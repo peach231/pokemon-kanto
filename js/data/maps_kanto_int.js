@@ -402,7 +402,10 @@
       yield { t: 'text', s: 'OAK: You may have ONE. Choose carefully — it will be with you a long time.' };
       return;
     }
-    yield { t: 'text', s: 'OAK: How is your ' + G.SPECIES[G.flags.starter].name + '? Treat it well and it will surprise you.' };
+    var yours = G.SPECIES[G.flags.starter];
+    yield { t: 'text', s: yours
+      ? 'OAK: How is your ' + yours.name + '? Treat it well and it will surprise you.'
+      : 'OAK: How is the little one getting on? Treat it well and it will surprise you.' };
     yield { t: 'text', s: 'OAK: Take the POKéDEX north and fill it. That is the real work.' };
   };
 
@@ -2044,8 +2047,8 @@
       yield { t: 'text', s: 'WARDEN: Hnnf! Hnn hnnf!' };
       yield { t: 'text', s: 'He is pointing at your bag. At the GOLD TEETH.' };
       yield { t: 'text', s: 'You handed over the GOLD TEETH.' };
-      yield { t: 'sfx', s: 'heal' };
-      yield { t: 'fn', f: function () {
+      yield { t: 'sfx', id: 'heal' };
+      yield { t: 'fn', fn: function () {
         delete G.player.bag.goldteeth;
         G.player.bag.hm04 = 1;
         G.flags.warden_paid = 1;
@@ -2124,13 +2127,13 @@
       yield { t: 'text', s: 'ATTENDANT: ...You do not have enough. I am sorry.' };
       return;
     }
-    yield { t: 'fn', f: function () {
+    yield { t: 'fn', fn: function () {
       G.player.money -= 500;
       G.player.bag.safariball = 30;
       G.player.safariSteps = 600;
       G.flags.safari_active = 1;
     } };
-    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'sfx', id: 'confirm' };
     yield { t: 'text', s: 'You received 30 SAFARI BALLs. The counter above the gate flicks over to 600.' };
     yield { t: 'text', s: 'ATTENDANT: When it reaches zero, we come and get you. Good luck!' };
   };
@@ -2207,8 +2210,8 @@
     yield { t: 'text', s: 'The old man does not seem surprised to see you. He does not seem to have been surprised by anything in a long time.' };
     yield { t: 'text', s: '???: You walked all the way out here. Past the marsh, past the ranges, on a clock.' };
     yield { t: 'text', s: '???: Most people turn back at the water. That is what the water is for.' };
-    yield { t: 'sfx', s: 'heal' };
-    yield { t: 'fn', f: function () { G.player.bag.hm03 = 1; G.flags.got_surf = 1; } };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.hm03 = 1; G.flags.got_surf = 1; } };
     yield { t: 'text', s: 'You received HM03 SURF!' };
     yield { t: 'text', s: '???: Now the water is a road instead of a wall. Half of KANTO is only reachable that way, and none of it is on your map yet.' };
     yield { t: 'text', s: '???: Go on. I have been waiting a very long time for someone to make the rest of it interesting.' };
@@ -2223,8 +2226,8 @@
     }
     yield { t: 'text', s: 'FISHING GURU: I am the FISHING GURU. Do you like to fish?' };
     yield { t: 'text', s: 'FISHING GURU: ...You are still using an OLD ROD. Oh, dear.' };
-    yield { t: 'sfx', s: 'heal' };
-    yield { t: 'fn', f: function () { G.player.bag.goodrod = 1; } };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.goodrod = 1; } };
     yield { t: 'text', s: 'You received a GOOD ROD!' };
     yield { t: 'text', s: 'FISHING GURU: That will pull up something with a spine in it. My brother in VERMILION has a better one still, if you can find him.' };
   };
@@ -2241,11 +2244,11 @@
     }
     yield { t: 'text', s: 'A SNORLAX is asleep across the whole road.' };
     yield { t: 'text', s: 'You played the POKé FLUTE.' };
-    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'sfx', id: 'heal' };
     yield { t: 'wait', frames: 30 };
     yield { t: 'text', s: 'The SNORLAX opened one eye.' };
     yield { t: 'text', s: 'It looked at you the way you look at an alarm clock.' };
-    yield { t: 'fn', f: function () {
+    yield { t: 'fn', fn: function () {
       if (here === 'route12') G.flags.snorlax12 = 1; else G.flags.snorlax16 = 1;
     } };
     yield {
@@ -2346,8 +2349,8 @@
     yield { t: 'text', s: 'She is watching the road. There is a very old PIDGEY asleep on the windowsill beside her.' };
     yield { t: 'text', s: '???: You have walked past this window four times now. West, then east, then west again.' };
     yield { t: 'text', s: '???: Everyone does. There is only the one road and it goes one way.' };
-    yield { t: 'sfx', s: 'heal' };
-    yield { t: 'fn', f: function () { G.player.bag.hm02 = 1; G.flags.got_fly = 1; } };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.hm02 = 1; G.flags.got_fly = 1; } };
     yield { t: 'text', s: 'You received HM02 FLY!' };
     yield { t: 'text', s: '???: Now you do not have to. Teach it to something with wings, open your TOWN MAP, and pick anywhere you have already been.' };
     yield { t: 'text', s: '???: It will not take you anywhere new. That part is still yours.' };
@@ -2391,8 +2394,8 @@
       return;
     }
     yield { t: 'text', s: 'FISHING GURU: You have my brother\'s rod. I can tell — he files the grip down, always has.' };
-    yield { t: 'sfx', s: 'heal' };
-    yield { t: 'fn', f: function () { G.player.bag.superrod = 1; } };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.superrod = 1; } };
     yield { t: 'text', s: 'You received a SUPER ROD!' };
     yield { t: 'text', s: 'FISHING GURU: That one reaches the bottom. Everything worth catching in KANTO lives at the bottom.' };
   };
@@ -2464,10 +2467,10 @@
     yield { t: 'text', s: 'You handed over the ' + f.name + '.' };
     yield { t: 'text', s: 'SCIENTIST: Come back in a while. This is not quick and it is not always kind.' };
     yield { t: 'wait', frames: 60 };
-    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'sfx', id: 'heal' };
     yield { t: 'text', s: '...' };
     yield { t: 'text', s: 'SCIENTIST: It worked. It always works, and it never stops being the strangest thing I have ever seen.' };
-    yield { t: 'fn', f: function () {
+    yield { t: 'fn', fn: function () {
       delete G.player.bag[f.item];
       var mon = G.makeMon(f.sp, 30);
       G.player.dexSeen[f.sp] = 1;
@@ -2507,7 +2510,7 @@
       }
     };
     if (!yes.v) { yield { t: 'text', s: 'SCIENTIST: The offer stands.' }; return; }
-    yield { t: 'fn', f: function () {
+    yield { t: 'fn', fn: function () {
       var lvl = G.player.party[idx].level;
       G.player.party[idx] = G.makeMon('ponyta', lvl);
       G.player.party[idx].nickname = null;
@@ -2515,7 +2518,7 @@
       G.player.dexSeen.ponyta = 1;
       G.flags.lab_trade = 1;
     } };
-    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'sfx', id: 'heal' };
     yield { t: 'text', s: 'You traded your RAICHU for a PONYTA!' };
     yield { t: 'text', s: 'SCIENTIST: A traded POKéMON grows faster. Nobody has ever explained why to my satisfaction.' };
   };
@@ -2674,10 +2677,10 @@
   // one of it, and if you knock it out it does not come back.
   G.EVENTS.zapdosEncounter = function* () {
     yield { t: 'text', s: 'The hum in the walls is not the building.' };
-    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'sfx', id: 'confirm' };
     yield { t: 'wait', frames: 24 };
     yield { t: 'text', s: 'ZAPDOS is sitting in the switchgear. It has been here long enough that the whole plant has started to sound like it.' };
-    yield { t: 'fn', f: function () { G.flags.zapdos_seen = 1; } };
+    yield { t: 'fn', fn: function () { G.flags.zapdos_seen = 1; } };
     yield {
       t: 'custom',
       run: function (done) {
@@ -2805,15 +2808,15 @@
     };
     if (right) {
       yield { t: 'text', s: 'Correct! ' + quiz.s };
-      yield { t: 'sfx', s: 'confirm' };
-      yield { t: 'fn', f: open };
+      yield { t: 'sfx', id: 'confirm' };
+      yield { t: 'fn', fn: open };
       yield { t: 'text', s: 'The shutter rolled up.' };
       return;
     }
     yield { t: 'text', s: 'Wrong. ' + quiz.s };
     yield { t: 'text', s: 'The shutter rolled up anyway — and somebody was standing behind it.' };
-    yield { t: 'sfx', s: 'cancel' };
-    yield { t: 'fn', f: open };
+    yield { t: 'sfx', id: 'cancel' };
+    yield { t: 'fn', fn: open };
   };
 
   // ================================================== SEAFOAM ISLANDS =======
@@ -2904,7 +2907,7 @@
 
   G.EVENTS.articunoEncounter = function* () {
     yield { t: 'text', s: 'The chamber is silent, and the silence has a shape.' };
-    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'sfx', id: 'confirm' };
     yield { t: 'wait', frames: 24 };
     yield { t: 'text', s: 'ARTICUNO has been sitting in the cold long enough that the cold is coming from it.' };
     yield {
@@ -2941,8 +2944,8 @@
       return;
     }
     yield { t: 'text', s: 'AIDE: Ten! Finally. Do you know how long I have been on this log?' };
-    yield { t: 'sfx', s: 'heal' };
-    yield { t: 'fn', f: function () { G.player.bag.hm05 = 1; G.flags.got_flash = 1; } };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.hm05 = 1; G.flags.got_flash = 1; } };
     yield { t: 'text', s: 'You received HM05 FLASH!' };
     yield { t: 'text', s: 'AIDE: There are caves in KANTO you cannot see your own feet in. ROCK TUNNEL is one. You will know the others when the screen goes dark.' };
   };
@@ -2985,7 +2988,7 @@
 
   // ------------------------------------------------------- HALL OF FAME ----
   G.EVENTS.hallOfFameCeremony = function* () {
-    yield { t: 'fn', f: function () { G.audio.playMusic('title'); } };
+    yield { t: 'fn', fn: function () { G.audio.playMusic('title'); } };
     yield { t: 'text', s: 'The machine at the end of the hall wakes up as you step onto the carpet.' };
     yield { t: 'wait', frames: 30 };
     yield { t: 'text', s: 'It records your POKéMON, one at a time, and takes its time about each of them.' };
@@ -2996,7 +2999,7 @@
         else done();
       }
     };
-    yield { t: 'fn', f: function () {
+    yield { t: 'fn', fn: function () {
       G.flags.champion = 1;
       G.player.champion = 1;
     } };
@@ -3030,7 +3033,7 @@
     if (!G.flags.hoc_open) {
       yield { t: 'text', s: 'OAK: Every CHAMPION before you kept the title for a while, and every one of them found something out there that nobody has found since.' };
       yield { t: 'text', s: 'OAK: They are all still here. They all still train. They have been waiting for somebody to be worth the trouble.' };
-      yield { t: 'fn', f: function () { G.flags.hoc_open = 1; } };
+      yield { t: 'fn', fn: function () { G.flags.hoc_open = 1; } };
     }
     yield { t: 'text', s: 'OAK: Go through whenever you are ready. There is no clock on this one.' };
     var go = { v: false };
@@ -3061,7 +3064,7 @@
     yield { t: 'text', s: 'BLUE: Eight badges. You actually did it. I did not think you would — I want to be honest about that, because I have not been honest about much.' };
     yield { t: 'text', s: 'BLUE: This is the same field where I told you to forget it. Day one. You remember.' };
     yield { t: 'text', s: 'BLUE: So we do it here, and then whoever is left walks up that road.' };
-    yield { t: 'fn', f: function () { G.flags.blue_route22b = 1; } };
+    yield { t: 'fn', fn: function () { G.flags.blue_route22b = 1; } };
     yield {
       t: 'custom',
       run: function (done) { G.startTrainerBattle('blue_route22b', { onEnd: function () { done(); } }); }
@@ -3080,7 +3083,7 @@
   function legendary(key, level, before, bg) {
     return function* () {
       for (var i = 0; i < before.length; i++) yield { t: 'text', s: before[i] };
-      yield { t: 'sfx', s: 'confirm' };
+      yield { t: 'sfx', id: 'confirm' };
       yield { t: 'wait', frames: 24 };
       yield {
         t: 'custom',
@@ -3135,7 +3138,7 @@
     }
     yield { t: 'text', s: 'A lorry, parked by the dock. Nobody knows whose it is.' };
     yield { t: 'text', s: 'You put your shoulder against it, which is a ridiculous thing to do, and your POKéMON does the rest.' };
-    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'sfx', id: 'confirm' };
     yield { t: 'wait', frames: 30 };
     yield { t: 'text', s: 'The lorry rolls back four feet.' };
     yield { t: 'wait', frames: 20 };
@@ -3163,7 +3166,7 @@
   G.EVENTS.safariTimeUp = function* () {
     yield { t: 'text', s: 'A tannoy, somewhere in the trees: "Time is up! Please return to the gate."' };
     yield { t: 'text', s: 'A warden appears at your elbow with the unhurried certainty of someone who has done this ten thousand times.' };
-    yield { t: 'fn', f: function () {
+    yield { t: 'fn', fn: function () {
       G.flags.safari_active = 0;
       G.player.safariSteps = 0;
       delete G.player.bag.safariball;
@@ -3196,8 +3199,8 @@
       return;
     }
     yield { t: 'text', s: 'CLERK: A BIKE VOUCHER! Yes, of course. Any one you like.' };
-    yield { t: 'sfx', s: 'heal' };
-    yield { t: 'fn', f: function () {
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () {
       delete G.player.bag.bikevoucher;
       G.player.bag.bicycle = 1;
       G.flags.got_bicycle = 1;

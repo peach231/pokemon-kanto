@@ -433,6 +433,127 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   console.log(`  moves: ${seen.size} distinct effect kinds, all handled`);
 }
 
+// --- event dry-run ---
+// Every audit above this one is STATIC: it reads the data and reasons about
+// it. This one actually RUNS each event generator to completion against a
+// stubbed world, which is the only way to catch the failures that live inside
+// the code rather than in the tables — a helper that was renamed, a field
+// accessed as `mon.species` when the engine calls it `mon.sp`, a yield shape
+// the event runner does not understand.
+//
+// Every event is run TWICE: once on a blank save and once on a finished one,
+// because almost every event in this game has an "already done that" branch
+// and running only the first path would leave half of them untested.
+{
+  const VALID_YIELDS = new Set(['text', 'fn', 'wait', 'custom', 'sfx',
+                                'balloon', 'npcApproach']);
+  const broken = [];
+  const mapOf = {};
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    for (const o of (m.npcs || []).concat(m.trainers || [], m.signs || [], m.scripts || [])) {
+      const ev = o.event || o.run;
+      if (ev && !mapOf[ev]) mapOf[ev] = id;
+    }
+  }
+
+  // Stubs. Anything that would open a scene, start a battle or touch the DOM
+  // is replaced with a recorder — the point is to execute the event BODY, not
+  // to simulate the game.
+  const realScene = { push: G.pushScene, pop: G.popScene, run: G.runEvent, runGen: G.runEventGen };
+  const noop = function () {};
+  const stubScene = function () { return { update: noop, draw: noop }; };
+  G.pushScene = noop; G.popScene = noop; G.replaceScene = noop;
+  G.runEvent = noop; G.runEventGen = noop;
+  G.Textbox = stubScene; G.Chooser = stubScene; G.FadeScene = stubScene;
+  G.PartyScene = stubScene; G.BattleScene = stubScene; G.HallOfFameScene = stubScene;
+  G.BattleSwirlScene = stubScene; G.EvolutionScene = stubScene; G.CaughtScene = stubScene;
+  G.startBattle = function () { return {}; };
+  G.startTrainerBattle = function () { return {}; };
+  G.ask = noop;
+  G.audio = G.audio || {};
+  G.audio.sfx = noop; G.audio.playMusic = noop;
+
+  const savedPlayer = JSON.stringify(G.player);
+  const savedFlags = JSON.stringify(G.flags);
+
+  function run(eid, finished) {
+    // A blank save, or a finished one with every flag set and every item held.
+    G.newGame('TEST');
+    G.player.party = [G.makeMon('bulbasaur', 30), G.makeMon('pidgey', 25)];
+    G.player.money = 999999;
+    if (finished) {
+      G.player.badges = [true, true, true, true, true, true, true, true];
+      for (let b = 1; b <= 8; b++) G.flags['badge' + b] = 1;
+      for (const it in G.ITEMS) G.player.bag[it] = 1;
+      for (const t in G.TRAINERS) G.flags[t] = 1;
+      // every flag any gate reads, so the "already done" branches all fire
+      for (const id in G.MAPS) {
+        const m = G.MAPS[id];
+        for (const o of (m.npcs || []).concat(m.trainers || [], m.items || [])) {
+          if (o.unlessFlag) G.flags[o.unlessFlag] = 1;
+          if (o.ifFlag) G.flags[o.ifFlag] = 1;
+          if (o.flag) G.flags[o.flag] = 1;
+        }
+      }
+      for (const f of (G.DYNAMIC_FLAGS || [])) G.flags[f] = 1;
+      ['champion', 'strengthOn', 'safari_active', 'hoc_open', 'got_flash',
+       'got_surf', 'got_fly', 'warden_paid', 'lab_trade'].forEach(f => { G.flags[f] = 1; });
+      // A few flags hold a VALUE rather than a 1, and blindly setting them to
+      // 1 tests a state the game can never actually be in.
+      G.flags.starter = 'bulbasaur';
+    }
+
+    const mid = mapOf[eid] || 'pallet';
+    G.world.mapId = mid;
+    G.world.map = G.MAPS[mid];
+    G.world.player = { x: 5, y: 5, dir: 'down', vehicle: null };
+    G.world.refreshTiles = noop;
+    G.world.npcs = [];
+
+    let it;
+    try { it = G.EVENTS[eid](); } catch (e) {
+      broken.push(`${eid} threw on construction: ${e.message}`); return;
+    }
+    let step, guard = 0;
+    try {
+      step = it.next();
+      while (!step.done) {
+        if (++guard > 400) { broken.push(`${eid} did not terminate in 400 steps`); return; }
+        const v = step.value || {};
+        if (!VALID_YIELDS.has(v.t)) {
+          broken.push(`${eid} yielded an unknown step type '${v.t}'`); return;
+        }
+        if (v.t === 'text' && typeof v.s !== 'string' && !Array.isArray(v.s)) {
+          broken.push(`${eid} yielded a text step with no string`); return;
+        }
+        if (v.t === 'fn') v.fn();
+        if (v.t === 'custom') {
+          if (typeof v.run !== 'function') {
+            broken.push(`${eid} yielded a custom step with no run() — the event runner ignores it and the event hangs`);
+            return;
+          }
+          v.run(noop);
+        }
+        step = it.next();
+      }
+    } catch (e) {
+      broken.push(`${eid} threw${finished ? ' (finished save)' : ''}: ${e.message}`);
+    }
+  }
+
+  const evIds = Object.keys(G.EVENTS || {});
+  for (const eid of evIds) { run(eid, false); run(eid, true); }
+
+  G.pushScene = realScene.push; G.popScene = realScene.pop;
+  G.runEvent = realScene.run; G.runEventGen = realScene.runGen;
+  G.player = JSON.parse(savedPlayer);
+  G.flags = JSON.parse(savedFlags);
+
+  for (const b of broken) errors.push('EVENT — ' + b);
+  if (!broken.length) console.log(`  events: ${evIds.length} events dry-run on a blank and a finished save`);
+}
+
 // --- world connectivity ---
 // Walk the warp graph out from the start map. Two failure modes matter and
 // neither is visible by reading a map file: a warp whose LANDING tile is solid

@@ -77,8 +77,8 @@
     G.runEventGen((function* () {
       yield { t: 'text', s: 'This tree can be CUT down!' };
       yield { t: 'text', s: G.monName(mon) + ' used CUT!' };
-      yield { t: 'sfx', s: 'confirm' };
-      yield { t: 'fn', f: function () {
+      yield { t: 'sfx', id: 'confirm' };
+      yield { t: 'fn', fn: function () {
         G.setTileEdit(w.mapId, fx, fy, w.map.base || 'grass');
         w.refreshTiles();
       } };
@@ -101,8 +101,8 @@
       G.runEventGen((function* () {
         yield { t: 'text', s: 'A boulder. It might be moved with STRENGTH.' };
         yield { t: 'text', s: G.monName(mon) + ' used STRENGTH!' };
-        yield { t: 'sfx', s: 'confirm' };
-        yield { t: 'fn', f: function () { G.flags.strengthOn = 1; } };
+        yield { t: 'sfx', id: 'confirm' };
+        yield { t: 'fn', fn: function () { G.flags.strengthOn = 1; } };
         yield { t: 'text', s: G.monName(mon) + ' can move boulders now. Walk into one to push it.' };
       })());
       return true;
@@ -142,8 +142,8 @@
     G.runEventGen((function* () {
       yield { t: 'text', s: 'The water is calm here. Would you like to SURF?' };
       yield { t: 'text', s: G.monName(mon) + ' used SURF!' };
-      yield { t: 'sfx', s: 'confirm' };
-      yield { t: 'fn', f: function () {
+      yield { t: 'sfx', id: 'confirm' };
+      yield { t: 'fn', fn: function () {
         p.vehicle = 'swim';
         p.fromX = p.x; p.fromY = p.y; p.x = fx; p.y = fy;
         p.moving = true; p.step = 0; p.stride = !p.stride;
@@ -163,8 +163,8 @@
     var mon = use.mon;
     G.runEventGen((function* () {
       yield { t: 'text', s: G.monName(mon) + ' used FLASH!' };
-      yield { t: 'sfx', s: 'confirm' };
-      yield { t: 'fn', f: function () { G.flags.flashOn = 1; } };
+      yield { t: 'sfx', id: 'confirm' };
+      yield { t: 'fn', fn: function () { G.flags.flashOn = 1; } };
       yield { t: 'text', s: 'The cave lit up around you.' };
     })());
     return true;
