@@ -383,4 +383,124 @@
     'The ball holds CHARMANDER, the lizard POKéMON. All nerve and no armour — the hard road, and the fun one.');
   G.EVENTS.pick_squirtle = starterEvent('squirtle',
     'The ball holds SQUIRTLE, the tiny turtle POKéMON. Level-headed, well-armoured, and never in a hurry.');
+
+  // ============================================================ PEWTER CITY =
+  healCentre('pewtercentre', 'PEWTER', { map: 'pewter', x: 16, y: 11 });
+  pokeMart('pewtermart', 'PEWTER', { map: 'pewter', x: 16, y: 17 },
+    ['potion', 'antidote', 'parlyzheal', 'awakening', 'burnheal', 'pokeball', 'escaperope']);
+
+  G.MAPS.pewterhouse = {
+    id: 'pewterhouse', name: 'Pewter House', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'IP..TT..PI',
+      'I........I',
+      'I.B......I',
+      'I........I',
+      'I..o..o..I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'pewter', tx: 7, ty: 17, dir: 'down' },
+      { x: 5, y: 8, to: 'pewter', tx: 7, ty: 17, dir: 'down' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'man', dir: 'down',
+        dialog: ['BROCK trains here because the ground is stone all the way down.',
+                 'His POKéMON have never known soft footing. It shows.'] }
+    ]
+  };
+
+  // The museum. Its two fossils are the ones you will be offered a choice
+  // between inside Mt. Moon, so seeing them here first is deliberate setup.
+  G.MAPS.pewtermuseum = {
+    id: 'pewtermuseum', name: 'Pewter Museum', w: 14, h: 11,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIIIII',
+      'I.U........U.I',
+      'I............I',
+      'I..T......T..I',
+      'I............I',
+      'I..B......B..I',
+      'I............I',
+      'I.U........U.I',
+      'I............I',
+      'I............I',
+      'IIIIII..IIIIII'
+    ], 14, 11),
+    deco: blank(14, 11),
+    warps: [
+      { x: 6, y: 10, to: 'pewter', tx: 8, ty: 5, dir: 'down' },
+      { x: 7, y: 10, to: 'pewter', tx: 9, ty: 5, dir: 'down' }
+    ],
+    signs: [
+      { x: 3, y: 4, text: 'A DOME FOSSIL, behind glass. The plaque says it is over three hundred million years old.' },
+      { x: 10, y: 4, text: 'A HELIX FOSSIL. Spiral-shelled, and far better preserved than the other one.' },
+      { x: 3, y: 6, text: 'A slab of AMBER with an insect sealed inside. And something larger.' }
+    ],
+    npcs: [
+      { x: 5, y: 8, sprite: 'scientist', dir: 'down',
+        dialog: ['These came out of MT. MOON. There are more still in the rock.',
+                 'If you find one, bring it to the LAB on CINNABAR. They can revive them now.',
+                 '...Revive them. Yes. I know how that sounds.'] },
+      { x: 9, y: 2, sprite: 'gentleman', dir: 'down',
+        dialog: ['A space rock fell on MT. MOON. That is what the MOON STONE is, they say.',
+                 'Certain POKéMON change shape when they touch one. Nobody knows why.'] }
+    ]
+  };
+
+  // ------------------------------------------------------------ PEWTER GYM --
+  // Boulders on the floor, because the room should tell you the type before
+  // anyone says a word.
+  G.MAPS.pewtergym = {
+    id: 'pewtergym', name: 'Pewter Gym', w: 12, h: 14,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IIIII..IIIII'
+    ], 12, 14),
+    deco: blank(12, 14),
+    warps: [
+      { x: 5, y: 13, to: 'pewter', tx: 5, ty: 11, dir: 'down' },
+      { x: 6, y: 13, to: 'pewter', tx: 6, ty: 11, dir: 'down' }
+    ],
+    npcs: [
+      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'pewterGymGuide' }
+    ],
+    trainers: [
+      { x: 5, y: 2, sprite: 'brock', dir: 'down', trainer: 'brock', sight: 0 },
+      { x: 3, y: 7, sprite: 'youngster', dir: 'right', trainer: 'pg_liam', sight: 4 }
+    ]
+  };
+
+  G.EVENTS.pewterGymGuide = function* () {
+    if (G.flags.badge1) {
+      yield { t: 'text', s: 'Guide: You beat BROCK! Head east through ROUTE 3 to MT. MOON.' };
+      return;
+    }
+    yield { t: 'text', s: "Guide: Hey! You're a new face. BROCK is the real deal." };
+    yield { t: 'text', s: 'Guide: His POKéMON are ROCK type — NORMAL and FLYING moves barely dent them.' };
+    yield { t: 'text', s: 'Guide: If you took BULBASAUR or SQUIRTLE, you already have the answer. If you took CHARMANDER... good luck.' };
+    yield { t: 'text', s: 'Guide: Catch a MANKEY on ROUTE 22, west of VIRIDIAN. FIGHTING moves crack rock wide open.' };
+  };
 })();

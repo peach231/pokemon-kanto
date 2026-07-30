@@ -15,7 +15,7 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
-| Kanto maps | Pallet / Route 1 / Viridian + 8 interiors done; the rest of the region is next |
+| Kanto maps | Pallet -> Pewter done (19 maps). Route 3 east to Mt. Moon is next |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
 | Region map screen | still draws Hoenn |
 | Gen 1 move effects in battle.js | descriptors emitted, engine doesn't read them all yet |
@@ -23,9 +23,14 @@ inherited; the data, art sources, world and story are being replaced.
 | Story, trainers, gyms, endgame | not started |
 
 **`node tools/check.js` passes**, battle-core tests included, and the game
-BOOTS AND RENDERS — you can walk Pallet, take a starter from Oak, and go north
-through Route 1 into Viridian. Everything past Viridian's north exit does not
-exist yet.
+BOOTS AND RENDERS. Playable from the start through to the BOULDERBADGE:
+Pallet -> Route 1 -> Viridian -> Route 2 -> Viridian Forest -> Pewter -> Brock.
+Nothing east of Pewter exists yet.
+
+check.js now also walks the WARP GRAPH from Pallet and fails on any warp that
+lands on a solid tile or out of bounds (arriving stuck inside a wall) and warns
+on any map no chain of warps can reach. Neither is visible by reading a map
+file, and both are the classic way this engine breaks.
 
 ## Workflows (CRITICAL)
 
@@ -97,8 +102,7 @@ exist yet.
 
 ## Known rough edges
 
-- Only Pallet, Route 1 and Viridian exist. Viridian's north exit to
-  Route 2 is not wired, because Route 2 has not been built.
+- The region stops at Pewter. Pewter has no east exit yet (Route 3).
 - `js/engine/title.js` still flies Rayquaza and Groudon.
 - `G.RegionMapScene` in `menus.js` still draws `'HOENN — REGION MAP'`.
 - `battle.js` understands the old Gen 3 effect kinds; the generated `moves.js`

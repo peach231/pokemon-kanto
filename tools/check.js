@@ -184,6 +184,39 @@ if (G.SPECIES) {
   }
 }
 
+// --- world connectivity ---
+// Walk the warp graph out from the start map. Two failure modes matter and
+// neither is visible by reading a map file: a warp whose LANDING tile is solid
+// or out of bounds (you arrive stuck inside a wall), and a map that no chain of
+// warps can reach (content that exists but nobody can ever see).
+{
+  const START = 'pallet';
+  const seen = new Set();
+  const queue = [START];
+  if (!G.MAPS[START]) errors.push(`WORLD: start map '${START}' does not exist`);
+  while (queue.length) {
+    const id = queue.shift();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const m = G.MAPS[id];
+    if (!m) continue;
+    for (const w of (m.warps || [])) {
+      const t = G.MAPS[w.to];
+      if (!t) { errors.push(`WARP ${id} -> '${w.to}': no such map`); continue; }
+      const row = t.ground[w.ty];
+      const ch = row && row[w.tx];
+      const tile = ch != null ? G.TILES[t.legend[ch]] : null;
+      if (!tile) errors.push(`WARP ${id} -> ${w.to}: lands out of bounds at (${w.tx},${w.ty})`);
+      else if (tile.solid) errors.push(`WARP ${id} -> ${w.to}: lands on SOLID '${t.legend[ch]}' at (${w.tx},${w.ty}) — soft-lock`);
+      queue.push(w.to);
+    }
+  }
+  for (const id of Object.keys(G.MAPS)) {
+    if (!seen.has(id)) warn.push(`WORLD: map '${id}' is unreachable from ${START}`);
+  }
+  console.log(`  world: ${seen.size}/${Object.keys(G.MAPS).length} maps reachable from ${START}`);
+}
+
 // --- Gen 1 type-chart sanity ---
 // Fifteen types. Dark, Steel and Fairy do not exist. The two mutual Bug/Poison
 // matchups and Psychic's near-invulnerability are the signature of the era, so

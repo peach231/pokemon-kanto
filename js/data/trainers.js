@@ -140,6 +140,15 @@
     music: 'gymleader'
   });
 
+  // Brock's gym trainer.
+  tr('pg_liam', {
+    name: 'Jr. Trainer Liam', sprite: 'trainer_youngster', ai: 'basic', money: 231,
+    party: [{ sp: 'diglett', level: 11 }, { sp: 'sandshrew', level: 11 }],
+    intro: 'Stop right there, kid! You are still light-years from facing BROCK!',
+    defeat: 'Darn! Light-years is a distance, not a time. I always get that wrong.',
+    music: 'battle'
+  });
+
   // ================================================= early-route trainers ===
   // Viridian Forest is bug catchers, as it should be.
   tr('vf_rick', {

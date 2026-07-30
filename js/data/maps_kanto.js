@@ -251,6 +251,8 @@
     ], 2)), 26, 24),
     deco: blank(26, 24),
     warps: [
+      { x: 12, y: 0, to: 'route2', tx: 10, ty: 32, dir: 'up' },
+      { x: 13, y: 0, to: 'route2', tx: 11, ty: 32, dir: 'up' },
       { x: 12, y: 23, to: 'route1', tx: 10, ty: 1, dir: 'down' },
       { x: 13, y: 23, to: 'route1', tx: 11, ty: 1, dir: 'down' },
       { x: 6, y: 5, to: 'viridiancentre', tx: 4, ty: 6, dir: 'up' },
@@ -275,6 +277,198 @@
         dialog: ["VIRIDIAN FOREST is north of here, and it's a maze.", "Bring something that isn't weak to BUG POKéMON."] },
       { x: 21, y: 16, sprite: 'littleboy', dir: 'left',
         dialog: ['I saw a shooting star fall on MT. MOON last night!', 'Maybe there are still bits of it up there.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 2 — Viridian to Pewter, but not directly. A band of impassable
+  // woodland across the middle means the ONLY way north is through Viridian
+  // Forest, which is exactly how Gen 1 forces you into the maze.
+  // ==========================================================================
+  G.MAPS.route2 = {
+    id: 'route2', name: 'Route 2', w: 20, h: 34,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututu..tutututu',
+      'vxvxvxvxvx..vxvxvxvx'
+    ].concat(rows([
+      '........pp......',   // 2
+      '..ggg...pp......',
+      '..ggg...pp..ggg.',
+      '........pp..ggg.',
+      '........pp......',
+      '....S...pp......',
+      '........pp......',
+      '........pp......',
+      '........pp......',   // 10 — the forest's north exit lands here
+      '........pp......',
+      'tutututututututu',   // 12 — the impassable band. No way around the
+      'vxvxvxvxvxvxvxvx',   //      forest, only through it.
+      'tutututututututu',
+      'vxvxvxvxvxvxvxvx',
+      'tutututututututu',
+      'vxvxvxvxvxvxvxvx',
+      'tutututututututu',
+      'vxvxvxvxvxvxvxvx',
+      '........pp......',   // 20
+      '........pp......',
+      '.......GHI......',   // 22 — the forest gate
+      '.......KLM......',
+      '.......WEW......',   // 24 — door at x=10
+      '........pp......',
+      '..ggg...pp..ggg.',
+      '..ggg...pp..ggg.',
+      '........pp......',
+      '.lllll..pp.lllll',   // 29
+      '........pp......',
+      '....y...pp....o.',
+      '........pp......',
+      '........pp......',
+      '........pp......'    // 33
+    ], 2)), 20, 34),
+    deco: blank(20, 34),
+    encounters: (G.ENCOUNTERS || {}).route2,
+    warps: [
+      { x: 10, y: 0, to: 'pewter', tx: 12, ty: 20, dir: 'up' },
+      { x: 11, y: 0, to: 'pewter', tx: 13, ty: 20, dir: 'up' },
+      { x: 10, y: 33, to: 'viridian', tx: 12, ty: 1, dir: 'down' },
+      { x: 11, y: 33, to: 'viridian', tx: 13, ty: 1, dir: 'down' },
+      { x: 10, y: 24, to: 'viridianforest', tx: 11, ty: 26, dir: 'up' }
+    ],
+    signs: [
+      { x: 9, y: 7, text: 'ROUTE 2 — VIRIDIAN FOREST ahead. Watch out for wild POKéMON in the tall grass.' },
+      { x: 9, y: 21, text: 'VIRIDIAN FOREST — Entrance. Trainers welcome. Bring repellent.' }
+    ],
+    npcs: [
+      { x: 13, y: 25, sprite: 'oldman', dir: 'left',
+        dialog: ['The forest is the only road north, and it is full of BUG POKéMON.',
+                 'A FLYING or FIRE type makes short work of them.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // VIRIDIAN FOREST — wall-to-wall tall grass with tree clumps breaking it up.
+  // Deliberately generous with corridors: Gen 1's forest is remembered as a
+  // maze, but an actually confusing maze this early is just an exit-hunt. The
+  // density of ENCOUNTERS is what should make it feel long, not the geometry.
+  // ==========================================================================
+  G.MAPS.viridianforest = {
+    id: 'viridianforest', name: 'Viridian Forest', w: 24, h: 28,
+    music: 'route', battleBg: 'forest', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tutututututu..tutututututu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvx'
+    ].map(function (r) { return r.slice(0, 24); }).concat(rows([
+      '.........pp.........',   // 2
+      'ggggg....pp....ggggg',
+      'ggggg.tu.pp.tu.ggggg',
+      'ggggg.vx.pp.vx.ggggg',
+      'ggggg....pp....ggggg',
+      '....gggggggggggg....',   // 7
+      '.tu.gggggggggggg.tu.',
+      '.vx.gggggggggggg.vx.',
+      '....gggggggggggg....',
+      'gggggggg....gggggggg',   // 11
+      'gggggggg.tu.gggggggg',
+      'gggggggg.vx.gggggggg',
+      'gggggggg....gggggggg',
+      '....gggggggggggg....',   // 15
+      '.tu.gggggggggggg.tu.',
+      '.vx.gggggggggggg.vx.',
+      '....gggggggggggg....',
+      'ggggg....pp....ggggg',   // 19
+      'ggggg.tu.pp.tu.ggggg',
+      'ggggg.vx.pp.vx.ggggg',
+      'ggggg....pp....ggggg',
+      '.........pp.........',   // 23
+      '....gggg.pp.gggg....',
+      '....gggg.pp.gggg....',
+      '.........pp.........',
+      '.........pp.........'    // 27
+    ], 2)), 24, 28),
+    deco: blank(24, 28),
+    encounters: (G.ENCOUNTERS || {}).viridianforest,
+    warps: [
+      { x: 11, y: 0, to: 'route2', tx: 10, ty: 10, dir: 'up' },
+      { x: 12, y: 0, to: 'route2', tx: 11, ty: 10, dir: 'up' },
+      { x: 11, y: 27, to: 'route2', tx: 10, ty: 25, dir: 'down' },
+      { x: 12, y: 27, to: 'route2', tx: 11, ty: 25, dir: 'down' }
+    ],
+    signs: [
+      { x: 10, y: 24, text: 'LEAVING VIRIDIAN FOREST — PEWTER CITY is to the north.' }
+    ],
+    trainers: [
+      { x: 7, y: 9, sprite: 'bugcatcher', dir: 'right', trainer: 'vf_rick', sight: 4 },
+      { x: 16, y: 16, sprite: 'bugcatcher', dir: 'left', trainer: 'vf_doug', sight: 4 },
+      { x: 11, y: 5, sprite: 'bugcatcher', dir: 'down', trainer: 'vf_sammy', sight: 3 }
+    ],
+    items: [
+      { x: 4, y: 12, item: 'potion', once: 'vf_potion' },
+      { x: 19, y: 20, item: 'antidote', once: 'vf_antidote' }
+    ]
+  };
+
+  // ==========================================================================
+  // PEWTER CITY — grey stone, a museum full of fossils, and the first gym.
+  // ==========================================================================
+  G.MAPS.pewter = {
+    id: 'pewter', name: 'Pewter City', w: 24, h: 22,
+    music: 'town', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    gymEmblem: { x: 5, y: 8, type: 'rock' },
+    ground: pad([
+      'tutututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvx'
+    ].concat(rows([
+      '....GHHHI...........',   // 2  museum
+      '....KLLLM...........',
+      '....WNEEW...........',
+      '....................',
+      'pppppppppppppppppppp',   // 6  north street
+      '....................',
+      '..ABBC......7889....',   // 8  gym            Centre
+      '..abbc......d+mh....',
+      '..WYYW......WNEW....',
+      '....................',
+      'pppppppppppppppppppp',   // 12 south street
+      '....................',
+      '...1223.....qrrz....',   // 14 house          Mart
+      '...4556.....i$jk....',
+      '...WNDW.....WNEW....',
+      '....................',
+      '..S.......pp......Q.',
+      '..........pp........',
+      '..........pp........',
+      '..........pp........'    // 21
+    ], 2)), 24, 22),
+    deco: blank(24, 22),
+    warps: [
+      { x: 12, y: 21, to: 'route2', tx: 10, ty: 1, dir: 'down' },
+      { x: 13, y: 21, to: 'route2', tx: 11, ty: 1, dir: 'down' },
+      { x: 8, y: 4, to: 'pewtermuseum', tx: 6, ty: 10, dir: 'up' },
+      { x: 9, y: 4, to: 'pewtermuseum', tx: 7, ty: 10, dir: 'up' },
+      { x: 5, y: 10, to: 'pewtergym', tx: 5, ty: 12, dir: 'up' },
+      { x: 6, y: 10, to: 'pewtergym', tx: 6, ty: 12, dir: 'up' },
+      { x: 16, y: 10, to: 'pewtercentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 7, y: 16, to: 'pewterhouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 16, y: 16, to: 'pewtermart', tx: 4, ty: 6, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 19, text: 'PEWTER CITY — A Stone Grey City.' },
+      { x: 7, y: 5, text: 'PEWTER MUSEUM OF SCIENCE' },
+      { x: 4, y: 11, text: 'PEWTER CITY POKéMON GYM — LEADER: BROCK. The Rock-Solid POKéMON Trainer!' }
+    ],
+    npcs: [
+      { x: 10, y: 7, sprite: 'gymguy', dir: 'down',
+        dialog: ["BROCK's POKéMON are ROCK-hard. Normal moves barely scratch them.",
+                 'GRASS and WATER types are what you want. Or a lot of patience.'] },
+      { x: 18, y: 13, sprite: 'baldingman', dir: 'left',
+        dialog: ['They dug a fossil out of MT. MOON and put it in the museum.',
+                 'Nobody can agree what it was.'] },
+      { x: 15, y: 19, sprite: 'littlegirl', dir: 'down',
+        dialog: ['MT. MOON is east of here, past ROUTE 3.', "It's dark inside. Really dark."] }
     ]
   };
 })();
