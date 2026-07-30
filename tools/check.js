@@ -358,6 +358,43 @@ if (G.SPECIES) {
   console.log(`  fly: ${Object.keys(G.FLY_POINTS || {}).length} destinations, all landable`);
 }
 
+// --- overworld sprite coverage ---
+// An NPC whose sprite has no sheet renders as NOTHING. It is still solid, it
+// still talks, and it is invisible — which is the single most confusing bug
+// this project can produce, because the map looks fine and a piece of it is
+// simply missing.
+{
+  const sheets = (G.OVERWORLD_CFG || {}).sheets || {};
+  const used = new Map();
+  for (const id in G.MAPS) {
+    for (const n of (G.MAPS[id].npcs || []).concat(G.MAPS[id].trainers || [])) {
+      if (!n.sprite) continue;
+      if (!used.has(n.sprite)) used.set(n.sprite, []);
+      used.get(n.sprite).push(id);
+    }
+  }
+  for (const [spr, where] of used) {
+    // Baked UI art (the Poke Ball on Oak's table, the Mt. Moon fossils) is a
+    // still image rather than a walk sheet, and is legitimately not in here.
+    if (sheets[spr] || G.ART[spr] || G.IMG[spr]) continue;
+    errors.push(`SPRITE '${spr}' has no overworld sheet — renders as an invisible NPC in ${[...new Set(where)].join(', ')}`);
+  }
+  console.log(`  sprites: ${used.size} overworld sprites, all resolvable`);
+
+  // The same problem one layer up: a trainer whose BATTLE portrait key is not
+  // in the keyMap fights you as an empty rectangle.
+  const tk = (G.TRAINER_CFG || {}).keyMap || {};
+  const badPortraits = new Set();
+  for (const tid in (G.TRAINERS || {})) {
+    const spr = G.TRAINERS[tid].sprite;
+    if (spr && !tk[spr] && !G.ART[spr] && !G.IMG[spr]) badPortraits.add(spr);
+  }
+  for (const spr of badPortraits) {
+    errors.push(`TRAINER PORTRAIT '${spr}' is not in the sprite keyMap — fights you as an empty rectangle`);
+  }
+  if (!badPortraits.size) console.log(`  portraits: ${Object.keys(tk).length} trainer portraits, all mapped`);
+}
+
 // --- map grid overflow ---
 // padRows records any map given more rows than its declared height (the extras
 // are silently dropped, along with anything on them) or rows wider than its

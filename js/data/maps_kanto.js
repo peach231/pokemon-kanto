@@ -748,6 +748,7 @@
       { x: 6, y: 11, to: 'ceruleangym', tx: 6, ty: 12, dir: 'up' },
       { x: 20, y: 5, to: 'ceruleancentre', tx: 4, ty: 6, dir: 'up' },
       { x: 20, y: 17, to: 'ceruleanmart', tx: 4, ty: 6, dir: 'up' },
+      { x: 7, y: 11, to: 'bikeshop', tx: 4, ty: 7, dir: 'up' },
       { x: 20, y: 11, to: 'ceruleanhouse', tx: 4, ty: 7, dir: 'up' },
       { x: 7, y: 17, to: 'robbedhouse', tx: 4, ty: 7, dir: 'up' },
       { x: 2, y: 3, to: 'ceruleancave1f', tx: 1, ty: 15, dir: 'up', needFlag: 'badge7',

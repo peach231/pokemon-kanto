@@ -245,6 +245,23 @@
       boy:        'people/boy',
       tuberf:     'people/tuber_f',
 
+      // --- classes pokefirered has no sheet for ---
+      // Seven Gen 1 trainer classes were never given overworld art in FireRed,
+      // because they only ever appeared as battle portraits. Rather than ship
+      // seven blank NPCs, each is mapped to the sheet that reads correctly IN
+      // THE PLACE IT STANDS — which is how the original games handled it too.
+      birdkeeper: 'people/camper',      // outdoorsy, young, always on a route
+      cueball:    'people/biker',       // literally the same gang as the bikers
+      juggler:    'people/rocker',      // a performer, dressed like one
+      psychicm:   'people/gentleman',   // Sabrina's gym is all formal dress
+      psychicf:   'people/channeler',   // robed, which is the whole read
+      burglar:    'people/biker',       // a thug going through an empty house
+      supernerd:  'people/scientist',   // Blaine's gym staff, and it shows
+
+      // --- the player, as an NPC ---
+      // Used exactly once, on the fifth plinth.
+      red:        'people/red_normal',
+
       // --- POKéMON that stand on the overworld ---
       // A legendary you can SEE from across the room, before it has a health
       // bar, is worth more than any amount of text telling you it is rare.

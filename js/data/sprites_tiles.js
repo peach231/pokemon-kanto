@@ -883,13 +883,17 @@
     'aaaaaaaaaaaaaaao', fill('o')
   ]);
 
+  // A carpet, not a rug. The previous tile carried a gold border on all four
+  // sides, so a wide run of them rendered as a chessboard of separate mats
+  // rather than one continuous carpet down the middle of a hall. This tiles
+  // seamlessly: an even weave, a slight sheen, and no edge at all.
   T('t_redcarpet', { a: C.red0, b: C.red1, c: C.red2, y: C.yel1 }, [
-    fill('y'), 'ycccccccccccccay', 'ybbbbbbbbbbbbbay',
-    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay',
-    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay',
-    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay',
-    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'yaaaaaaaaaaaaaay',
-    fill('y')
+    'bbabbabbabbabbab', 'babbabbabbabbabb', 'bbabbabbabbabbab',
+    'abbabbabbabbabba', 'bbabbabbabbabbab', 'babbabbabbabbabb',
+    'bcabbabbabbabbab', 'abbabbabcbbabbba', 'bbabbabbabbabbab',
+    'babbabbabbabbabb', 'bbabbabbacbabbab', 'abbabbabbabbabba',
+    'bbabbabbabbabbab', 'babbabcbabbabbab', 'bbabbabbabbabbab',
+    'abbabbabbabbabba'
   ]);
   T('t_statue', { o: C.ink, a: C.stn1, b: C.stn2, c: C.stn3, f: C.gfl2 }, [
     fill('f'), 'ffffffooooffffff', 'fffffocccbofffff',

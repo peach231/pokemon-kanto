@@ -866,6 +866,44 @@
       { id: 'victoryroad1f',  label: 'Victory Road',     kind: 'cave',   x: 18,  y: 62 },
       { id: 'indigo',         label: 'Indigo Plateau',   kind: 'league', x: 18,  y: 44 }
     ];
+    // The footer panel owns the bottom 28 pixels, so the landmass has to live
+    // above it. These coordinates were laid out against a full-height screen
+    // and put CINNABAR and the SEAFOAM ISLANDS underneath the caption box —
+    // squeezing them here keeps the geography honest and the whole region
+    // visible at once.
+    for (var sq = 0; sq < NODES.length; sq++) {
+      NODES[sq].y = Math.round(NODES[sq].y * 0.74 + 12);
+    }
+
+    // Which places actually connect to which. Kanto is a loop with two spurs
+    // and an island chain, and the shape of that loop is the single most
+    // useful thing this screen can tell you.
+    var EDGES = [
+      ['pallet', 'route1'], ['route1', 'viridian'],
+      ['viridian', 'route22'], ['route22', 'route23'],
+      ['route23', 'victoryroad1f'], ['victoryroad1f', 'indigo'],
+      ['viridian', 'route2'], ['route2', 'viridianforest'], ['viridianforest', 'pewter'],
+      ['pewter', 'route3'], ['route3', 'mtmoon1f'], ['mtmoon1f', 'route4'],
+      ['route4', 'cerulean'], ['cerulean', 'route24'], ['route24', 'route25'],
+      ['cerulean', 'route5'], ['route5', 'saffron'],
+      ['saffron', 'route6'], ['route6', 'vermilion'],
+      ['cerulean', 'route9'], ['route9', 'rocktunnel1f'],
+      ['rocktunnel1f', 'route10'], ['route10', 'lavender'],
+      ['lavender', 'route8'], ['route8', 'saffron'],
+      ['saffron', 'route7'], ['route7', 'celadon'],
+      ['celadon', 'route16'], ['route16', 'route17'], ['route17', 'route18'],
+      ['route18', 'fuchsia'],
+      ['lavender', 'route12'], ['route12', 'route13'], ['route13', 'route14'],
+      ['route14', 'route15'], ['route15', 'fuchsia'],
+      ['vermilion', 'route11'], ['route11', 'route12'],
+      ['fuchsia', 'safarizonecenter'],
+      ['fuchsia', 'route19'], ['route19', 'route20'],
+      ['route20', 'seafoam1f'], ['route20', 'cinnabar'],
+      ['cinnabar', 'route21'], ['route21', 'pallet']
+    ];
+    var BY_ID = {};
+    for (var bi = 0; bi < NODES.length; bi++) BY_ID[NODES[bi].id] = NODES[bi];
+
     var visited = G.player.visited || {};
     function isSeen(id) { return !!visited[id]; }
     var mid = (G.world && G.world.mapId) || '';
@@ -945,15 +983,22 @@
         }
         // A lighter interior so the mass is not one flat green — roughly the
         // inland belt between Cerulean, Saffron and Celadon.
-        blob(100, 70, 34, 20, '#54a354');
+        blob(100, 64, 34, 16, '#54a354');
         // The offshore pair.
-        isle(38, 148, 15, 10);   // Cinnabar
-        isle(62, 150, 11, 8);    // Seafoam
+        isle(38, 122, 15, 10);   // Cinnabar
+        isle(62, 123, 11, 8);    // Seafoam
 
         G.text(ctx, 'KANTO — TOWN MAP', 8, 5, G.C.white, '#1a1c2c');
 
-        // route trails (sea segments look the same — they cross open water)
-        for (var e = 0; e < NODES.length - 1; e++) trail(NODES[e].x, NODES[e].y, NODES[e + 1].x, NODES[e + 1].y);
+        // Route trails follow the REAL connections, not the array order. The
+        // previous version joined NODES[i] to NODES[i+1], which drew a line
+        // from ROUTE 25 straight across the map to ROUTE 5 — a road that does
+        // not exist, on the one screen whose entire job is telling you which
+        // roads do.
+        for (var e = 0; e < EDGES.length; e++) {
+          var a = BY_ID[EDGES[e][0]], b = BY_ID[EDGES[e][1]];
+          if (a && b) trail(a.x, a.y, b.x, b.y);
+        }
 
         // detailed per-area markers
         for (var i = 0; i < NODES.length; i++) {
@@ -992,7 +1037,7 @@
         var sNode = NODES[this.sel], seenSel = isSeen(sNode.id);
         G.text(ctx, seenSel ? sNode.label : '? ? ? (unexplored)', 8, H - 23, seenSel ? G.UI.text : G.C.gry, G.UI.textShadow);
         if (this.sel === cur) G.text(ctx, 'You are here.', 150, H - 23, G.UI.hpGreen, G.UI.textShadow);
-        G.text(ctx, 'Explored ' + seenCount + '/' + NODES.length, 8, H - 12, G.C.lgry);
+        G.text(ctx, 'Explored ' + seenCount + '/' + NODES.length, 8, H - 11, G.C.lgry);
         var flyable = G.canFly && G.canFly() && G.FLY_POINTS[sNode.id] && seenSel;
         G.text(ctx, flyable ? 'Z: FLY   X: back' : '<>: move   X: back', W - 110, H - 12,
           flyable ? '#f8e878' : G.C.lgry);

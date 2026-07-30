@@ -164,7 +164,7 @@
         var dx = Math.abs(x - cx), dy = Math.abs(y - cy);
         var d = Math.max(dx, dy);
         if (d <= radius - 1) continue;
-        ctx.fillStyle = (d === radius) ? 'rgba(8,8,16,0.55)' : 'rgba(8,8,16,0.97)';
+        ctx.fillStyle = (d === radius) ? 'rgba(8,8,16,0.6)' : '#06060c';
         ctx.fillRect(x * TILEPX - cam.x, y * TILEPX - cam.y, TILEPX, TILEPX);
       }
     }
@@ -457,6 +457,22 @@
       if (p.vehicle) {
         var hd = w.tileDefAt(p.x, p.y);
         if (!(hd && hd.water)) p.vehicle = null;
+      }
+
+      // The SAFARI ZONE clock. It runs on STEPS, not on time, and it does not
+      // run while you are indoors or talking — which is why the rest house in
+      // the middle of the preserve matters and why everyone works that out at
+      // about four hundred steps.
+      if (w.map.safari && G.flags.safari_active) {
+        G.player.safariSteps = Math.max(0, (G.player.safariSteps || 0) - 1);
+        var left = G.player.safariSteps;
+        if (left === 100 || left === 50 || left === 20) {
+          G.pushScene(G.Textbox('A voice over the tannoy: "' + left + ' steps remaining!"'));
+        }
+        if (left === 0) {
+          G.runEvent('safariTimeUp');
+          return;
+        }
       }
 
       // repel ticks on every step, like the real thing

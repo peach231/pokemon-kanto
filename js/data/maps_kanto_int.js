@@ -3156,4 +3156,81 @@
       }
     };
   };
+
+  // The clock runs out. You are escorted to the gate with whatever you caught,
+  // and the SAFARI BALLs are taken back — which is the whole reason the step
+  // limit is a puzzle rather than a nuisance: you cannot bank progress inside.
+  G.EVENTS.safariTimeUp = function* () {
+    yield { t: 'text', s: 'A tannoy, somewhere in the trees: "Time is up! Please return to the gate."' };
+    yield { t: 'text', s: 'A warden appears at your elbow with the unhurried certainty of someone who has done this ten thousand times.' };
+    yield { t: 'fn', f: function () {
+      G.flags.safari_active = 0;
+      G.player.safariSteps = 0;
+      delete G.player.bag.safariball;
+    } };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.FadeScene(function () {
+          G.world.loadMap('safarigate', 5, 5, 'down');
+          done();
+        }));
+      }
+    };
+    yield { t: 'text', s: 'ATTENDANT: How did you get on? Come back any time — it is ₽500 and we reset the counter.' };
+  };
+
+  // The CERULEAN bike shop. A bicycle costs a million pounds and the voucher
+  // is worth exactly a million pounds, which is a joke the original played
+  // completely straight and is funnier for it.
+  G.EVENTS.bikeShop = function* () {
+    if (G.player.bag.bicycle) {
+      yield { t: 'text', s: 'CLERK: How is the BICYCLE? Fastest thing in KANTO that is not a POKéMON.' };
+      return;
+    }
+    if (!G.player.bag.bikevoucher) {
+      yield { t: 'text', s: 'CLERK: Welcome to the CERULEAN BIKE SHOP!' };
+      yield { t: 'text', s: 'CLERK: That one is ₽1,000,000.' };
+      yield { t: 'text', s: '...You read it twice. It still says ₽1,000,000.' };
+      yield { t: 'text', s: 'CLERK: We do accept BIKE VOUCHERS. The POKéMON FAN CLUB in VERMILION hands them out.' };
+      return;
+    }
+    yield { t: 'text', s: 'CLERK: A BIKE VOUCHER! Yes, of course. Any one you like.' };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'fn', f: function () {
+      delete G.player.bag.bikevoucher;
+      G.player.bag.bicycle = 1;
+      G.flags.got_bicycle = 1;
+    } };
+    yield { t: 'text', s: 'You received the BICYCLE!' };
+    yield { t: 'text', s: 'CLERK: CYCLING ROAD, west of CELADON. That is what people buy these for. Downhill the whole way and you cannot stop.' };
+  };
+
+  G.MAPS.bikeshop = {
+    id: 'bikeshop', name: 'Cerulean Bike Shop', w: 10, h: 9,
+    music: 'center', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'I.CCCCCC.I',
+      'I........I',
+      'I........I',
+      'I..T..T..I',
+      'I..o..o..I',
+      'I........I',
+      'IIII..IIII',
+      '..........'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 7, to: 'cerulean', tx: 7, ty: 12, dir: 'down' },
+      { x: 5, y: 7, to: 'cerulean', tx: 7, ty: 12, dir: 'down' }
+    ],
+    npcs: [
+      { x: 4, y: 2, sprite: 'clerk', dir: 'down', event: 'bikeShop' }
+    ],
+    signs: [
+      { x: 7, y: 1, text: 'A price tag: ₽1,000,000. There is no decimal point and no mistake.' }
+    ]
+  };
 })();
