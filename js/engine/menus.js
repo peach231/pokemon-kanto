@@ -348,27 +348,16 @@
         var cur = party[this.sel];
         if (cur) {
           panel(ctx, 152, 20, 84, 92);
-          if (cur.egg) {
-            var eimg = G.IMG.mon_egg;
-            if (eimg) ctx.drawImage(eimg, 194 - eimg.width / 2, 92 - eimg.height);
-            G.text(ctx, 'A mystery EGG.', 158, 26, G.UI.text, G.UI.textShadow);
-            var tot = cur.hatchTotal || G.EGG_STEPS || 1;
-            var prog = G.clamp((tot - cur.hatch) / tot, 0, 1);
-            ctx.fillStyle = G.C.dgry; ctx.fillRect(158, 94, 72, 6);
-            ctx.fillStyle = G.UI.expBlue || '#4a90e0'; ctx.fillRect(158, 94, Math.round(72 * prog), 6);
-            G.text(ctx, Math.round(prog * 100) + '% warmed', 158, 103, G.C.lgry);
-          } else {
-            var img = G.IMG['mon_' + cur.sp];
-            if (img) ctx.drawImage(img, 194 - img.width / 2, 96 - img.height);
-            var sp = G.SPECIES[cur.sp];
-            for (var t = 0; t < sp.types.length; t++) {
-              ctx.fillStyle = G.TYPE_COLORS[sp.types[t]];
-              ctx.fillRect(158 + t * 40, 98, 36, 10);
-              G.text(ctx, sp.types[t].toUpperCase().slice(0, 8), 160 + t * 40, 100, G.C.white);
-            }
-            var stats2 = G.monStats(cur);
-            G.text(ctx, cur.curHp + '/' + stats2.hp + ' HP', 158, 26, G.UI.text, G.UI.textShadow);
+          var img = G.IMG['mon_' + cur.sp];
+          if (img) ctx.drawImage(img, 194 - img.width / 2, 96 - img.height);
+          var sp = G.SPECIES[cur.sp];
+          for (var t = 0; t < sp.types.length; t++) {
+            ctx.fillStyle = G.TYPE_COLORS[sp.types[t]];
+            ctx.fillRect(158 + t * 40, 98, 36, 10);
+            G.text(ctx, sp.types[t].toUpperCase().slice(0, 8), 160 + t * 40, 100, G.C.white);
           }
+          var stats2 = G.monStats(cur);
+          G.text(ctx, cur.curHp + '/' + stats2.hp + ' HP', 158, 26, G.UI.text, G.UI.textShadow);
         }
         G.text(ctx, 'Z: select   X: back', 10, H - 12, G.C.lgry);
       }
@@ -386,7 +375,6 @@
         ctx.fillStyle = '#2a3040';
         ctx.fillRect(0, 0, W, H);
         var sp = G.SPECIES[mon.sp];
-        var nat = G.natureOf(mon);
         // left: sprite + identity
         panel(ctx, 6, 6, 96, 104);
         var img = G.IMG['mon_' + mon.sp];
@@ -399,16 +387,30 @@
           G.text(ctx, sp.types[t].toUpperCase().slice(0, 8), 16 + t * 42, 80, G.C.white);
         }
         G.text(ctx, 'No.' + (sp.id < 10 ? '00' : sp.id < 100 ? '0' : '') + sp.id, 14, 94, G.UI.text, G.UI.textShadow);
-        G.text(ctx, nat.name + ' nature', 14, 102, '#e8c038', G.UI.textShadow);
-        // right: stats — the nature's raised stat shows red, its lowered stat blue
+        // Gen 1 has no natures. What actually varies between two mons of the
+        // same species and level is the DV spread, so show that instead — and
+        // colour it, since a 15 DV is worth a flat +30 base stat here.
+        var dv = mon.dvs || {};
+        var dvTot = (dv.hp || 0) + (dv.atk || 0) + (dv.def || 0) + (dv.spc || 0) + (dv.spe || 0);
+        G.text(ctx, 'DV total ' + dvTot + '/75', 14, 102,
+          dvTot >= 60 ? '#e8c038' : dvTot >= 40 ? G.UI.text : G.C.lgry, G.UI.textShadow);
+
+        // right: stats. ONE Special row — that is the whole point of Gen 1.
         panel(ctx, 108, 6, 126, 70);
         var stats = G.monStats(mon);
-        var natKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-        var rows = [['HP', mon.curHp + '/' + stats.hp], ['Attack', stats.atk], ['Defense', stats.def], ['Sp. Atk', stats.spa], ['Sp. Def', stats.spd], ['Speed', stats.spe]];
+        var rows = [
+          ['HP', mon.curHp + '/' + stats.hp, dv.hp],
+          ['Attack', stats.atk, dv.atk],
+          ['Defense', stats.def, dv.def],
+          ['Special', stats.spa, dv.spc],
+          ['Speed', stats.spe, dv.spe]
+        ];
         for (var i = 0; i < rows.length; i++) {
-          var sc = natKeys[i] === nat.up ? '#d04a48' : natKeys[i] === nat.down ? '#4a90e0' : G.UI.text;
+          var d = rows[i][2];
+          var sc = d >= 14 ? '#d04a48' : d <= 2 ? '#4a90e0' : G.UI.text;
           G.text(ctx, rows[i][0], 116, 12 + i * 10, sc, G.UI.textShadow);
-          G.text(ctx, String(rows[i][1]), 196, 12 + i * 10, sc, G.UI.textShadow);
+          G.text(ctx, String(rows[i][1]), 190, 12 + i * 10, sc, G.UI.textShadow);
+          G.text(ctx, d == null ? '' : String(d), 218, 12 + i * 10, G.C.lgry);
         }
         // moves
         panel(ctx, 108, 80, 126, 56);

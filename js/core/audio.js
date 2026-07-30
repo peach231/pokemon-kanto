@@ -282,11 +282,50 @@
     },
 
     // ---- Pokémon cry --------------------------------------------------------
+    // Real recorded cries, streamed per species (see G.CRY_CFG). The first call
+    // for a species kicks off the fetch and plays the synthesized cry so there
+    // is no silent gap; once cached, later calls use the real audio.
+    //
+    // `down` is the faint cry — pitched and slowed down, which is roughly what
+    // the games do to the same sample.
+    _cryCache: {},
+    _cryDead: {},
+
+    cry: function (key, down) {
+      if (this.muted) return;
+      var url = G.cryUrl && G.cryUrl(key);
+      if (!url || this._cryDead[key]) { this._synthCry(key, down); return; }
+
+      var el = this._cryCache[key];
+      if (!el) {
+        var self = this;
+        el = new Audio();
+        el.preload = 'auto';
+        el.addEventListener('error', function () { self._cryDead[key] = true; });
+        el.src = url;
+        this._cryCache[key] = el;
+        this._synthCry(key, down);   // cover the first play while it downloads
+        return;
+      }
+      if (!el.readyState) { this._synthCry(key, down); return; }
+
+      try {
+        el.pause();
+        el.currentTime = 0;
+        el.volume = (G.CRY_CFG && G.CRY_CFG.volume != null ? G.CRY_CFG.volume : 0.35);
+        el.playbackRate = down ? 0.75 : 1;
+        var p = el.play();
+        if (p && p.catch) p.catch(function () {});
+      } catch (e) {
+        this._synthCry(key, down);
+      }
+    },
+
     // A short synthesized call, deterministic per species key, so every creature
     // has its own consistent "voice" (pitch / sweep / vibrato / waveform / grit)
-    // the way the originals faked hundreds of cries from a tiny synth. `down`
-    // gives a lower, slurred faint-cry variant.
-    cry: function (key, down) {
+    // the way the originals faked hundreds of cries from a tiny synth. This is
+    // the fallback when the recorded cry hasn't downloaded or can't be reached.
+    _synthCry: function (key, down) {
       if (!actx || this.muted) return;
       var s = 2166136261; key = String(key);
       for (var ci = 0; ci < key.length; ci++) { s ^= key.charCodeAt(ci); s = (s * 16777619) >>> 0; }

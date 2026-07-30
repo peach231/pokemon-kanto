@@ -104,36 +104,8 @@
       // image files (see loadMonSprites), which is async, so boot waits on them
       // separately (main.js). World/UI art above is still baked synchronously.
       G.gfx.buildFont();
-      G.gfx.makeEggSprite();
     },
 
-    // A creature egg shown in the party/summary while it incubates: a white egg
-    // with blue + orange blotches and a highlight (original art).
-    makeEggSprite: function () {
-      var w = 44, h = 54, c = makeCanvas(w, h), x = c.getContext('2d');
-      var cx = w / 2, cy = h / 2 + 2, rx = 17, ry = 24, TAU = Math.PI * 2;
-      function eggPath() {
-        x.beginPath();
-        x.moveTo(cx, cy - ry);
-        x.bezierCurveTo(cx + rx * 1.05, cy - ry * 0.55, cx + rx, cy + ry * 0.7, cx, cy + ry);
-        x.bezierCurveTo(cx - rx, cy + ry * 0.7, cx - rx * 1.05, cy - ry * 0.55, cx, cy - ry);
-        x.closePath();
-      }
-      x.fillStyle = 'rgba(18,20,34,0.22)';
-      x.beginPath(); x.ellipse(cx, cy + ry - 1, rx * 0.85, 4, 0, 0, TAU); x.fill();
-      x.fillStyle = G.C.ink || '#1a1c2c'; eggPath(); x.fill();
-      x.save(); eggPath(); x.clip();
-      x.fillStyle = '#fbfbf6'; x.fillRect(0, 0, w, h);
-      x.fillStyle = '#e2e2ea'; x.beginPath(); x.ellipse(cx + 3, cy + ry - 6, rx, ry * 0.6, 0, 0, TAU); x.fill();
-      x.fillStyle = '#9ad7e6'; x.beginPath(); x.ellipse(cx - 7, cy + 7, 7, 8, 0, 0, TAU); x.fill();
-      x.fillStyle = '#79bcd0'; x.beginPath(); x.ellipse(cx - 7, cy + 9, 5, 5, 0, 0, TAU); x.fill();
-      x.fillStyle = '#9ad7e6'; x.beginPath(); x.ellipse(cx + 6, cy - 9, 5, 6, 0, 0, TAU); x.fill();
-      x.fillStyle = '#f0a85c'; x.beginPath(); x.ellipse(cx + 8, cy + 8, 5, 6, 0, 0, TAU); x.fill();
-      x.fillStyle = '#d6843c'; x.beginPath(); x.ellipse(cx + 8, cy + 9, 3, 3, 0, 0, TAU); x.fill();
-      x.fillStyle = 'rgba(255,255,255,0.85)'; x.beginPath(); x.ellipse(cx - 5, cy - 12, 4, 7, -0.3, 0, TAU); x.fill();
-      x.restore();
-      G.IMG.mon_egg = c;
-    },
 
     // -----------------------------------------------------------------------
     // Creature sprites load as real IMAGE files (you supply them; see
@@ -174,6 +146,58 @@
       }
       return c;
     },
+
+    // -----------------------------------------------------------------------
+    // LIVE (animated) sprites.
+    //
+    // The battlers are animated GIFs. drawImage() on an <img> samples whatever
+    // frame the GIF is currently showing, but _fitToBox bakes into a canvas —
+    // which would freeze every battler on frame 0. So animated sources instead
+    // get a canvas that is re-blitted from the live <img> once per frame.
+    //
+    // We deliberately do NOT trim animated frames: a Gen-5 battler bounces
+    // within its frame, so a trim measured on frame 0 clips the animation. The
+    // source GIFs are already tightly framed with the creature standing at the
+    // bottom, so a plain fit-and-bottom-anchor is correct.
+    // -----------------------------------------------------------------------
+    _live: [],
+
+    _fitLive: function (src, box, flip) {
+      var c = makeCanvas(box, box);
+      var entry = { src: src, dst: c, box: box, flip: !!flip };
+      G.gfx._live.push(entry);
+      G.gfx._blitLive(entry);
+      return c;
+    },
+
+    _blitLive: function (e) {
+      var sw = e.src.width || e.box, sh = e.src.height || e.box;
+      var scale = Math.min(e.box / sw, e.box / sh, 1);   // fit, never upscale
+      var dw = Math.round(sw * scale), dh = Math.round(sh * scale);
+      var dx = Math.round((e.box - dw) / 2), dy = e.box - dh;  // bottom-centre
+      var ctx = e.dst.getContext('2d');
+      ctx.clearRect(0, 0, e.box, e.box);
+      ctx.imageSmoothingEnabled = false;
+      if (e.flip) {
+        ctx.save();
+        ctx.translate(e.box, 0); ctx.scale(-1, 1);
+        ctx.drawImage(e.src, e.box - dx - dw, dy, dw, dh);
+        ctx.restore();
+      } else {
+        ctx.drawImage(e.src, dx, dy, dw, dh);
+      }
+    },
+
+    // Called once per rendered frame from main.js. Only the handful of sprites
+    // actually on screen matter, but re-blitting all loaded ones is still cheap
+    // (a few dozen 80x80 drawImage calls) and keeps the bookkeeping trivial.
+    tickLive: function () {
+      var L = G.gfx._live;
+      for (var i = 0; i < L.length; i++) G.gfx._blitLive(L[i]);
+    },
+
+    // True if this URL is an animated source that must stay live.
+    _isAnimated: function (url) { return /\.gif(\?|$)/i.test(url || ''); },
 
     // Fit src (Image or canvas) into a box-sized canvas: trim transparent
     // margins so the creature stands ON the platform (no floating), then
@@ -234,12 +258,14 @@
         }
         var img = new Image();
         if (G.SPRITE_CFG.remoteBase && G.SPRITE_CFG.crossOrigin) img.crossOrigin = G.SPRITE_CFG.crossOrigin;
+        var url = urls[i];
         img.onload = function () {
-          G.IMG[reqKey] = G.gfx._fitToBox(img, box, false);
-          G.IMG[reqKey + '_back'] = G.gfx._fitToBox(img, box, true);
+          var live = G.gfx._isAnimated(url);
+          G.IMG[reqKey] = live ? G.gfx._fitLive(img, box, false) : G.gfx._fitToBox(img, box, false);
+          G.IMG[reqKey + '_back'] = live ? G.gfx._fitLive(img, box, true) : G.gfx._fitToBox(img, box, true);
         };
         img.onerror = function () { attempt(i + 1); };
-        img.src = urls[i];
+        img.src = url;
       })(0);
     },
     _shinyReq: {},
@@ -271,34 +297,42 @@
         if (settled >= pending) done();
       }
 
-      // Try candidate URLs in order; cb(img) on first success, cb(null) if none.
+      // Try candidate URLs in order; cb(img, url) on first success, cb(null) if none.
       function loadFirst(urls, cb) {
         var i = 0;
         (function attempt() {
-          if (i >= urls.length) { cb(null); return; }
+          if (i >= urls.length) { cb(null, null); return; }
+          var url = urls[i];
           var img = new Image();
           if (G.SPRITE_CFG.remoteBase && G.SPRITE_CFG.crossOrigin) img.crossOrigin = G.SPRITE_CFG.crossOrigin;
-          img.onload = function () { cb(img); };
+          img.onload = function () { cb(img, url); };
           img.onerror = function () { i++; attempt(); };
-          img.src = urls[i];
+          img.src = url;
         })();
+      }
+
+      // Animated sources stay live; static ones get trimmed and baked.
+      function fit(img, url, flip) {
+        return G.gfx._isAnimated(url)
+          ? G.gfx._fitLive(img, box, flip)
+          : G.gfx._fitToBox(img, box, flip);
       }
 
       keys.forEach(function (key) {
         var sp = G.SPECIES[key];
-        var override = G.SPRITE_MANIFEST && G.SPRITE_MANIFEST[sp.id];
-        var hasBack = override && override.back;
 
         pending++; // front
-        loadFirst(G.spriteUrl('front', sp.id), function (img) {
-          G.IMG['mon_' + key] = img ? G.gfx._fitToBox(img, box, false) : G.gfx.makePlaceholder(sp.id);
+        loadFirst(G.spriteUrl('front', sp.id), function (img, url) {
+          G.IMG['mon_' + key] = img ? fit(img, url, false) : G.gfx.makePlaceholder(sp.id);
           tick();
         });
 
-        if (hasBack) {
-          pending++; // dedicated back
-          loadFirst(G.spriteUrl('back', sp.id), function (img) {
-            if (img) G.IMG['mon_' + key + '_back'] = G.gfx._fitToBox(img, box, false);
+        // The Gen-5 set ships genuine rear views, so always try for a real back
+        // rather than mirroring the front. done() mirrors as the fallback.
+        if (G.spriteUrl('back', sp.id).length) {
+          pending++;
+          loadFirst(G.spriteUrl('back', sp.id), function (img, url) {
+            if (img) G.IMG['mon_' + key + '_back'] = fit(img, url, false);
             tick();
           });
         }
@@ -402,6 +436,15 @@
         rctx.drawImage(tmp, 0, 0, fw, srcH, Math.round((bw - dw) / 2), bh - dh, dw, dh);
         G.IMG[base + k] = c;
       });
+      // Short sheets: the gym leaders and other stationary NPCs ship only the
+      // three idle frames (48x32, not 144x32) because they never walk. Fill
+      // their stride slots from the matching idle so they render completely
+      // instead of falling back to unrelated baked art mid-animation.
+      var STAND_IN = { d1: 'd0', d2: 'd0', u1: 'u0', u2: 'u0', s1: 's0', s2: 's0' };
+      Object.keys(STAND_IN).forEach(function (k) {
+        if (!G.IMG[base + k] && G.IMG[base + STAND_IN[k]]) G.IMG[base + k] = G.IMG[base + STAND_IN[k]];
+      });
+
       FLIP.forEach(function (k) { if (G.IMG[base + k]) G.IMG[base + k + '_flip'] = self._flipCanvas(G.IMG[base + k]); });
     },
 

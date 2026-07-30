@@ -133,6 +133,9 @@
         G.frame++;
         acc -= STEP_MS;
       }
+      // Re-blit animated battlers from their live <img> sources before drawing,
+      // or every GIF would be frozen on its first frame.
+      if (G.gfx.tickLive) G.gfx.tickLive();
       G.ctx.fillStyle = '#08080c';
       G.ctx.fillRect(0, 0, G.SCREEN_W, G.SCREEN_H);
       G.drawScenes(G.ctx);

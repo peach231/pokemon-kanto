@@ -407,21 +407,8 @@
         }
       }
 
-      // eggs warm as you walk — a party egg hatches when its timer runs out;
-      // an egg left with the Nursery just counts down for later collection.
-      var party = G.player.party || [];
-      for (var ei = 0; ei < party.length; ei++) {
-        var egg = party[ei];
-        if (egg.egg && egg.hatch > 0) {
-          egg.hatch--;
-          if (egg.hatch <= 0) {
-            G.hatchEgg(egg);
-            if (G.audio.playJingle) G.audio.playJingle('jingle_heal');
-            G.pushScene(G.Textbox(['Huh? One of your EGGs is hatching!', 'It hatched into ' + G.monName(egg) + '!']));
-            return;
-          }
-        }
-      }
+      // (Gen 1 has no breeding, so nothing warms as you walk. The step hook
+      // stays because poison damage and the Safari step counter hang off it.)
       if (G.player.daycare && G.player.daycare.hatch > 0) G.player.daycare.hatch--;
 
       var warp = w.warpAt(p.x, p.y);

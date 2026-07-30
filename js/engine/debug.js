@@ -116,15 +116,15 @@
     assert(m.level === 10, 'gainExp boundary -> level 10, got ' + m.level);
 
     // stat formula known answer
-    var probe = G.makeMon('manectric', 50, { ivs: { hp: 10, atk: 10, def: 10, spa: 10, spd: 10, spe: 10 } });
+    var probe = G.makeMon('manectric', 50, { dvs: { atk: 10, def: 10, spc: 10, spe: 10 } });
     var st = G.monStats(probe);
     var expectHp = Math.floor((2 * G.SPECIES.manectric.base.hp + 10) * 50 / 100) + 50 + 10;
     assert(st.hp === expectHp, 'hp formula mismatch: ' + st.hp + ' vs ' + expectHp);
 
     // damage range check: 200 samples fall within [min, max] closed form
     G.seedRng(1234);
-    var atk = G.makeMon('geodude', 12, { ivs: { hp: 8, atk: 8, def: 8, spa: 8, spd: 8, spe: 8 }, moves: ['rockthrow'] });
-    var def = G.makeMon('zigzagoon', 12, { ivs: { hp: 8, atk: 8, def: 8, spa: 8, spd: 8, spe: 8 } });
+    var atk = G.makeMon('geodude', 12, { dvs: { atk: 8, def: 8, spc: 8, spe: 8 }, moves: ['rockthrow'] });
+    var def = G.makeMon('zigzagoon', 12, { dvs: { atk: 8, def: 8, spc: 8, spe: 8 } });
     var battle = new G.Battle({ party: [atk], foes: [def], wild: true });
     var A = G.monStats(atk).atk, D = G.monStats(def).def;
     var base = Math.floor(Math.floor(Math.floor((2 * 12 / 5 + 2) * 50 * A / D) / 50) + 2);
