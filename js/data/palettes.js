@@ -20,26 +20,44 @@
     pale:  '#d8d8e4',
     white: '#f4f4f4',
 
-    // foliage greens (trees, deep plants)
-    grn0: '#14402e', grn1: '#1f6e44', grn2: '#3fa757', grn3: '#7ed27d',
+    // ---- KANTO is temperate, not tropical -------------------------------
+    // The inherited Hoenn ramps were warm and saturated — jungle greens, red
+    // earth, bleached sand. Kanto is deciduous woodland and grey stone, so the
+    // greens are cooler and deeper, the browns are loam rather than clay, and
+    // the stone loses its blue cast. Every sprite in the game reads from these
+    // names, so shifting them here re-tints the whole world at once; the tile
+    // art on top of it is drawn fresh.
 
-    // ground greens (grass fields — lighter, warmer)
-    leaf0: '#3c7e4c', leaf1: '#58aa5c', leaf2: '#7cc86c', leaf3: '#a0e08c',
+    // foliage greens (trees, deep plants) — cooler, bluer, less lime
+    grn0: '#123526', grn1: '#1c5c3c', grn2: '#2f8c50', grn3: '#5fb873',
+
+    // ground greens (grass fields) — muted meadow, not tropical
+    leaf0: '#356b45', leaf1: '#4c9152', leaf2: '#6cb062', leaf3: '#92cc80',
 
     // water blues
-    blu0: '#1a3a6e', blu1: '#2860c0', blu2: '#4a90e0', blu3: '#8cc8f0',
+    blu0: '#16345f', blu1: '#2458ac', blu2: '#4386d2', blu3: '#86c2ec',
 
     // sky
     sky0: '#6cb0e4', sky1: '#a8d8f8',
 
-    // earth browns
-    brn0: '#3c2a20', brn1: '#6e4a30', brn2: '#9c6e48', brn3: '#c89868',
+    // earth browns — damp loam and bark, not red clay
+    brn0: '#33251c', brn1: '#5e4630', brn2: '#8a6a4a', brn3: '#b8946c',
 
-    // warm tans (paths, sand)
-    tan0: '#e8c898', tan1: '#f4e0b8',
+    // warm tans (dirt paths, beach sand)
+    tan0: '#d8bc92', tan1: '#eedcb4',
 
-    // stone (bluish grays for cliffs/caves/steel)
-    stn0: '#2e2e3e', stn1: '#54546c', stn2: '#8a8aa4', stn3: '#c2c2d6',
+    // stone — neutral grey for cliffs, caves, Mt. Moon, Indigo marble
+    stn0: '#2c2c33', stn1: '#54545e', stn2: '#8b8b96', stn3: '#c4c4cc',
+
+    // ---- Kanto-specific building colours --------------------------------
+    // Gen 1's towns are read at a glance by roof colour: Centres are red,
+    // Marts are blue, gyms are slate, houses are terracotta.
+    ctr0: '#7a1f24', ctr1: '#bc3038', ctr2: '#e0585c',   // Pokemon Centre roof
+    mrt0: '#173f74', mrt1: '#2a6cb4', mrt2: '#4e9ada',   // Poke Mart roof
+    gym0: '#3a3f4c', gym1: '#5c6474', gym2: '#8892a4',   // gym slate roof
+    hse0: '#8a3a22', hse1: '#c05e34', hse2: '#e08a54',   // house terracotta
+    brk0: '#6a3a30', brk1: '#9c5c48', brk2: '#c08468',   // brick / Pewter stone
+    twr0: '#2a1c38', twr1: '#4a3660', twr2: '#6e548a',   // Pokemon Tower stone
 
     // reds
     red0: '#5a1a28', red1: '#9e2a3a', red2: '#d04a48', red3: '#f08060',

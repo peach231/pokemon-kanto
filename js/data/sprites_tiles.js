@@ -1,19 +1,55 @@
-// Pokéram — sprites_tiles.js
+// pokemon-kanto — sprites_tiles.js
 // 16x16 map tiles, authored as palette-indexed grids (see palettes.js for the
-// style contract). Also defines G.TILES — the gameplay property table that
-// maps tile names to art + behavior (solid / encounter grass / ledge / etc).
+// style contract), plus G.TILES — the gameplay table mapping tile names to art
+// and behaviour (solid / grass / ledge / door / water / cave / cut / strength).
+//
+// This is a Kanto set, drawn fresh rather than re-tinted from Hoenn's. The
+// region is temperate woodland: deciduous canopies instead of palms, loam
+// tracks instead of red clay, neutral grey stone instead of volcanic rock.
+//
+// Gen 1's towns are legible at a glance by ROOF COLOUR, and that is a hard rule
+// here: red roof means Pokemon Centre, blue means Mart, slate means gym,
+// terracotta means an ordinary house. A player should never have to walk into
+// a building to find out what it is.
+//
+// Drawing rules (from palettes.js): light comes from the upper-left, shading
+// steps down the local ramp rather than to black, and no tile carries its own
+// drop shadow — renderers add those.
 
 (function () {
   var C = G.C;
 
-  function T(name, pal, rows) { G.ART[name] = { w: 16, h: 16, pal: pal, px: rows }; }
+  // Every tile is exactly 16x16. Rather than trust hand-counted string widths,
+  // T() normalises and records anything that was off so tools/check.js can
+  // report it — a miscounted row would otherwise be an invisible seam in the
+  // world rather than a loud failure.
+  G.ART_WARN = G.ART_WARN || [];
+  function T(name, pal, rows) {
+    var px = [];
+    for (var y = 0; y < 16; y++) {
+      var r = rows[y] == null ? '' : String(rows[y]);
+      if (r.length !== 16) G.ART_WARN.push(name + ' row ' + y + ': ' + r.length + ' cols');
+      while (r.length < 16) r += r.charAt(r.length - 1) || '.';
+      px.push(r.slice(0, 16));
+    }
+    if (rows.length !== 16) G.ART_WARN.push(name + ': ' + rows.length + ' rows');
+    G.ART[name] = { w: 16, h: 16, pal: pal, px: px };
+  }
 
-  // ---------------------------------------------------------------- grass --
-  var GR = { a: C.leaf1, b: C.leaf2, c: C.leaf3 };
+  // Build a row by repeating a pattern out to 16 columns.
+  function rep(pat) {
+    var r = '';
+    while (r.length < 16) r += pat;
+    return r.slice(0, 16);
+  }
+  var fill = function (ch) { return rep(ch); };
 
-  // base grass: a calm leaf2 field stippled with small blades — a light tip (c)
-  // over a shadowed base (a) — so a tiled field reads as textured turf, not a
-  // flat slab, while staying quiet enough not to fight sprites/deco on top.
+  // ======================================================= GROUND: grass ====
+  // A calm mid-green field stippled with blades: a light tip over a shadowed
+  // base. Quiet enough not to fight the sprites standing on it, textured
+  // enough that a large field doesn't read as a flat slab.
+  var GR = { a: C.leaf0, b: C.leaf1, c: C.leaf2, d: C.leaf3 };
+
   T('t_grass', GR, [
     'bbbbbbbbbbbbbbbb',
     'bbcbbbbbbbcbbbbb',
@@ -33,7 +69,6 @@
     'bbbbbbbbbbbabbbb'
   ]);
 
-  // grass variant — same blades in different spots so adjacent tiles vary.
   T('t_grass2', GR, [
     'bbbbbbbbbbbbbbbb',
     'bbbbbbbbbbbbbbbb',
@@ -47,1684 +82,1009 @@
     'bbbbbbbbbabbbbbb',
     'bbbbbbbbbbbbbbbb',
     'bbbbbbbbbbbbbbbb',
-    'bbbcbbbbbbbbbbbb',
-    'bbbabbbbbbbbbbbb',
+    'bbcbbbbbbbbbbcbb',
+    'bbabbbbbbbbbbabb',
     'bbbbbbbbbbbbbbbb',
     'bbbbbbbbbbbbbbbb'
   ]);
 
-  // tall grass (wild encounters) — lit blade clumps, not a flat dark block.
-  // Light upper-left: each tuft is lit (e/c) on its left edge, shadowed (b/a) on
-  // the right; tips break the top edge (transparent gaps show the grass underneath).
-  T('t_tallgrass', { a: C.grn0, b: C.grn1, c: C.grn2, e: C.grn3 }, [
-    '.e....e.....e...',
-    '.ec..cec...cec..',
-    'eec..cecb.eceb..',
-    'cecb.cecb.cecbe.',
-    'cecb.cecbececbce',
-    'cecbbcecbbcecbce',
-    'becbacecbacecbac',
-    'becababcbabcbbac',
-    'bbcaabbbaabbcaab',
-    'bbaaabbaaabbaaab',
-    'abaaababaaababaa',
-    'aababaaababaabab',
-    'aaabaaaaabaaaaba',
-    'aaaaaaaaaaaaaaaa',
-    'aaaaaaaaaaaaaaaa',
-    '.aaa..aaa..aaa..'
+  // Encounter grass. Where the wild Pokemon are is the single most important
+  // piece of information on a Kanto route, so this cannot be a subtle texture
+  // variation — a first pass that only stippled the field green was almost
+  // invisible next to it. The BASE is a full step darker than the field and
+  // the tufts are big, high-contrast and offset between the two halves so a
+  // patch reads as one obviously different surface from across the screen.
+  var TG = { a: C.grn0, b: C.leaf0, c: C.leaf2, d: C.leaf3 };
+  T('t_tallgrass', TG, [
+    'bbbbbbbbbbbbbbbb',
+    'bbbcbbbbbbbcbbbb',
+    'bbcacbbbbbcacbbb',
+    'bbacabbbbbacabbb',
+    'bacacabbbacacabb',
+    'baabaabbbaabaabb',
+    'bbaaabbbbbaaabbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbcbbbbbbcb',
+    'bbbbbbcacbbbbcac',
+    'bbbbbbacabbbbaca',
+    'abbbbacacabbacac',
+    'abbbbaabaabbbaba',
+    'bbbbbbaaabbbbbaa',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbbbbbbbbbb'
   ]);
 
-  // flowers (2-frame animation on grass)
-  var FL = { a: C.leaf1, b: C.leaf2, c: C.leaf3, r: C.red2, y: C.yel1 };
+  // Wildflowers — two frames, gently alternating.
+  var FL = { a: C.leaf0, b: C.leaf1, y: C.yel2, w: C.white, r: C.red3 };
   T('t_flower1', FL, [
     'bbbbbbbbbbbbbbbb',
-    'bbbabbbbbbbbbbbb',
-    'bbbbbbbbbbcbbbbb',
-    'bbbrbbbbbbbbbbab',
-    'bbryrbbbbbbbbbbb',
-    'bbbrbbbbbbbbbbbb',
-    'babbbbbbbbbbcbbb',
     'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbrbbbb',
-    'bbcbbbbbbbryrbbb',
-    'bbbbbbbbbbbrbbbb',
-    'bbbbabbbbbbbbbab',
+    'bbbwbbbbbbbbbbbb',
+    'bbwywbbbbbbrbbbb',
+    'bbbwbbbbbbryrbbb',
+    'bbbabbbbbbbrbbbb',
+    'bbbbbbbbbbbabbbb',
     'bbbbbbbbbbbbbbbb',
-    'babbbbcbbbbbbbbb',
-    'bbbbbbbbbbabbbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbwbbbbbbbb',
+    'bbbbbbwywbbbbbbb',
+    'bbbbbbbwbbbbbbbb',
+    'bbbbbbbabbbbbbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbbbbbbbbbb',
     'bbbbbbbbbbbbbbbb'
   ]);
   T('t_flower2', FL, [
     'bbbbbbbbbbbbbbbb',
-    'bbbabbbbbbbbbbbb',
-    'bbbbbbbbbbcbbbbb',
-    'bbrbrbbbbbbbbbab',
-    'bbbybbbbbbbbbbbb',
-    'bbrbrbbbbbbbbbbb',
-    'babbbbbbbbbbcbbb',
     'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbrbrbbb',
-    'bbcbbbbbbbbybbbb',
-    'bbbbbbbbbbrbrbbb',
-    'bbbbabbbbbbbbbab',
     'bbbbbbbbbbbbbbbb',
-    'babbbbcbbbbbbbbb',
-    'bbbbbbbbbbabbbbb',
+    'bbbwbbbbbbbrbbbb',
+    'bbwywbbbbbryrbbb',
+    'bbbwbbbbbbbrbbbb',
+    'bbbabbbbbbbabbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbwbbbbbbbb',
+    'bbbbbbwywbbbbbbb',
+    'bbbbbbbwbbbbbbbb',
+    'bbbbbbbabbbbbbbb',
+    'bbbbbbbbbbbbbbbb',
     'bbbbbbbbbbbbbbbb'
   ]);
 
-  // overlay decorations (transparent bg; scattered onto grass by decorateMap)
-  T('t_deco_flowerY', { y: C.yel1, w: C.white }, [
-    '................',
-    '................',
-    '.....y..........',
-    '....ywy.........',
-    '.....y......y...',
-    '...........ywy..',
-    '............y...',
-    '................',
-    '................',
-    '..y.............',
-    '.ywy........y...',
-    '..y........ywy..',
-    '............y...',
-    '................',
-    '.......y........',
-    '......ywy.......'
-  ]);
-  T('t_deco_pebble', { d: C.dgry, l: C.lgry }, [
-    '................',
-    '................',
-    '................',
-    '.........dd.....',
-    '........dlld....',
-    '.........dd.....',
-    '................',
-    '...dd...........',
-    '..dlld..........',
-    '...dd...........',
-    '................',
-    '............dd..',
-    '...........dlld.',
-    '............dd..',
-    '................',
-    '................'
-  ]);
-  T('t_deco_bush', { a: C.leaf1, b: C.leaf2, c: C.leaf3 }, [
-    '................',
-    '................',
-    '................',
-    '................',
-    '......ccc.......',
-    '.....cbbbc......',
-    '....cbbabbc.....',
-    '....cbaabbc.....',
-    '.....cbbbc......',
-    '......ccc.......',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................'
-  ]);
+  // ======================================================== GROUND: path ====
+  // Packed loam with grit. Kanto's routes are dirt tracks through woodland.
+  var PA = { a: C.brn1, b: C.tan0, c: C.tan1, d: C.brn2, g: C.leaf1, h: C.leaf0 };
 
-  // island + volcano overlay decorations (transparent bg)
-  T('t_deco_palm', { b: C.leaf2, c: C.leaf3, t: C.brn2 }, [
-    '................',
-    '................',
-    '.....bbb........',
-    '...bbcbcbb......',
-    '..bc..t..cb.....',
-    '......t.........',
-    '......t.........',
-    '......t.........',
-    '......t.........',
-    '......t.........',
-    '.....ttt........',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................'
-  ]);
-  T('t_deco_shell', { o: C.org2, p: C.white }, [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '......oo........',
-    '.....opppo......',
-    '.....opppo......',
-    '......oo........',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................'
-  ]);
-  T('t_deco_cinder', { r: C.red2, y: C.yel1, o: C.org2 }, [
-    '................',
-    '................',
-    '....y...........',
-    '...yoy.....y....',
-    '....y.....yoy...',
-    '..........y.....',
-    '................',
-    '................',
-    '................',
-    '......y.........',
-    '.....yoy........',
-    '......y.........',
-    '................',
-    '...........y....',
-    '..........yoy...',
-    '...........y....'
-  ]);
-  // molten lava — a solid, impassable floor for the Magma Chamber (the path is
-  // the raised cave floor; everything lower is this).
-  T('t_lava', { o: C.org0, b: C.red1, r: C.org1, R: C.org2, y: C.yel1 }, [
-    'RRRoooRRRRRRbbRR',
-    'RRoRRRoRRRRoRRbR',
-    'RoRyyRRoRRoRyyRo',
-    'RoRyRRRRbRRRyRRo',
-    'RRoRRRRoRRoRRRRo',
-    'RRRooooRRRRoooRR',
-    'bRRRRRRRRyRRRRRb',
-    'RRRyyRRRRRRRRyRR',
-    'RoooRRRoooRRRRoR',
-    'oRRRoRoRRRoRRroR',
-    'oRyRRoRyyRoRyRRo',
-    'RRRRRoRRRRoRRRRo',
-    'RRoooRRRRRRooobR',
-    'bRRRRyRRRyRRRRRR',
-    'RRRRRRoooRRRRyRR',
-    'RRyRRRRRRRRoRRRR'
-  ]);
-
-  // ===== Marine Cavern (Kyogre lair) tiles ==============================
-  // seabed: pale blue-grey sand floor with cyan ripples (walkable lane)
-  T('t_seabed', { s: C.stn2, d: C.stn1, l: C.stn3, w: C.ice1 }, [
-    'ssssssssssssssss',
-    'ssssssssswssssss',
-    'ssdsssssssssssss',
-    'ssssssssssssssss',
-    'sssswssssssssdss',
-    'ssssssssssssssss',
-    'sssssssssslsssss',
-    'swssssssssssssss',
-    'ssssssssssssssss',
-    'sssssssssswsssss',
-    'sssdssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssslss',
-    'sssssswsssssssss',
-    'ssssssssdsssssss',
-    'ssssssssssssssss'
-  ]);
-  // kelp: swaying seaweed fronds — the encounter zones (2 frames)
-  T('t_kelp1', { s: C.stn2, d: C.stn1, g: C.grn1, G: C.grn2, h: C.grn3, t: C.ice2 }, [
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssdsssssssssssss',
-    'shtsssshthtsdsss',
-    'shgsssshghgsssss',
-    'sghssssghghsssss',
-    'ssGsssssGsGsssss',
-    'sssGsssssGsGssss',
-    'sssGgssssGgGgsss',
-    'ssssGsssGsssGsss',
-    'sssgGssgGssgGsss',
-    'ssssGsssGsssGsss',
-    'ssssGgssGgssGgss',
-    'ssssGssdGsssGsss',
-    'sssGsssGsssGssss',
-    'ssgGssgGssgGssss'
-  ]);
-  T('t_kelp2', { s: C.stn2, d: C.stn1, g: C.grn1, G: C.grn2, h: C.grn3, t: C.ice2 }, [
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssdsssssssssssss',
-    'ssshthtsssshtsss',
-    'ssshghgsssshgsss',
-    'sssghghssssghsss',
-    'ssssGsGsssssGsss',
-    'sssssGsGsssssGss',
-    'sssssGgGgssssGgs',
-    'ssssGsssGsssGsss',
-    'sssgGssgGssgGsss',
-    'ssssGsssGsssGsss',
-    'ssssGgssGgssGgss',
-    'ssssGssdGsssGsss',
-    'sssGsssGsssGssss',
-    'ssgGssgGssgGssss'
-  ]);
-  // coral: solid fan coral on a deep-water field (blends with deepwater walls)
-  T('t_coral', { B: C.blu0, o: C.ink, r: C.red2, R: C.red3, y: C.org2, w: C.ice2 }, [
-    'BBBBBBBBBBBBBBBB',
-    'BBBBBBByyBBBBBBB',
-    'BBBBByyRRyyBBBBB',
-    'BBBBoRRrrRRoBBBB',
-    'BBBoRrrwrrrRoBBB',
-    'BBoRrrrrrrrRRoBB',
-    'BBoRrwrrrwrrRoBB',
-    'BBoRRrrrrrrRRoBB',
-    'BBBoRrrrrrrRoBBB',
-    'BBBBoRRrrRRoBBBB',
-    'BBBBBoRrrRoBBBBB',
-    'BBBBBBoRRoBBBBBB',
-    'BBBBBBBrrBBBBBBB',
-    'BBBBBBBrrBBBBBBB',
-    'BBBBBBorroBBBBBB',
-    'BBBBBBooooBBBBBB'
-  ]);
-  // bubbles: rising air bubbles over seabed (walkable accent, 3 frames)
-  T('t_bubbles1', { s: C.stn2, d: C.stn1, o: C.ice1, w: C.ice3 }, [
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssds',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'sdssssssssssssss',
-    'ssssssssssswosss',
-    'sssssssssssoosss',
-    'sssswossssssssss',
-    'ssssoossswosssss',
-    'sssssssssoosssss',
-    'ssssssssssssssss'
-  ]);
-  T('t_bubbles2', { s: C.stn2, d: C.stn1, o: C.ice1, w: C.ice3 }, [
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssds',
-    'ssssssssssswosss',
-    'sssssssssssoosss',
-    'sssswossssssssss',
-    'sdssoossswosssss',
-    'sssssssssoosssss',
-    'sssssswossssssss',
-    'ssssssoossssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss'
-  ]);
-  T('t_bubbles3', { s: C.stn2, d: C.stn1, o: C.ice1, w: C.ice3 }, [
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssswosss',
-    'sssssssssssoosss',
-    'sssswossssssssss',
-    'ssssoossswosssds',
-    'sssssssssoosssss',
-    'sssssswossssssss',
-    'ssssssoossssssss',
-    'sdssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss'
-  ]);
-
-  // ===== Magma Chamber (Groudon lair) tiles =============================
-  // basalt: dark volcanic causeway floor (walkable lane)
-  T('t_basalt', { s: C.stn1, t: C.stn2, k: C.stn0, o: C.org1 }, [
-    'ssssstssssssssss',
-    'ssssssssssstssss',
-    'sstsssssssssssss',
-    'ssskkssstsssssts',
-    'sssssssssoksssss',
-    'sssstsssssssssss',
-    'sssssssssstsssss',
-    'sssssskossssssss',
-    'stssssssssssssss',
-    'ssssssstssssksss',
-    'ssssssssssssstss',
-    'sskossssssssssss',
-    'ssstssssssssssss',
-    'sssssssskkssssss',
-    'sssssstsssssskss',
-    'sssssssssssstsss'
-  ]);
-  // emberfloor: cracked ground with glowing magma veins — encounter zones (2 frames)
-  T('t_emberfloor1', { d: C.stn0, k: C.ink, o: C.org1, r: C.org2, y: C.yel1 }, [
-    'dddddddddddddddd',
-    'dddddddddddddddd',
-    'dddddddddddddddd',
-    'droddddddddddddd',
-    'dkkooddddddddddd',
-    'dddkkooddooddddd',
-    'ddddokkyokkooddd',
-    'ddddkddkkdokkrdd',
-    'ddddrdddddkddkdd',
-    'dddokdddddrddddd',
-    'dddkorddddkddddd',
-    'ddddkkoodddddddd',
-    'ddddddkkrodddddd',
-    'ddddddddkkordddd',
-    'ddddddddddkkdddd',
-    'dddddddddddddddd'
-  ]);
-  T('t_emberfloor2', { d: C.stn0, k: C.ink, o: C.org1, r: C.org2, y: C.yel1 }, [
-    'dddddddddddddddd',
-    'dddddddddddddddd',
-    'dddddddddddddddd',
-    'dyrddddddddddddd',
-    'dkkrrddddddddddd',
-    'dddkkrrddrrddddd',
-    'ddddrkkyrkkrrddd',
-    'ddddkddkkdrkkydd',
-    'ddddydddddkddkdd',
-    'dddrkdddddyddddd',
-    'dddkryddddkddddd',
-    'ddddkkrrdddddddd',
-    'ddddddkkyrdddddd',
-    'ddddddddkkrydddd',
-    'ddddddddddkkdddd',
-    'dddddddddddddddd'
-  ]);
-  // obsidian: black glassy faceted pillar with a molten reflection (solid accent)
-  T('t_obsidian', { d: C.stn0, o: C.ink, p: C.pur1, h: C.pur3, q: C.pur2, r: C.org1 }, [
-    'ddoooooooooooooo',
-    'dopppppppphpppoo',
-    'doppphpppphpppoo',
-    'doppphpppphpppoo',
-    'doppphpppphpppoo',
-    'dopqqqqqqqqqqpoo',
-    'doppphpppphpppoo',
-    'doppphpppphpppoo',
-    'doppphprpphpppoo',
-    'doppphpprphpppoo',
-    'doppphpppphpppoo',
-    'doppphrppphpppoo',
-    'doppphpppphpppoo',
-    'doppphppppppppoo',
-    'doppppppppppppoo',
-    'dooooooooooooooo'
-  ]);
-
-  // small boat drawn under the player while sailing (see overworld _drawActor)
-  T('fx_boat', { w: C.brn2, d: C.brn3, l: C.tan0 }, [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '...wwwwwwwwww...',
-    '..wllllllllllw..',
-    '..wllllllllllw..',
-    '...dwwwwwwwwd...',
-    '....dddddddd....'
-  ]);
-
-  // ----------------------------------------------------------------- path --
-  var PA = { d: C.tan0, e: C.brn3, f: C.tan1 };
+  // A large expanse of path was reading as one flat beige slab, so the grit is
+  // clustered into wheel-rut bands rather than sprinkled evenly — a worn track
+  // has darker compacted lines through it, and that is what breaks up the area.
   T('t_path', PA, [
-    'dddddddddddddddd',
-    'ddddedddddddfddd',
-    'ddfddddddedddddd',
-    'dddddddddddddddd',
-    'dedddddfdddddddd',
-    'ddddddddddddeddd',
-    'dddddedddddddddf',
-    'fddddddddddddddd',
-    'dddddddddedddddd',
-    'ddedddfddddddddd',
-    'dddddddddddddedd',
-    'dfdddddddddddddd',
-    'ddddddeddddfdddd',
-    'dddddddddddddddd',
-    'dedddddddedddddf',
-    'dddddddddddddddd'
+    'bbbbbbbbbbbbbbbb',
+    'bbcbbbbbbddbbbbb',
+    'bddbbbbdbbdbbbcc',
+    'bcbbbbbddbbbbbbb',
+    'bbbbddbbbbccbbbb',
+    'bbbbdbbbbbbbbddb',
+    'ddbbbbccbbbbbbbb',
+    'bbbbbbbbbbbbbccb',
+    'bbccbbbbdddbbbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbddbbbbccbbb',
+    'ccbbbbbbbbbbbbdd',
+    'bbbbbbbccbbbbbdb',
+    'bddbbbbbbbbbbbbb',
+    'bbbbbbbbbbddbbbb',
+    'bbbbccbbbbbbbbbb'
   ]);
 
-  // path edges: side that meets grass gets a grass band + dark rim
-  var PE = { d: C.tan0, e: C.brn3, f: C.tan1, b: C.leaf2, g: C.brn2 };
-  T('t_path_n', PE, [
+  // Path edges: the grass verge crumbles into the track.
+  T('t_path_n', PA, [
+    fill('g'),
+    rep('hghg'),
+    rep('ahaa'),
+    rep('bbab'),
     'bbbbbbbbbbbbbbbb',
-    'gggggggggggggggg',
-    'ffddddddfddddddf',
-    'dddddddddddddddd',
-    'dedddddfdddddddd',
-    'ddddddddddddeddd',
-    'dddddedddddddddf',
-    'fddddddddddddddd',
-    'dddddddddedddddd',
-    'ddedddfddddddddd',
-    'dddddddddddddedd',
-    'dfdddddddddddddd',
-    'ddddddeddddfdddd',
-    'dddddddddddddddd',
-    'dedddddddedddddf',
-    'dddddddddddddddd'
+    'bbbcbbbbbdbbbbbb',
+    'bbbbbbbbbbbbbbcb',
+    'bcbbbbbdbbbbbbbb',
+    'bbbbbbbbbbbcbbbb',
+    'bbbbbdbbbbbbbbbb',
+    'bbbbbbbbcbbbbdbb',
+    'bdbbbbbbbbbbbbbb',
+    'bbbbbcbbbbbbbbbb',
+    'bbbbbbbbbdbbbcbb',
+    'bbbcbbbbbbbbbbbb',
+    'bbbbbbbdbbbbbbbb'
   ]);
-  T('t_path_s', PE, [
-    'dddddddddddddddd',
-    'ddddedddddddfddd',
-    'ddfddddddedddddd',
-    'dddddddddddddddd',
-    'dedddddfdddddddd',
-    'ddddddddddddeddd',
-    'dddddedddddddddf',
-    'fddddddddddddddd',
-    'dddddddddedddddd',
-    'ddedddfddddddddd',
-    'dddddddddddddedd',
-    'dfdddddddddddddd',
-    'ddddddeddddfdddd',
-    'dddddddddddddddd',
-    'gggggggggggggggg',
+  T('t_path_s', PA, [
+    'bbbbbbbdbbbbbbbb',
+    'bbbcbbbbbbbbbbbb',
+    'bbbbbbbbbdbbbcbb',
+    'bbbbbcbbbbbbbbbb',
+    'bdbbbbbbbbbbbbbb',
+    'bbbbbbbbcbbbbdbb',
+    'bbbbbdbbbbbbbbbb',
+    'bbbbbbbbbbbcbbbb',
+    'bcbbbbbdbbbbbbbb',
+    'bbbbbbbbbbbbbbcb',
+    'bbbcbbbbbdbbbbbb',
+    'bbbbbbbbbbbbbbbb',
+    rep('bbab'),
+    rep('ahaa'),
+    rep('hghg'),
+    fill('g')
+  ]);
+  T('t_path_w', PA, [
+    'ghabbbbbbbbbbbbb',
+    'gaabbbcbbbbdbbbb',
+    'hhabbbbbbbdbbbcb',
+    'ghabcbbbbbbbbbbb',
+    'gaabbbbdbbbbcbbb',
+    'hhabbbbbbbbbbbdb',
+    'ghabbbbbbcbbbbbb',
+    'gaabbdbbbbbbbbbb',
+    'hhabbbbbbbbcbbbb',
+    'ghabbcbbbdbbbbbb',
+    'gaabbbbbbbbbbbcb',
+    'hhabbbbdbbbbbbbb',
+    'ghabbbbbbbbcbbbb',
+    'gaabcbbbbbbbbdbb',
+    'hhabbbbbdbbbbbbb',
+    'ghabbbbbbbbbbbbb'
+  ]);
+  T('t_path_e', PA, [
+    'bbbbbbbbbbbbbahg',
+    'bbbbdbbbbcbbbaag',
+    'bcbbbbbdbbbbbahh',
+    'bbbbbbbbbbbcbahg',
+    'bbbcbbbbdbbbbaag',
+    'bdbbbbbbbbbbbahh',
+    'bbbbbbcbbbbbbahg',
+    'bbbbbbbbbdbbbaag',
+    'bbbcbbbbbbbbbahh',
+    'bbbbbbdbbbcbbahg',
+    'bcbbbbbbbbbbbaag',
+    'bbbbbbbbdbbbbahh',
+    'bbbbcbbbbbbbbahg',
+    'bbbbbbbbbbcbbaag',
+    'bdbbbbbcbbbbbahh',
+    'bbbbbbbbbbbbbahg'
+  ]);
+
+  // Beach sand. It has to be unmistakable against the dirt path, which is a
+  // similar tan — so sand is a step LIGHTER, and carries wind ripples rather
+  // than the path's compacted ruts.
+  var SA = { a: C.tan0, b: C.tan1, c: '#fdf1cf', d: C.brn3 };
+  T('t_sand', SA, [
+    'bbbbbbbbbbbbbbbb',
+    'bccbbbbbbbccbbbb',
+    'bbbbbbccbbbbbbbb',
+    'aabbbbbbbbbbaabb',
+    'bbbbbbbbccbbbbbb',
+    'bbccbbbbbbbbbbcc',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbaabbbbbbaabb',
+    'ccbbbbbbccbbbbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbccbbbbbbccbb',
+    'aabbbbbbaabbbbbb',
+    'bbbbbbbbbbbbbbbb',
+    'bbccbbbbbbccbbbb',
+    'bbbbbbccbbbbbbbb',
     'bbbbbbbbbbbbbbbb'
   ]);
-  T('t_path_w', PE, [
-    'bgdddddddddddddd',
-    'bgddedddddddfddd',
-    'bgfddddddddddddd',
-    'bgdddddddddddddd',
-    'bgdddddfdddddddd',
-    'bgddddddddddeddd',
-    'bgdddedddddddddf',
-    'bgdddddddddddddd',
-    'bgddddddddeddddd',
-    'bgedddfddddddddd',
-    'bgdddddddddddedd',
-    'bgfddddddddddddd',
-    'bgddddeddddfdddd',
-    'bgdddddddddddddd',
-    'bgddddddddeddddf',
-    'bgdddddddddddddd'
+
+  // ======================================================= GROUND: water ====
+  // Four-frame ripple, generated so the phases genuinely march rather than
+  // being three hand-typos of each other.
+  var WA = { a: C.blu0, b: C.blu1, c: C.blu2, d: C.blu3 };
+  function water(name, off) {
+    var rows = [];
+    for (var y = 0; y < 16; y++) {
+      var r = '';
+      for (var x = 0; x < 16; x++) {
+        var w = (x + off + (y >> 1) * 3) % 12;
+        r += w === 0 ? 'd' : w === 1 ? 'c' : (y % 4 === 3 ? 'a' : 'b');
+      }
+      rows.push(r);
+    }
+    T(name, WA, rows);
+  }
+  water('t_water1', 0); water('t_water2', 3); water('t_water3', 6); water('t_water4', 9);
+
+  var DW = { a: C.blu0, b: '#12294d', c: C.blu1, d: C.blu2 };
+  function deep(name, off) {
+    var rows = [];
+    for (var y = 0; y < 16; y++) {
+      var r = '';
+      for (var x = 0; x < 16; x++) {
+        var w = (x * 2 + off + (y >> 1) * 5) % 17;
+        r += w === 0 ? 'd' : w === 1 ? 'c' : (y % 3 === 2 ? 'b' : 'a');
+      }
+      rows.push(r);
+    }
+    T(name, DW, rows);
+  }
+  deep('t_deepwater1', 0); deep('t_deepwater2', 4); deep('t_deepwater3', 8); deep('t_deepwater4', 12);
+
+  // Shorelines — walkable, so you can wade off the sand and Surf away.
+  var SH = { s: C.tan1, t: C.tan0, x: C.blu3, w: C.blu2, a: C.blu1 };
+  T('t_shore_n', SH, [
+    fill('s'), rep('stss'), rep('ttst'), rep('xxtx'), rep('xwxx'),
+    fill('w'), rep('waww'), fill('w'), rep('awwa'), fill('w'),
+    rep('wwaw'), fill('w'), rep('awww'), fill('w'), rep('wwaw'), fill('w')
   ]);
-  T('t_path_e', PE, [
-    'ddddddddddddddgb',
-    'ddddeddddddddfgb',
-    'ddfddddddeddddgb',
-    'ddddddddddddddgb',
-    'dedddddfddddddgb',
-    'dddddddddddeddgb',
-    'dddddeddddddddgb',
-    'fdddddddddddddgb',
-    'dddddddddeddddgb',
-    'ddedddfdddddddgb',
-    'dddddddddddddegb',
-    'dfddddddddddddgb',
-    'ddddddedddfdddgb',
-    'ddddddddddddddgb',
-    'dedddddddeddddgb',
-    'ddddddddddddddgb'
+  T('t_shore_s', SH, [
+    fill('w'), rep('wwaw'), fill('w'), rep('awww'), fill('w'),
+    rep('wwaw'), fill('w'), rep('awwa'), fill('w'), rep('waww'),
+    fill('w'), rep('xwxx'), rep('xxtx'), rep('ttst'), rep('stss'), fill('s')
+  ]);
+  T('t_shore_w', SH, [
+    'sstxwwwawwwawwaw',
+    'sttxwwawwwawwwaw',
+    'stxxwwwwwwwwwwww',
+    'sstxwawwawwawwwa',
+    'ttxxwwwwwwwwwwww',
+    'stxxwwwwawwwawww',
+    'sstxwawwwwwwawww',
+    'sttxwwwwwwwwwwww',
+    'stxxwwawwawwwaww',
+    'sstxwwwwwwwwwwww',
+    'ttxxwwawwwawwaww',
+    'stxxwwwwwwwwwwww',
+    'sstxwwwawwwawwaw',
+    'sttxwawwwwwwwwww',
+    'stxxwwwwawwawwwa',
+    'sstxwwwwwwwwwwww'
+  ]);
+  T('t_shore_e', SH, [
+    'wawwawwwawwawxts',
+    'wwwwwwwwwwwwxtts',
+    'wwawwwawwawwxxts',
+    'wwwwwwwwwwwwxtss',
+    'awwawwwawwwwxxtt',
+    'wwwwwwwwwwwwxxts',
+    'wwwawwawwwawxtss',
+    'wwwwwwwwwwwwxtts',
+    'awwwwwawwawwxxts',
+    'wwwwwwwwwwwwxtss',
+    'wwawwawwwawwxxtt',
+    'wwwwwwwwwwwwxxts',
+    'wawwwawwawwwxtss',
+    'wwwwwwwwwwwwxtts',
+    'wwwawwwawwawxxts',
+    'wwwwwwwwwwwwxtss'
   ]);
 
-  // ----------------------------------------------------------------- tree --
-  // One big 32x32 tree split into 4 tiles. Tops go on the overhead layer
-  // (player walks behind them), bottoms are solid deco. Transparent bg.
-  // flatter, dustier GBA canopy: 2 muted greens (dark edge/dither + main fill)
-  // instead of a smooth 4-green gradient. 'b' specks read as dither shading.
-  var TR = { o: C.ink, a: C.grn1, b: C.grn0, c: C.grn2, d: C.grn3, t: C.brn1, u: C.brn2 };
+  // ========================================================= NATURE: trees ==
+  // A 2x2 deciduous canopy. Kanto's woodland is oak and maple, so the crown is
+  // rounded and lumpy rather than a palm's radiating fronds. Lit upper-left.
+  var TR = { o: C.grn0, a: C.grn1, b: C.grn2, c: C.grn3, t: C.brn0, u: C.brn1,
+             g: C.leaf1, h: C.leaf0 };
 
   T('t_tree_tl', TR, [
     '................',
-    '................',
-    '................',
-    '................',
-    '...........ooooo',
-    '..........oddddd',
-    '........oodddddc',
-    '.......odddccccc',
-    '......odddcccccc',
-    '.....odddccccccc',
-    '....oddcccccbbcc',
-    '....odccccccbbcc',
-    '...odccccccccccc',
-    '...odccccbbccccc',
-    '..occcccbbcccccc',
-    '..occccccccccccc'
+    '.............ooo',
+    '...........oobbc',
+    '.........oobbccc',
+    '........oobbcccb',
+    '......oobbbccbbb',
+    '.....oobbbcbbbba',
+    '....ooabbbbbbbaa',
+    '....oabbbbbbbaaa',
+    '...oabbbbbbbaaaa',
+    '...oabbbbbbaaaaa',
+    '..oaabbbbbaaaaaa',
+    '..oabbbbbaaaaaaa',
+    '..oaabbbaaaaaaaa',
+    '..ooaabaaaaaaaaa',
+    '...ooaaaaaaaaaoo'
   ]);
   T('t_tree_tr', TR, [
     '................',
-    '................',
-    '................',
-    '................',
-    'ooooo...........',
-    'ccccbo..........',
-    'cccccboo........',
-    'ccccccbbo.......',
-    'cccccccbbo......',
-    'ccccccccbbo.....',
-    'ccbbccccccbo....',
-    'ccbbcccccccbo...',
-    'ccccccccccccbo..',
-    'cbbcccccccccbo..',
-    'ccccbbccccccbo..',
-    'ccccccccccccco..'
+    'ooo.............',
+    'bbooo...........',
+    'bbbboo..........',
+    'bbbbbboo........',
+    'abbbbbboo.......',
+    'aabbbbbboo......',
+    'aaabbbbbboa.....',
+    'aaaabbbbbboa....',
+    'aaaaaabbbbboa...',
+    'aaaaaaabbbbboa..',
+    'aaaaaaaabbbboa..',
+    'aaaaaaaaabbboa..',
+    'aaaaaaaaaabboa..',
+    'aaaaaaaaaaaboa..',
+    'ooaaaaaaaaaoo...'
   ]);
   T('t_tree_bl', TR, [
-    '..occccbbccccccc',
-    '..occccbbccccccb',
-    '...obccccccccccb',
-    '...obcccccbbcccb',
-    '....obccccbbcccb',
-    '.....obcccccbbbb',
-    '......obbccccbbb',
-    '.......obbcccbbb',
-    '........oobbbbbb',
-    '..........oobbbb',
-    '............oooo',
-    '.............ouu',
-    '.............ouu',
-    '.............out',
-    '.............ouu',
-    '............oouu'
+    '...oooaaaaaaaooo',
+    '....oooaaaaoooo.',
+    '.....oooooooo...',
+    '........ttu.....',
+    '.......ttuu......'.slice(0, 16),
+    '.......ttuu.....',
+    '.......ttuu.....',
+    '.......ttuu.....',
+    '......tttuuu....',
+    '......tttuuu....',
+    '.....ttttuuuu...',
+    '......tttuu.....',
+    '................',
+    rep('....'),
+    fill('.'),
+    fill('.')
   ]);
   T('t_tree_br', TR, [
-    'bbccccccbbbbbo..',
-    'bccccbbbbbabbo..',
-    'ccccbbbbbbbbo...',
-    'cbbccccbbbabo...',
-    'cccbbcccbbbo....',
-    'bbbcccbbbbo.....',
-    'bbbbccbbbo......',
-    'abbbbbbao.......',
-    'bbbbbboo........',
-    'bbbboo..........',
-    'oooo............',
-    'tto.............',
-    'tto.............',
-    'tuo.............',
-    'tto.............',
-    'ttoo............'
+    'oooaaaaaaaooo....'.slice(0, 16),
+    '.ooooaaaaoooo...',
+    '...oooooooo.....',
+    '....utt.........',
+    '....utt.........',
+    '....utt.........',
+    '....utt.........',
+    '....utt.........',
+    '....uuttt.......',
+    '....uuttt.......',
+    '...uuuutttt.....',
+    '.....uutttt.....',
+    '................',
+    rep('....'),
+    fill('.'),
+    fill('.')
   ]);
 
-  // ---------------------------------------------------------------- ledge --
-  // ledge: turf above, a clearly 3D drop you hop down (a sun-lit top lip, a
-  // tan→brown vertical face), then a cast shadow on the grass you land on.
-  T('t_ledge', { a: C.leaf1, b: C.leaf2, c: C.leaf3, g: C.brn2, h: C.brn1, d: C.tan0 }, [
-    'bbbbbbbbbbbbbbbb',
-    'bbbabbbbbbcbbbbb',
-    'bbbbbbcbbbbbbbbb',
-    'abbbbbbbbbbbbabb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbcbbbbab',
-    'bbcbbbbbbbbbbbbb',
-    'cccccccccccccccc',
-    'dddddddddddddddd',
-    'ddgddddgdddddgdd',
-    'gggggggggggggggg',
-    'hhhhhhhhhhhhhhhh',
-    'aaaaaaaaaaaaaaaa',
-    'babbbbbbbcbbbbbb',
-    'bbbbabbbbbbbabbb',
-    'bbbbbbbbbbbbbbbb'
+  // A tree small enough to Cut. Deliberately unlike the 2x2 canopy — one tile,
+  // paler, with a visible trunk — so the player learns to spot the obstacle.
+  T('t_cuttree', TR, [
+    '.....ooooo......',
+    '....oobbbcoo....',
+    '...obbbccccbo...',
+    '..obbbccccbbbo..',
+    '..obbccccbbbbbo.',
+    '.obbbcccbbbbbao.',
+    '.obbbbbbbbbbaao.',
+    '.obbbbbbbbbaaao.',
+    '.oabbbbbbbaaaao.',
+    '..oabbbbbaaaao..',
+    '...oaabbaaaao...',
+    '....oottuoo.....',
+    '.......ttu......',
+    '.......ttu......',
+    '................',
+    '................'
   ]);
 
-  // ---------------------------------------------------------------- fence --
-  T('t_fence', { o: C.ink, r: C.brn3, s: C.brn2, t: C.brn1 }, [
+  // Strength boulder — round and pale so it stands out against cave rock.
+  var BO = { o: C.stn0, a: C.stn1, b: C.stn2, c: C.stn3, g: C.leaf1 };
+  T('t_boulder', BO, [
+    '.....oooooo.....',
+    '...oooccccooo...',
+    '..oocccccccbao..',
+    '.ooccccccccbbao.',
+    '.occccccbbbbbbao',
+    'occcccbbbbbbbbba',
+    'occccbbbbbbbbbaa',
+    'ocbbbbbbbbbbbaaa',
+    'obbbbbbbbbbbaaaa',
+    'obbbbbbbbbbaaaaa',
+    'obbbbbbbbbaaaaaa',
+    'oabbbbbbbaaaaaao',
+    '.oaabbbbaaaaaao.',
+    '..oaaaaaaaaaao..',
+    '...ooaaaaaaoo...',
+    '.....oooooo......'.slice(0, 16)
+  ]);
+
+  // Ledge — hop DOWN, never climb back. The lip is bright and the face dark so
+  // the one-way direction reads instantly.
+  var LE = { a: C.brn0, b: C.brn1, c: C.brn2, d: C.tan0, g: C.leaf1, h: C.leaf0 };
+  // The face has to be tall enough to read as a DROP rather than a stripe —
+  // the first pass was a thin brown line and looked like a fence. Top and
+  // bottom are transparent so the ground above and below shows through, and
+  // the bright lip over a darkening striated face sells the one-way direction.
+  T('t_ledge', LE, [
+    fill('.'),
+    fill('.'),
+    fill('d'),
+    fill('d'),
+    rep('cccb'),
+    fill('c'),
+    rep('cbcb'),
+    fill('b'),
+    rep('bbab'),
+    fill('b'),
+    rep('babb'),
+    fill('a'),
+    rep('aaba'),
+    fill('a'),
+    fill('.'),
+    fill('.')
+  ]);
+
+  // ======================================================== NATURE: stone ===
+  var ST = { o: C.stn0, a: C.stn1, b: C.stn2, c: C.stn3, g: C.leaf1 };
+
+  T('t_rock', ST, [
+    '................',
+    '......ooooo......'.slice(0, 16),
+    '.....occcbao....',
+    '....occccbbao...',
+    '...occbbbbbbao..',
+    '..ocbbbbbbbbbao.',
+    '.obbbbbbbbbbbbao',
+    'obbbbbbbbbbbbbaa',
+    'obbbbbbbbbbbbaaa',
+    'oabbbbbbbbbbaaaa',
+    '.oaabbbbbbbaaao.',
+    '..oaaaaaaaaaao..',
+    '...ooaaaaaaoo...',
+    '.....oooooo......'.slice(0, 16),
+    '................',
+    '................'
+  ]);
+
+  // Cliff face — the wall of a plateau, blocking every route edge.
+  T('t_cliff', ST, [
+    fill('c'), rep('baab'), fill('a'), rep('aoaa'),
+    fill('o'), fill('a'), rep('abaa'), fill('a'),
+    rep('oaao'), fill('o'), fill('a'), rep('baab'),
+    fill('a'), rep('aoaa'), fill('o'), fill('a')
+  ]);
+
+  // ========================================================= DECORATIONS ====
+  // Scattered by the procedural decorator in overworld.js. None of them block.
+  var DE = { g: C.leaf1, h: C.leaf0, y: C.yel2, w: C.white,
+             s: C.stn2, t: C.stn1, b: C.grn1, c: C.grn2, u: C.brn1, v: C.brn0 };
+
+  T('t_deco_flowerY', DE, [
+    '................', '................', '................',
+    '......y.........', '.....ywy........', '......y.........',
+    '................', '................', '..........y......'.slice(0, 16),
+    '.........ywy....', '...........y....', '................',
+    '................', '................', '................',
+    '................'
+  ]);
+
+  T('t_deco_pebble', DE, [
+    '................', '................', '................',
+    '....tt..........', '...tss..........', '....tt..........',
+    '................', '................', '..........tt....',
+    '.........tss....', '..........tt....', '................',
+    '....t...........', '...ts...........', '................',
+    '................'
+  ]);
+
+  // Low woodland shrub.
+  T('t_deco_bush', DE, [
     '................',
     '................',
+    '......bbb.......',
+    '.....bcccb......',
+    '....bcccccb.....',
+    '...bccccccbb....',
+    '...bcccccbbb....',
+    '..bbccccbbbbb...',
+    '..bbbbbbbbbbb...',
+    '...bbbbbbbbb....',
+    '....bbbbbbb.....',
+    '.....bbbbb......',
     '................',
-    '..ooo.......ooo.',
-    '..oro.......oro.',
-    '..oro.......oro.',
-    'oooooooooooooooo',
-    'rrrrrrrrrrrrrrrr',
-    'ssssssssssssssss',
-    'oooooooooooooooo',
-    '..oto.......oto.',
-    '..oto.......oto.',
-    '..ooo.......ooo.',
     '................',
     '................',
     '................'
   ]);
 
-  // ----------------------------------------------------------------- sign --
-  T('t_sign', { o: C.ink, r: C.brn3, s: C.brn2, t: C.brn1, f: C.tan1 }, [
+  // Cut stump — replaces the Hoenn palm. Old logging along the routes.
+  T('t_deco_stump', DE, [
+    '................', '................', '................',
+    '................', '......vvvv......', '.....vuuuuv.....',
+    '....vuuvvuuv....', '....vuuvvuuv....', '.....vuuuuv.....',
+    '......vuuv......', '......vuuv......', '................',
+    '................', '................', '................',
+    '................'
+  ]);
+
+  // Bracken fern — replaces the Hoenn seashell inland.
+  T('t_deco_fern', DE, [
+    '................', '................', '................',
+    '........b.......', '......bcb.......', '.....bcbcb......',
+    '....bcbbbcb.....', '...bcbbbbbcb....', '....bbb.bbb.....',
+    '.......b.........'.slice(0, 16), '.......b.........'.slice(0, 16),
+    '................', '................', '................',
+    '................', '................'
+  ]);
+
+  // ========================================================= TOWN: fences ===
+  var FE = { o: C.brn0, a: C.brn1, b: C.brn2, c: C.brn3, g: C.leaf1 };
+  T('t_fence', FE, [
+    '................',
+    '..o..........o..',
+    '.oc..........oc.',
+    '.ob..........ob.',
+    fill('o'),
+    fill('c'),
+    fill('b'),
+    '.ob..........ob.',
+    '.ob..........ob.',
+    fill('o'),
+    fill('c'),
+    fill('b'),
+    '.ob..........ob.',
+    '.ob..........ob.',
+    '.oa..........oa.',
+    '................'
+  ]);
+
+  var SG = { o: C.brn0, a: C.brn1, b: C.brn2, w: C.tan1, t: C.stn1,
+             g: C.leaf1, h: C.leaf0 };
+  T('t_sign', SG, [
     '................',
     '..oooooooooooo..',
-    '.orffffffffffro.',
-    '.orfrrrrrrrrfro.',
-    '.orffffffffffro.',
-    '.orfrrrrrffffro.',
-    '.orffffffffffro.',
-    '.orfrrrrrrrffro.',
-    '.orffffffffffro.',
-    '..oooooooooooo..',
-    '......otto......',
-    '......otto......',
-    '......otto......',
-    '......osto......',
-    '....oosssoo.....',
-    '................'
-  ]);
-
-  // ---------------------------------------------------------------- house --
-  // red-roof cottage; the lab reuses these grids with a blue/stone palette
-  // shingled roof: lit ridge (q) at the top, staggered shingle seams (r), course
-  // shadow lines, and a dark overhanging eave (s) on the bottom row so the building
-  // front reads as sticking out instead of a flat slab.
-  var RF = { o: C.ink, q: C.red3, R: C.red2, r: C.red1, s: C.red0 };
-  T('t_roof_tl', RF, [
-    '....oooooooooooo',
-    '..ooqqqqqqqqqqqq',
-    '.oqRRRRRRRRRRRRR',
-    'oqRRRRRRRRRRRRRR',
-    'oqRRrRRRRrRRRRrR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR',
-    'oqRRRRrRRRRrRRRR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR',
-    'oqRRrRRRRrRRRRrR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR',
-    'oqRRRRrRRRRrRRRR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR'
-  ]);
-  T('t_roof_tm', RF, [
-    'oooooooooooooooo',
-    'qqqqqqqqqqqqqqqq',
-    'RRRRRRRRRRRRRRRR',
-    'RRrRRRRrRRRRrRRR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRRRrRRRRrRRRRrR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRrRRRRrRRRRrRRR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRRRrRRRRrRRRRrR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRrRRRRrRRRRrRRR'
-  ]);
-  T('t_roof_tr', RF, [
-    'oooooooooooo....',
-    'qqqqqqqqqqqqoo..',
-    'RRRRRRRRRRRRRqo.',
-    'RRRRRRRRRRRRRRqo',
-    'RrRRRRrRRRRrRRqo',
-    'rrrrrrrrrrrrrrqo',
-    'RRRRRRRRRRRRRRqo',
-    'RRRRrRRRRrRRRRqo',
-    'rrrrrrrrrrrrrrqo',
-    'RRRRRRRRRRRRRRqo',
-    'RRrRRRRrRRRRrRqo',
-    'rrrrrrrrrrrrrrqo',
-    'RRRRRRRRRRRRRRqo',
-    'RRRRrRRRRrRRRRqo',
-    'rrrrrrrrrrrrrrqo',
-    'RRRRRRRRRRRRRRqo'
-  ]);
-  T('t_roof_bl', RF, [
-    'oqRRRRRRRRRRRRRR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR',
-    'oqRRRRrRRRRrRRRR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR',
-    'oqRRrRRRRrRRRRrR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR',
-    'oqRRRRrRRRRrRRRR',
-    'oqrrrrrrrrrrrrrr',
-    'oqRRRRRRRRRRRRRR',
-    'oqrrrrrrrrrrrrrr',
-    'osssssssssssssss',
-    'osssssssssssssss',
-    'oooooooooooooooo'
-  ]);
-  T('t_roof_bm', RF, [
-    'RRRRRRRRRRRRRRRR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRRRrRRRRrRRRRrR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRrRRRRrRRRRrRRR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRRRrRRRRrRRRRrR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'rrrrrrrrrrrrrrrr',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'oooooooooooooooo'
-  ]);
-  T('t_roof_br', RF, [
-    'RRRRRRRRRRRRRRro',
-    'rrrrrrrrrrrrrrro',
-    'RRRRRRRRRRRRRRro',
-    'RRRRrRRRRrRRRRro',
-    'rrrrrrrrrrrrrrro',
-    'RRRRRRRRRRRRRRro',
-    'RRrRRRRrRRRRrRro',
-    'rrrrrrrrrrrrrrro',
-    'RRRRRRRRRRRRRRro',
-    'RRRRrRRRRrRRRRro',
-    'rrrrrrrrrrrrrrro',
-    'RRRRRRRRRRRRRRro',
-    'rrrrrrrrrrrrrrro',
-    'ssssssssssssssro',
-    'ssssssssssssssso',
-    'oooooooooooooooo'
-  ]);
-
-  // wall: a shadow band at the top (cast by the roof eave overhang), horizontal
-  // clapboard courses, and a base shadow where it meets the ground.
-  var WA = { o: C.ink, w: C.pale, l: C.lgry, g: C.gry };
-  T('t_wall', WA, [
-    'gggggggggggggggg',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'gggggggggggggggg',
-    'oooooooooooooooo'
-  ]);
-  T('t_window', { o: C.ink, w: C.pale, l: C.lgry, g: C.blu2, G: C.blu3, s: C.gry }, [
-    'ssssssssssssssss',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'lllloooooooollll',
-    'wwwwoGGggggowwww',
-    'wwwwoGgggggowwww',
-    'wwwwoggggggowwww',
-    'lllloggggggollll',
-    'wwwwoggggggowwww',
-    'wwwwoggggggowwww',
-    'wwwwoooooooowwww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'ssssssssssssssss',
-    'oooooooooooooooo'
-  ]);
-  // House / generic wooden door: brown panelled door with a gold knob.
-  T('t_door', { o: C.ink, w: C.pale, l: C.lgry, D: C.brn2, d: C.brn1, k: C.yel1, s: C.gry }, [
-    'ssssssssssssssss',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'wwwoooooooooowww',
-    'wwwoDDDDDDDDowww',
-    'wwwoDddddddDowww',
-    'wwwoDdDDDDdDowww',
-    'wwwoDdDDDDdDowww',
-    'wwwoDdDDDDdDowww',
-    'wwwoDddddddDowww',
-    'wwwoDDDDDDkDowww',
-    'wwwoDDDDDDDDowww',
-    'wwwoDDDDDDDDowww',
-    'wwwoDDDDDDDDowww',
-    'lllooooooooollll',
-    'oooooooooooooooo'
-  ]);
-  // Automatic glass double-door (Center / Mart / shop entrance): twin light-
-  // blue glass panels split by a central stile in a dark frame over a step.
-  T('t_gdoor', { o: C.ink, w: C.pale, l: C.lgry, g: C.blu3, G: C.ice2, s: C.gry }, [
-    'ssssssssssssssss',
-    'wwwwwwwwwwwwwwww',
-    'wwooooooooooooww',
-    'wwoGgggooGgggoww',
-    'wwoggggooggggoww',
-    'wwoGgggooGgggoww',
-    'wwoggggooggggoww',
-    'wwoGgggooGgggoww',
-    'wwoggggooggggoww',
-    'wwoGgggooGgggoww',
-    'wwoggggooggggoww',
-    'wwoGgggooGgggoww',
-    'wwooooooooooooww',
-    'wwllllllllllllww',
-    'llllllllllllllll',
-    'oooooooooooooooo'
-  ]);
-
-  // gym / lab building = sturdy stone-gray roof (gold trim via lroofx), stone
-  // walls — distinct from the red homes/center and the blue Mart.
-  var LRF = { o: C.ink, q: C.stn3, R: C.stn2, r: C.stn1, s: C.stn0 };
-  G.ART.t_lroof_tl = { base: 't_roof_tl', pal: LRF };
-  G.ART.t_lroof_tm = { base: 't_roof_tm', pal: LRF };
-  G.ART.t_lroof_tr = { base: 't_roof_tr', pal: LRF };
-  G.ART.t_lroof_bl = { base: 't_roof_bl', pal: LRF };
-  G.ART.t_lroof_bm = { base: 't_roof_bm', pal: LRF };
-  G.ART.t_lroof_br = { base: 't_roof_br', pal: LRF };
-  // Devon Corp roof — teal/cyan, distinct from the stone gym/lab. Devon uses pale
-  // walls (W/N/D), so the building reads as a sleek corporate HQ, not a gym.
-  var DRF = { o: C.ink, q: C.ice2, R: C.ice1, r: C.ice0, s: C.blu0 };
-  G.ART.t_droof_tl = { base: 't_roof_tl', pal: DRF };
-  G.ART.t_droof_tm = { base: 't_roof_tm', pal: DRF };
-  G.ART.t_droof_tr = { base: 't_roof_tr', pal: DRF };
-  G.ART.t_droof_bl = { base: 't_roof_bl', pal: DRF };
-  G.ART.t_droof_bm = { base: 't_roof_bm', pal: DRF };
-  G.ART.t_droof_br = { base: 't_roof_br', pal: DRF };
-  G.ART.t_lwall = { base: 't_wall', pal: { o: C.ink, w: C.stn3, l: C.stn2, g: C.stn1 } };
-  G.ART.t_lwindow = { base: 't_window', pal: { o: C.ink, w: C.stn3, l: C.stn2, g: C.blu2, G: C.blu3, s: C.stn1 } };
-  T('t_ldoor', { o: C.ink, w: C.stn3, l: C.stn2, g: C.blu3, G: C.ice3, s: C.stn1 }, [
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'wwooooooooooooww',
-    'wwosggggggggsoww',
-    'wwosgGGgggggsoww',
-    'wwosgGggggggsoww',
-    'wwosggggggggsoww',
-    'wwosggggggggsoww',
-    'wwosggggggggsoww',
-    'wwosgggssgggsoww',
-    'wwosgggssgggsoww',
-    'wwosgggssgggsoww',
-    'wwosgggssgggsoww',
-    'wwosgggssgggsoww',
-    'wwosgggssgggsoww',
-    'oooooooooooooooo'
-  ]);
-
-  // ------------------------------------------------------------- interior --
-  T('t_ifloor', { f: C.tan1, d: C.tan0 }, [
-    'ffffffffdfffffff',
-    'ffffffffdfffffff',
-    'ffffffffdfffffff',
-    'dddddddddddddddd',
-    'fdffffffffffffff',
-    'fdffffffffffffff',
-    'fdffffffffffffff',
-    'dddddddddddddddd',
-    'ffffffffffffdfff',
-    'ffffffffffffdfff',
-    'ffffffffffffdfff',
-    'dddddddddddddddd',
-    'ffffdfffffffffff',
-    'ffffdfffffffffff',
-    'ffffdfffffffffff',
-    'dddddddddddddddd'
-  ]);
-  T('t_iwall', { o: C.ink, w: C.pale, l: C.lgry, n: C.brn2, m: C.brn1 }, [
-    'oooooooooooooooo',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'wwwwwwwwwwwwwwww',
-    'llllllllllllllll',
-    'oooooooooooooooo',
-    'nnnnnnnnnnnnnnnn',
-    'nmnnnnnmnnnnnmnn',
-    'nnnnnnnnnnnnnnnn',
-    'mmmmmmmmmmmmmmmm',
-    'oooooooooooooooo'
-  ]);
-  T('t_imat', { a: C.leaf1, b: C.leaf2, c: C.leaf3 }, [
-    'aaaaaaaaaaaaaaaa',
-    'abbbbbbbbbbbbbba',
-    'abccccccccccccba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abcbbbbbbbbbbcba',
-    'abccccccccccccba',
-    'abbbbbbbbbbbbbba',
-    'aaaaaaaaaaaaaaaa'
-  ]);
-  T('t_itable', { o: C.ink, r: C.brn3, s: C.brn2, t: C.brn1, f: C.tan1 }, [
-    '................',
-    '................',
-    '.oooooooooooooo.',
-    'offffffffffffffo',
-    'offrrrrrrrrrrffo',
-    'offffffffffffffo',
-    'oooooooooooooooo',
-    'osssssssssssssso',
-    'osssssssssssssso',
-    'oossssssssssssoo',
-    '.otto......otto.',
-    '.otto......otto.',
-    '.otto......otto.',
-    '.otto......otto.',
-    '.oooo......oooo.',
-    '................'
-  ]);
-  T('t_ibook', { o: C.ink, t: C.brn1, s: C.brn2, r: C.red2, g: C.grn2, b: C.blu2, y: C.yel1, w: C.pale }, [
-    'oooooooooooooooo',
-    'otttttttttttttto',
-    'otrgbyrwbgryrbto',
-    'otrgbyrwbgryrbto',
-    'otrgbyrwbgryrbto',
-    'otrgbyrwbgryrbto',
-    'otooooooooooooto',
-    'otbrygwbryggwbto',
-    'otbrygwbryggwbto',
-    'otbrygwbryggwbto',
-    'otbrygwbryggwbto',
-    'otooooooooooooto',
-    'otywbgrwygbrrgto',
-    'otywbgrwygbrrgto',
-    'otttttttttttttto',
-    'oooooooooooooooo'
-  ]);
-  T('t_imach', { o: C.ink, s: C.stn1, u: C.stn2, v: C.stn3, r: C.red2, g: C.grn3, b: C.blu3 }, [
-    'oooooooooooooooo',
-    'ouuuuuuuuuuuuuuo',
-    'ouvvvvvvvvvvvvuo',
-    'ouvbbbbbbbbbbvuo',
-    'ouvbgbgbbbbbbvuo',
-    'ouvbbbbbgbbbbvuo',
-    'ouvbbbbbbbbbbvuo',
-    'ouvvvvvvvvvvvvuo',
-    'ouuuuuuuuuuuuuuo',
-    'ousrsugsusrsusuo',
-    'ouuuuuuuuuuuuuuo',
-    'ousgsusrsusgsuso',
-    'ouuuuuuuuuuuuuuo',
-    'osssssssssssssso',
-    'osssssssssssssso',
-    'oooooooooooooooo'
-  ]);
-  T('t_ibed_t', { o: C.ink, t: C.brn1, s: C.brn2, w: C.white, l: C.lgry }, [
-    '.oooooooooooooo.',
-    'osssssssssssssso',
-    'osttttttttttttso',
-    'osssssssssssssso',
-    'oooooooooooooooo',
-    'owwwwwwwwwwwwwwo',
-    'owwwwwwwwwwwwllo',
-    'owwwwwwwwwwwwllo',
-    'owllllllllllllwo',
-    'oooooooooooooooo',
-    'owwwwwwwwwwwwwwo',
-    'owwwwwwwwwwwwwwo',
-    'owwwwwwwwwwwwwwo',
-    'owwwwwwwwwwwwwwo',
-    'owwwwwwwwwwwwwwo',
-    'owwwwwwwwwwwwwwo'
-  ]);
-  T('t_ibed_b', { o: C.ink, r: C.red2, q: C.red1, t: C.brn1, s: C.brn2 }, [
-    'orrrrrrrrrrrrrro',
-    'orrrrrrrrrrrrrro',
-    'oqqqqqqqqqqqqqqo',
-    'orrrrrrrrrrrrrro',
-    'orrrrrrrrrrrrrro',
-    'orrrrrrrrrrrrrro',
-    'orrrrrrrrrrrrrro',
-    'orrrrrrrrrrrrrro',
-    'orrrrrrrrrrrrrro',
-    'oqqqqqqqqqqqqqqo',
-    'orrrrrrrrrrrrrro',
-    'oooooooooooooooo',
-    'osssssssssssssso',
-    'osttttttttttttso',
-    '.oosssssssssoo..',
-    '................'
-  ]);
-  T('t_iplant', { o: C.ink, p: C.brn2, q: C.brn1, g: C.grn2, h: C.grn3, a: C.grn1 }, [
-    '................',
-    '.....ooooo......',
-    '....ohghhgo.....',
-    '...ohgghhghgo...',
-    '...oghahgahgo...',
-    '...ohgghaghgo...',
-    '....ogahgago....',
-    '.....oogoo......',
-    '.....opqpo......',
-    '....opqppqo.....',
-    '....opppppo.....',
-    '.....opppo......',
-    '.....ooooo......',
-    '................',
-    '................',
-    '................'
-  ]);
-  T('t_istool', { o: C.ink, r: C.brn3, t: C.brn1 }, [
-    '................',
-    '................',
-    '................',
-    '................',
-    '....oooooooo....',
-    '...orrrrrrrro...',
-    '...orrrrrrrro...',
-    '...oooooooooo...',
-    '...ot......to...',
-    '...ot......to...',
-    '...ot......to...',
-    '...oo......oo...',
-    '................',
-    '................',
+    '.owwwwwwwwwwwao.',
+    '.owtttwtttwtwwa.',
+    '.owwwwwwwwwwwwa.',
+    '.owttwttwtttwwa.',
+    '.owwwwwwwwwwwwa.',
+    '.owtttwtwttwwwa.',
+    '.owwwwwwwwwwwwa.',
+    '.oaaaaaaaaaaaaa.',
+    '..oooobaboooooo.',
+    '.....obab.......',
+    '.....obab.......',
+    '.....oaab.......',
     '................',
     '................'
   ]);
 
-  // ---------------------------------------------------------------- water --
-  var WT = { a: C.blu1, b: C.blu2, c: C.blu3 };
-  T('t_water1', WT, [
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbccbbbbbbbbbbbb',
-    'bbbbbbbbbbcccbbb',
-    'bbbbbbbbbbbbbbbb',
-    'babbbbbbbbbbbbbb',
-    'bbbbbbbabbbbbbbb',
-    'bbbbbbbbbbbbbbcb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbccbbbbbabbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbccbb',
-    'babbbbbbbbbbbbbb',
-    'bbbbbbcbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbabbbbb'
-  ]);
-  T('t_water2', WT, [
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbccbbbbbbbbbbb',
-    'bbbbbbbbbbbcccbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbabbbbbbbbbbbbb',
-    'bbbbbbbbabbbbbbb',
-    'bbbbbbbbbbbbbbbc',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbccbbbbbabbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbbccb',
-    'bbabbbbbbbbbbbbb',
-    'bbbbbbbcbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbabbbb'
-  ]);
-  T('t_water3', WT, [
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbccbbbbbbbbbb',
-    'bbbbbbbbbbbbcccb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbabbbbbbbbbbbb',
-    'bbbbbbbbbabbbbbb',
-    'cbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbccbbbbbabbb',
-    'bbbbbbbbbbbbbbbb',
-    'cbbbbbbbbbbbbbcc',
-    'bbbabbbbbbbbbbbb',
-    'bbbbbbbbcbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbabbb'
-  ]);
-  G.ART.t_water4 = { base: 't_water2', pal: WT };
-  // deep water — same churn, darker; SOLID and NOT swimmable (maze barriers)
-  var DEEP = { a: C.blu0, b: C.blu1, c: C.blu2 };
-  G.ART.t_deepwater1 = { base: 't_water1', pal: DEEP };
-  G.ART.t_deepwater2 = { base: 't_water2', pal: DEEP };
-  G.ART.t_deepwater3 = { base: 't_water3', pal: DEEP };
-  G.ART.t_deepwater4 = { base: 't_water2', pal: DEEP };
+  // ========================================================= TOWN: roofs ====
+  // Six-tile roofs (2 rows x 3 cols) plus a widening column. One generator,
+  // five palettes — the SHAPE is shared so the town silhouette stays coherent
+  // and only the colour tells you what the building is.
+  function roofSet(prefix, dark, mid, light) {
+    var P = { o: C.ink, a: dark, b: mid, c: light, w: C.pale };
+    var g = 'g';
+    var P2 = { o: C.ink, a: dark, b: mid, c: light, w: C.pale, g: C.leaf1 };
 
-  // shores: water with a grass bank on one side
-  var SH = { a: C.blu1, b: C.blu2, c: C.blu3, g: C.leaf2, e: C.leaf1 };
-  T('t_shore_n', SH, [
-    'gggggggggggggggg',
-    'eeeeeeeeeeeeeeee',
-    'cbcbbcbbbcbbabcb'.replace('a', 'b'),
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'babbbbbbbbbbbbbb',
-    'bbbbbbbabbbbbbbb',
-    'bbbbbbbbbbbbbbcb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbccbbbbbabbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbccbb',
-    'babbbbbbbbbbbbbb',
-    'bbbbbbcbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbabbbbb'
-  ]);
-  T('t_shore_s', SH, [
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbccbbbbbbbbbbbb',
-    'bbbbbbbbbbcccbbb',
-    'bbbbbbbbbbbbbbbb',
-    'babbbbbbbbbbbbbb',
-    'bbbbbbbabbbbbbbb',
-    'bbbbbbbbbbbbbbcb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbccbbbbbabbbbb',
-    'bbbbbbbbbbbbbbbb',
-    'bbbbbbbbbbbbccbb',
-    'babbbbbbbbbbbbbb',
-    'bbbbbbcbbbbbbbbb',
-    'eeeeeeeeeeeeeeee',
-    'gggggggggggggggg'
-  ]);
-  T('t_shore_w', SH, [
-    'gebbbbbbbbbbbbbb',
-    'gebbbbbbbbbbbbbb',
-    'gebbccbbbbbbbbbb',
-    'gebbbbbbbbcccbbb',
-    'gebbbbbbbbbbbbbb',
-    'gebbbbbbbbbbbbbb',
-    'gebbbbbabbbbbbbb',
-    'gebbbbbbbbbbbbcb',
-    'gebbbbbbbbbbbbbb',
-    'gebbccbbbbabbbbb',
-    'gebbbbbbbbbbbbbb',
-    'gebbbbbbbbbbccbb',
-    'gebbbbbbbbbbbbbb',
-    'gebbbbcbbbbbbbbb',
-    'gebbbbbbbbbbbbbb',
-    'gebbbbbbbbabbbbb'
-  ]);
-  T('t_shore_e', SH, [
-    'bbbbbbbbbbbbbbeg',
-    'bbbbbbbbbbbbbbeg',
-    'bbccbbbbbbbbbbeg',
-    'bbbbbbbbbcccbbeg',
-    'bbbbbbbbbbbbbbeg',
-    'babbbbbbbbbbbbeg',
-    'bbbbbbbabbbbbbeg',
-    'bbbbbbbbbbbbbbeg',
-    'bbbbbbbbbbbbbbeg',
-    'bbbccbbbbbabbbeg',
-    'bbbbbbbbbbbbbbeg',
-    'bbbbbbbbbbccbbeg',
-    'babbbbbbbbbbbbeg',
-    'bbbbbbcbbbbbbbeg',
-    'bbbbbbbbbbbbbbeg',
-    'bbbbbbbbbbabbbeg'
+    T(prefix + '_tl', P2, [
+      'gggggggggggggggg', 'gggggggggggggooo', 'ggggggggggoooccc',
+      'gggggggoooccccbb', 'ggggoooccccbbbbb', 'gooocccbbbbbbbbb',
+      'occcbbbbbbbbbbbb', 'obbbbbbbbbbbbbbb', 'obbbbbbbbbbbbbbb',
+      'obbbbbbbbbbbbbbb', 'obbbbbbbbbbbbbbb', 'oabbbbbbbbbbbbbb',
+      'oabbbbbbbbbbbbbb', 'oaabbbbbbbbbbbbb', fill('a').replace(/^./, 'o'),
+      fill('o')
+    ]);
+    T(prefix + '_tm', P2, [
+      fill('g'), fill('o'), fill('c'), fill('b'), fill('b'), fill('b'),
+      fill('b'), fill('b'), fill('b'), fill('b'), fill('b'), fill('b'),
+      fill('b'), fill('b'), fill('a'), fill('o')
+    ]);
+    T(prefix + '_tr', P2, [
+      'gggggggggggggggg', 'ooogggggggggggggg'.slice(0, 16), 'cccooogggggggggg',
+      'bbccccoogggggggg', 'bbbbbccccooogggg', 'bbbbbbbbbcccooog',
+      'bbbbbbbbbbbbccco', 'bbbbbbbbbbbbbbbo', 'bbbbbbbbbbbbbbbo',
+      'bbbbbbbbbbbbbbao', 'bbbbbbbbbbbbbbao', 'bbbbbbbbbbbbbaao',
+      'bbbbbbbbbbbbbaao', 'bbbbbbbbbbbbaaao', fill('a').replace(/.$/, 'o'),
+      fill('o')
+    ]);
+    // The wall band under the roof.
+    var wallRow = 'o' + rep('w').slice(0, 15);
+    T(prefix + '_bl', P, [
+      wallRow, wallRow, wallRow, wallRow, wallRow, wallRow, wallRow, wallRow,
+      wallRow, wallRow, wallRow, wallRow, wallRow, wallRow, wallRow, wallRow
+    ]);
+    T(prefix + '_bm', P, [
+      fill('w'), fill('w'), fill('w'), fill('w'), fill('w'), fill('w'),
+      fill('w'), fill('w'), fill('w'), fill('w'), fill('w'), fill('w'),
+      fill('w'), fill('w'), fill('w'), fill('w')
+    ]);
+    var wallRowR = rep('w').slice(0, 15) + 'o';
+    T(prefix + '_br', P, [
+      wallRowR, wallRowR, wallRowR, wallRowR, wallRowR, wallRowR, wallRowR,
+      wallRowR, wallRowR, wallRowR, wallRowR, wallRowR, wallRowR, wallRowR,
+      wallRowR, wallRowR
+    ]);
+    // A wider building extends its roof with this plain middle column.
+    T(prefix + 'x', P2, [
+      fill('g'), fill('o'), fill('c'), fill('b'), fill('b'), fill('b'),
+      fill('b'), fill('b'), fill('b'), fill('b'), fill('b'), fill('b'),
+      fill('b'), fill('b'), fill('a'), fill('o')
+    ]);
+  }
+
+  roofSet('t_roof',  C.hse0, C.hse1, C.hse2);   // ordinary house — terracotta
+  roofSet('t_hroof', C.ctr0, C.ctr1, C.ctr2);   // Pokemon Centre — RED
+  roofSet('t_sroof', C.mrt0, C.mrt1, C.mrt2);   // Poke Mart — BLUE
+  roofSet('t_groof', C.gym0, C.gym1, C.gym2);   // gym — slate
+  roofSet('t_lroof', C.brk0, C.brk1, C.brk2);   // labs / civic buildings
+
+  // ========================================================= TOWN: walls ====
+  var WL = { o: C.ink, a: C.stn1, b: C.pale, d: C.stn2 };
+  T('t_wall', WL, [
+    fill('b'), fill('b'), fill('b'), fill('b'), fill('d'), fill('b'),
+    fill('b'), fill('b'), fill('b'), fill('d'), fill('b'), fill('b'),
+    fill('b'), fill('b'), fill('b'), fill('a')
   ]);
 
-  // ----------------------------------------------------------------- sand --
-  T('t_sand', { d: C.tan1, e: C.tan0, f: C.brn3 }, [
-    'dddddddddddddddd',
-    'ddddeddddddddddd',
-    'dddddddddddeddddd'.slice(0, 16),
-    'dddddddddddddddd',
-    'ddfddddddddddddd',
-    'dddddddddeddddddd'.slice(0, 16),
-    'dddddddddddddddd',
-    'dddddedddddddfdd',
-    'dddddddddddddddd',
-    'dedddddddddddddd',
-    'ddddddddddedddddd'.slice(0, 16),
-    'dddddddddddddddd',
-    'dddfddddddddeddd',
-    'dddddddddddddddd',
-    'ddddddedddddddddd'.slice(0, 16),
-    'dddddddddddddddd'
+  var WN = { o: C.ink, b: C.pale, s: C.sky0, t: C.sky1, a: C.stn1 };
+  T('t_window', WN, [
+    'bbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbbbbb', 'bboooooooooooobb',
+    'bbottttttssssobb', 'bbottttttssssobb', 'bbottttttssssobb',
+    'bbottttttssssobb', 'bboooooooooooobb', 'bbottttttssssobb',
+    'bbottttttssssobb', 'bbottttttssssobb', 'bbottttttssssobb',
+    'bboooooooooooobb', 'bbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbbbbb',
+    fill('a')
   ]);
 
-  // ----------------------------------------------------------------- cliff --
-  T('t_cliff', { s: C.stn1, t: C.stn0, u: C.stn2 }, [
-    'uuuuuuuuuuuuuuuu',
-    'ssssssssssssssss',
-    'ssssssssssssssss',
-    'sstssssssstsssss',
-    'ssssssssssssssss',
-    'tttsssssssssttts',
-    'ssssssssssssssss',
-    'ssssssstssssssss',
-    'ssssssssssssssss',
-    'stsssssssssstsss',
-    'ssssssssssssssss',
-    'ssstttsssssssstt',
-    'ssssssssssssssss',
-    'sssssssssstsssss',
-    'tsssssssssssssss',
-    'tttttttttttttttt'
-  ]);
-  T('t_rock', { o: C.ink, s: C.stn2, t: C.stn1, u: C.stn3 }, [
-    '................',
-    '................',
-    '................',
-    '.....oooooo.....',
-    '...oouuuuusoo...',
-    '..ouuuuussssso..',
-    '..ouuussssssso..',
-    '.ouusssssssstto.'.replace('tt', 'ts'),
-    '.ousssssssstssо.'.replace('о', 'o'),
-    '.ossssstsssssto.',
-    '.osstssssssssto.',
-    '..ossssssttsto..',
-    '..otssssssstto..',
-    '...oottssttoo...',
-    '.....oooooo.....',
-    '................'
+  var DR = { o: C.ink, a: C.brn0, b: C.brn1, c: C.brn2, d: C.yel1, w: C.pale };
+  T('t_door', DR, [
+    fill('w'), 'wwwoooooooooowww', 'wwwoccccccccowww',
+    'wwwocbbbbbbcowww', 'wwwocbbbbbbcowww', 'wwwocbbbbbbcowww',
+    'wwwocbbbbbbcowww', 'wwwocbbbbbbcowww', 'wwwocbbbdbbcowww',
+    'wwwocbbbdbbcowww', 'wwwocbbbbbbcowww', 'wwwocbbbbbbcowww',
+    'wwwocbbbbbbcowww', 'wwwocbbbbbbcowww', 'wwwoaaaaaaaaowww',
+    'wwwoooooooooowww'
   ]);
 
-  // ------------------------------------------------------------------ cave --
-  T('t_cavefloor', { s: C.stn1, t: C.stn0, u: C.stn2 }, [
-    'ssssssssssssssss',
-    'ssssusssssssssss',
-    'ssssssssssstssss',
-    'ssssssssssssssss',
-    'sstsssssusssssss',
-    'ssssssssssssssss',
-    'ssssssstssssssss',
-    'sussssssssssssts',
-    'ssssssssssssssss',
-    'ssssstssssssssss',
-    'ssssssssssussses'.replace('e', 's'),
-    'stssssssssssssss',
-    'ssssssssstssssss',
-    'ssssssssssssssss',
-    'ssussssssssstsss',
-    'ssssssssssssssss'
-  ]);
-  T('t_cavewall', { o: C.ink, s: C.stn0, t: C.stn1, u: C.stn2 }, [
-    'tttttttttttttttt',
-    'tutttttttutttttt',
-    'tttttttttttttttt',
-    'ttttttuttttttutt',
-    'tttttttttttttttt',
-    'oooooooooooooooo',
-    'sssssssssssssss s'.slice(0, 16),
-    'ssosssssossssoss',
-    'ssssssssssssssss',
-    'sossssossssossss',
-    'ssssssssssssssss',
-    'ssssossssossssos',
-    'ssssssssssssssss',
-    'sossssssosssssss',
-    'ssssssssssssssss',
-    'ssssssssssssssss'
-  ]);
-  T('t_crystal', { o: C.ink, c: C.ice2, i: C.ice3, p: C.pur2, s: C.stn1 }, [
-    '................',
-    '......o.........',
-    '.....oco........',
-    '.....ocio..oo...',
-    '....ocico.oco...',
-    '....ocico.oco...',
-    '...ociicооico...'.replace('оо', 'oo'),
-    '...ociico.oico..',
-    '...ociico.oico..',
-    '..ociiicоoiico..'.replace('о', 'o'),
-    '..ociiiicоiicо..'.replace(/о/g, 'o'),
-    '..oiiciicоiico..'.replace('о', 'o'),
-    '..ooooooooooo...',
-    '..osssssssssо...'.replace('о', 'o'),
-    '...ooooooooo....',
-    '................'
-  ]);
-  T('t_stairs', { o: C.ink, s: C.stn1, t: C.stn0, u: C.stn2 }, [
-    'oooooooooooooooo',
-    'ouuuuuuuuuuuuuuо'.replace('о', 'o'),
-    'osssssssssssssso',
-    'otttttttttttttto',
-    'oooooooooooooooo',
-    'ouuuuuuuuuuuuuuо'.replace('о', 'o'),
-    'osssssssssssssso',
-    'otttttttttttttto',
-    'oooooooooooooooo',
-    'ouuuuuuuuuuuuuuо'.replace('о', 'o'),
-    'osssssssssssssso',
-    'otttttttttttttto',
-    'oooooooooooooooo',
-    'ouuuuuuuuuuuuuuо'.replace('о', 'o'),
-    'osssssssssssssso',
-    'oooooooooooooooo'
+  // Sliding glass double door — Centres, Marts and civic buildings.
+  var GD = { o: C.ink, s: C.sky0, t: C.sky1, a: C.stn1, w: C.pale };
+  T('t_gdoor', GD, [
+    fill('w'), 'wwooooooooooooww', 'wwottssootttssow',
+    'wwottssootttssow', 'wwottssootttssow', 'wwosttssootttsow',
+    'wwosttssootttsow', 'wwossttsoosttssow'.slice(0, 16), 'wwossssoossssssw'.slice(0, 16),
+    'wwossssoosssssow', 'wwossssoosssssow', 'wwossssoosssssow',
+    'wwossssoosssssow', 'wwoaaaaooaaaaaow', 'wwooooooooooooow'.slice(0, 16),
+    fill('w')
   ]);
 
-  // ------------------------------ rooftop markers (heal / shop / gym) -------
-  // Center rooftop placard: a proper Poké Ball — bright-red top half, white
-  // bottom, ink equator with a white release button — reading clearly against
-  // the deep-red Center roof.
-  T('t_hroofx', { o: C.ink, R: C.red1, q: C.red3, w: C.white }, [
-    'RRRRRRRRRRRRRRRR',
-    'RRRRRooooooRRRRR',
-    'RRRooqqqqqqooRRR',
-    'RRoqqqqqqqqqqoRR',
-    'RRoqqqqqqqqqqoRR',
-    'RRoqqqqqqqqqqoRR',
-    'RRooooooooooooRR',
-    'RRoooowwwwooooRR',
-    'RRoooowwwwooooRR',
-    'RRooooooooooooRR',
-    'RRowwwwwwwwwwoRR',
-    'RRowwwwwwwwwwoRR',
-    'RRoowwwwwwwwooRR',
-    'RRRoowwwwwwooRRR',
-    'RRRRRooooooRRRRR',
-    'RRRRRRRRRRRRRRRR'
-  ]);
-  T('t_sroofx', { o: C.ink, R: C.blu1, r: C.blu0, y: C.yel1, Y: C.yel2 }, [
-    'RRRRRRRRRRRRRRRR',
-    'RRRRRRRRRRRRRRRR',
-    'RRRRRooooooRRRRR',
-    'RRRooyyyyyyooRRR',
-    'RRoyyYYyyyyyyoRR',
-    'RRoyYyyyyooyyoRR',
-    'RRoyYyyyoyyyyoRR',
-    'RRoyyyyoyyyyyoRR',
-    'RRoyyyoyyyyYyoRR',
-    'RRoyyoyyyyyYyoRR',
-    'RRoyyyyyyYYyyoRR',
-    'RRRooyyyyyyooRRR',
-    'RRRRRooooooRRRRR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR',
-    'RRRRRRRRRRRRRRRR'
-  ]);
-  T('t_lroofx', { o: C.ink, R: C.stn2, r: C.stn1, y: C.yel1, Y: C.yel2 }, [
-    'RRRRRRRRRRRRRRRR',
-    'RRRRRRRRRRRRRRRR',
-    'RRRRRRRooRRRRRRR',
-    'RRRRRRoYYoRRRRRR',
-    'RRRRRoYYYYoRRRRR',
-    'RRRRoYYyyYYoRRRR',
-    'RRRoYYyyyyYYoRRR',
-    'RRoYYyyyyyyYYoRR',
-    'RRoyYyyyyyyYyoRR',
-    'RRRoyYyyyyYyoRRR',
-    'RRRRoyYyyYyoRRRR',
-    'RRRRRoyyyyoRRRRR',
-    'RRRRRRoyyoRRRRRR',
-    'RRRRRRRooRRRRRRR',
-    'rrrrrrrrrrrrrrrr',
-    'RRRRRRRRRRRRRRRR'
+  T('t_gymdoor', { o: C.ink, a: C.gym0, b: C.gym1, c: C.gym2, y: C.yel1, w: C.pale }, [
+    fill('w'), 'wwwoooooooooowww', 'wwwocccccccccwww',
+    'wwwocbbbbbbbcwww', 'wwwocbbbyybbcwww', 'wwwocbbyyyybcwww',
+    'wwwocbbyaayybcww', 'wwwocbyaaaaybcww', 'wwwocbyaaaaybcww',
+    'wwwocbbyaayybcww', 'wwwocbbyyyybcwww', 'wwwocbbbyybbcwww',
+    'wwwocbbbbbbbcwww', 'wwwocbbbbbbbcwww', 'wwwoaaaaaaaaawww',
+    'wwwoooooooooowww'
   ]);
 
-  // ------------------------------------- heal / shop / gym facade pieces ----
-  // Pokémon-Center red roof (classic look) + Poké Mart blue roof.
-  var HR = { o: C.ink, q: C.red2, R: C.red1, r: C.red0, s: C.red0 };
-  var SR = { o: C.ink, q: C.blu2, R: C.blu1, r: C.blu0, s: C.blu0 };
-  G.ART.t_hroof_tl = { base: 't_roof_tl', pal: HR };
-  G.ART.t_hroof_tm = { base: 't_roof_tm', pal: HR };
-  G.ART.t_hroof_tr = { base: 't_roof_tr', pal: HR };
-  G.ART.t_hroof_bl = { base: 't_roof_bl', pal: HR };
-  G.ART.t_hroof_bm = { base: 't_roof_bm', pal: HR };
-  G.ART.t_hroof_br = { base: 't_roof_br', pal: HR };
-  G.ART.t_sroof_tl = { base: 't_roof_tl', pal: SR };
-  G.ART.t_sroof_tm = { base: 't_roof_tm', pal: SR };
-  G.ART.t_sroof_tr = { base: 't_roof_tr', pal: SR };
-  G.ART.t_sroof_bl = { base: 't_roof_bl', pal: SR };
-  G.ART.t_sroof_bm = { base: 't_roof_bm', pal: SR };
-  G.ART.t_sroof_br = { base: 't_roof_br', pal: SR };
-
-  // Center placard: a red-and-white capture-ball emblem.
-  T('t_healsign', { o: C.ink, w: C.pale, l: C.lgry, R: C.red2 }, [
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'wwooooooooooooww',
-    'wwowwwwwwwwwwoww',
-    'wwowwoooooowwoww',
-    'wwowoRRRRRRowoww',
-    'wwowoRRRRRRowoww',
-    'wwowoRRRRRRowoww',
-    'wwowooowwooowoww',
-    'wwowowwwwwwowoww',
-    'wwowowwwwwwowoww',
-    'wwowwoooooowwoww',
-    'wwooooooooooooww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'oooooooooooooooo'
+  // Roof-mounted signage — the big red P and the blue MART board.
+  T('t_healsign', { o: C.ink, r: C.ctr1, w: C.white, a: C.ctr0 }, [
+    fill('a'), 'aoooooooooooooaa'.slice(0, 16), 'aowwwwwwwwwwwoaa',
+    'aowwrrrrrrwwwoaa', 'aowwrwwwwrwwwoaa', 'aowwrwwwwrwwwoaa',
+    'aowwrrrrrrwwwoaa', 'aowwrwwwwwwwwoaa', 'aowwrwwwwwwwwoaa',
+    'aowwrwwwwwwwwoaa', 'aowwrwwwwwwwwoaa', 'aowwwwwwwwwwwoaa',
+    'aoooooooooooooaa'.slice(0, 16), fill('a'), fill('a'), fill('a')
   ]);
-  // Mart placard: a blue shopping bag.
-  T('t_shopsign', { o: C.ink, w: C.pale, l: C.lgry, b: C.blu2, B: C.blu1 }, [
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'wwooooooooooooww',
-    'wwowwoowwoowwoww',
-    'wwowoooooooowoww',
-    'wwoobbbbbbbbooww',
-    'wwoobBBBBBBbooww',
-    'wwoobbbbbbbbooww',
-    'wwoobBBBBBBbooww',
-    'wwoobbbbbbbbooww',
-    'wwoobBBBBBBbooww',
-    'wwowoooooooowoww',
-    'wwooooooooooooww',
-    'llllllllllllllll',
-    'wwwwwwwwwwwwwwww',
-    'oooooooooooooooo'
-  ]);
-  // Grand gym entrance: tall stone double-doors split by a central stile, with
-  // gold accent bands — reads as a civic landmark, not a house door.
-  T('t_gymdoor', { o: C.ink, w: C.stn3, l: C.stn2, s: C.stn1, y: C.yel1 }, [
-    'llllllllllllllll',
-    'wwooooooooooooww',
-    'wwossssoossssoww',
-    'wwosyysoosyysoww',
-    'wwossssoossssoww',
-    'wwossssoossssoww',
-    'wwosyysoosyysoww',
-    'wwossssoossssoww',
-    'wwossssoossssoww',
-    'wwosyysoosyysoww',
-    'wwossssoossssoww',
-    'wwossssoossssoww',
-    'wwosyysoosyysoww',
-    'wwossssoossssoww',
-    'wwooooooooooooww',
-    'oooooooooooooooo'
+  T('t_shopsign', { o: C.ink, b: C.mrt1, w: C.white, a: C.mrt0 }, [
+    fill('a'), 'aoooooooooooooaa'.slice(0, 16), 'aowwwwwwwwwwwoaa',
+    'aowbwbwbbbwbwoaa', 'aowbwbwbwbwbwoaa', 'aowbbbwbbbwbwoaa',
+    'aowbwbwbwwwbwoaa', 'aowbwbwbwwwbwoaa', 'aowwwwwwwwwwwoaa',
+    'aoooooooooooooaa'.slice(0, 16), fill('a'), fill('a'),
+    fill('a'), fill('a'), fill('a'), fill('a')
   ]);
 
-  // ----------------------------------------------- more interior pieces ----
-  T('t_icounter', { o: C.ink, r: C.brn3, s: C.brn2, t: C.brn1, f: C.tan1 }, [
-    'oooooooooooooooo',
-    'offffffffffffffо'.replace('о', 'o'),
-    'offrrrrrrrrrrffo',
-    'offffffffffffffо'.replace('о', 'o'),
-    'oooooooooooooooo',
-    'osssssssssssssso',
-    'ossttssttssttsso',
-    'osssssssssssssso',
-    'ossttssttssttsso',
-    'osssssssssssssso',
-    'ossttssttssttsso',
-    'osssssssssssssso',
-    'osssssssssssssso',
-    'otttttttttttttto',
-    'oooooooooooooooo',
-    '................'
+  // ========================================================== INTERIORS =====
+  var WOOD = '#b8946c';
+  var IF = { a: '#9a7a54', b: WOOD, c: '#cfae86' };
+  T('t_ifloor', IF, [
+    'bbbbbbbbbbbbbbbb', 'bcbbbbbbbbbbbbcb', 'bbbbbbbbbbbbbbbb',
+    fill('a'), 'bbbbbbbbbbbbbbbb', 'bbbbbbcbbbbbbbbb',
+    'bbbbbbbbbbbbbbbb', fill('a'), 'bbbbbbbbbbbbbbbb',
+    'bcbbbbbbbbbcbbbb', 'bbbbbbbbbbbbbbbb', fill('a'),
+    'bbbbbbbbbbbbbbbb', 'bbbbbbbbcbbbbbbb', 'bbbbbbbbbbbbbbbb',
+    fill('a')
   ]);
-  T('t_ihealm', { o: C.ink, s: C.stn1, u: C.stn2, v: C.stn3, r: C.red2, g: C.grn3, w: C.white }, [
-    'oooooooooooooooo',
-    'ouuuuuuuuuuuuuuo',
-    'ouvvvvvvvvvvvvuo',
-    'ouvwwwwwwwwwwvuo',
-    'ouvwrgrgrgrgwvuo',
-    'ouvwwwwwwwwwwvuo',
-    'ouvvvvvvvvvvvvuo',
-    'ouuuuuuuuuuuuuuo',
-    'ousosososososuuo',
-    'ouuuuuuuuuuuuuuo',
-    'ousususususususo',
-    'ouuuuuuuuuuuuuuo',
-    'osssssssssssssso',
-    'osssssssssssssso',
-    'oooooooooooooooo',
-    '................'
+  T('t_iwall', { a: '#5c6a86', b: '#7d8aa6', c: '#9daac4', o: C.ink }, [
+    fill('c'), fill('b'), fill('b'), fill('b'), fill('a'), fill('b'),
+    fill('b'), fill('b'), fill('a'), fill('b'), fill('b'), fill('b'),
+    fill('a'), fill('b'), fill('b'), fill('o')
   ]);
-  T('t_gfloor', { s: C.stn3, t: C.stn2, u: C.pale }, [
-    'ssssssssssssssss',
-    'stttttttttttttts',
-    'stssssssssssssts',
-    'stsusssssssussts',
-    'stssssssssssssts',
-    'stssssssssssssts',
-    'stsssssttsssssts',
-    'stsssstuutssssts',
-    'stsssstuutssssts',
-    'stsssssttsssssts',
-    'stssssssssssssts',
-    'stssssssssssssts',
-    'stsusssssssussts',
-    'stssssssssssssts',
-    'stttttttttttttts',
-    'ssssssssssssssss'
+  T('t_imat', { a: C.red1, b: C.red2, c: C.red3, o: C.brn0 }, [
+    fill('o'), 'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo',
+    'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo', 'obbbbbbbbbbbbbbo',
+    'obcbcbcbcbcbcbbo', 'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo',
+    'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo', 'obbbbbbbbbbbbbbo',
+    'obcbcbcbcbcbcbbo', 'obbbbbbbbbbbbbbo', 'oaaaaaaaaaaaaaao',
+    fill('o')
   ]);
-  T('t_redcarpet', { r: C.red1, q: C.red2, y: C.yel1 }, [
-    'yqqqqqqqqqqqqqqy',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'qrrrrrrrrrrrrrrq',
-    'yqqqqqqqqqqqqqqy'
+  T('t_itable', { o: C.brn0, a: C.brn1, b: C.brn2, c: C.brn3, f: WOOD }, [
+    fill('f'), fill('o'), 'occcccccccccccco',
+    'obbbbbbbbbbbbbbo', 'obbbbbbbbbbbbbbo', 'obbbbbbbbbbbbbbo',
+    'oaaaaaaaaaaaaaao', fill('o'), 'ffoaaffffffaaoff',
+    'ffoaaffffffaaoff', 'ffoaaffffffaaoff', 'ffoaaffffffaaoff',
+    'ffoaaffffffaaoff', 'ffoaaffffffaaoff', 'ffooofffffffooff'.slice(0, 16),
+    fill('f')
   ]);
-  T('t_statue', { o: C.ink, s: C.stn2, t: C.stn1, u: C.stn3 }, [
-    '................',
-    '.....oooo.......',
-    '....ouuuso......',
-    '....oussso......',
-    '.....ossо.......'.replace('о', 'o'),
-    '....ouusso......',
-    '...ouusssso.....',
-    '...oussssto.....',
-    '...oussssto.....',
-    '....osssto......',
-    '....ossstо......'.replace('о', 'o'),
-    '...oossssoo.....',
-    '..ouussssstо....'.replace('о', 'o'),
-    '..ousssssssto...',
-    '..ooooooooooo...',
-    '................'
+  T('t_ibook', { o: C.brn0, a: C.brn1, r: C.red2, g: C.grn2, b: C.blu2, y: C.yel1 }, [
+    fill('o'), 'oaaaaaaaaaaaaaao', 'oarbgrybrgbyrgao',
+    'oarbgrybrgbyrgao', 'oarbgrybrgbyrgao', 'oaaaaaaaaaaaaaao',
+    'oaaaaaaaaaaaaaao', 'oagybrgbyrbgryao', 'oagybrgbyrbgryao',
+    'oagybrgbyrbgryao', 'oaaaaaaaaaaaaaao', 'oaaaaaaaaaaaaaao',
+    'oabrygbrygbrygao', 'oabrygbrygbrygao', 'oaaaaaaaaaaaaaao',
+    fill('o')
+  ]);
+  // The PC / research machine.
+  T('t_imach', { o: C.ink, a: C.stn1, b: C.stn2, c: C.stn3, s: C.sky0, g: C.leaf2, f: WOOD }, [
+    fill('f'), fill('o'), 'occcccccccccccco',
+    'oboooooooooooobo', 'obosssssssssobbo', 'obossgsssgssobbo',
+    'obosssssssssobbo', 'obossgggggssobbo', 'obosssssssssobbo',
+    'oboooooooooooobo', 'obbbbbbbbbbbbbbo', 'obbaaabbbaaabbbo',
+    'obbbbbbbbbbbbbbo', 'obbbbbbbbbbbbbbo', 'oaaaaaaaaaaaaaao',
+    fill('o')
+  ]);
+  T('t_ibed_t', { o: C.ink, b: C.blu2, c: C.blu3, w: C.white, f: WOOD }, [
+    fill('f'), 'ooooooooooooooof', 'owwwwwwwwwwwwwof',
+    'owwwwwwwwwwwwwof', 'owwwwwwwwwwwwwof', 'ooooooooooooooof',
+    'occccccccccccccf'.slice(0, 16), 'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof',
+    'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof',
+    'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof',
+    'obbbbbbbbbbbbbof'
+  ]);
+  T('t_ibed_b', { o: C.ink, a: C.blu1, b: C.blu2, f: WOOD }, [
+    'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof',
+    'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof',
+    'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof', 'obbbbbbbbbbbbbof',
+    'obbbbbbbbbbbbbof', 'oaaaaaaaaaaaaaof', 'ooooooooooooooof',
+    'offoooooooooffof'.slice(0, 16), 'offofffffffffoof'.slice(0, 16),
+    'offoffffffffffof'.slice(0, 16), fill('f')
+  ]);
+  T('t_iplant', { o: C.brn0, a: C.brn1, b: C.grn1, c: C.grn2, d: C.grn3, f: WOOD }, [
+    fill('f'), 'ffffffbbffffffff', 'fffffbcdcbffffff',
+    'ffffbcdddcbfffff', 'fffbcdddddcbffff', 'ffbcdddbdddcbfff',
+    'ffbcddbbbddcbfff', 'fffbcdbbbdcbffff', 'ffffbcbbbcbfffff',
+    'fffffbbbbbffffff', 'ffffffbbbfffffff', 'fffffoaaaofffff'.slice(0, 15) + 'f',
+    'fffffoaaaaofffff', 'fffffoaaaaofffff', 'fffffooooooffff'.slice(0, 15) + 'f',
+    fill('f')
+  ]);
+  T('t_istool', { o: C.brn0, a: C.brn1, b: C.brn2, f: WOOD }, [
+    fill('f'), fill('f'), 'ffffooooooooffff',
+    'fffobbbbbbbbofff', 'fffobbbbbbbbofff', 'fffoaaaaaaaaofff',
+    'ffffoooooooofffff'.slice(0, 16), 'fffffoaaaaoffffff'.slice(0, 16),
+    'fffffoaffaoffffff'.slice(0, 16), 'fffffoaffaofffff', 'fffffoaffaofffff',
+    'fffffoaffaofffff', 'ffffoaffffaoffff', 'ffffoaffffaoffff',
+    'ffffooffffooffff', fill('f')
+  ]);
+  T('t_icounter', { o: C.ink, a: C.brn0, b: C.brn1, c: C.brn3, f: WOOD }, [
+    fill('f'), fill('o'), fill('c'),
+    fill('b'), fill('b'), fill('a'),
+    fill('o'), fill('b'), fill('b'),
+    fill('b'), fill('b'), fill('b'),
+    fill('b'), fill('b'), fill('a'), fill('o')
+  ]);
+  // The healing machine behind the Centre counter.
+  T('t_ihealm', { o: C.ink, a: C.stn1, b: C.stn2, c: C.stn3, r: C.ctr1, w: C.white, f: WOOD }, [
+    fill('f'), fill('o'), 'occcccccccccccco',
+    'obwwwwwwwwwwwwbo', 'obwrwrwrwrwrwwbo', 'obwwwwwwwwwwwwbo',
+    'obbbbbbbbbbbbbbo', 'obrrbbrrbbrrbbbo', 'obbbbbbbbbbbbbbo',
+    'obbbbbbbbbbbbbbo', 'obaaabbaaabbaabo', 'obbbbbbbbbbbbbbo',
+    'obbbbbbbbbbbbbbo', 'obbbbbbbbbbbbbbo', 'oaaaaaaaaaaaaaao',
+    fill('o')
+  ]);
+  T('t_gfloor', { a: '#4a5568', b: '#5f6d84', c: '#77879e' }, [
+    fill('c'), 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
+    'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
+    'bbbbbbbbbbbbbbba', fill('a'), fill('c'),
+    'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
+    'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
+    fill('a')
+  ]);
+  T('t_redcarpet', { a: C.red0, b: C.red1, c: C.red2, y: C.yel1 }, [
+    fill('y'), 'ycccccccccccccay', 'ybbbbbbbbbbbbbay',
+    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay',
+    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay',
+    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay',
+    'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'yaaaaaaaaaaaaaay',
+    fill('y')
+  ]);
+  T('t_statue', { o: C.ink, a: C.stn1, b: C.stn2, c: C.stn3, f: '#77879e' }, [
+    fill('f'), 'ffffffooooffffff', 'fffffocccbofffff',
+    'fffffocbcbofffff', 'fffffobbbbofffff', 'ffffoobbbbooffff',
+    'ffffocbbbbcoffff', 'ffffocbbbbcoffff', 'ffffoabbbbaoffff',
+    'fffffobbbbofffff', 'fffffobbbbofffff', 'ffffoobbbboofffff'.slice(0, 16),
+    'ffffocccccccoffff'.slice(0, 16), 'fffocbbbbbbbcoff', 'fffoaaaaaaaaaoff',
+    'fffoooooooooooff'.slice(0, 16)
+  ]);
+  T('t_stairs', { o: C.ink, a: C.stn1, b: C.stn2, c: C.stn3 }, [
+    fill('o'), 'occcccccccccccco', 'obbbbbbbbbbbbbbo',
+    'oaaaaaaaaaaaaaao', fill('o'), 'occcccccccccccco',
+    'obbbbbbbbbbbbbbo', 'oaaaaaaaaaaaaaao', fill('o'),
+    'occcccccccccccco', 'obbbbbbbbbbbbbbo', 'oaaaaaaaaaaaaaao',
+    fill('o'), 'occcccccccccccco', 'obbbbbbbbbbbbbbo', fill('o')
   ]);
 
-  // ==========================================================================
-  // G.TILES — gameplay properties. img/anim reference G.ART names.
-  // solid blocks walking; grass rolls wild encounters; ledge hops one way.
-  // ==========================================================================
+  // ============================================================== CAVES =====
+  // Mt. Moon and the Rock Tunnel — warm brown limestone, not the blue-grey
+  // volcanic rock the Hoenn set used.
+  function caveFloor(name, pal) {
+    T(name, pal, [
+      'bbbbbbbbbbbbbbbb', 'bcbbbbbbbabbbbbb', 'bbbbbabbbbbbbcbb',
+      'bbbbbbbbbbbbbbbb', 'babbbbbcbbbbbbab', 'bbbbbbbbbbbbbbbb',
+      'bbbbcbbbbbabbbbb', 'bbbbbbbbbbbbbbbb', 'bbabbbbbbbbbcbbb',
+      'bbbbbbbabbbbbbbb', 'bcbbbbbbbbbbbbab', 'bbbbbbbbbbbbbbbb',
+      'bbbbbabbbcbbbbbb', 'bbbbbbbbbbbbbbbb', 'babbbbbbbbbabbcb',
+      'bbbbbbbbbbbbbbbb'
+    ]);
+  }
+  function caveWall(name, pal) {
+    T(name, pal, [
+      fill('d'), 'ccccccccccccccca', 'cbcbccbcbccbcbca',
+      'bbbbbbbbbbbbbbba', 'baabaaabaabaaaba', fill('a'),
+      'aoaaoaaoaaoaaoaa', fill('o'), fill('a'),
+      'ccccccccccccccca', 'cbccbcbccbcbccba', 'bbbbbbbbbbbbbbba',
+      'baaabaabaaabaaba', fill('a'), 'aoaoaaoaaoaaoaaa',
+      fill('o')
+    ]);
+  }
+  var CV  = { o: '#241a14', a: '#3d2c20', b: '#584134', c: '#75594a', d: '#8f7160' };
+  var GRA = { o: '#141420', a: '#242436', b: '#38384e', c: '#4e4e68', d: '#6a6a86' };
+  var IC  = { o: C.ice0, a: C.ice1, b: C.ice2, c: C.ice3, d: C.white };
+
+  caveFloor('t_cavefloor', CV);   caveWall('t_cavewall', CV);
+  // Cerulean Cave / Victory Road — darker granite, so the endgame reads harder.
+  caveFloor('t_darkfloor', GRA);  caveWall('t_darkwall', GRA);
+  // Seafoam Islands — ice over rock.
+  caveFloor('t_icefloor', IC);    caveWall('t_icewall', IC);
+
+  // ==================================================== SPECIAL INTERIORS ===
+  // Pokemon Tower — cold violet stone. Lavender's tower should feel wrong.
+  var TW = { o: C.twr0, a: C.twr1, b: C.twr2, c: '#8f74aa', w: C.pale };
+  T('t_towerfloor', TW, [
+    fill('a'), 'abaaaaaaaabaaaaa', 'aaaaaaaaaaaaaaaa',
+    fill('o'), fill('a'), 'aaaabaaaaaaaabaa',
+    'aaaaaaaaaaaaaaaa', fill('o'), fill('a'),
+    'abaaaaaaabaaaaaa', 'aaaaaaaaaaaaaaaa', fill('o'),
+    fill('a'), 'aaaaaabaaaaaaaba', 'aaaaaaaaaaaaaaaa', fill('o')
+  ]);
+  T('t_towerwall', TW, [
+    fill('c'), 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
+    fill('a'), fill('o'), 'bbbbbbbbbbbbbbba',
+    'bbbbbbbbbbbbbbba', fill('a'), fill('o'),
+    'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba', fill('a'),
+    fill('o'), 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba', fill('o')
+  ]);
+  // A grave marker in the tower.
+  T('t_grave', TW, [
+    fill('a'), 'aaaaaooooooaaaaa', 'aaaaowwwwwwoaaaa',
+    'aaaaowwwwwwoaaaa', 'aaaaowwoowwoaaaa', 'aaaaowwwwwwoaaaa',
+    'aaaaowwoowwoaaaa', 'aaaaowwwwwwoaaaa', 'aaaaowwwwwwoaaaa',
+    'aaaaowwwwwwoaaaa', 'aaaaocccccccoaaa', 'aaaoooooooooaaaa',
+    'aaocccccccccoaaa', 'aaocccccccccoaaa', 'aaooooooooooaaaa',
+    fill('a')
+  ]);
+
+  // Silph Co. / Power Plant / Rocket Hideout — industrial steel plate.
+  var MT = { o: '#1e222b', a: '#333a47', b: '#4a5464', c: '#66738a', d: '#8a97ad' };
+  T('t_metalfloor', MT, [
+    fill('d'), 'dbbbbbbbdbbbbbbd', 'dbccccccdbccccbd',
+    'dbcbbbbcdbcbbcbd', 'dbcbbbbcdbcbbcbd', 'dbccccccdbccccbd',
+    'dbbbbbbbdbbbbbbd', fill('d'), 'dbbbbbbbdbbbbbbd',
+    'dbccccccdbccccbd', 'dbcbbbbcdbcbbcbd', 'dbcbbbbcdbcbbcbd',
+    'dbccccccdbccccbd', 'dbbbbbbbdbbbbbbd', fill('d'),
+    'dbbbbbbbdbbbbbbd'
+  ]);
+  T('t_metalwall', MT, [
+    fill('d'), fill('c'), 'cbbbbbbbbbbbbbba',
+    'cbaaaaaaaaaaaaba', 'cbabbbbbbbbbbaba', 'cbabbbbbbbbbbaba',
+    'cbaaaaaaaaaaaaba', 'cbbbbbbbbbbbbbba', fill('o'),
+    fill('c'), 'cbbbbbbbbbbbbbba', 'cbaaaaaaaaaaaaba',
+    'cbabbbbbbbbbbaba', 'cbaaaaaaaaaaaaba', 'cbbbbbbbbbbbbbba',
+    fill('o')
+  ]);
+
+  // Indigo Plateau — pale marble. The end of the road should look expensive.
+  var MB = { o: '#5a5468', a: '#8d879e', b: '#b8b2c6', c: '#d9d5e2', w: C.white };
+  T('t_marble', MB, [
+    fill('c'), 'cbccccccccccccbc', 'ccccccbccccccccc',
+    fill('o'), fill('c'), 'ccccbccccccbcccc',
+    fill('c'), fill('o'), fill('c'),
+    'cbcccccccccccccc', 'ccccccccbccccccc', fill('o'),
+    fill('c'), 'cccccbcccccccbcc', fill('c'), fill('o')
+  ]);
+  T('t_marblewall', MB, [
+    fill('w'), fill('c'), 'cbbbbbbbbbbbbbbc',
+    'cbbbbbbbbbbbbbbc', 'caaaaaaaaaaaaaac', fill('o'),
+    fill('c'), 'cbbbbbbbbbbbbbbc', 'cbbbbbbbbbbbbbbc',
+    'caaaaaaaaaaaaaac', fill('o'), fill('c'),
+    'cbbbbbbbbbbbbbbc', 'cbbbbbbbbbbbbbbc', 'caaaaaaaaaaaaaac',
+    fill('o')
+  ]);
+
+  // =============================================================== TILES ====
+  // G.TILES — gameplay properties. img/anim reference the G.ART names above.
   G.TILES = {
+    // ---- ground ----
     grass:     { img: 't_grass' },
     grass2:    { img: 't_grass2' },
     tallgrass: { img: 't_tallgrass', grass: true },
     flower:    { anim: ['t_flower1', 't_flower2'], animSpeed: 32 },
-    deco_flowerY: { img: 't_deco_flowerY' },
-    deco_pebble:  { img: 't_deco_pebble' },
-    deco_bush:    { img: 't_deco_bush' },
-    deco_palm:    { img: 't_deco_palm' },
-    deco_shell:   { img: 't_deco_shell' },
-    deco_cinder:  { img: 't_deco_cinder' },
-    lava:      { img: 't_lava', solid: true },
-    // ---- endgame lair tiles ----
-    seabed:    { img: 't_seabed' },
-    kelp:      { anim: ['t_kelp1', 't_kelp2'], animSpeed: 30, grass: true },
-    coral:     { img: 't_coral', solid: true },
-    bubbles:   { anim: ['t_bubbles1', 't_bubbles2', 't_bubbles3'], animSpeed: 20 },
-    basalt:    { img: 't_basalt' },
-    emberfloor:{ anim: ['t_emberfloor1', 't_emberfloor2'], animSpeed: 26, cave: true },
-    obsidian:  { img: 't_obsidian', solid: true },
     path:      { img: 't_path' },
     path_n:    { img: 't_path_n' },
     path_s:    { img: 't_path_s' },
     path_e:    { img: 't_path_e' },
     path_w:    { img: 't_path_w' },
+    sand:      { img: 't_sand' },
+
+    // ---- decoration (scattered procedurally; never blocks) ----
+    deco_flowerY: { img: 't_deco_flowerY' },
+    deco_pebble:  { img: 't_deco_pebble' },
+    deco_bush:    { img: 't_deco_bush' },
+    deco_stump:   { img: 't_deco_stump' },
+    deco_fern:    { img: 't_deco_fern' },
+
+    // ---- water ----
+    water:     { anim: ['t_water1', 't_water2', 't_water3', 't_water4'], animSpeed: 24, solid: true, water: true },
+    deepwater: { anim: ['t_deepwater1', 't_deepwater2', 't_deepwater3', 't_deepwater4'], animSpeed: 24, solid: true, water: true },
+    shore_n:   { img: 't_shore_n' },
+    shore_s:   { img: 't_shore_s' },
+    shore_w:   { img: 't_shore_w' },
+    shore_e:   { img: 't_shore_e' },
+
+    // ---- nature ----
     tree_tl:   { img: 't_tree_tl', solid: true },
     tree_tr:   { img: 't_tree_tr', solid: true },
     tree_bl:   { img: 't_tree_bl', solid: true },
     tree_br:   { img: 't_tree_br', solid: true },
+    cuttree:   { img: 't_cuttree', solid: true, cut: true },
+    boulder:   { img: 't_boulder', solid: true, strength: true },
     ledge:     { img: 't_ledge', ledge: 'down' },
+    rock:      { img: 't_rock', solid: true },
+    cliff:     { img: 't_cliff', solid: true },
+
+    // ---- town ----
     fence:     { img: 't_fence', solid: true },
     sign:      { img: 't_sign', solid: true },
+    wall:      { img: 't_wall', solid: true },
+    window:    { img: 't_window', solid: true },
+    door:      { img: 't_door', door: true },
+    gdoor:     { img: 't_gdoor', door: true },
+    gymdoor:   { img: 't_gymdoor', door: true },
+    healsign:  { img: 't_healsign', solid: true },
+    shopsign:  { img: 't_shopsign', solid: true },
 
-    roof_tl: { img: 't_roof_tl', solid: true }, roof_tm: { img: 't_roof_tm', solid: true },
-    roof_tr: { img: 't_roof_tr', solid: true }, roof_bl: { img: 't_roof_bl', solid: true },
-    roof_bm: { img: 't_roof_bm', solid: true }, roof_br: { img: 't_roof_br', solid: true },
-    wall:    { img: 't_wall', solid: true },    window: { img: 't_window', solid: true },
-    door:    { img: 't_door', door: true },
-    gdoor:   { img: 't_gdoor', door: true },
-
-    lroof_tl: { img: 't_lroof_tl', solid: true }, lroof_tm: { img: 't_lroof_tm', solid: true },
-    lroof_tr: { img: 't_lroof_tr', solid: true }, lroof_bl: { img: 't_lroof_bl', solid: true },
-    lroof_bm: { img: 't_lroof_bm', solid: true }, lroof_br: { img: 't_lroof_br', solid: true },
-    droof_tl: { img: 't_droof_tl', solid: true }, droof_tm: { img: 't_droof_tm', solid: true },
-    droof_tr: { img: 't_droof_tr', solid: true }, droof_bl: { img: 't_droof_bl', solid: true },
-    droof_bm: { img: 't_droof_bm', solid: true }, droof_br: { img: 't_droof_br', solid: true },
-    lwall:    { img: 't_lwall', solid: true },    lwindow: { img: 't_lwindow', solid: true },
-    ldoor:    { img: 't_ldoor', door: true },
-
-    ifloor: { img: 't_ifloor' },
-    iwall:  { img: 't_iwall', solid: true },
-    imat:   { img: 't_imat' },
-    itable: { img: 't_itable', solid: true },
-    ibook:  { img: 't_ibook', solid: true },
-    imach:  { img: 't_imach', solid: true },
-    ibed_t: { img: 't_ibed_t', solid: true },
-    ibed_b: { img: 't_ibed_b', solid: true },
-    iplant: { img: 't_iplant', solid: true },
-    istool: { img: 't_istool', solid: true },
-
-    water:   { anim: ['t_water1', 't_water2', 't_water3', 't_water4'], animSpeed: 24, solid: true, water: true },
-    deepwater: { anim: ['t_deepwater1', 't_deepwater2', 't_deepwater3', 't_deepwater4'], animSpeed: 24, solid: true },
-    // beaches are walkable so you can wade from the sand into the sea and swim
-    shore_n: { img: 't_shore_n' },
-    shore_s: { img: 't_shore_s' },
-    shore_w: { img: 't_shore_w' },
-    shore_e: { img: 't_shore_e' },
-    sand:    { img: 't_sand' },
-    cliff:   { img: 't_cliff', solid: true },
-    rock:    { img: 't_rock', solid: true },
-
-    cavefloor: { img: 't_cavefloor', cave: true },
-    cavewall:  { img: 't_cavewall', solid: true },
-    crystal:   { img: 't_crystal', solid: true },
+    // ---- interiors ----
+    ifloor:    { img: 't_ifloor' },
+    iwall:     { img: 't_iwall', solid: true },
+    imat:      { img: 't_imat' },
+    itable:    { img: 't_itable', solid: true },
+    ibook:     { img: 't_ibook', solid: true },
+    imach:     { img: 't_imach', solid: true },
+    ibed_t:    { img: 't_ibed_t', solid: true },
+    ibed_b:    { img: 't_ibed_b', solid: true },
+    iplant:    { img: 't_iplant', solid: true },
+    istool:    { img: 't_istool', solid: true },
+    icounter:  { img: 't_icounter', solid: true },
+    ihealm:    { img: 't_ihealm', solid: true },
+    gfloor:    { img: 't_gfloor' },
+    redcarpet: { img: 't_redcarpet' },
+    statue:    { img: 't_statue', solid: true },
     stairs:    { img: 't_stairs' },
 
-    hroof_tl: { img: 't_hroof_tl', solid: true }, hroof_tm: { img: 't_hroof_tm', solid: true },
-    hroof_tr: { img: 't_hroof_tr', solid: true }, hroof_bl: { img: 't_hroof_bl', solid: true },
-    hroof_bm: { img: 't_hroof_bm', solid: true }, hroof_br: { img: 't_hroof_br', solid: true },
-    sroof_tl: { img: 't_sroof_tl', solid: true }, sroof_tm: { img: 't_sroof_tm', solid: true },
-    sroof_tr: { img: 't_sroof_tr', solid: true }, sroof_bl: { img: 't_sroof_bl', solid: true },
-    sroof_bm: { img: 't_sroof_bm', solid: true }, sroof_br: { img: 't_sroof_br', solid: true },
-    healsign: { img: 't_healsign', solid: true },
-    hroofx: { img: 't_hroofx', solid: true },
-    sroofx: { img: 't_sroofx', solid: true },
-    lroofx: { img: 't_lroofx', solid: true },
-    shopsign: { img: 't_shopsign', solid: true },
-    gymdoor:  { img: 't_gymdoor', door: true },
+    // ---- caves ----
+    cavefloor: { img: 't_cavefloor', cave: true },
+    cavewall:  { img: 't_cavewall', solid: true },
+    darkfloor: { img: 't_darkfloor', cave: true },
+    darkwall:  { img: 't_darkwall', solid: true },
+    icefloor:  { img: 't_icefloor', cave: true },
+    icewall:   { img: 't_icewall', solid: true },
 
-    icounter: { img: 't_icounter', solid: true },
-    ihealm:   { img: 't_ihealm', solid: true },
-    gfloor:   { img: 't_gfloor' },
-    redcarpet:{ img: 't_redcarpet' },
-    statue:   { img: 't_statue', solid: true }
+    // ---- special interiors ----
+    towerfloor: { img: 't_towerfloor' },
+    towerwall:  { img: 't_towerwall', solid: true },
+    grave:      { img: 't_grave', solid: true },
+    metalfloor: { img: 't_metalfloor' },
+    metalwall:  { img: 't_metalwall', solid: true },
+    marble:     { img: 't_marble' },
+    marblewall: { img: 't_marblewall', solid: true }
   };
+
+  // Roof pieces are mechanical: five colour sets x seven pieces, all solid.
+  // Registering them in a loop keeps the table honest — a missing piece would
+  // be a silent hole in a building, so generating beats typing 35 lines.
+  ['roof', 'hroof', 'sroof', 'groof', 'lroof'].forEach(function (r) {
+    ['_tl', '_tm', '_tr', '_bl', '_bm', '_br', 'x'].forEach(function (p) {
+      G.TILES[r + p] = { img: 't_' + r + p, solid: true };
+    });
+  });
 })();
-
-

@@ -14,8 +14,8 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 data layer (151 species, 165 moves, type chart) | done — generated from `pret/pokered` |
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
-| **Kanto tileset** | next |
-| **Kanto maps** | not started — this is the big one |
+| Kanto tileset | done — 110 tiles, rendered and reviewed |
+| **Kanto maps** | next — this is the big one |
 | Encounter tables | parser ready (`pokered.loadWild`), not wired |
 | Region map screen | still draws Hoenn |
 | Gen 1 move effects in battle.js | descriptors emitted, engine doesn't read them all yet |
@@ -35,7 +35,12 @@ run yet.
 - **Validate**: `node tools/check.js` — loads every script in `index.html`
   order under Node, lints art grids / maps / species / moves, runs the battle
   tests. Run after EVERY map or data edit.
-- **Visual review**: headless Edge screenshots. Use `--headless=new` AND a
+- **Look at the art**: `node tools/render_tiles.js tools/tiles.png 4` writes a
+  contact sheet of every tile PLUS three composed scenes (route, town block,
+  interiors) and does not need a browser. Tiles that look fine alone often tile
+  badly, so always check the scenes. Object tiles are transparent-backed, so the
+  scene composer underlays a ground tile the way the overworld renderer does.
+- **Visual review in-engine**: headless Edge screenshots. Use `--headless=new` AND a
   unique `--user-data-dir` per invocation — the default profile locks and
   silently writes no PNG.
 
@@ -101,6 +106,10 @@ run yet.
   disable / haze / mist / screen / rest / switchout / payday / rage / explode).
   Unhandled kinds currently fall through as plain damage.
 - `assets/sprites/*/README.txt` still describe the gen3 bring-your-own-art flow.
+- Object tiles (trees, rocks, boulders, decorations, signs, fences) are
+  transparent-backed on purpose so they can sit on any ground. Do NOT bake a
+  grass surround back into them — that was the original Hoenn bug and it made
+  boulders show green fringes inside caves.
 - `tools/recipes.js`, `tools/bake_mons.js`, `tools/spritegen.js` are the gen3
   creature-baking pipeline and are now dead — battlers stream. Delete once the
   tileset work confirms nothing else uses `spritegen`.
