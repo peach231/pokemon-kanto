@@ -188,7 +188,12 @@
       this.player.x = x; this.player.y = y;
       this.player.dir = dir || this.player.dir;
       this.player.moving = false; this.player.step = 0; this.player.hop = 0;
-      this.player.vehicle = null; // never start a new map mid-swim
+      // Arriving on a water tile means you arrived SURFING — the sea routes
+      // have no beach to land on, so clearing the vehicle unconditionally
+      // (which is what the inherited code did) dropped you into the ocean on
+      // foot and wedged you there.
+      var arriveDef = this.tileDefAt(x, y);
+      this.player.vehicle = (arriveDef && arriveDef.water) ? 'swim' : null;
       this.npcs = [];
       var defs = (map.npcs || []).concat(map.trainers || []);
       for (var i = 0; i < defs.length; i++) {
@@ -615,6 +620,14 @@
       // boulder or a stretch of water is a locked door, and the key is an HM
       // plus the badge that licenses it.
       var fdef = w.tileDefAt(fx, fy);
+      // Some tiles ARE the interaction — BLAINE's quiz shutters answer to
+      // being talked to, which is why walking up to one feels like being
+      // asked a question rather than meeting a quizmaster.
+      if (fdef && fdef.story && G.TILE_EVENTS) {
+        var tname = w.tileNameAt('deco', fx, fy) || w.tileNameAt('ground', fx, fy);
+        var ev = G.TILE_EVENTS[tname];
+        if (ev && G.EVENTS[ev]) { G.runEvent(ev); return; }
+      }
       if (fdef && fdef.cut && G.tryCut) { G.tryCut(fx, fy); return; }
       if (fdef && fdef.strength && G.tryStrength) { G.tryStrength(fx, fy); return; }
 

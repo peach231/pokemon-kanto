@@ -90,6 +90,9 @@
     gra0: '#141420', gra1: '#242436', gra2: '#38384e', gra3: '#4e4e68', gra4: '#6a6a86',
     // Indoor floorboards and plaster.
     wud0: '#9a7a54', wud1: '#b8946c', wud2: '#cfae86',
+    // Pokemon Mansion — charred timber. Warm enough to have been a house,
+    // dark enough that it plainly is not one any more.
+    brn0: '#1c1410', brn1: '#30231a', brn2: '#463228', brn3: '#5e4436', brn4: '#7a5a46',
     pls0: '#5c6a86', pls1: '#7d8aa6', pls2: '#9daac4',
     // Gym floor.
     gfl0: '#4a5568', gfl1: '#5f6d84', gfl2: '#77879e'

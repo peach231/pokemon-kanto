@@ -931,6 +931,23 @@
   caveFloor('t_darkfloor', GRA);  caveWall('t_darkwall', GRA);
   // Seafoam Islands — ice over rock.
   caveFloor('t_icefloor', IC);    caveWall('t_icewall', IC);
+  // Pokemon Mansion — charred timber and soot. Same generator as the caves
+  // because a burnt-out building and a cave are the same thing to walk
+  // through: irregular, dark, and nobody has swept it.
+  var BRN = { o: C.brn0, a: C.brn1, b: C.brn2, c: C.brn3, d: C.brn4 };
+  caveFloor('t_burntfloor', BRN); caveWall('t_burntwall', BRN);
+
+  // A roller shutter, ribbed and industrial, with a question stencilled on
+  // it. Deliberately reads as machinery rather than as a door: it is the
+  // only thing in KANTO that opens for an ANSWER.
+  T('t_quizdoor', { o: C.mtl0, a: C.mtl1, b: C.mtl2, c: C.mtl3, w: C.white }, [
+    'oooooooooooooooo', 'abababababababab', 'bbbbbbbbbbbbbbbb',
+    'aaaaaaaaaaaaaaaa', 'oooooooooooooooo', 'abababababababab',
+    'bbwwbbbbwwbbwwbb', 'aawaaaawaaawaaaa', 'oowoooowoooowooo',
+    'abwwbabawwbawwba', 'bbbbbbbbbbbbbbbb', 'aaaaaaaaaaaaaaaa',
+    'oooooooooooooooo', 'abababababababab', 'bbbbbbbbbbbbbbbb',
+    'oooooooooooooooo'
+  ]);
 
   // ==================================================== SPECIAL INTERIORS ===
   // Pokemon Tower — cold violet stone. Lavender's tower should feel wrong.
@@ -1087,6 +1104,11 @@
     grave:      { img: 't_grave', solid: true },
     metalfloor: { img: 't_metalfloor' },
     metalwall:  { img: 't_metalwall', solid: true },
+    // BLAINE's shutters. Solid until the question on them is answered, at
+    // which point field.js edits the tile away.
+    quizdoor:   { img: 't_quizdoor', solid: true, story: true },
+    burntfloor: { img: 't_burntfloor' },
+    burntwall:  { img: 't_burntwall', solid: true },
     marble:     { img: 't_marble' },
     marblewall: { img: 't_marblewall', solid: true }
   };

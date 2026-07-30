@@ -53,6 +53,10 @@
   item('superrepel', 'Super Repel', 500, 'repel',  { steps: 200 }, 'Repels weak wild POKéMON for 200 steps.');
   item('maxrepel',   'Max Repel',   700, 'repel',  { steps: 250 }, 'Repels weak wild POKéMON for 250 steps.');
   item('escaperope', 'Escape Rope', 550, 'escape', {},             'Escapes instantly from a cave or dungeon.');
+  // One level, instantly. Gen 1 hid these in the places nobody sensible
+  // goes, which is the only reason a single level ever felt like a reward.
+  item('rarecandy',  'Rare Candy',    0, 'xp',     { amount: 0, levels: 1 },
+    'Raises a POKéMON by exactly one level.');
 
   // ------------------------------------------------------ evolution stones --
   // Fourteen species evolve by stone. Eevee's three branches are the reason

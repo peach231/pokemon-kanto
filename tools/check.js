@@ -148,7 +148,9 @@ for (const id in (G.MAPS || {})) {
     };
     const name = nm('deco') || nm('ground');
     const t = (name && G.TILES) ? G.TILES[name] : null;
-    return !!(t && t.solid);
+    // Water counts as passable: you arrive there SURFING, and the sea routes
+    // have no beach to land on by design.
+    return !!(t && t.solid && !t.water);
   };
   for (const tr of (m.trainers || [])) if (solidAt(m, tr.x, tr.y)) warn.push(`MAP ${id}: trainer at (${tr.x},${tr.y}) on a solid tile`);
   for (const it of (m.items || [])) if (solidAt(m, it.x, it.y)) warn.push(`MAP ${id}: item at (${it.x},${it.y}) on a solid tile`);
@@ -245,6 +247,11 @@ if (G.SPECIES) {
     const src = String(G.EVENTS[eid]);
     for (const mt of src.matchAll(/G\.flags\.([A-Za-z_$][\w$]*)\s*=/g)) set.add(mt[1]);
     for (const mt of src.matchAll(/G\.flags\[['"]([^'"]+)['"]\]\s*=/g)) set.add(mt[1]);
+  }
+  // Picking an item up off the ground sets its flag — that is done by the
+  // engine rather than by an event body, so a purely textual scan misses it.
+  for (const id in G.MAPS) {
+    for (const it of (G.MAPS[id].items || [])) if (it.flag) set.add(it.flag);
   }
   for (const [flag, where] of read) {
     if (!set.has(flag)) {
@@ -343,7 +350,7 @@ if (G.SPECIES) {
     const name = (m.deco && m.deco[pt.y][pt.x] !== '.' ? m.legend[m.deco[pt.y][pt.x]] : null) ||
                  m.legend[m.ground[pt.y][pt.x]] || m.base;
     const def = G.TILES[name];
-    if (!def || def.solid) errors.push(`FLY POINT ${id}: lands on '${name}', which is solid`);
+    if (!def || def.solid && !def.water) errors.push(`FLY POINT ${id}: lands on '${name}', which is solid`);
   }
   console.log(`  fly: ${Object.keys(G.FLY_POINTS || {}).length} destinations, all landable`);
 }
@@ -409,7 +416,7 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
       const ch = row && row[w.tx];
       const tile = ch != null ? G.TILES[t.legend[ch]] : null;
       if (!tile) errors.push(`WARP ${id} -> ${w.to}: lands out of bounds at (${w.tx},${w.ty})`);
-      else if (tile.solid) errors.push(`WARP ${id} -> ${w.to}: lands on SOLID '${t.legend[ch]}' at (${w.tx},${w.ty}) — soft-lock`);
+      else if (tile.solid && !tile.water) errors.push(`WARP ${id} -> ${w.to}: lands on SOLID '${t.legend[ch]}' at (${w.tx},${w.ty}) — soft-lock`);
       queue.push(w.to);
     }
   }

@@ -1888,4 +1888,1010 @@
     yield { t: 'text', s: 'Rocket: Which company? Does not matter. Turn around.' };
   };
 
+
+  // ============================================================== ROUTE 12 ==
+  // The fishing hut on SILENCE BRIDGE. The man inside gives away rods to
+  // anyone who asks, which is either generosity or recruitment.
+  G.MAPS.fishinghut = {
+    id: 'fishinghut', name: 'Fishing Hut', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'I(.T....PI',
+      'I)......oI',
+      'I........I',
+      'I..T.....I',
+      'I..o.....I',
+      'I........I',
+      'IIII..IIII',
+      '..........'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 7, to: 'route12', tx: 6, ty: 23, dir: 'down' },
+      { x: 5, y: 7, to: 'route12', tx: 6, ty: 23, dir: 'down' }
+    ],
+    npcs: [
+      { x: 4, y: 4, sprite: 'fisher', dir: 'down', event: 'goodRodGift' }
+    ]
+  };
+
+  // ============================================================== FUCHSIA ===
+  healCentre('fuchsiacentre', 'FUCHSIA', { map: 'fuchsia', x: 6, y: 9 });
+  pokeMart('fuchsiamart', 'FUCHSIA', { map: 'fuchsia', x: 20, y: 9 },
+    ['ultraball', 'greatball', 'hyperpotion', 'superpotion', 'fullheal', 'revive', 'maxrepel']);
+
+  // KOGA's gym. In Red/Blue this room is invisible walls — a puzzle built out
+  // of bad information rather than out of geometry, and the only way through
+  // is to walk into things until you have mapped it by collision. This is the
+  // same idea made honest: a real maze, generated as a spanning tree so there
+  // is exactly one route from the door to KOGA and no walls you cannot see.
+  // Every dead end has a ninja in it who has clearly been waiting some time.
+  G.MAPS.fuchsiagym = {
+    id: 'fuchsiagym', name: 'Fuchsia Gym', w: 19, h: 17,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor', indoors: true,
+    gymTint: '#a040a0',
+    legend: { '.': 'gfloor', 'I': 'iwall' },
+    ground: pad([
+      'IIIIIIIIIIIIIIIIIII',
+      'I...I.....I.......I',
+      'I.I.III.I.IIIII.I.I',
+      'I.I.....I.....I.I.I',
+      'I.IIIIIIIIIII.III.I',
+      'I.I.......I...I...I',
+      'I.III.III.I.III.III',
+      'I...I...I...I.....I',
+      'III.III.IIIIIIIII.I',
+      'I...I...I.......I.I',
+      'I.III.IIIII.III.I.I',
+      'I.I...I.....I.I...I',
+      'I.I.III.IIIII.III.I',
+      'I.I.I...I.I.....I.I',
+      'I.I.I.III.I.III.I.I',
+      'I.I...I.......I...I',
+      'I.IIIIIIIIIIIIIIIII'
+    ], 19, 17),
+    deco: blank(19, 17),
+    warps: [
+      { x: 1, y: 16, to: 'fuchsia', tx: 5, ty: 19, dir: 'down' }
+    ],
+    trainers: [
+      { x: 17, y: 1, sprite: 'koga', dir: 'down', trainer: 'koga', sight: 0 },
+      { x: 5, y: 1, sprite: 'blackbelt', dir: 'down', trainer: 'fg_nob', sight: 0 },
+      { x: 9, y: 9, sprite: 'juggler', dir: 'down', trainer: 'fg_kirk', sight: 0 },
+      { x: 13, y: 11, sprite: 'juggler', dir: 'down', trainer: 'fg_shawn', sight: 0 },
+      { x: 9, y: 13, sprite: 'blackbelt', dir: 'down', trainer: 'fg_rocky', sight: 0 }
+    ],
+    npcs: [
+      { x: 1, y: 15, sprite: 'gymguy', dir: 'right', event: 'fuchsiaGymGuide' }
+    ]
+  };
+
+  G.EVENTS.fuchsiaGymGuide = function* () {
+    if (G.flags.badge5) {
+      yield { t: 'text', s: 'Guide: The SOULBADGE. Your POKéMON will SURF for you now — the whole south of KANTO just opened up.' };
+      return;
+    }
+    yield { t: 'text', s: 'Guide: KOGA does not beat you. He waits for you to beat yourself.' };
+    yield { t: 'text', s: 'Guide: TOXIC, then DOUBLE TEAM, then nothing. Every turn you miss, the poison gets worse.' };
+    yield { t: 'text', s: 'Guide: So do not settle in. Bring something fast that hits hard, and end it early.' };
+    yield { t: 'text', s: 'Guide: One route through, one way back. Mind the dead ends — they are not empty.' };
+  };
+
+  // The WARDEN. He cannot speak without his teeth, which is played for a laugh
+  // and then quietly stops being funny: he has been in charge of the preserve
+  // for forty years and nobody in town has learned to read his gestures.
+  G.MAPS.wardenhouse = {
+    id: 'wardenhouse', name: "Warden's House", w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'I(.B..B.PI',
+      'I)......oI',
+      'I........I',
+      'I...TT...I',
+      'I...oo...I',
+      'I........I',
+      'IIII..IIII',
+      '..........'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 7, to: 'fuchsia', tx: 20, ty: 19, dir: 'down' },
+      { x: 5, y: 7, to: 'fuchsia', tx: 20, ty: 19, dir: 'down' }
+    ],
+    npcs: [
+      { x: 4, y: 3, sprite: 'oldman', dir: 'down', event: 'wardenTeeth' }
+    ],
+    signs: [
+      { x: 6, y: 1, text: 'A framed photograph: a much younger man, standing in tall grass, grinning with all his teeth.' }
+    ]
+  };
+
+  G.EVENTS.wardenTeeth = function* () {
+    if (G.flags.warden_paid) {
+      yield { t: 'text', s: 'WARDEN: Come back any time! The ZONE is always open to you.' };
+      return;
+    }
+    if (G.player.bag.goldteeth) {
+      yield { t: 'text', s: 'WARDEN: Hnnf! Hnn hnnf!' };
+      yield { t: 'text', s: 'He is pointing at your bag. At the GOLD TEETH.' };
+      yield { t: 'text', s: 'You handed over the GOLD TEETH.' };
+      yield { t: 'sfx', s: 'heal' };
+      yield { t: 'fn', f: function () {
+        delete G.player.bag.goldteeth;
+        G.player.bag.hm04 = 1;
+        G.flags.warden_paid = 1;
+      } };
+      yield { t: 'text', s: 'WARDEN: There! Ahh, that is better. Forty years I have run that preserve and I have never once been able to say thank you properly.' };
+      yield { t: 'text', s: 'WARDEN: Take this. HM04. STRENGTH.' };
+      yield { t: 'text', s: 'You received HM04 STRENGTH!' };
+      yield { t: 'text', s: 'WARDEN: A POKéMON that knows it will shift any boulder in KANTO. There are more of those in your way than you think.' };
+      return;
+    }
+    yield { t: 'text', s: 'WARDEN: Hnn! Hnnf hnn hnnnf!' };
+    yield { t: 'text', s: 'He is trying very hard to tell you something and you cannot understand a word of it.' };
+    yield { t: 'text', s: 'He mimes something small. Then he taps his jaw, and looks embarrassed.' };
+  };
+
+  // ========================================================== SAFARI ZONE ===
+  // The gate. ₽500 buys thirty SAFARI BALLs and six hundred steps, and the
+  // step counter is the entire design: the two things worth having are at
+  // opposite ends of the preserve and you cannot fetch both in one visit
+  // unless you already know the way.
+  G.MAPS.safarigate = {
+    id: 'safarigate', name: 'Safari Zone Gate', w: 12, h: 10,
+    music: 'center', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIII..IIII',
+      'I..........I',
+      'I..........I',
+      'I..CCC..CC.I',
+      'I..........I',
+      'I..........I',
+      'I..........I',
+      'I..........I',
+      'IIII..IIIIII',
+      '............'
+    ], 12, 10),
+    deco: blank(12, 10),
+    warps: [
+      { x: 4, y: 8, to: 'fuchsia', tx: 12, ty: 5, dir: 'down' },
+      { x: 5, y: 8, to: 'fuchsia', tx: 13, ty: 5, dir: 'down' },
+      { x: 6, y: 0, to: 'safarizonecenter', tx: 12, ty: 18, dir: 'up' },
+      { x: 7, y: 0, to: 'safarizonecenter', tx: 13, ty: 18, dir: 'up' }
+    ],
+    npcs: [
+      { x: 4, y: 4, sprite: 'clerk', dir: 'down', event: 'safariEnter' },
+      { x: 9, y: 6, sprite: 'gentleman', dir: 'left',
+        dialog: ['Six hundred steps. It sounds generous until you are four hundred in and lost.',
+                 'Count your turns, not your steps. That is the trick.'] }
+    ],
+    signs: [
+      { x: 3, y: 3, text: 'SAFARI ZONE RULES: no attacking. Throw BAIT to make them stay, throw a ROCK to make them catchable, and accept that both make them flightier.' }
+    ]
+  };
+
+  G.EVENTS.safariEnter = function* () {
+    if (G.flags.safari_active) {
+      yield { t: 'text', s: 'ATTENDANT: You are still on the clock! ' + (G.player.safariSteps || 0) + ' steps left.' };
+      return;
+    }
+    yield { t: 'text', s: 'ATTENDANT: Welcome to the SAFARI ZONE! ₽500 for thirty SAFARI BALLs and six hundred steps. Would you like to play?' };
+    var yes = { v: false };
+    yield { t: 'custom', scene: G.Chooser({
+      items: ['Yes', 'No'], cancelIndex: 1,
+      onPick: function (i) { yes.v = (i === 0); }
+    }) };
+    if (!yes.v) {
+      yield { t: 'text', s: 'ATTENDANT: Do come back!' };
+      return;
+    }
+    if (G.player.money < 500) {
+      yield { t: 'text', s: 'ATTENDANT: ...You do not have enough. I am sorry.' };
+      return;
+    }
+    yield { t: 'fn', f: function () {
+      G.player.money -= 500;
+      G.player.bag.safariball = 30;
+      G.player.safariSteps = 600;
+      G.flags.safari_active = 1;
+    } };
+    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'text', s: 'You received 30 SAFARI BALLs. The counter above the gate flicks over to 600.' };
+    yield { t: 'text', s: 'ATTENDANT: When it reaches zero, we come and get you. Good luck!' };
+  };
+
+  // The rest house in the middle of the preserve. Nothing here heals you —
+  // that would defeat the point — but the step counter stops while you talk.
+  G.MAPS.safarirest = {
+    id: 'safarirest', name: 'Safari Rest House', w: 10, h: 9,
+    music: 'center', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'I.T....P.I',
+      'I.o......I',
+      'I........I',
+      'I.o.o.o..I',
+      'I........I',
+      'I........I',
+      'IIII..IIII',
+      '..........'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 7, to: 'safarizonecenter', tx: 16, ty: 10, dir: 'down' },
+      { x: 5, y: 7, to: 'safarizonecenter', tx: 16, ty: 10, dir: 'down' }
+    ],
+    npcs: [
+      { x: 3, y: 4, sprite: 'workerm', dir: 'down',
+        dialog: ['Sit down a minute. The clock does not run in here.',
+                 'Everyone works that out eventually, usually about four hundred steps in.'] },
+      { x: 7, y: 4, sprite: 'picnicker', dir: 'left',
+        dialog: ['I come for the CHANSEY. I have never caught one.',
+                 'I have seen four. That is four more than most people.'] }
+    ]
+  };
+
+  // The SECRET HOUSE. Whoever lives here is not home, has never been home, and
+  // left HM03 on the table — the single most valuable object in the region,
+  // unguarded, at the far end of a preserve with a step limit.
+  G.MAPS.secrethouse = {
+    id: 'secrethouse', name: 'Secret House', w: 12, h: 10,
+    music: 'town', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'I(.......P.I',
+      'I).........I',
+      'I..........I',
+      'I....TT....I',
+      'I....oo....I',
+      'I..........I',
+      'I..........I',
+      'IIIII..IIIII',
+      '............'
+    ], 12, 10),
+    deco: blank(12, 10),
+    warps: [
+      { x: 5, y: 8, to: 'safarizonewest', tx: 8, ty: 6, dir: 'down' },
+      { x: 6, y: 8, to: 'safarizonewest', tx: 9, ty: 6, dir: 'down' }
+    ],
+    npcs: [
+      { x: 5, y: 3, sprite: 'oldman', dir: 'down', event: 'secretHouseSurf' }
+    ],
+    signs: [
+      { x: 9, y: 1, text: 'A logbook, open, thick with dust. The last entry is a species name nobody has ever catalogued, and a question mark.' }
+    ]
+  };
+
+  G.EVENTS.secretHouseSurf = function* () {
+    if (G.flags.got_surf) {
+      yield { t: 'text', s: 'He nods at you, then goes back to watching the window.' };
+      return;
+    }
+    yield { t: 'text', s: 'The old man does not seem surprised to see you. He does not seem to have been surprised by anything in a long time.' };
+    yield { t: 'text', s: '???: You walked all the way out here. Past the marsh, past the ranges, on a clock.' };
+    yield { t: 'text', s: '???: Most people turn back at the water. That is what the water is for.' };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'fn', f: function () { G.player.bag.hm03 = 1; G.flags.got_surf = 1; } };
+    yield { t: 'text', s: 'You received HM03 SURF!' };
+    yield { t: 'text', s: '???: Now the water is a road instead of a wall. Half of KANTO is only reachable that way, and none of it is on your map yet.' };
+    yield { t: 'text', s: '???: Go on. I have been waiting a very long time for someone to make the rest of it interesting.' };
+  };
+
+  // The GOOD ROD, from the man on the bridge. He gives it away because a rod
+  // that only ever catches MAGIKARP is a joke you should not have to keep.
+  G.EVENTS.goodRodGift = function* () {
+    if (G.player.bag.goodrod) {
+      yield { t: 'text', s: 'FISHING GURU: Any luck? The water under this bridge goes down further than the town does up.' };
+      return;
+    }
+    yield { t: 'text', s: 'FISHING GURU: I am the FISHING GURU. Do you like to fish?' };
+    yield { t: 'text', s: 'FISHING GURU: ...You are still using an OLD ROD. Oh, dear.' };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'fn', f: function () { G.player.bag.goodrod = 1; } };
+    yield { t: 'text', s: 'You received a GOOD ROD!' };
+    yield { t: 'text', s: 'FISHING GURU: That will pull up something with a spine in it. My brother in VERMILION has a better one still, if you can find him.' };
+  };
+
+  // SNORLAX. Two of them, asleep across two roads, and the same solution to
+  // both — which is why the POKé FLUTE is worth a whole tower of ghosts.
+  G.EVENTS.snorlaxWake = function* () {
+    var here = G.world.mapId;
+    if (!G.player.bag.pokeflute) {
+      yield { t: 'text', s: 'A SNORLAX is asleep across the whole road.' };
+      yield { t: 'text', s: 'It is breathing. That is the only thing about it that is doing anything.' };
+      yield { t: 'text', s: 'Shouting does not work. Shoving does not work. It does not even shift its weight.' };
+      return;
+    }
+    yield { t: 'text', s: 'A SNORLAX is asleep across the whole road.' };
+    yield { t: 'text', s: 'You played the POKé FLUTE.' };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'wait', frames: 30 };
+    yield { t: 'text', s: 'The SNORLAX opened one eye.' };
+    yield { t: 'text', s: 'It looked at you the way you look at an alarm clock.' };
+    yield { t: 'fn', f: function () {
+      if (here === 'route12') G.flags.snorlax12 = 1; else G.flags.snorlax16 = 1;
+    } };
+    yield { t: 'custom', scene: (function () {
+      var wild = G.makeMon('snorlax', 30);
+      G.player.dexSeen.snorlax = 1;
+      return G.BattleScene(
+        { party: G.player.party, foes: [wild], wild: true },
+        { bg: 'meadow', onEnd: G.afterBattle }
+      );
+    })() };
+    yield { t: 'text', s: 'The road is clear.' };
+  };
+
+  // ================================================= ROUTE 16 / 17 / 18 =====
+  // Gate buildings. Both are two-storey: the road on top crosses the road
+  // underneath, and the stairs between them are the only connection. That is
+  // how CYCLING ROAD gets over ROUTE 18 without either road acknowledging the
+  // other exists.
+  function roadGate(id, name, down, up, guardText) {
+    G.MAPS[id] = {
+      id: id, name: name, w: 10, h: 9,
+      music: 'center', battleBg: 'indoor', base: 'ifloor', indoors: true,
+      legend: G.LEG_INT,
+      ground: pad([
+        'IIII..IIII',
+        'I........I',
+        'I........I',
+        'I..C..C..I',
+        'I........I',
+        'I........I',
+        'I........I',
+        'IIII..IIII',
+        '..........'
+      ], 10, 9),
+      deco: blank(10, 9),
+      warps: [
+        { x: 4, y: 7, to: down.map, tx: down.x, ty: down.y, dir: 'down' },
+        { x: 5, y: 7, to: down.map, tx: down.x, ty: down.y, dir: 'down' },
+        { x: 4, y: 0, to: up.map, tx: up.x, ty: up.y, dir: 'up' },
+        { x: 5, y: 0, to: up.map, tx: up.x, ty: up.y, dir: 'up' }
+      ],
+      npcs: [
+        { x: 3, y: 4, sprite: 'gymguy', dir: 'down', event: guardText }
+      ]
+    };
+  }
+
+  roadGate('cyclegate', 'Cycling Road Gate',
+    { map: 'route16', x: 5, y: 6 }, { map: 'route17', x: 9, y: 1 }, 'cycleGateGuard');
+  roadGate('route18gate', 'Route 18 Gate',
+    { map: 'route18', x: 5, y: 6 }, { map: 'route17', x: 9, y: 34 }, 'cycleGateGuard');
+
+  G.EVENTS.cycleGateGuard = function* () {
+    if (G.player.bag.bicycle) {
+      yield { t: 'text', s: 'GUARD: On you go. Mind the ledges — it is downhill the whole way and you cannot come back up.' };
+      return;
+    }
+    yield { t: 'text', s: 'GUARD: CYCLING ROAD is for BICYCLES. It is a hill with no brakes on it, and on foot you will be flattened.' };
+    yield { t: 'text', s: 'GUARD: Come back with a BICYCLE. There is a shop in CERULEAN.' };
+  };
+
+  // The house on ROUTE 16 with HM02. FLY is the only HM you are given rather
+  // than made to earn, which is deliberate: by the time you can reach it, you
+  // have walked every road in KANTO at least twice.
+  G.MAPS.flyhouse = {
+    id: 'flyhouse', name: 'A House on Route 16', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'I(.T....PI',
+      'I).....o.I',
+      'I........I',
+      'I..TT....I',
+      'I..oo....I',
+      'I........I',
+      'IIII..IIII',
+      '..........'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 7, to: 'route16', tx: 16, ty: 6, dir: 'down' },
+      { x: 5, y: 7, to: 'route16', tx: 16, ty: 6, dir: 'down' }
+    ],
+    npcs: [
+      { x: 4, y: 3, sprite: 'woman', dir: 'down', event: 'flyGift' }
+    ]
+  };
+
+  G.EVENTS.flyGift = function* () {
+    if (G.flags.got_fly) {
+      yield { t: 'text', s: 'She waves at you from the window seat. Her PIDGEY is asleep on the sill.' };
+      return;
+    }
+    yield { t: 'text', s: 'She is watching the road. There is a very old PIDGEY asleep on the windowsill beside her.' };
+    yield { t: 'text', s: '???: You have walked past this window four times now. West, then east, then west again.' };
+    yield { t: 'text', s: '???: Everyone does. There is only the one road and it goes one way.' };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'fn', f: function () { G.player.bag.hm02 = 1; G.flags.got_fly = 1; } };
+    yield { t: 'text', s: 'You received HM02 FLY!' };
+    yield { t: 'text', s: '???: Now you do not have to. Teach it to something with wings, open your TOWN MAP, and pick anywhere you have already been.' };
+    yield { t: 'text', s: '???: It will not take you anywhere new. That part is still yours.' };
+  };
+
+  // The SUPER ROD hut on ROUTE 15 — the third and last rod. The brothers have
+  // been handing these out down the length of the region for years.
+  G.MAPS.superrodhut = {
+    id: 'superrodhut', name: 'Fishing Brothers', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'I(.B..B.PI',
+      'I).......I',
+      'I........I',
+      'I..T.....I',
+      'I..o.....I',
+      'I........I',
+      'IIII..IIII',
+      '..........'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 7, to: 'route15', tx: 3, ty: 7, dir: 'down' },
+      { x: 5, y: 7, to: 'route15', tx: 3, ty: 7, dir: 'down' }
+    ],
+    npcs: [
+      { x: 4, y: 4, sprite: 'fisher', dir: 'down', event: 'superRodGift' }
+    ]
+  };
+
+  G.EVENTS.superRodGift = function* () {
+    if (G.player.bag.superrod) {
+      yield { t: 'text', s: 'FISHING GURU: Nothing left to give you. Go and use it.' };
+      return;
+    }
+    if (!G.player.bag.goodrod) {
+      yield { t: 'text', s: 'FISHING GURU: My brother on SILENCE BRIDGE hands out GOOD RODs. Start there.' };
+      yield { t: 'text', s: 'FISHING GURU: I am not giving the best one to somebody who has not held the middle one.' };
+      return;
+    }
+    yield { t: 'text', s: 'FISHING GURU: You have my brother\'s rod. I can tell — he files the grip down, always has.' };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'fn', f: function () { G.player.bag.superrod = 1; } };
+    yield { t: 'text', s: 'You received a SUPER ROD!' };
+    yield { t: 'text', s: 'FISHING GURU: That one reaches the bottom. Everything worth catching in KANTO lives at the bottom.' };
+  };
+
+  // ============================================================= CINNABAR ===
+  healCentre('cinnabarcentre', 'CINNABAR', { map: 'cinnabar', x: 15, y: 6 });
+  pokeMart('cinnabarmart', 'CINNABAR', { map: 'cinnabar', x: 16, y: 15 },
+    ['ultraball', 'greatball', 'maxpotion', 'hyperpotion', 'fullheal', 'revive', 'maxrepel', 'escaperope']);
+
+  // The LAB. Two rooms in one: the fossil bench at the back, and the trade
+  // desk at the front. The fossil you did NOT take in MT. MOON is gone
+  // forever, which is the only irreversible choice in the game besides the
+  // starter and the DOJO.
+  G.MAPS.cinnabarlab = {
+    id: 'cinnabarlab', name: 'Pokémon Lab', w: 14, h: 14,
+    music: 'center', battleBg: 'indoor', base: 'ifloor', indoors: true,
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIIIII',
+      'I.HHH....HHH.I',
+      'I............I',
+      'I..T......T..I',
+      'I..o......o..I',
+      'I............I',
+      'I.CCCCCCCCCC.I',
+      'I............I',
+      'I..B..B..B...I',
+      'I............I',
+      'I..o......o..I',
+      'I............I',
+      'IIIII..IIIIIII',
+      '..............'
+    ], 14, 14),
+    deco: blank(14, 14),
+    warps: [
+      { x: 5, y: 12, to: 'cinnabar', tx: 7, ty: 6, dir: 'down' },
+      { x: 6, y: 12, to: 'cinnabar', tx: 8, ty: 6, dir: 'down' }
+    ],
+    npcs: [
+      { x: 4, y: 5, sprite: 'scientist', dir: 'down', event: 'fossilRevive' },
+      { x: 9, y: 5, sprite: 'scientist', dir: 'down', event: 'labTrade' },
+      { x: 3, y: 10, sprite: 'workerm', dir: 'right',
+        dialog: ['The MANSION was ours, once. Then it was not, and nobody will say what happened in between.',
+                 'The paperwork stops in the same month for every single project.'] }
+    ],
+    signs: [
+      { x: 2, y: 1, text: 'A centrifuge, running. Whatever is in it has been spinning for a very long time.' },
+      { x: 11, y: 1, text: 'A wall of specimen jars. Most are empty. The labels have not been removed.' }
+    ]
+  };
+
+  // Fossil revival. AERODACTYL from the OLD AMBER, OMANYTE from the HELIX,
+  // KABUTO from the DOME — the three species in the dex that cannot be caught
+  // anywhere, at any level, by anyone.
+  G.EVENTS.fossilRevive = function* () {
+    var FOSSILS = [
+      { item: 'domefossil', sp: 'kabuto', name: 'DOME FOSSIL' },
+      { item: 'helixfossil', sp: 'omanyte', name: 'HELIX FOSSIL' },
+      { item: 'oldamber', sp: 'aerodactyl', name: 'OLD AMBER' }
+    ];
+    var held = FOSSILS.filter(function (f) { return G.player.bag[f.item]; });
+    if (!held.length) {
+      yield { t: 'text', s: 'SCIENTIST: We can bring a POKéMON back from a fossil. We have done it four times.' };
+      yield { t: 'text', s: 'SCIENTIST: Bring me something old enough and I will show you.' };
+      return;
+    }
+    var f = held[0];
+    yield { t: 'text', s: 'SCIENTIST: That is a ' + f.name + '. Where did you— no. Never mind. May I?' };
+    yield { t: 'text', s: 'You handed over the ' + f.name + '.' };
+    yield { t: 'text', s: 'SCIENTIST: Come back in a while. This is not quick and it is not always kind.' };
+    yield { t: 'wait', frames: 60 };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'text', s: '...' };
+    yield { t: 'text', s: 'SCIENTIST: It worked. It always works, and it never stops being the strangest thing I have ever seen.' };
+    yield { t: 'fn', f: function () {
+      delete G.player.bag[f.item];
+      var mon = G.makeMon(f.sp, 30);
+      G.player.dexSeen[f.sp] = 1;
+      G.player.dexCaught[f.sp] = 1;
+      if (G.player.party.length < 6) G.player.party.push(mon);
+      else G.player.box.push(mon);
+      G.flags['revived_' + f.sp] = 1;
+    } };
+    yield { t: 'text', s: 'You received ' + G.SPECIES[f.sp].name.toUpperCase() + '!' };
+    yield { t: 'text', s: 'SCIENTIST: It has been extinct for a hundred million years and it is now standing in my lab, looking at me.' };
+    yield { t: 'text', s: 'SCIENTIST: Take it outside. Please.' };
+  };
+
+  G.EVENTS.labTrade = function* () {
+    if (G.flags.lab_trade) {
+      yield { t: 'text', s: 'SCIENTIST: My PONYTA is settling in nicely. Yours is somewhere on the other side of the sea by now.' };
+      return;
+    }
+    var mine = null, idx = -1;
+    for (var i = 0; i < G.player.party.length; i++) {
+      if (G.player.party[i].sp === 'raichu') { mine = G.player.party[i]; idx = i; break; }
+    }
+    yield { t: 'text', s: 'SCIENTIST: I run trades. Not for money — for the look on their faces when they arrive.' };
+    if (!mine) {
+      yield { t: 'text', s: 'SCIENTIST: I want a RAICHU. I will give you a PONYTA for it, and the PONYTA is a good one.' };
+      return;
+    }
+    yield { t: 'text', s: 'SCIENTIST: A RAICHU! Yes. Trade it for my PONYTA?' };
+    var yes = { v: false };
+    yield { t: 'custom', scene: G.Chooser({
+      items: ['Yes', 'No'], cancelIndex: 1, onPick: function (i) { yes.v = (i === 0); }
+    }) };
+    if (!yes.v) { yield { t: 'text', s: 'SCIENTIST: The offer stands.' }; return; }
+    yield { t: 'fn', f: function () {
+      var lvl = G.player.party[idx].level;
+      G.player.party[idx] = G.makeMon('ponyta', lvl);
+      G.player.party[idx].nickname = null;
+      G.player.dexCaught.ponyta = 1;
+      G.player.dexSeen.ponyta = 1;
+      G.flags.lab_trade = 1;
+    } };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'text', s: 'You traded your RAICHU for a PONYTA!' };
+    yield { t: 'text', s: 'SCIENTIST: A traded POKéMON grows faster. Nobody has ever explained why to my satisfaction.' };
+  };
+
+  // ================================================== POKéMON MANSION ======
+  // Burnt out, condemned, and the only building in KANTO that is a ruin rather
+  // than a room. BLAINE's SECRET KEY is in the basement, and so are the
+  // journals — six lines of research log that are the entire backstory of the
+  // strongest thing in the game, written by people who did not survive writing
+  // them.
+  function mansionFloor(id, name, rowsIn, opts) {
+    G.MAPS[id] = {
+      id: id, name: name, w: 20, h: 20,
+      music: 'cave', battleBg: 'indoor', base: 'burntfloor', indoors: true,
+      legend: { '.': 'burntfloor', '#': 'burntwall', '>': 'stairs' },
+      ground: pad(rowsIn, 20, 20),
+      deco: blank(20, 20),
+      encounters: (G.ENCOUNTERS || {})[opts.enc || id],
+      warps: opts.warps,
+      signs: opts.signs || [],
+      npcs: opts.npcs || [],
+      items: opts.items || [],
+      trainers: opts.trainers || []
+    };
+  }
+
+  mansionFloor('mansion1f', 'Pokémon Mansion 1F', [
+      '####################',
+      '#..................#',
+      '#.####.######.####.#',
+      '#.#..#.#....#.#..#.#',
+      '#.#..#.#....#.#..#.#',
+      '#.#..#.#.>..#.#..#.#',
+      '#.####.######.####.#',
+      '#..................#',
+      '#.########.#######.#',
+      '#.#......#.#.....#.#',
+      '#.#......#.#.....#.#',
+      '#.#......#.#.....#.#',
+      '#.########.#######.#',
+      '#..................#',
+      '#.####.######.#####.',
+      '#.#..#.#....#......#',
+      '#.#..#.#....#.####.#',
+      '#....#.#....#....#.#',
+      '#########..#########',
+      '####################'
+    ], {
+    warps: [
+      { x: 9, y: 18, to: 'cinnabar', tx: 8, ty: 11, dir: 'down' },
+      { x: 10, y: 18, to: 'cinnabar', tx: 9, ty: 11, dir: 'down' },
+      { x: 9, y: 5, to: 'mansion2f', tx: 11, ty: 9, dir: 'up' }
+    ],
+    signs: [
+      { x: 5, y: 7, text: 'A research journal, water-damaged. "DIARY: JULY 5. GUYANA, SOUTH AMERICA. A new POKéMON was discovered deep in the jungle."' },
+      { x: 14, y: 13, text: 'Scorch marks up the wall, and a handprint in the soot at shoulder height. Someone left in a hurry.' }
+    ],
+    items: [
+      { x: 3, y: 9, item: 'escaperope', flag: 'mn_rope' },
+      { x: 16, y: 3, item: 'tm14', flag: 'mn_tm14' }
+    ],
+    trainers: [
+      { x: 6, y: 13, sprite: 'scientist', dir: 'right', trainer: 'mn_braydon', sight: 3 },
+      { x: 15, y: 9, sprite: 'burglar', dir: 'left', trainer: 'mn_ramon', sight: 3 }
+    ]
+  });
+
+  mansionFloor('mansion2f', 'Pokémon Mansion 2F', [
+      '####################',
+      '#..................#',
+      '#.#####.#####.####.#',
+      '#.#...#.#...#.#..#.#',
+      '#.#...#.#...#.#..#.#',
+      '#.#####.#####.####.#',
+      '#..................#',
+      '#.####.#########.#.#',
+      '#.#..#.#.......#.#.#',
+      '#.#..#.#..>....#.#.#',
+      '#.#..#.#.......#.#.#',
+      '#.####.#########.#.#',
+      '#..................#',
+      '#.#############.##.#',
+      '#.#...........#....#',
+      '#.#....>......#.####',
+      '#.#...........#....#',
+      '#.#############....#',
+      '#..................#',
+      '####################'
+    ], {
+    warps: [
+      { x: 10, y: 9, to: 'mansion1f', tx: 10, ty: 5, dir: 'down' },
+      { x: 7, y: 15, to: 'mansionb1f', tx: 10, ty: 5, dir: 'down' }
+    ],
+    signs: [
+      { x: 4, y: 3, text: '"DIARY: JULY 10. We named the newly discovered POKéMON MEW."' },
+      { x: 15, y: 8, text: '"DIARY: FEB 6. MEW gave birth. We named the new POKéMON MEWTWO."' }
+    ],
+    items: [
+      { x: 3, y: 18, item: 'maxpotion', flag: 'mn_maxpotion' },
+      { x: 16, y: 3, item: 'tm22', flag: 'mn_tm22' }
+    ],
+    trainers: [
+      { x: 9, y: 3, sprite: 'burglar', dir: 'down', trainer: 'mn_dalton', sight: 3 },
+      { x: 5, y: 14, sprite: 'scientist', dir: 'right', trainer: 'mn_ivan', sight: 3 }
+    ]
+  });
+
+  mansionFloor('mansionb1f', 'Pokémon Mansion B1F', [
+      '####################',
+      '#..................#',
+      '#.####.######.####.#',
+      '#.#..#.#....#.#..#.#',
+      '#.#..#.#....#.#..#.#',
+      '#.####.#.>..#.####.#',
+      '#......#....#......#',
+      '#.############.###.#',
+      '#.#..........#...#.#',
+      '#.#..........#...#.#',
+      '#.#..........#...#.#',
+      '#.############...#.#',
+      '#................#.#',
+      '#.##############.#.#',
+      '#.#............#.#.#',
+      '#.#............#...#',
+      '#.##############.###',
+      '#..................#',
+      '#..................#',
+      '####################'
+    ], {
+    warps: [
+      { x: 9, y: 5, to: 'mansion2f', tx: 7, ty: 16, dir: 'up' }
+    ],
+    signs: [
+      { x: 5, y: 9, text: '"DIARY: SEPT 1. MEWTWO is far too strong. We have failed to curb its vicious tendencies."' },
+      { x: 14, y: 15, text: 'The last page is not a diary entry. It is a single word, pressed hard enough to tear the paper: RUN.' }
+    ],
+    items: [
+      { x: 3, y: 15, item: 'secretkey', flag: 'got_secretkey' },
+      { x: 16, y: 9, item: 'rarecandy', flag: 'mn_candy' },
+      { x: 6, y: 17, item: 'fullrestore', flag: 'mn_full' }
+    ],
+    trainers: [
+      { x: 12, y: 12, sprite: 'burglar', dir: 'left', trainer: 'mn_kelly', sight: 3 }
+    ],
+    npcs: [
+      { x: 10, y: 17, sprite: 'scientist', dir: 'down',
+        dialog: ['I worked here. I was twenty-four and I thought we were doing biology.',
+                 'It got out through the wall. Not a door. The wall.',
+                 'They tell people the fire was an accident.'] }
+    ]
+  });
+
+  // ================================================== ZAPDOS ================
+  // The first legendary most players find, because the POWER PLANT is the one
+  // that is merely far away rather than gated behind the endgame. Level 50,
+  // one of it, and if you knock it out it does not come back.
+  G.EVENTS.zapdosEncounter = function* () {
+    yield { t: 'text', s: 'The hum in the walls is not the building.' };
+    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'wait', frames: 24 };
+    yield { t: 'text', s: 'ZAPDOS is sitting in the switchgear. It has been here long enough that the whole plant has started to sound like it.' };
+    yield { t: 'fn', f: function () { G.flags.zapdos_seen = 1; } };
+    yield { t: 'custom', scene: (function () {
+      var wild = G.makeMon('zapdos', 50);
+      G.player.dexSeen.zapdos = 1;
+      return G.BattleScene(
+        { party: G.player.party, foes: [wild], wild: true },
+        { bg: 'indoor', onEnd: function (res, b) {
+            if (res === 'caught' || res === 'won') G.flags.zapdos_caught = 1;
+            G.afterBattle(res, b);
+          } }
+      );
+    })() };
+  };
+
+  // ================================================== CINNABAR GYM — BLAINE =
+  // Red/Blue built this gym as a quiz. Six shutters down one corridor, each
+  // with a yes/no question about POKéMON printed on it; answer right and it
+  // opens, answer wrong and the trainer standing behind it comes out.
+  //
+  // It is the only gym in the game that tests whether you have been PAYING
+  // ATTENTION rather than whether you have been grinding, and it is the best
+  // idea in Gen 1's level design. Keeping it was not optional.
+  G.MAPS.cinnabargym = {
+    id: 'cinnabargym', name: 'Cinnabar Gym', w: 12, h: 18,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor', indoors: true,
+    gymTint: '#e05030',
+    legend: { '.': 'gfloor', 'I': 'iwall', 'Q': 'quizdoor' },
+    ground: pad([
+      'IIIIIIIIIIII',
+      'I..........I',
+      'I..........I',
+      'IIIIIQQIIIII',
+      'I..........I',
+      'I..........I',
+      'IIIIIQQIIIII',
+      'I..........I',
+      'I..........I',
+      'IIIIIQQIIIII',
+      'I..........I',
+      'I..........I',
+      'IIIIIQQIIIII',
+      'I..........I',
+      'I..........I',
+      'IIIIIQQIIIII',
+      'I..........I',
+      'IIIII..IIIII'
+    ], 12, 18),
+    deco: blank(12, 18),
+    warps: [
+      { x: 5, y: 17, to: 'cinnabar', tx: 6, ty: 15, dir: 'down' },
+      { x: 6, y: 17, to: 'cinnabar', tx: 7, ty: 15, dir: 'down' }
+    ],
+    trainers: [
+      { x: 5, y: 1, sprite: 'blaine', dir: 'down', trainer: 'blaine', sight: 0 },
+      { x: 2, y: 13, sprite: 'supernerd', dir: 'right', trainer: 'bg_erik', sight: 0 },
+      { x: 9, y: 10, sprite: 'supernerd', dir: 'left', trainer: 'bg_derek', sight: 0 },
+      { x: 2, y: 7, sprite: 'burglar', dir: 'right', trainer: 'bg_ramon', sight: 0 },
+      { x: 9, y: 4, sprite: 'supernerd', dir: 'left', trainer: 'bg_avery', sight: 0 }
+    ],
+    npcs: [
+      { x: 2, y: 16, sprite: 'gymguy', dir: 'right', event: 'cinnabarGymGuide' }
+    ]
+  };
+
+  G.EVENTS.cinnabarGymGuide = function* () {
+    if (G.flags.badge7) {
+      yield { t: 'text', s: 'Guide: The VOLCANOBADGE. There is one gym left, and everybody already knows who runs it.' };
+      return;
+    }
+    yield { t: 'text', s: 'Guide: BLAINE puts a quiz on every shutter. Get it right, it opens. Get it wrong, it opens anyway — but you fight whoever is behind it first.' };
+    yield { t: 'text', s: 'Guide: So you cannot get stuck. You can only get tired.' };
+    yield { t: 'text', s: 'Guide: WATER, ROCK or GROUND. And bring a BURN HEAL, because he will burn you.' };
+  };
+
+  // The quiz. Answers are Gen 1's own, including the mean one about DVs that
+  // nobody in 1996 had the vocabulary for.
+  var GYM_QUIZ = [
+    { q: 'CATERPIE evolves into BUTTERFREE?', a: false,
+      s: 'It evolves into METAPOD first. BUTTERFREE comes after.' },
+    { q: 'There are nine certified POKéMON LEAGUE BADGEs?', a: false,
+      s: 'There are eight. You are collecting them.' },
+    { q: 'POLIWAG evolves three times?', a: true,
+      s: 'POLIWAG, POLIWHIRL, POLIWRATH. Three stages, two evolutions.' },
+    { q: 'ELECTRIC moves are effective against GROUND types?', a: false,
+      s: 'They do nothing at all. Not resisted — nothing.' },
+    { q: 'Two POKéMON of the same kind and level are always identical?', a: false,
+      s: 'They are never identical. Every one is rolled differently the moment you meet it.' }
+  ];
+
+  // Quiz shutters are a TILE with an event, not an NPC — the door itself is
+  // the thing you talk to, which is why walking up to it feels like being
+  // asked a question rather than meeting a quizmaster.
+  G.TILE_EVENTS = G.TILE_EVENTS || {};
+  G.TILE_EVENTS.quizdoor = 'blaineQuiz';
+
+  G.EVENTS.blaineQuiz = function* () {
+    var w = G.world, p = w.player, d = G.DIRS[p.dir];
+    var fx = p.x + d.dx, fy = p.y + d.dy;
+    // Which shutter is this? Five of them, top to bottom, so the question is
+    // stable for a given door rather than random each time.
+    var idx = [15, 12, 9, 6, 3].indexOf(fy);
+    if (idx < 0) idx = 0;
+    var quiz = GYM_QUIZ[idx];
+    yield { t: 'text', s: 'A shutter, with a question stencilled across it.' };
+    yield { t: 'text', s: 'BLAINE: ' + quiz.q };
+    var said = { v: null };
+    yield { t: 'custom', scene: G.Chooser({
+      items: ['Yes', 'No'], cancelIndex: 1,
+      onPick: function (i) { said.v = (i === 0); }
+    }) };
+    var right = (said.v === quiz.a);
+    var open = function () {
+      // Both shutter tiles on this row, so the corridor is actually passable.
+      G.setTileEdit(w.mapId, 5, fy, 'gfloor');
+      G.setTileEdit(w.mapId, 6, fy, 'gfloor');
+      w.refreshTiles();
+    };
+    if (right) {
+      yield { t: 'text', s: 'Correct! ' + quiz.s };
+      yield { t: 'sfx', s: 'confirm' };
+      yield { t: 'fn', f: open };
+      yield { t: 'text', s: 'The shutter rolled up.' };
+      return;
+    }
+    yield { t: 'text', s: 'Wrong. ' + quiz.s };
+    yield { t: 'text', s: 'The shutter rolled up anyway — and somebody was standing behind it.' };
+    yield { t: 'sfx', s: 'cancel' };
+    yield { t: 'fn', f: open };
+  };
+
+  // ================================================== SEAFOAM ISLANDS =======
+  // Two floors of ice over rock with the sea running straight through them.
+  // ARTICUNO is at the bottom, and the only way down is to shift a boulder
+  // with STRENGTH — so the WARDEN's teeth, found in a marsh on the far side of
+  // the region, are what stands between you and a legendary bird.
+  function seafoamFloor(id, name, rowsIn, opts) {
+    G.MAPS[id] = {
+      id: id, name: name, w: 20, h: opts.h,
+      music: 'cave', battleBg: 'cave', base: 'icefloor', indoors: true,
+      legend: G.LEG_CAVE,
+      ground: pad(rowsIn, 20, opts.h),
+      deco: blank(20, opts.h),
+      encounters: (G.ENCOUNTERS || {})[id],
+      warps: opts.warps,
+      signs: opts.signs || [],
+      npcs: opts.npcs || [],
+      items: opts.items || []
+    };
+  }
+
+  seafoamFloor('seafoam1f', 'Seafoam Islands 1F', [
+      '####################',
+      '#iiiiiiii##iiiiiiii#',
+      '#i######i##i######i#',
+      '#i#....i####i....#i#',
+      '#i#.##.iiiiii.##.#i#',
+      '#i#.#O......O#.#..i#',
+      '#i#.#.######.#.#..i#',
+      '#i#.#.#~~~~#.#.#..i#',
+      '#i#...#~~~~#...#..i#',
+      '#i#####~~~~#####..i#',
+      '#i.....>...........#',
+      '#iiiiiiiiiiiiiiiiii#',
+      '#i##..############i#',
+      '#iiii..iiiiiiiiiiii#',
+      '####################'
+    ], {
+    h: 15,
+    warps: [
+      { x: 5, y: 13, to: 'route20', tx: 14, ty: 4, dir: 'down' },
+      { x: 6, y: 13, to: 'route20', tx: 15, ty: 4, dir: 'down' },
+      { x: 7, y: 10, to: 'seafoamb1f', tx: 8, ty: 14, dir: 'down' }
+    ],
+    signs: [
+      { x: 10, y: 10, text: 'The current runs south through the rock. Something heavy would stop it.' }
+    ],
+    items: [
+      { x: 17, y: 5, item: 'ultraball', flag: 'sf_ultraball' }
+    ]
+  });
+
+  seafoamFloor('seafoamb1f', 'Seafoam Islands B1F', [
+      '####################',
+      '#..................#',
+      '#.####.######.####.#',
+      '#.#~~#.#~~~~#.#~~#.#',
+      '#.#~~#.#~~~~#.#~~#.#',
+      '#.####.######.####.#',
+      '#....O........O....#',
+      '#.################.#',
+      '#.#..............#.#',
+      '#.#....######....#.#',
+      '#.#....#....#....#.#',
+      '#.#....#....#....#.#',
+      '#.#....######....#.#',
+      '#.#..............#.#',
+      '#.####.>....######.#',
+      '#..................#',
+      '####################'
+    ], {
+    h: 17,
+    warps: [
+      { x: 7, y: 14, to: 'seafoam1f', tx: 8, ty: 10, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 15, text: 'It is colder down here than the sea outside has any right to make it.' }
+    ],
+    items: [
+      { x: 17, y: 1, item: 'maxrevive', flag: 'sf_maxrevive' }
+    ],
+    npcs: [
+      { x: 10, y: 10, sprite: 'articuno', obj: true, dir: 'down',
+        unlessFlag: 'articuno_caught', event: 'articunoEncounter' }
+    ]
+  });
+
+  G.EVENTS.articunoEncounter = function* () {
+    yield { t: 'text', s: 'The chamber is silent, and the silence has a shape.' };
+    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'wait', frames: 24 };
+    yield { t: 'text', s: 'ARTICUNO has been sitting in the cold long enough that the cold is coming from it.' };
+    yield { t: 'custom', scene: (function () {
+      var wild = G.makeMon('articuno', 50);
+      G.player.dexSeen.articuno = 1;
+      return G.BattleScene(
+        { party: G.player.party, foes: [wild], wild: true },
+        { bg: 'cave', onEnd: function (res, b) {
+            if (res === 'caught' || res === 'won') G.flags.articuno_caught = 1;
+            G.afterBattle(res, b);
+          } }
+      );
+    })() };
+  };
+
+  // OAK's aide on ROUTE 2 with HM05. FLASH is the only HM you are handed for
+  // filling in the POKéDEX rather than for having walked somewhere, which is
+  // the one time the game rewards you for the thing it keeps telling you is
+  // the point.
+  G.EVENTS.oaksAideFlash = function* () {
+    var caught = Object.keys(G.player.dexCaught || {}).length;
+    if (G.flags.got_flash) {
+      yield { t: 'text', s: 'AIDE: How is the DEX coming? ' + caught + ' so far.' };
+      return;
+    }
+    yield { t: 'text', s: "AIDE: I work for PROF. OAK. He sent me out here to wait for whoever filled in ten entries first." };
+    if (caught < 10) {
+      yield { t: 'text', s: 'AIDE: You have caught ' + caught + '. Come back at ten and I have something for you.' };
+      yield { t: 'text', s: 'AIDE: I have been sitting on this log for four months. I am not going anywhere.' };
+      return;
+    }
+    yield { t: 'text', s: 'AIDE: Ten! Finally. Do you know how long I have been on this log?' };
+    yield { t: 'sfx', s: 'heal' };
+    yield { t: 'fn', f: function () { G.player.bag.hm05 = 1; G.flags.got_flash = 1; } };
+    yield { t: 'text', s: 'You received HM05 FLASH!' };
+    yield { t: 'text', s: 'AIDE: There are caves in KANTO you cannot see your own feet in. ROCK TUNNEL is one. You will know the others when the screen goes dark.' };
+  };
 })();

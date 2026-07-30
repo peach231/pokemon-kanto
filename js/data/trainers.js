@@ -509,4 +509,291 @@
       return G.makeMon(key, p.level);
     });
   };
+
+  // ============================================== THE SOUTH-EAST (12-15) ===
+  // Levels here run 28-34. The south-east is deliberately a grind rather than
+  // a gauntlet: nothing on these routes counters you, there is just a great
+  // deal of it between one Centre and the next, and the walk back is longer
+  // than the walk forward.
+  tr('r12_martin', {
+    name: 'Martin', cls: 'Fisherman', sprite: 'trainer_fisher', ai: 'basic', money: 464,
+    party: [{ sp: 'goldeen', level: 28 }, { sp: 'seaking', level: 29 }],
+    intro: 'I have been on this bridge since before you were born.',
+    defeat: 'The fish are not biting either.'
+  });
+  tr('r12_stephen', {
+    name: 'Stephen', cls: 'Fisherman', sprite: 'trainer_fisher', ai: 'basic', money: 480,
+    party: [{ sp: 'poliwag', level: 28 }, { sp: 'poliwhirl', level: 29 }, { sp: 'tentacool', level: 28 }],
+    intro: 'Quiet! You will scare them.',
+    defeat: 'Now look what you have done.'
+  });
+  tr('r12_perry', {
+    name: 'Perry', cls: 'Bird Keeper', sprite: 'trainer_birdkeeper', ai: 'basic', money: 544,
+    party: [{ sp: 'pidgeotto', level: 29 }, { sp: 'farfetchd', level: 32 }],
+    intro: 'My birds range the whole coast. Yours?',
+    defeat: 'Fly home, then.'
+  });
+  tr('r13_perry', {
+    name: 'Bruce', cls: 'Bird Keeper', sprite: 'trainer_birdkeeper', ai: 'basic', money: 561,
+    party: [{ sp: 'pidgey', level: 29 }, { sp: 'pidgey', level: 29 }, { sp: 'pidgeotto', level: 31 }],
+    intro: 'You can see a long way out here. I saw you coming.',
+    defeat: 'And I saw that coming too, honestly.'
+  });
+  tr('r13_lola', {
+    name: 'Lola', cls: 'Beauty', sprite: 'trainer_beauty', ai: 'smart', money: 1350,
+    party: [{ sp: 'seaking', level: 30 }, { sp: 'seaking', level: 30 }, { sp: 'goldeen', level: 30 }],
+    intro: 'Do not get my shoes muddy.',
+    defeat: 'Well. That is the afternoon ruined.'
+  });
+  tr('r13_naomi', {
+    name: 'Naomi', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 1584,
+    party: [{ sp: 'nidorina', level: 31 }, { sp: 'nidoqueen', level: 33 }],
+    intro: 'Everyone walks this route. Almost nobody finishes it.',
+    defeat: 'Then finish it.'
+  });
+  tr('r13_irwin', {
+    name: 'Irwin', cls: 'Juggler', sprite: 'trainer_juggler', ai: 'smart', money: 1024,
+    party: [{ sp: 'kadabra', level: 29 }, { sp: 'mrmime', level: 31 }],
+    intro: 'Keep your eye on the one that is not moving.',
+    defeat: 'Ah. You did.'
+  });
+  tr('r14_lukas', {
+    name: 'Lukas', cls: 'Biker', sprite: 'trainer_biker', ai: 'basic', money: 640,
+    party: [{ sp: 'koffing', level: 31 }, { sp: 'grimer', level: 31 }, { sp: 'weezing', level: 33 }],
+    intro: 'This is our road. All of it.',
+    defeat: 'Take it, then.'
+  });
+  tr('r14_isaac', {
+    name: 'Isaac', cls: 'Biker', sprite: 'trainer_biker', ai: 'basic', money: 620,
+    party: [{ sp: 'voltorb', level: 30 }, { sp: 'magneton', level: 32 }],
+    intro: 'Nice walk? Must be slow.',
+    defeat: 'Whatever.'
+  });
+  tr('r14_bryce', {
+    name: 'Bryce', cls: 'Bird Keeper', sprite: 'trainer_birdkeeper', ai: 'basic', money: 578,
+    party: [{ sp: 'spearow', level: 31 }, { sp: 'fearow', level: 34 }],
+    intro: 'FEAROW does not come back when I call. It comes back when it wants.',
+    defeat: 'See? Gone again.'
+  });
+  tr('r14_hideo', {
+    name: 'Hideo', cls: 'Biker', sprite: 'trainer_biker', ai: 'smart', money: 680,
+    party: [{ sp: 'muk', level: 33 }, { sp: 'weezing', level: 33 }],
+    intro: 'Everyone on this road is poison. Ask yourself why.',
+    defeat: 'Because it works. Usually.'
+  });
+  tr('r15_chester', {
+    name: 'Chester', cls: 'Bird Keeper', sprite: 'trainer_birdkeeper', ai: 'basic', money: 595,
+    party: [{ sp: 'pidgeotto', level: 32 }, { sp: 'fearow', level: 33 }],
+    intro: 'FUCHSIA is close. So is a very bad afternoon for you.',
+    defeat: 'One of those was right.'
+  });
+  tr('r15_dalton', {
+    name: 'Dalton', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 1680,
+    party: [{ sp: 'sandslash', level: 33 }, { sp: 'dugtrio', level: 33 }, { sp: 'nidoking', level: 35 }],
+    intro: 'You are two badges off the LEAGUE and I can tell.',
+    defeat: 'Better than I thought. Still not enough.'
+  });
+  tr('r15_grace', {
+    name: 'Grace', cls: 'Beauty', sprite: 'trainer_beauty', ai: 'smart', money: 1440,
+    party: [{ sp: 'bellsprout', level: 31 }, { sp: 'weepinbell', level: 32 }, { sp: 'victreebel', level: 34 }],
+    intro: 'I grew all three of these myself.',
+    defeat: 'They will grow back.'
+  });
+
+  // ==================================================== FUCHSIA GYM — KOGA ==
+  // Every one of these is standing in a dead end. They have been there a
+  // while, and the maze means you meet them one at a time, alone, which is
+  // exactly how a ninja gym should work.
+  tr('fg_nob', {
+    name: 'Nob', cls: 'Black Belt', sprite: 'trainer_blackbelt', ai: 'basic', money: 774,
+    party: [{ sp: 'hitmonlee', level: 37 }, { sp: 'hitmonchan', level: 37 }],
+    intro: 'You found me. Few do.',
+    defeat: 'Go on, then. He is at the end.'
+  });
+  tr('fg_kirk', {
+    name: 'Kirk', cls: 'Juggler', sprite: 'trainer_juggler', ai: 'smart', money: 1056,
+    party: [{ sp: 'drowzee', level: 33 }, { sp: 'hypno', level: 36 }],
+    intro: 'Did you take a wrong turn, or the right one?',
+    defeat: 'The right one, apparently.'
+  });
+  tr('fg_shawn', {
+    name: 'Shawn', cls: 'Juggler', sprite: 'trainer_juggler', ai: 'smart', money: 1088,
+    party: [{ sp: 'kadabra', level: 34 }, { sp: 'venomoth', level: 36 } ],
+    intro: 'The walls here are honest. That is the only thing about this gym that is.',
+    defeat: 'Straight on. You cannot miss him.'
+  });
+  tr('fg_rocky', {
+    name: 'Rocky', cls: 'Black Belt', sprite: 'trainer_blackbelt', ai: 'basic', money: 795,
+    party: [{ sp: 'machoke', level: 36 }, { sp: 'machamp', level: 38 }],
+    intro: 'Dead end. Sorry.',
+    defeat: 'Back the way you came.'
+  });
+
+  // ================================= CYCLING ROAD AND THE WEST (16-21) =====
+  // Levels 28-38. This half of the region assumes SURF, so it assumes you have
+  // been to FUCHSIA, so it can stop being polite.
+  tr('r16_alex', {
+    name: 'Alex', cls: 'Biker', sprite: 'trainer_biker', ai: 'basic', money: 580,
+    party: [{ sp: 'koffing', level: 28 }, { sp: 'koffing', level: 28 }, { sp: 'grimer', level: 28 }],
+    intro: 'You are on foot. On our road.',
+    defeat: 'Fine. Walk.'
+  });
+  tr('r16_dwayne', {
+    name: 'Dwayne', cls: 'Biker', sprite: 'trainer_biker', ai: 'basic', money: 600,
+    party: [{ sp: 'voltorb', level: 29 }, { sp: 'voltorb', level: 29 }],
+    intro: 'Both of these explode. Just so you know going in.',
+    defeat: 'They exploded.'
+  });
+  tr('cr_charles', {
+    name: 'Charles', cls: 'Biker', sprite: 'trainer_biker', ai: 'basic', money: 620,
+    party: [{ sp: 'weezing', level: 31 }, { sp: 'muk', level: 31 }],
+    intro: 'You cannot stop on this road. Neither can I. Make it quick.',
+    defeat: 'Downhill. Always downhill.'
+  });
+  tr('cr_riley', {
+    name: 'Riley', cls: 'Biker', sprite: 'trainer_biker', ai: 'basic', money: 640,
+    party: [{ sp: 'raticate', level: 32 }, { sp: 'arbok', level: 33 }],
+    intro: 'Everyone comes down this hill. Nobody comes back up it.',
+    defeat: 'You will be back. Everyone is.'
+  });
+  tr('cr_joel', {
+    name: 'Joel', cls: 'Biker', sprite: 'trainer_biker', ai: 'smart', money: 660,
+    party: [{ sp: 'koffing', level: 31 }, { sp: 'weezing', level: 33 }, { sp: 'koffing', level: 31 }],
+    intro: 'Hold your breath.',
+    defeat: 'You can breathe now.'
+  });
+  tr('cr_glenn', {
+    name: 'Glenn', cls: 'Biker', sprite: 'trainer_biker', ai: 'smart', money: 680,
+    party: [{ sp: 'magneton', level: 33 }, { sp: 'electrode', level: 34 }],
+    intro: 'Speed is the only thing that matters here.',
+    defeat: 'Faster than me, then.'
+  });
+  tr('cr_jaren', {
+    name: 'Jaren', cls: 'Cue Ball', sprite: 'trainer_cueball', ai: 'smart', money: 720,
+    party: [{ sp: 'machoke', level: 34 }, { sp: 'primeape', level: 35 }],
+    intro: 'I am the last one on the hill. That is not an accident.',
+    defeat: 'Go on. FUCHSIA is at the bottom.'
+  });
+  tr('r18_jacob', {
+    name: 'Jacob', cls: 'Bird Keeper', sprite: 'trainer_birdkeeper', ai: 'basic', money: 612,
+    party: [{ sp: 'spearow', level: 33 }, { sp: 'fearow', level: 34 }],
+    intro: 'Nothing to do at the bottom of the hill but wait.',
+    defeat: 'Back to waiting.'
+  });
+  tr('r18_wilton', {
+    name: 'Wilton', cls: 'Bird Keeper', sprite: 'trainer_birdkeeper', ai: 'basic', money: 630,
+    party: [{ sp: 'pidgeotto', level: 34 }, { sp: 'fearow', level: 34 }, { sp: 'pidgey', level: 32 }],
+    intro: 'Three birds, one road.',
+    defeat: 'One road, no birds.'
+  });
+  tr('r19_douglas', {
+    name: 'Douglas', cls: 'Swimmer', sprite: 'trainer_swimmer', ai: 'basic', money: 592,
+    party: [{ sp: 'tentacool', level: 30 }, { sp: 'tentacruel', level: 32 }],
+    intro: 'You SURFED all the way out here? Good. Most people do not.',
+    defeat: 'Keep going west. It is worth it.'
+  });
+  tr('r19_denise', {
+    name: 'Denise', cls: 'Swimmer', sprite: 'trainer_swimmerf', ai: 'smart', money: 608,
+    party: [{ sp: 'shellder', level: 31 }, { sp: 'cloyster', level: 33 }],
+    intro: 'There is no land for a very long way in any direction.',
+    defeat: 'Mind the currents.'
+  });
+  tr('r19_matthew', {
+    name: 'Matthew', cls: 'Swimmer', sprite: 'trainer_swimmer', ai: 'basic', money: 624,
+    party: [{ sp: 'horsea', level: 31 }, { sp: 'seadra', level: 33 }],
+    intro: 'Out here you find out how good your POKéMON actually is.',
+    defeat: 'Now you know.'
+  });
+  tr('r20_nicole', {
+    name: 'Nicole', cls: 'Swimmer', sprite: 'trainer_swimmerf', ai: 'smart', money: 656,
+    party: [{ sp: 'goldeen', level: 32 }, { sp: 'seaking', level: 34 }],
+    intro: 'The SEAFOAM caves are cold enough to hurt. Do not go in wet.',
+    defeat: 'I did warn you.'
+  });
+  tr('r20_briana', {
+    name: 'Briana', cls: 'Swimmer', sprite: 'trainer_swimmer', ai: 'smart', money: 672,
+    party: [{ sp: 'staryu', level: 33 }, { sp: 'starmie', level: 35 }],
+    intro: 'CINNABAR is west. Everything else is water.',
+    defeat: 'West. Keep going west.'
+  });
+  tr('r20_axle', {
+    name: 'Axle', cls: 'Swimmer', sprite: 'trainer_swimmer', ai: 'basic', money: 640,
+    party: [{ sp: 'poliwhirl', level: 33 }, { sp: 'poliwrath', level: 35 }],
+    intro: 'This far out, nobody is coming to help either of us.',
+    defeat: 'Fair enough.'
+  });
+  tr('r21_barry', {
+    name: 'Barry', cls: 'Swimmer', sprite: 'trainer_swimmer', ai: 'smart', money: 704,
+    party: [{ sp: 'tentacruel', level: 35 }, { sp: 'starmie', level: 36 }],
+    intro: 'PALLET TOWN is north. You can nearly see it from here.',
+    defeat: 'Funny place to end up, going home the long way.'
+  });
+  tr('r21_ronald', {
+    name: 'Ronald', cls: 'Fisherman', sprite: 'trainer_fisher', ai: 'basic', money: 688,
+    party: [{ sp: 'magikarp', level: 33 }, { sp: 'gyarados', level: 37 }],
+    intro: 'The first one is a joke. The second one is not.',
+    defeat: 'Everyone underestimates the first one.'
+  });
+
+  // ================================================= POKéMON MANSION =======
+  // Scientists who used to work here, and burglars who have worked out that
+  // nobody is coming back for any of it.
+  tr('mn_braydon', {
+    name: 'Braydon', cls: 'Scientist', sprite: 'trainer_scientist', ai: 'smart', money: 1290,
+    party: [{ sp: 'magnemite', level: 33 }, { sp: 'magneton', level: 35 }, { sp: 'voltorb', level: 33 }],
+    intro: 'You should not be in here. Neither should I.',
+    defeat: 'I only came back for the notes.'
+  });
+  tr('mn_ramon', {
+    name: 'Ramon', cls: 'Burglar', sprite: 'trainer_burglar', ai: 'basic', money: 1440,
+    party: [{ sp: 'growlithe', level: 34 }, { sp: 'vulpix', level: 34 }],
+    intro: 'Place has been empty for years. Finders keepers.',
+    defeat: 'There is nothing good left anyway.'
+  });
+  tr('mn_dalton', {
+    name: 'Dalton', cls: 'Burglar', sprite: 'trainer_burglar', ai: 'smart', money: 1476,
+    party: [{ sp: 'ponyta', level: 35 }, { sp: 'rapidash', level: 37 }],
+    intro: 'Everything in here burns. Have you noticed that?',
+    defeat: 'Everything in here already burned once.'
+  });
+  tr('mn_ivan', {
+    name: 'Ivan', cls: 'Scientist', sprite: 'trainer_scientist', ai: 'smart', money: 1330,
+    party: [{ sp: 'electrode', level: 35 }, { sp: 'weezing', level: 36 }],
+    intro: 'Do not read the journals. I mean it kindly.',
+    defeat: 'You are going to read them.'
+  });
+  tr('mn_kelly', {
+    name: 'Kelly', cls: 'Burglar', sprite: 'trainer_burglar', ai: 'smart', money: 1512,
+    party: [{ sp: 'charmeleon', level: 36 }, { sp: 'ninetales', level: 38 }],
+    intro: 'The basement is the only part still worth robbing.',
+    defeat: 'Take the key. I could never get it to open anything.'
+  });
+
+  // ================================================ CINNABAR GYM — BLAINE ==
+  // One behind each shutter, and each of them has been standing there since
+  // the last time somebody got a question wrong.
+  tr('bg_erik', {
+    name: 'Erik', cls: 'Super Nerd', sprite: 'trainer_supernerd', ai: 'basic', money: 1188,
+    party: [{ sp: 'growlithe', level: 38 }, { sp: 'vulpix', level: 38 }],
+    intro: 'Wrong! Sorry. I do not make the questions.',
+    defeat: 'Next shutter.'
+  });
+  tr('bg_derek', {
+    name: 'Derek', cls: 'Super Nerd', sprite: 'trainer_supernerd', ai: 'smart', money: 1224,
+    party: [{ sp: 'ponyta', level: 39 }, { sp: 'charmeleon', level: 39 }],
+    intro: 'You could have just known that.',
+    defeat: 'Now you do.'
+  });
+  tr('bg_ramon', {
+    name: 'Ramon', cls: 'Burglar', sprite: 'trainer_burglar', ai: 'smart', money: 1656,
+    party: [{ sp: 'ninetales', level: 40 }],
+    intro: 'I got the last one wrong as well. Twelve years ago.',
+    defeat: 'Still here, though.'
+  });
+  tr('bg_avery', {
+    name: 'Avery', cls: 'Super Nerd', sprite: 'trainer_supernerd', ai: 'smart', money: 1260,
+    party: [{ sp: 'rapidash', level: 40 }, { sp: 'arcanine', level: 41 }],
+    intro: 'Last shutter. He is right behind it.',
+    defeat: 'Go on.'
+  });
 })();

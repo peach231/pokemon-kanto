@@ -143,7 +143,9 @@
       { x: 5, y: 5, to: 'playerhome', tx: 4, ty: 7, dir: 'up' },
       { x: 15, y: 8, to: 'rivalhome', tx: 4, ty: 7, dir: 'up' },
       { x: 6, y: 14, to: 'oakslab', tx: 6, ty: 11, dir: 'up' },
-      { x: 7, y: 14, to: 'oakslab', tx: 7, ty: 11, dir: 'up' }
+      { x: 7, y: 14, to: 'oakslab', tx: 7, ty: 11, dir: 'up' },
+      { x: 10, y: 17, to: 'route21', tx: 8, ty: 1, dir: 'down' },
+      { x: 11, y: 17, to: 'route21', tx: 9, ty: 1, dir: 'down' }
     ],
     signs: [
       { x: 4, y: 6, text: 'PALLET TOWN — A quiet place with clean air.' },
@@ -357,7 +359,8 @@
     npcs: [
       { x: 13, y: 25, sprite: 'oldman', dir: 'left',
         dialog: ['The forest is the only road north, and it is full of BUG POKéMON.',
-                 'A FLYING or FIRE type makes short work of them.'] }
+                 'A FLYING or FIRE type makes short work of them.'] },
+      { x: 6, y: 7, sprite: 'scientist', dir: 'down', event: 'oaksAideFlash' }
     ]
   };
 
@@ -1100,7 +1103,9 @@
     warps: [
       { x: 0, y: 5, to: 'vermilion', tx: 23, ty: 7, dir: 'left' },
       { x: 0, y: 6, to: 'vermilion', tx: 23, ty: 7, dir: 'left' },
-      { x: 1, y: 2, to: 'diglettscave', tx: 4, ty: 23, dir: 'up' }
+      { x: 1, y: 2, to: 'diglettscave', tx: 4, ty: 23, dir: 'up' },
+      { x: 31, y: 5, to: 'route12', tx: 1, ty: 24, dir: 'right' },
+      { x: 31, y: 6, to: 'route12', tx: 1, ty: 24, dir: 'right' }
     ],
     signs: [
       { x: 3, y: 3, text: "DIGLETT'S CAVE — north entrance. Comes out on ROUTE 2, near PEWTER." }
@@ -1266,18 +1271,18 @@
       'tututututu..tutututu',
       'vxvxvxvxvx..vxvxvxvx'
     ].concat(rows([
-      '........pp......',   // 2
+      '........pp......',   //  2
       '..ggg...pp......',
-      '..ggg...pp..ggg.',
-      '........pp..ggg.',
-      '.lllll..pp......',
-      '........pp......',
-      '........pp......',
-      '....y...pp....o.',
-      '........pp......',
       '..ggg...pp......',
-      '..ggg...pp..ggg.',
-      '........pp......',
+      '........pp.[~~~~',   //  5  the lake. The POWER PLANT is on the far bank
+      '.lllll..pp.[~~~~',   //      and there is no bridge, because the plant
+      '........pp.[~~~E',   //  8  the door is on the FAR bank. No bridge was
+      '........pp.[~~~E',   //  9  ever built; the plant closed before one was.
+      '....y...pp.[~~~~',
+      '........pp.[~~~~',
+      '..ggg...pp.[~~~~',
+      '..ggg...pp.[~~~~',
+      '........pp.[~~~~',
       '........pp......',
       '........pp......'    // 15
     ], 2)), 20, 16),
@@ -1287,10 +1292,13 @@
       { x: 10, y: 0, to: 'rocktunnel1f', tx: 25, ty: 14, dir: 'up' },
       { x: 11, y: 0, to: 'rocktunnel1f', tx: 25, ty: 14, dir: 'up' },
       { x: 10, y: 15, to: 'lavender', tx: 12, ty: 1, dir: 'down' },
-      { x: 11, y: 15, to: 'lavender', tx: 13, ty: 1, dir: 'down' }
+      { x: 11, y: 15, to: 'lavender', tx: 13, ty: 1, dir: 'down' },
+      { x: 17, y: 8, to: 'powerplant', tx: 20, ty: 15, dir: 'right' },
+      { x: 17, y: 9, to: 'powerplant', tx: 20, ty: 15, dir: 'right' }
     ],
     signs: [
-      { x: 9, y: 12, text: 'ROUTE 10 — LAVENDER TOWN to the south.' }
+      { x: 9, y: 12, text: 'ROUTE 10 — LAVENDER TOWN to the south.' },
+      { x: 9, y: 5, text: 'POWER PLANT — DECOMMISSIONED. No access. (Across the water, and nobody built a bridge.)' }
     ],
     trainers: [
       { x: 13, y: 7, sprite: 'picnicker', dir: 'left', trainer: 'r10_carol', sight: 3 }
@@ -1343,7 +1351,9 @@
       { x: 21, y: 5, to: 'pokemontower1f', tx: 10, ty: 13, dir: 'up' },
       { x: 7, y: 11, to: 'lavenderhouse', tx: 4, ty: 7, dir: 'up' },
       { x: 19, y: 11, to: 'mrfujihouse', tx: 4, ty: 7, dir: 'up' },
-      { x: 7, y: 17, to: 'lavendermart', tx: 4, ty: 6, dir: 'up' }
+      { x: 7, y: 17, to: 'lavendermart', tx: 4, ty: 6, dir: 'up' },
+      { x: 12, y: 19, to: 'route12', tx: 10, ty: 1, dir: 'down' },
+      { x: 13, y: 19, to: 'route12', tx: 11, ty: 1, dir: 'down' }
     ],
     signs: [
       { x: 4, y: 13, text: 'LAVENDER TOWN — The Noble Purple Town.' },
@@ -1474,7 +1484,7 @@
       'tu..KLLLM.......4556....pptu',
       'vx..WNEEW.......WNDW....ppvx',
       'tu......................pptu',
-      'vxpppppppppppppppppppppppppp',
+      'pppppppppppppppppppppppppppp',
       'tu......................pptu',
       'vx..ABBC......f.........ppvx',
       'tu..abbc................pptu',
@@ -1489,6 +1499,8 @@
     deco: blank(28, 24),
     warps: [
       { x: 25, y: 13, to: 'route7', tx: 1, ty: 5, dir: 'right' },
+      { x: 0, y: 13, to: 'route16', tx: 24, ty: 6, dir: 'left' },
+      { x: 1, y: 13, to: 'route16', tx: 24, ty: 7, dir: 'left' },
       { x: 6, y: 5, to: 'celadonstore', tx: 6, ty: 10, dir: 'up' },
       { x: 7, y: 5, to: 'celadonstore', tx: 7, ty: 10, dir: 'up' },
       { x: 18, y: 5, to: 'celadoncentre', tx: 4, ty: 6, dir: 'up' },
@@ -1595,4 +1607,889 @@
     ]
   };
 
+
+  // ==========================================================================
+  // ROUTE 12 — the long coastal road south out of LAVENDER, sea down its whole
+  // east flank. A SNORLAX is asleep across the middle of it and has been for
+  // years; nothing shifts it, and the town has given up trying.
+  //
+  // This is where Kanto stops being a corridor. The road forks, the water is
+  // fishable end to end, and once you have SURF you can leave the path
+  // entirely and strike east into open sea.
+  // ==========================================================================
+  G.MAPS.route12 = {
+    id: 'route12', name: 'Route 12', w: 20, h: 32,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututupptutututu',
+      'vxvxvxvxvxppvxvxvxvx',
+      'tu........pp......tu',
+      'vx........pp......vx',
+      'tu..ggg...pp.[~~~~tu',
+      'vx..ggg...pp.[~~~~vx',
+      'tu........pp.[~~~~tu',
+      'vx....S...pp.[~~~~vx',
+      'tu........pp.[~~~~tu',
+      'vx........pp.[~~~~vx',
+      'tu........pp.[~~~~tu',
+      'vx........OO.[~~~~vx',
+      'tu........pp.[~~~~tu',
+      'vx........pp.[~~~~vx',
+      'tu..ggggg.pp.[~~~~tu',
+      'vx..ggggg.pp.[~~~~vx',
+      'tu........pp.[~~~~tu',
+      'vx.lllllllpp.[~~~~vx',
+      'tu........pp.[~~~~tu',
+      'vx........pp.[~~~~vx',
+      'tu..GHI...pp.[~~~~tu',
+      'vx..KLM...pp.[~~~~vx',
+      'tu..WEW...pp.[~~~~tu',
+      'vx........pp.[~~~~vx',
+      'pppppppppppp.[~~~~tu',
+      'vx........pp.[~~~~vx',
+      'tu..ggg...pp.[~~~~tu',
+      'vx..ggg...pp.[~~~~vx',
+      'tu........pp.[~~~~tu',
+      'vx........pp.[~~~~vx',
+      'tututututupptutututu',
+      'vxvxvxvxvxppvxvxvxvx'
+    ], 20, 32),
+    deco: blank(20, 32),
+    encounters: (G.ENCOUNTERS || {}).route12,
+    warps: [
+      { x: 10, y: 0, to: 'lavender', tx: 12, ty: 18, dir: 'up' },
+      { x: 11, y: 0, to: 'lavender', tx: 13, ty: 18, dir: 'up' },
+      { x: 0, y: 24, to: 'route11', tx: 30, ty: 5, dir: 'left' },
+      { x: 1, y: 24, to: 'route11', tx: 30, ty: 6, dir: 'left' },
+      { x: 10, y: 31, to: 'route13', tx: 2, ty: 2, dir: 'down' },
+      { x: 11, y: 31, to: 'route13', tx: 3, ty: 2, dir: 'down' },
+      { x: 6, y: 22, to: 'fishinghut', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 6, y: 7, text: 'ROUTE 12 — SILENCE BRIDGE. Fishing from the rail is permitted.' }
+    ],
+    npcs: [
+      { x: 10, y: 11, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax12', event: 'snorlaxWake' },
+      { x: 11, y: 11, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax12', event: 'snorlaxWake' },
+      { x: 9, y: 10, sprite: 'oldman', dir: 'right', unlessFlag: 'snorlax12',
+        dialog: ['That is a SNORLAX. It has been asleep across this road since before I was born.',
+                 'Shouting does nothing. Shoving does nothing. It just breathes.',
+                 'They say one sound in the world will wake it, and nobody has it.'] },
+      { x: 16, y: 6, sprite: 'fisher', dir: 'left',
+        dialog: ['This water runs all the way down to FUCHSIA and out to sea.',
+                 'A SUPER ROD gets you things an OLD ROD never will.'] }
+    ],
+    trainers: [
+      { x: 6, y: 14, sprite: 'fisher', dir: 'right', trainer: 'r12_martin', sight: 3 },
+      { x: 8, y: 19, sprite: 'fisher', dir: 'right', trainer: 'r12_stephen', sight: 3 },
+      { x: 5, y: 27, sprite: 'birdkeeper', dir: 'right', trainer: 'r12_perry', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 13 — the turn west. Open ground, almost no cover, and a line of
+  // trainers who can all see a long way. Kanto's south-east is where the
+  // difficulty stops being about the type chart and starts being about
+  // attrition: nothing here counters you, there is just a lot of it.
+  // ==========================================================================
+  G.MAPS.route13 = {
+    id: 'route13', name: 'Route 13', w: 30, h: 14,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tupptututututututututututututu',
+      'vxppvxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu..pp......................tu',
+      'vx..pp......................vx',
+      'tu..pp....ggggg.......ggggg.tu',
+      'vx..pp....ggggg.......ggggg.vx',
+      'pppppppppppppppppppppppppppptu',
+      'ppppppppppppppppppppppppppppvx',
+      'tu........llllll............tu',
+      'vx..............ggggg.......vx',
+      'tu..............ggggg.......tu',
+      'vx..........................vx',
+      'tututututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], 30, 14),
+    deco: blank(30, 14),
+    encounters: (G.ENCOUNTERS || {}).route13,
+    warps: [
+      { x: 2, y: 0, to: 'route12', tx: 10, ty: 30, dir: 'up' },
+      { x: 3, y: 0, to: 'route12', tx: 11, ty: 30, dir: 'up' },
+      { x: 0, y: 6, to: 'route14', tx: 21, ty: 2, dir: 'left' },
+      { x: 0, y: 7, to: 'route14', tx: 21, ty: 3, dir: 'left' }
+    ],
+    signs: [
+      { x: 5, y: 5, text: 'ROUTE 13 — FUCHSIA CITY, west. LAVENDER TOWN, north.' }
+    ],
+    trainers: [
+      { x: 10, y: 4, sprite: 'birdkeeper', dir: 'down', trainer: 'r13_perry', sight: 4 },
+      { x: 16, y: 9, sprite: 'beauty', dir: 'up', trainer: 'r13_lola', sight: 4 },
+      { x: 22, y: 4, sprite: 'cooltrainerf', dir: 'down', trainer: 'r13_naomi', sight: 4 },
+      { x: 26, y: 10, sprite: 'juggler', dir: 'up', trainer: 'r13_irwin', sight: 4 }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 14 — bikers. The gang that owns CYCLING ROAD ranges this far east,
+  // so you meet them here, on foot, before you ever see the road itself.
+  // ==========================================================================
+  G.MAPS.route14 = {
+    id: 'route14', name: 'Route 14', w: 24, h: 18,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tutututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu.................ppptu',
+      'vx.................pppvx',
+      'tu......ggggg......pp.tu',
+      'vx......ggggg......pp.vx',
+      'tu.................pp.tu',
+      'vxppppppppppppppppppppvx',
+      'tupppppppppppppppppppptu',
+      'vx.........lllll......vx',
+      'tu..ggggg.............tu',
+      'vx..ggggg.............vx',
+      'tu....................tu',
+      'pppppppppppppp........vx',
+      'tu....................tu',
+      'vx....................vx',
+      'tutututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvx'
+    ], 24, 18),
+    deco: blank(24, 18),
+    encounters: (G.ENCOUNTERS || {}).route14,
+    warps: [
+      { x: 21, y: 2, to: 'route13', tx: 1, ty: 6, dir: 'right' },
+      { x: 21, y: 3, to: 'route13', tx: 1, ty: 7, dir: 'right' },
+      { x: 0, y: 13, to: 'route15', tx: 30, ty: 5, dir: 'left' },
+      { x: 1, y: 13, to: 'route15', tx: 30, ty: 6, dir: 'left' }
+    ],
+    signs: [
+      { x: 4, y: 12, text: 'ROUTE 14 — Beware of bicycles at speed.' }
+    ],
+    trainers: [
+      { x: 8, y: 4, sprite: 'biker', dir: 'down', trainer: 'r14_lukas', sight: 4 },
+      { x: 14, y: 10, sprite: 'biker', dir: 'left', trainer: 'r14_isaac', sight: 4 },
+      { x: 5, y: 15, sprite: 'birdkeeper', dir: 'right', trainer: 'r14_bryce', sight: 4 },
+      { x: 18, y: 11, sprite: 'biker', dir: 'up', trainer: 'r14_hideo', sight: 4 }
+    ],
+    npcs: [
+      { x: 11, y: 14, sprite: 'biker', dir: 'down',
+        dialog: ['We ride CYCLING ROAD. Down the hill, west of here, all the way to FUCHSIA.',
+                 'No pedalling. It is downhill the whole way and you cannot stop.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 15 — the last stretch into FUCHSIA, running underneath CYCLING
+  // ROAD's southern end. The two-storey gate is how the road above crosses the
+  // road below without either of them noticing the other.
+  // ==========================================================================
+  G.MAPS.route15 = {
+    id: 'route15', name: 'Route 15', w: 32, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tutututututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu........ggggg...............tu',
+      'vx........ggggg...............vx',
+      'tuGHI.........................tu',
+      'ppKLMppppppppppppppppppppppppppp',
+      'ppWEWppppppppppppppppppppppppppp',
+      'vx.......lllllll..............vx',
+      'tu...................ggggg....tu',
+      'vx...................ggggg....vx',
+      'tutututututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], 32, 12),
+    deco: blank(32, 12),
+    encounters: (G.ENCOUNTERS || {}).route15,
+    warps: [
+      { x: 31, y: 5, to: 'route14', tx: 1, ty: 13, dir: 'right' },
+      { x: 31, y: 6, to: 'route14', tx: 1, ty: 13, dir: 'right' },
+      { x: 0, y: 5, to: 'fuchsia', tx: 28, ty: 9, dir: 'left' },
+      { x: 0, y: 6, to: 'fuchsia', tx: 28, ty: 9, dir: 'left' },
+      { x: 3, y: 6, to: 'superrodhut', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 6, y: 4, text: 'ROUTE 15 — FUCHSIA CITY, west. LAVENDER TOWN, a very long way north.' }
+    ],
+    trainers: [
+      { x: 12, y: 3, sprite: 'birdkeeper', dir: 'down', trainer: 'r15_chester', sight: 3 },
+      { x: 20, y: 8, sprite: 'cooltrainerm', dir: 'up', trainer: 'r15_dalton', sight: 3 },
+      { x: 26, y: 3, sprite: 'beauty', dir: 'down', trainer: 'r15_grace', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // FUCHSIA CITY — a town built around a wildlife preserve, which makes it the
+  // strangest place in Kanto: half quiet fishing town, half a fence with
+  // something enormous breathing on the other side.
+  //
+  // KOGA's gym is here and so is the SAFARI ZONE gate, and the Safari Zone is
+  // where SURF and STRENGTH come from. That makes Fuchsia the hinge the entire
+  // back half of the region turns on — every route you have not walked yet is
+  // on the far side of water or a boulder, and both keys are in there.
+  // ==========================================================================
+  G.MAPS.fuchsia = {
+    id: 'fuchsia', name: 'Fuchsia City', w: 30, h: 22,
+    music: 'town', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    gymEmblem: { x: 6, y: 16, type: 'poison' },
+    ground: pad([
+      'tututututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu........GHHHI.............tu',
+      'vx........KLLLM.............vx',
+      'tu........WNEEW.............tu',
+      'vx..........pp..............vx',
+      'tu..7889....pp....qrrz......tu',
+      'vx..d+mh....pp....i$jk......vx',
+      'tu..WNEW....pp....WNEW......tu',
+      'pppppppppppppppppppppppppppppp',
+      'tu..........pp..............tu',
+      'vx..FFFFF...pp...FFFFF......vx',
+      'tu..F...F...pp...F...F......tu',
+      'vx..F.Q.F...pp...F.Q.F......vx',
+      'tu..FFFFF...pp...FFFFF......tu',
+      'vx..........pp..............vx',
+      'tu..ABBC....pp....1223......tu',
+      'vx..abbc....pp....4556......vx',
+      'tu..WYYW....pp....WNDW......tu',
+      'vx..S.......pp..............vx',
+      'tu..........pp..............tu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvxvxvx'
+    ], 30, 22),
+    deco: blank(30, 22),
+    warps: [
+      { x: 0, y: 9, to: 'route18', tx: 24, ty: 6, dir: 'left' },
+      { x: 1, y: 9, to: 'route18', tx: 24, ty: 7, dir: 'left' },
+      { x: 29, y: 9, to: 'route15', tx: 1, ty: 5, dir: 'right' },
+      { x: 28, y: 9, to: 'route15', tx: 1, ty: 5, dir: 'right' },
+      { x: 12, y: 21, to: 'route19', tx: 8, ty: 1, dir: 'down' },
+      { x: 13, y: 21, to: 'route19', tx: 9, ty: 1, dir: 'down' },
+      { x: 12, y: 4, to: 'safarigate', tx: 4, ty: 7, dir: 'up' },
+      { x: 13, y: 4, to: 'safarigate', tx: 5, ty: 7, dir: 'up' },
+      { x: 6, y: 8, to: 'fuchsiacentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 20, y: 8, to: 'fuchsiamart', tx: 4, ty: 6, dir: 'up' },
+      { x: 5, y: 18, to: 'fuchsiagym', tx: 1, ty: 15, dir: 'up' },
+      { x: 6, y: 18, to: 'fuchsiagym', tx: 1, ty: 15, dir: 'up' },
+      { x: 20, y: 18, to: 'wardenhouse', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 19, text: 'FUCHSIA CITY — Behold! It is passion and pride!' },
+      { x: 5, y: 5, text: 'SAFARI ZONE — Entrance gate. ₽500 for 30 SAFARI BALLs and 600 steps.' },
+      { x: 5, y: 15, text: 'FUCHSIA CITY POKéMON GYM — LEADER: KOGA. The Poisonous Ninja Master!' }
+    ],
+    npcs: [
+      { x: 10, y: 12, sprite: 'oldman', dir: 'right',
+        dialog: ['These enclosures are the old zoo. We keep them because the children like them.',
+                 'The real animals are through the gate, and they are not behind anything.'] },
+      { x: 18, y: 13, sprite: 'gymguy', dir: 'left',
+        dialog: ['KOGA fights like a ninja, which mostly means he fights like a coward.',
+                 'TOXIC, then DOUBLE TEAM, then he waits you out. Bring an ANTIDOTE and something that hits hard and fast.',
+                 'PSYCHIC ends him. PSYCHIC ends most things, this generation.'] },
+      { x: 22, y: 20, sprite: 'fisher', dir: 'down',
+        dialog: ['South of town is open water all the way to CINNABAR.',
+                 'Nobody walks it. You SURF it, or you do not go.'] },
+      { x: 16, y: 10, sprite: 'littlegirl', dir: 'down',
+        dialog: ['The WARDEN lost his teeth somewhere in the SAFARI ZONE.',
+                 'He cannot say a word without them. It is very sad and a little bit funny.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // THE SAFARI ZONE — four connected preserves. No trainers, no visible
+  // fences, and a step counter running the entire time you are inside.
+  //
+  // Everything the back half of Kanto needs is in here, and both halves of it
+  // are as far from the gate as the preserve can put them: SURF in the SECRET
+  // HOUSE at the far west, and the WARDEN's GOLD TEETH out in the east marsh,
+  // which is what buys you STRENGTH. The step limit is the puzzle — you cannot
+  // fetch both in one visit unless you know exactly where you are going.
+  // ==========================================================================
+  function safariArea(id, name, rowsIn, opts) {
+    G.MAPS[id] = {
+      id: id, name: name, w: 26, h: 20,
+      music: 'route', battleBg: 'meadow', base: 'grass',
+      legend: G.LEG_EXT, safari: true,
+      ground: pad(rowsIn, 26, 20),
+      deco: blank(26, 20),
+      encounters: (G.ENCOUNTERS || {})[id],
+      warps: opts.warps,
+      signs: opts.signs || [],
+      npcs: opts.npcs || [],
+      items: opts.items || []
+    };
+  }
+
+  safariArea('safarizonecenter', 'Safari Zone — Centre', [
+      'tutututututu..tutututututu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvx',
+      'tu......................tu',
+      'vx..ggggg......ggggg....vx',
+      'tu..ggggg......ggggg....tu',
+      'vx......................vx',
+      'tu...~~~~~..............tu',
+      'vx...~~~~~....GHHHI.....vx',
+      'tu...~~~~~....KLLLM.....tu',
+      'vx............WNEEW.....vx',
+      'pp......................pp',
+      'vx......................vx',
+      'tu..ggggg......ggggg....tu',
+      'vx..ggggg......ggggg....vx',
+      'tu.....O................tu',
+      'vx......................vx',
+      'tu..ggggg......ggggg....tu',
+      'vx..ggggg......ggggg....vx',
+      'tu..........pp..........tu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvx'
+    ], {
+    warps: [
+      { x: 12, y: 19, to: 'safarigate', tx: 5, ty: 5, dir: 'down' },
+      { x: 13, y: 19, to: 'safarigate', tx: 6, ty: 5, dir: 'down' },
+      { x: 12, y: 0, to: 'safarizonenorth', tx: 12, ty: 18, dir: 'up' },
+      { x: 13, y: 0, to: 'safarizonenorth', tx: 13, ty: 18, dir: 'up' },
+      { x: 0, y: 10, to: 'safarizonewest', tx: 24, ty: 10, dir: 'left' },
+      { x: 1, y: 10, to: 'safarizonewest', tx: 24, ty: 10, dir: 'left' },
+      { x: 25, y: 10, to: 'safarizoneeast', tx: 1, ty: 10, dir: 'right' },
+      { x: 24, y: 10, to: 'safarizoneeast', tx: 1, ty: 10, dir: 'right' },
+      { x: 16, y: 9, to: 'safarirest', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 8, y: 14, text: 'SAFARI ZONE — CENTRE. West: the old ranges. East: the marsh. North: the plain.' }
+    ],
+    npcs: [
+      { x: 18, y: 14, sprite: 'scientist', dir: 'left',
+        dialog: ['Nothing in here has ever met a trainer, so nothing in here plays by trainer rules.',
+                 'You have SAFARI BALLs, you have bait and you have rocks. That is the whole toolkit.'] }
+    ]
+  });
+
+  safariArea('safarizonewest', 'Safari Zone — West', [
+      'tututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu......................tu',
+      'vx...GHHHI..............vx',
+      'tu...KLLLM....ggggg.....tu',
+      'vx...WNEEW....ggggg.....vx',
+      'tu......................tu',
+      'vx....~~~~~~~~..........vx',
+      'tu....~~~~~~~~..........tu',
+      'vx....~~~~~~~~..........vx',
+      'tu......................pp',
+      'vx......................vx',
+      'tu..ggggg......ggggg....tu',
+      'vx..ggggg......ggggg....vx',
+      'tu......................tu',
+      'vx.......O..............vx',
+      'tu..ggggg......ggggg....tu',
+      'vx..ggggg......ggggg....vx',
+      'tu......................tu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], {
+    warps: [
+      { x: 25, y: 10, to: 'safarizonecenter', tx: 1, ty: 10, dir: 'right' },
+      { x: 24, y: 10, to: 'safarizonecenter', tx: 1, ty: 10, dir: 'right' },
+      { x: 8, y: 5, to: 'secrethouse', tx: 5, ty: 7, dir: 'up' },
+      { x: 9, y: 5, to: 'secrethouse', tx: 6, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 12, y: 3, text: 'A hut. No path leads to it and nobody will say who built it.' }
+    ],
+    items: [
+      { x: 20, y: 16, item: 'goldteeth', flag: 'got_goldteeth' }
+    ]
+  });
+
+  safariArea('safarizoneeast', 'Safari Zone — East', [
+      'tututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu......................tu',
+      'vx..ggggg......ggggg....vx',
+      'tu..ggggg......ggggg....tu',
+      'vx......................vx',
+      'tu.......~~~~~~~........tu',
+      'vx.......~~~~~~~........vx',
+      'tu.......~~~~~~~........tu',
+      'vx.......~~~~~~~........vx',
+      'pp......................tu',
+      'vx......................vx',
+      'tu..ggggg......ggggg....tu',
+      'vx..ggggg......ggggg....vx',
+      'tu......O...............tu',
+      'vx......................vx',
+      'tu..ggggg......ggggg....tu',
+      'vx..ggggg......ggggg....vx',
+      'tu......................tu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], {
+    warps: [
+      { x: 0, y: 10, to: 'safarizonecenter', tx: 24, ty: 10, dir: 'left' },
+      { x: 1, y: 10, to: 'safarizonecenter', tx: 24, ty: 10, dir: 'left' }
+    ],
+    signs: [
+      { x: 12, y: 14, text: 'SAFARI ZONE — EAST MARSH. Ground is soft. Mind your footing.' }
+    ],
+    items: [
+      { x: 4, y: 4, item: 'maxpotion', flag: 'safari_maxpotion' }
+    ],
+    npcs: [
+      { x: 15, y: 12, sprite: 'workerm', dir: 'down',
+        dialog: ['Half of what lives out here has never been catalogued.',
+                 'We stopped trying. It kept eating the clipboards.'] }
+    ]
+  });
+
+  safariArea('safarizonenorth', 'Safari Zone — North', [
+      'tututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu......................tu',
+      'vx..ggggg......ggggg....vx',
+      'tu..ggggg......ggggg....tu',
+      'vx......................vx',
+      'tu..............O.......tu',
+      'vx..ggggg...............vx',
+      'tu..ggggg......ggggg....tu',
+      'vx.............ggggg....vx',
+      'tu......................tu',
+      'vx....~~~~~~............vx',
+      'tu....~~~~~~............tu',
+      'vx....~~~~~~............vx',
+      'tu......................tu',
+      'vx..ggggg......ggggg....vx',
+      'tu..ggggg......ggggg....tu',
+      'vx......................vx',
+      'tu..........pp..........tu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvx'
+    ], {
+    warps: [
+      { x: 12, y: 19, to: 'safarizonecenter', tx: 12, ty: 1, dir: 'down' },
+      { x: 13, y: 19, to: 'safarizonecenter', tx: 13, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 10, y: 6, text: 'SAFARI ZONE — NORTH PLAIN. The rarest residents keep to the far end.' },
+      { x: 18, y: 10, text: 'Tracks. Very large, very deep, and the stride is longer than a person.' }
+    ],
+    items: [
+      { x: 20, y: 4, item: 'ultraball', flag: 'safari_ultraball' }
+    ]
+  });
+
+  // ==========================================================================
+  // ROUTE 16 — west out of CELADON, and the second SNORLAX. One flute, two
+  // roads: this is why the POKé FLUTE is worth a whole tower of ghosts.
+  //
+  // The gate at the far end is the top of CYCLING ROAD, and you cannot reach
+  // it until the sleeper moves.
+  // ==========================================================================
+  G.MAPS.route16 = {
+    id: 'route16', name: 'Route 16', w: 26, h: 14,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu......................tu',
+      'vx..GHI.......1223......vx',
+      'tu..KLM.......4556......tu',
+      'vx..WEW.......WNDW......vx',
+      'tupppppppppppppppppppppppp',
+      'vxpppppppp**pppppppppppppp',
+      'tu......................tu',
+      'vx.......llllll.........vx',
+      'tu.....ggggg............tu',
+      'vx.....ggggg............vx',
+      'tututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], 26, 14),
+    deco: blank(26, 14),
+    encounters: (G.ENCOUNTERS || {}).route16,
+    warps: [
+      { x: 25, y: 6, to: 'celadon', tx: 1, ty: 13, dir: 'right' },
+      { x: 25, y: 7, to: 'celadon', tx: 1, ty: 13, dir: 'right' },
+      { x: 5, y: 5, to: 'cyclegate', tx: 4, ty: 7, dir: 'up' },
+      { x: 16, y: 5, to: 'flyhouse', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 8, y: 8, text: 'CYCLING ROAD — through the gate. BICYCLES ONLY. No pedestrians.' }
+    ],
+    npcs: [
+      { x: 10, y: 6, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax16', event: 'snorlaxWake' },
+      { x: 11, y: 6, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax16', event: 'snorlaxWake' },
+      { x: 13, y: 7, sprite: 'oldwoman', dir: 'left', unlessFlag: 'snorlax16',
+        dialog: ['Another one. There are two in KANTO and both of them chose a road.',
+                 'The council voted to build around it. Twice.'] }
+    ],
+    trainers: [
+      { x: 19, y: 9, sprite: 'biker', dir: 'up', trainer: 'r16_alex', sight: 3 },
+      { x: 21, y: 3, sprite: 'biker', dir: 'down', trainer: 'r16_dwayne', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // CYCLING ROAD — thirty-four tiles of downhill with a ledge across the full
+  // width every six. You cannot walk back up, which is the whole idea: it is
+  // the only road in KANTO that only goes one way, and the bikers who live on
+  // it treat that as a personality.
+  // ==========================================================================
+  G.MAPS.route17 = {
+    id: 'route17', name: 'Cycling Road', w: 20, h: 36,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tutututupppptutututu',
+      'vxvxvxvxppppvxvxvxvx',
+      'tu......pppp......tu',
+      'vx......pppp......vx',
+      'tu......pppp......tu',
+      'vx..*...pppp...*..vx',
+      'tu......pppp......tu',
+      'vxllllllppppllllllvx',
+      'tu......pppp......tu',
+      'vx......pppp......vx',
+      'tu......pppp......tu',
+      'vx..*...pppp...*..vx',
+      'tu......pppp......tu',
+      'vxllllllppppllllllvx',
+      'tu......pppp......tu',
+      'vx......pppp......vx',
+      'tu......pppp......tu',
+      'vx..*...pppp...*..vx',
+      'tu......pppp......tu',
+      'vxllllllppppllllllvx',
+      'tu......pppp......tu',
+      'vx......pppp......vx',
+      'tu......pppp......tu',
+      'vx..*...pppp...*..vx',
+      'tu......pppp......tu',
+      'vxllllllppppllllllvx',
+      'tu......pppp......tu',
+      'vx......pppp......vx',
+      'tu......pppp......tu',
+      'vx..*...pppp...*..vx',
+      'tu......pppp......tu',
+      'vxllllllppppllllllvx',
+      'tu......pppp......tu',
+      'vx......pppp......vx',
+      'tutututupppptutututu',
+      'vxvxvxvxppppvxvxvxvx'
+    ], 20, 36),
+    deco: blank(20, 36),
+    encounters: (G.ENCOUNTERS || {}).route17,
+    warps: [
+      { x: 8, y: 0, to: 'cyclegate', tx: 4, ty: 2, dir: 'up' },
+      { x: 9, y: 0, to: 'cyclegate', tx: 5, ty: 2, dir: 'up' },
+      { x: 10, y: 0, to: 'cyclegate', tx: 5, ty: 2, dir: 'up' },
+      { x: 11, y: 0, to: 'cyclegate', tx: 5, ty: 2, dir: 'up' },
+      { x: 8, y: 35, to: 'route18', tx: 5, ty: 5, dir: 'down' },
+      { x: 9, y: 35, to: 'route18', tx: 5, ty: 5, dir: 'down' },
+      { x: 10, y: 35, to: 'route18', tx: 5, ty: 6, dir: 'down' },
+      { x: 11, y: 35, to: 'route18', tx: 5, ty: 6, dir: 'down' }
+    ],
+    signs: [
+      { x: 6, y: 3, text: 'CYCLING ROAD — Downhill only. Do not attempt on foot.' }
+    ],
+    trainers: [
+      { x: 7, y: 7, sprite: 'biker', dir: 'right', trainer: 'cr_charles', sight: 4 },
+      { x: 12, y: 12, sprite: 'biker', dir: 'left', trainer: 'cr_riley', sight: 4 },
+      { x: 7, y: 18, sprite: 'biker', dir: 'right', trainer: 'cr_joel', sight: 4 },
+      { x: 12, y: 24, sprite: 'biker', dir: 'left', trainer: 'cr_glenn', sight: 4 },
+      { x: 7, y: 30, sprite: 'cueball', dir: 'right', trainer: 'cr_jaren', sight: 4 }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 18 — the flat run east into FUCHSIA at the bottom of the hill.
+  // ==========================================================================
+  G.MAPS.route18 = {
+    id: 'route18', name: 'Route 18', w: 26, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu......................tu',
+      'vx..GHI.................vx',
+      'tu..KLM....ggggg........tu',
+      'vx..WEW....ggggg........vx',
+      'tupppppppppppppppppppppppp',
+      'vxpppppppppppppppppppppppp',
+      'tu........lllll.........tu',
+      'vx......................vx',
+      'tututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], 26, 12),
+    deco: blank(26, 12),
+    encounters: (G.ENCOUNTERS || {}).route18,
+    warps: [
+      { x: 25, y: 6, to: 'fuchsia', tx: 1, ty: 9, dir: 'right' },
+      { x: 25, y: 7, to: 'fuchsia', tx: 1, ty: 9, dir: 'right' },
+      { x: 5, y: 5, to: 'route18gate', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 8, y: 8, text: 'ROUTE 18 — FUCHSIA CITY, east. CYCLING ROAD, through the gate.' }
+    ],
+    trainers: [
+      { x: 14, y: 3, sprite: 'birdkeeper', dir: 'down', trainer: 'r18_jacob', sight: 3 },
+      { x: 20, y: 9, sprite: 'birdkeeper', dir: 'up', trainer: 'r18_wilton', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTES 19-21 — open water. No path, no ledge, no gate: the sea IS the
+  // obstacle, and SURF is the only thing that turns it into a road. This is the
+  // biggest single change in the shape of the region, and it happens the
+  // moment you walk out of the SECRET HOUSE with an HM in your bag.
+  // ==========================================================================
+  G.MAPS.route19 = {
+    id: 'route19', name: 'Route 19', w: 16, h: 22,
+    music: 'route', battleBg: 'water', base: 'water',
+    legend: G.LEG_EXT,
+    ground: pad([
+      '%%%%%%%%%%%%%%%%',
+      '%%%%%%%%%%%%%%%%',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~%%%%%~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~%%%%%~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~'
+    ], 16, 22),
+    deco: blank(16, 22),
+    encounters: (G.ENCOUNTERS || {}).route19,
+    warps: [
+      { x: 8, y: 0, to: 'fuchsia', tx: 12, ty: 20, dir: 'up' },
+      { x: 9, y: 0, to: 'fuchsia', tx: 13, ty: 20, dir: 'up' },
+      { x: 8, y: 21, to: 'route20', tx: 32, ty: 6, dir: 'down' },
+      { x: 9, y: 21, to: 'route20', tx: 32, ty: 7, dir: 'down' }
+    ],
+    signs: [
+      { x: 6, y: 7, text: 'A weather buoy. SEAFOAM ISLANDS, west. CINNABAR ISLAND, west again and keep going.' }
+    ],
+    trainers: [
+      { x: 4, y: 5, sprite: 'swimmer', dir: 'right', trainer: 'r19_douglas', sight: 3 },
+      { x: 11, y: 11, sprite: 'swimmerf', dir: 'left', trainer: 'r19_denise', sight: 3 },
+      { x: 5, y: 17, sprite: 'swimmer', dir: 'right', trainer: 'r19_matthew', sight: 3 }
+    ]
+  };
+
+  G.MAPS.route20 = {
+    id: 'route20', name: 'Route 20', w: 34, h: 14,
+    music: 'route', battleBg: 'water', base: 'water',
+    legend: G.LEG_EXT,
+    ground: pad([
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~%%%%%%~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~%%##%%~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~%%##%%~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~%%%%%%~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~%%%%~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    ], 34, 14),
+    deco: blank(34, 14),
+    encounters: (G.ENCOUNTERS || {}).route20,
+    warps: [
+      { x: 33, y: 6, to: 'route19', tx: 8, ty: 20, dir: 'right' },
+      { x: 33, y: 7, to: 'route19', tx: 9, ty: 20, dir: 'right' },
+      { x: 0, y: 6, to: 'cinnabar', tx: 20, ty: 8, dir: 'left' },
+      { x: 0, y: 7, to: 'cinnabar', tx: 20, ty: 9, dir: 'left' },
+      { x: 14, y: 4, to: 'seafoam1f', tx: 4, ty: 12, dir: 'up' },
+      { x: 15, y: 4, to: 'seafoam1f', tx: 5, ty: 12, dir: 'up' }
+    ],
+    signs: [
+      { x: 13, y: 7, text: 'SEAFOAM ISLANDS — Sea currents run right through the caves. Do not enter without a plan.' }
+    ],
+    trainers: [
+      { x: 6, y: 3, sprite: 'swimmerf', dir: 'down', trainer: 'r20_nicole', sight: 3 },
+      { x: 22, y: 10, sprite: 'swimmer', dir: 'up', trainer: 'r20_briana', sight: 3 },
+      { x: 27, y: 3, sprite: 'swimmer', dir: 'down', trainer: 'r20_axle', sight: 3 }
+    ]
+  };
+
+  G.MAPS.route21 = {
+    id: 'route21', name: 'Route 21', w: 16, h: 24,
+    music: 'route', battleBg: 'water', base: 'water',
+    legend: G.LEG_EXT,
+    ground: pad([
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~%%%%%%%%~~~~',
+      '~~~~%%%%%%%%~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~%%%%%%%%~~~~',
+      '~~~~%%%%%%%%~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~'
+    ], 16, 24),
+    deco: blank(16, 24),
+    encounters: (G.ENCOUNTERS || {}).route21,
+    warps: [
+      { x: 8, y: 0, to: 'pallet', tx: 10, ty: 16, dir: 'up' },
+      { x: 9, y: 0, to: 'pallet', tx: 11, ty: 16, dir: 'up' },
+      { x: 8, y: 23, to: 'cinnabar', tx: 10, ty: 1, dir: 'down' },
+      { x: 9, y: 23, to: 'cinnabar', tx: 11, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 6, y: 6, text: 'A fishing marker. PALLET TOWN is north. You can see the roof of the lab from here.' }
+    ],
+    trainers: [
+      { x: 5, y: 8, sprite: 'swimmer', dir: 'right', trainer: 'r21_barry', sight: 3 },
+      { x: 10, y: 15, sprite: 'fisher', dir: 'left', trainer: 'r21_ronald', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // CINNABAR ISLAND — a volcano with a research lab on it, and the only town
+  // in KANTO you cannot walk to. Everything here is about what the LAB did:
+  // the fossils it revives, the mansion it abandoned, and the thing it made
+  // in the basement and then stopped writing about.
+  // ==========================================================================
+  G.MAPS.cinnabar = {
+    id: 'cinnabar', name: 'Cinnabar Island', w: 22, h: 18,
+    music: 'town', battleBg: 'meadow', base: 'sand',
+    legend: G.LEG_EXT,
+    gymEmblem: { x: 6, y: 12, type: 'fire' },
+    ground: pad([
+      '~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~',
+      '~~%%%%%%%%%%%%%%%%%%~~',
+      '~~%..GHHHI...7889..%~~',
+      '~~%..KLLLM...d+mh..%~~',
+      '~~%..WNEEW...WNEW..%~~',
+      '~~%................%~~',
+      '~~%................%~~',
+      '~~%...GHHHHHHI.....%~~',
+      '~~%...KLLLLLLM.....%~~',
+      '~~%...WNEEWNNW.....%~~',
+      '~~%................%~~',
+      '~~%..ABBC....qrrz..%~~',
+      '~~%..abbc....i$jk..%~~',
+      '~~%..WYYW....WNEW..%~~',
+      '~~%..S.............%~~',
+      '~~%%%%%%%%%%%%%%%%%%~~',
+      '~~~~~~~~~~~~~~~~~~~~~~'
+    ], 22, 18),
+    deco: blank(22, 18),
+    warps: [
+      { x: 10, y: 0, to: 'route21', tx: 8, ty: 22, dir: 'up' },
+      { x: 11, y: 0, to: 'route21', tx: 9, ty: 22, dir: 'up' },
+      { x: 21, y: 8, to: 'route20', tx: 1, ty: 6, dir: 'right' },
+      { x: 21, y: 9, to: 'route20', tx: 1, ty: 7, dir: 'right' },
+      { x: 7, y: 5, to: 'cinnabarlab', tx: 5, ty: 11, dir: 'up' },
+      { x: 8, y: 5, to: 'cinnabarlab', tx: 6, ty: 11, dir: 'up' },
+      { x: 15, y: 5, to: 'cinnabarcentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 8, y: 10, to: 'mansion1f', tx: 9, ty: 17, dir: 'up' },
+      { x: 9, y: 10, to: 'mansion1f', tx: 10, ty: 17, dir: 'up' },
+      { x: 6, y: 14, to: 'cinnabargym', tx: 5, ty: 16, dir: 'up' },
+      { x: 7, y: 14, to: 'cinnabargym', tx: 6, ty: 16, dir: 'up' },
+      { x: 16, y: 14, to: 'cinnabarmart', tx: 4, ty: 6, dir: 'up' }
+    ],
+    signs: [
+      { x: 5, y: 15, text: 'CINNABAR ISLAND — The Fiery Town of Burning Desire.' },
+      { x: 6, y: 6, text: 'POKéMON LAB — Fossil restoration. Bring us something old enough.' },
+      { x: 10, y: 11, text: 'POKéMON MANSION — CONDEMNED. Structurally unsound. Do not enter.' }
+    ],
+    npcs: [
+      { x: 13, y: 7, sprite: 'scientist', dir: 'left',
+        dialog: ['The LAB can bring back a POKéMON that has been extinct for a hundred million years.',
+                 'That is the single most impressive thing anyone in KANTO has ever done, and nobody talks about it.',
+                 'They talk about the MANSION instead.'] },
+      { x: 12, y: 13, sprite: 'oldman', dir: 'down', unlessFlag: 'got_secretkey',
+        dialog: ['The GYM is locked and BLAINE has the only key.',
+                 'BLAINE has not been seen in town for three weeks. His house is the burnt one.'] },
+      { x: 17, y: 11, sprite: 'fisher', dir: 'left',
+        dialog: ['The volcano has not gone off in my lifetime.',
+                 'It smokes, though. Every single day, it smokes.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // THE POWER PLANT — abandoned, and still live. Nothing here has been
+  // maintained in years, half the residents are indistinguishable from the
+  // equipment, and there is a bird in the back room that has been sitting in
+  // the switchgear long enough that the building has started to sound like it.
+  // ==========================================================================
+  G.MAPS.powerplant = {
+    id: 'powerplant', name: 'Power Plant', w: 22, h: 17,
+    music: 'cave', battleBg: 'indoor', base: 'metalfloor', indoors: true,
+    legend: { '.': 'metalfloor', '#': 'metalwall' },
+    ground: pad([
+      '######################',
+      '#....................#',
+      '#.####.####.####.###.#',
+      '#.#..........#.....#.#',
+      '#.#.####.###.#.###.#.#',
+      '#...#......#...#.....#',
+      '#.###.####.#####.###.#',
+      '#.....#..........#...#',
+      '#.#####.########.#.###',
+      '#.......#......#.#...#',
+      '#.#####.#.####.#.###.#',
+      '#.#...#.#.#..#.#...#.#',
+      '#.#.#.#.#.#..#.###.#.#',
+      '#...#...#....#.....#.#',
+      '#.#########.##########',
+      '#..........#..........',
+      '######################'
+    ], 22, 17),
+    deco: blank(22, 17),
+    encounters: (G.ENCOUNTERS || {}).powerplant,
+    warps: [
+      { x: 21, y: 15, to: 'route10', tx: 16, ty: 8, dir: 'right' }
+    ],
+    signs: [
+      { x: 2, y: 1, text: 'A safety notice, sun-bleached to nothing. Only the word DANGER survives.' },
+      { x: 10, y: 9, text: 'The floor here is warm. The hum is coming up through your boots.' }
+    ],
+    items: [
+      { x: 3, y: 11, item: 'tm25', flag: 'pp_tm25' },
+      { x: 18, y: 3, item: 'maxrepel', flag: 'pp_maxrepel' },
+      { x: 6, y: 13, item: 'ultraball', flag: 'pp_ultraball' }
+    ],
+    npcs: [
+      { x: 10, y: 1, sprite: 'zapdos', obj: true, dir: 'down', unlessFlag: 'zapdos_caught', event: 'zapdosEncounter' }
+    ]
+  };
 })();

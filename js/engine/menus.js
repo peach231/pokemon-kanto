@@ -526,10 +526,16 @@
                   else if (mon.level >= 100) { msg = G.monName(mon) + ' is already at the top level!'; }
                   else {
                     var startLvl = mon.level;
-                    var events = G.gainExp(mon, item.amount);
+                    // A RARE CANDY is denominated in LEVELS, not experience —
+                    // so it is worth exactly one level whether it is used on a
+                    // level 5 or a level 60, which is the whole point of it.
+                    var gain = item.levels
+                      ? Math.max(1, G.monExpForLevel(mon, mon.level + item.levels) - mon.exp)
+                      : item.amount;
+                    var events = G.gainExp(mon, gain);
                     G.player.bag[id]--;
                     G.audio.sfx('levelUp');
-                    msg = G.monName(mon) + ' gained ' + item.amount + ' EXP!';
+                    msg = item.levels ? (G.monName(mon) + ' grew!') : (G.monName(mon) + ' gained ' + gain + ' EXP!');
                     if (mon.level > startLvl) msg += ' It grew to Lv' + mon.level + '!';
                     var learned = [];
                     for (var e = 0; e < events.length; e++) {
