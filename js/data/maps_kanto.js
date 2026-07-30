@@ -2396,7 +2396,14 @@
   G.MAPS.cinnabar = {
     id: 'cinnabar', name: 'Cinnabar Island', w: 22, h: 18,
     music: 'town', battleBg: 'meadow', base: 'sand',
-    legend: G.LEG_EXT,
+    // Its own legend, so '.' is SAND rather than grass. CINNABAR is a volcano
+    // with a laboratory on it; grass lawns and scattered wildflowers are the
+    // wrong island entirely, and the shared exterior legend was giving it both.
+    legend: (function () {
+      var L = {}; for (var k in G.LEG_EXT) L[k] = G.LEG_EXT[k];
+      L['.'] = 'sand'; L[','] = 'sand';
+      return L;
+    })(),
     gymEmblem: { x: 6, y: 12, type: 'fire' },
     ground: pad([
       '~~~~~~~~~~~~~~~~~~~~~~',

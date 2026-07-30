@@ -646,25 +646,28 @@
   // and only the colour tells you what the building is.
   function roofSet(prefix, dark, mid, light) {
     var P = { o: C.ink, a: dark, b: mid, c: light, w: C.pale };
-    var g = 'g';
-    var P2 = { o: C.ink, a: dark, b: mid, c: light, w: C.pale, g: C.leaf1 };
+    // The sky above a pitched roof is TRANSPARENT, not grass. Baking a green
+    // background into every roof tile meant every building standing on
+    // anything else wore a green fringe — CINNABAR ISLAND is a volcano and
+    // its houses had lawns growing out of their eaves.
+    var P2 = { o: C.ink, a: dark, b: mid, c: light, w: C.pale };
 
     T(prefix + '_tl', P2, [
-      'gggggggggggggggg', 'gggggggggggggooo', 'ggggggggggoooccc',
-      'gggggggoooccccbb', 'ggggoooccccbbbbb', 'gooocccbbbbbbbbb',
+      '................', '.............ooo', '..........oooccc',
+      '.......oooccccbb', '....oooccccbbbbb', '.ooocccbbbbbbbbb',
       'occcbbbbbbbbbbbb', 'obbbbbbbbbbbbbbb', 'obbbbbbbbbbbbbbb',
       'obbbbbbbbbbbbbbb', 'obbbbbbbbbbbbbbb', 'oabbbbbbbbbbbbbb',
       'oabbbbbbbbbbbbbb', 'oaabbbbbbbbbbbbb', fill('a').replace(/^./, 'o'),
       fill('o')
     ]);
     T(prefix + '_tm', P2, [
-      fill('g'), fill('o'), fill('c'), fill('b'), fill('b'), fill('b'),
+      fill('.'), fill('o'), fill('c'), fill('b'), fill('b'), fill('b'),
       fill('b'), fill('b'), fill('b'), fill('b'), fill('b'), fill('b'),
       fill('b'), fill('b'), fill('a'), fill('o')
     ]);
     T(prefix + '_tr', P2, [
-      'gggggggggggggggg', 'ooogggggggggggggg'.slice(0, 16), 'cccooogggggggggg',
-      'bbccccoogggggggg', 'bbbbbccccooogggg', 'bbbbbbbbbcccooog',
+      '................', 'ooo..............'.slice(0, 16), 'cccooo..........',
+      'bbccccoo........', 'bbbbbccccooo....', 'bbbbbbbbbcccooo.',
       'bbbbbbbbbbbbccco', 'bbbbbbbbbbbbbbbo', 'bbbbbbbbbbbbbbbo',
       'bbbbbbbbbbbbbbao', 'bbbbbbbbbbbbbbao', 'bbbbbbbbbbbbbaao',
       'bbbbbbbbbbbbbaao', 'bbbbbbbbbbbbaaao', fill('a').replace(/.$/, 'o'),
@@ -689,7 +692,7 @@
     ]);
     // A wider building extends its roof with this plain middle column.
     T(prefix + 'x', P2, [
-      fill('g'), fill('o'), fill('c'), fill('b'), fill('b'), fill('b'),
+      fill('.'), fill('o'), fill('c'), fill('b'), fill('b'), fill('b'),
       fill('b'), fill('b'), fill('b'), fill('b'), fill('b'), fill('b'),
       fill('b'), fill('b'), fill('a'), fill('o')
     ]);

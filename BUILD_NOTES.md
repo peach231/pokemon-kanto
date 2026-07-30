@@ -8,34 +8,68 @@ inherited; the data, art sources, world and story are being replaced.
 
 ## Status
 
+**The region is complete.** Pallet Town to the Indigo Plateau, 133 maps, 8
+badges, the Elite Four, the Hall of Fame and the Hall of Champions.
+`node tools/check.js` passes all fourteen audits and the battle-core tests.
+
 | Phase | State |
 |---|---|
 | Engine fork + scaffold | done |
-| Gen 1 data layer (151 species, 165 moves, type chart) | done — generated from `pret/pokered` |
+| Gen 1 data layer (151 species, 165 moves, type chart, 55 TM/HMs) | done — generated from `pret/pokered` |
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
-| Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
-| Kanto tileset | done — 110 tiles, rendered and reviewed |
-| Kanto maps | Pallet -> Saffron done (79 maps). Fuchsia, Cinnabar and the League are next |
+| Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all URLs verified, all sprites audited |
+| Kanto tileset | done — 113 tiles |
+| Kanto maps | **done — 133 maps, all reachable from Pallet** |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
-| Region map screen | done — Kanto, landmass derived from the node graph |
-| Gen 1 move effects in battle.js | done — all 35 effect kinds handled, guarded by check.js |
-| Intro sequence | legendaries re-cast (Zapdos/Articuno/Moltres/Mewtwo/Mew); Oak's speech + demo battle still to do |
-| Story, trainers, gyms, endgame | not started |
+| Region map screen | done — real edge list, Fly from any visited town |
+| Gen 1 move effects in battle.js | done — all 35 effect kinds, guarded by check.js |
+| HM field moves (Cut / Fly / Surf / Strength / Flash) | done |
+| Intro (title, demo battle, Oak's speech, name entry) | done |
+| Story, trainers, gyms, endgame | done |
 
-**`node tools/check.js` passes**, battle-core tests included, and the game
-BOOTS AND RENDERS. Playable from the start through to the Pokemon Tower: Pallet -> Viridian ->
-Viridian Forest -> Pewter (Brock) -> Mt. Moon -> Cerulean (Misty) -> Nugget
-Bridge -> Bill -> Underground Path -> Vermilion (Lt. Surge) -> S.S. Anne (Cut)
--> Route 9 -> Rock Tunnel -> Lavender -> Pokemon Tower -> Route 8 -> the
-east-west Underground Path -> Route 7 -> Celadon (Erika, Game Corner, Rocket
-Hideout) -> Saffron (Sabrina, Silph Co., Giovanni again). The Tower loop
-CLOSES: the Silph Scope is obtainable, so the Marowak can be laid to rest and
-the Poke Flute collected.
+### The critical path, end to end
 
-check.js now also walks the WARP GRAPH from Pallet and fails on any warp that
-lands on a solid tile or out of bounds (arriving stuck inside a wall) and warns
-on any map no chain of warps can reach. Neither is visible by reading a map
-file, and both are the classic way this engine breaks.
+Pallet → Viridian → Viridian Forest → **Pewter (Brock)** → Mt. Moon →
+**Cerulean (Misty)** → Nugget Bridge → Bill → Underground Path →
+**Vermilion (Lt. Surge)** → S.S. Anne (**HM01 Cut**) → Rock Tunnel → Lavender →
+Pokémon Tower (Silph Scope → Poké Flute) → **Celadon (Erika)** → Game Corner →
+Rocket Hideout → **Saffron (Sabrina)** → Silph Co. → Routes 11-15 →
+**Fuchsia (Koga)** → Safari Zone (**HM03 Surf**, Gold Teeth → **HM04
+Strength**) → the sea → **Cinnabar (Blaine)** → Pokémon Mansion (Secret Key) →
+**Viridian (Giovanni)** → Route 22 → Route 23 → Victory Road → **the League**.
+
+### What is deliberately NOT Gen 1
+
+- **Ghost → Psychic is 2×.** The ROM's 0× is a straight data error.
+- **Koga's gym is a real maze**, not invisible walls — a spanning tree with
+  exactly one route to him, so it is a puzzle of geometry rather than of bad
+  information.
+- **The Safari Zone has no separate battle mode.** Bait and rocks are not
+  implemented; the step counter and the Safari Balls are. This is the one
+  meaningful mechanical omission and it is listed here rather than hidden.
+- **The Hall of Champions does not exist in Red/Blue.** It is the ending this
+  project wanted: the Elite Four end the challenge, and this ends the game.
+
+## Lessons this codebase has actually paid for
+
+Every audit in `check.js` was added the day a bug of that kind cost real time.
+The pattern is always the same — **the failure is silent**:
+
+1. `shopBuy` was deleted with the Hoenn interiors. Six Poké Marts had clerks
+   who did nothing. Nothing crashed; the event lookup returned `undefined`.
+2. `padRows` silently TRUNCATED. Rows added past a map's declared height
+   vanished, taking their warps with them, and the source looked fine.
+3. Twenty-one events yielded `{t:'fn', f: …}` when the runner calls
+   `step.fn()`. Every one stopped halfway through, silently. Two HMs became
+   unobtainable and half the region was cut off — with all checks passing,
+   because it was correct data calling one wrong field name.
+4. Nine trainer classes had no overworld sheet and rendered as *nothing*:
+   solid, talkable, invisible.
+5. Roof tiles baked a grass background, so every building on sand or marble
+   wore a green fringe.
+
+The rule this produces: **when a bug is found, do not fix the instance — add
+the audit that finds every instance, then fix what it reports.**
 
 ## Workflows (CRITICAL)
 
