@@ -935,6 +935,304 @@
     yield { t: 'text', s: 'Blue: I am off to LAVENDER. Something is happening at that tower.' };
   };
 
+  // ========================================================== LAVENDER TOWN =
+  healCentre('lavendercentre', 'LAVENDER', { map: 'lavender', x: 6, y: 6 });
+  pokeMart('lavendermart', 'LAVENDER', { map: 'lavender', x: 7, y: 18 },
+    ['potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+     'iceheal', 'revive', 'pokeball', 'greatball', 'escaperope']);
+
+  G.MAPS.lavenderhouse = {
+    id: 'lavenderhouse', name: 'Lavender House', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'IP..TT..PI',
+      'I........I',
+      'I.B......I',
+      'I........I',
+      'I..o..o..I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'lavender', tx: 7, ty: 12, dir: 'down' },
+      { x: 5, y: 8, to: 'lavender', tx: 7, ty: 12, dir: 'down' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'oldman', dir: 'down',
+        dialog: ['My CUBONE will not stop crying.',
+                 'Its mother is up in that tower. TEAM ROCKET put her there.'] }
+    ]
+  };
+
+  G.MAPS.mrfujihouse = {
+    id: 'mrfujihouse', name: "Mr. Fuji's House", w: 12, h: 10,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'IP..TTTT..PI',
+      'I..........I',
+      'I.B......B.I',
+      'I..........I',
+      'I..o....o..I',
+      'I..........I',
+      'I..........I',
+      'I..........I',
+      'IIIII..IIIII'
+    ], 12, 10),
+    deco: blank(12, 10),
+    warps: [
+      { x: 5, y: 9, to: 'lavender', tx: 19, ty: 12, dir: 'down' },
+      { x: 6, y: 9, to: 'lavender', tx: 19, ty: 12, dir: 'down' }
+    ],
+    signs: [
+      { x: 3, y: 4, text: 'Shelves of records: names, dates, and which POKéMON is buried where.' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'mrfuji', dir: 'down', event: 'fujiTalk' }
+    ]
+  };
+
+  G.EVENTS.fujiTalk = function* () {
+    if (G.flags.silphscope) {
+      yield { t: 'text', s: 'Mr. Fuji: Go carefully up there. And be kind to whatever you find.' };
+      return;
+    }
+    yield { t: 'text', s: 'Mr. Fuji: I look after the tower. Or I did, until they came.' };
+    yield { t: 'text', s: 'Mr. Fuji: TEAM ROCKET killed a MAROWAK on the top floor. A mother, defending her child.' };
+    yield { t: 'text', s: 'Mr. Fuji: Her spirit has not settled, and now nobody can get past the third floor.' };
+    yield { t: 'text', s: 'Mr. Fuji: You cannot fight a ghost you cannot see. You would need a SILPH SCOPE.' };
+    yield { t: 'text', s: 'Mr. Fuji: ROCKET have them. They have a hideout under the GAME CORNER in CELADON.' };
+  };
+
+
+  // ========================================================= POKEMON TOWER ==
+  // Seven floors of graves. Stamped from one plan because the sameness IS the
+  // effect: you climb, the room does not change, and the only thing that does
+  // change is how many channelers turn to look at you.
+  function towerFloor(n, opts) {
+    var id = 'pokemontower' + n + 'f';
+    G.MAPS[id] = {
+      id: id, name: 'Pokémon Tower ' + n + 'F', w: 20, h: 16,
+      music: 'cave', battleBg: 'indoor', base: 'towerfloor',
+      legend: { '.': 'towerfloor', '#': 'towerwall', 'g': 'grave', '>': 'stairs' },
+      ground: pad([
+        '####################',
+        '#..................#',
+        '#..g.g..g.g..g.g...#',
+        '#..................#',
+        '#..................#',
+        '#..g.g..g.g..g.g...#',
+        '#..................#',
+        '#..................#',
+        '#..g.g..g.g..g.g...#',
+        '#..................#',
+        '#..................#',
+        '#..g.g..g.g..g.g...#',
+        '#..................#',
+        '#..................#',
+        '#..................#',
+        '####################'
+      ], 20, 16),
+      deco: blank(20, 16),
+      encounters: (G.ENCOUNTERS || {})[id],
+      warps: opts.warps,
+      signs: opts.signs || [],
+      npcs: opts.npcs || [],
+      trainers: opts.trainers || [],
+      items: opts.items || []
+    };
+  }
+
+  // 1F is the entrance hall: no graves, no encounters, somewhere to breathe
+  // before the climb.
+  G.MAPS.pokemontower1f = {
+    id: 'pokemontower1f', name: 'Pokémon Tower 1F', w: 20, h: 16,
+    music: 'cave', battleBg: 'indoor', base: 'towerfloor',
+    legend: { '.': 'towerfloor', '#': 'towerwall', 'g': 'grave', '>': 'stairs' },
+    ground: pad([
+      '####################',
+      '#.................>#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#########..#########',
+      '####################'
+    ], 20, 16),
+    deco: blank(20, 16),
+    warps: [
+      { x: 9, y: 14, to: 'lavender', tx: 20, ty: 6, dir: 'down' },
+      { x: 10, y: 14, to: 'lavender', tx: 21, ty: 6, dir: 'down' },
+      { x: 18, y: 1, to: 'pokemontower2f', tx: 18, ty: 2, dir: 'up' }
+    ],
+    signs: [
+      { x: 5, y: 3, text: 'A board of names. Some of the ink is very old and some of it is very new.' }
+    ],
+    npcs: [
+      { x: 6, y: 8, sprite: 'channeler', dir: 'down',
+        dialog: ['Be quiet on the upper floors. They can hear you.',
+                 '...I am not being poetic.'] },
+      { x: 13, y: 10, sprite: 'oldwoman', dir: 'left',
+        dialog: ['I come every week. My GROWLITHE is on the fifth floor.',
+                 'I have not been able to reach her since the men in black arrived.'] }
+    ]
+  };
+
+  towerFloor(2, {
+    warps: [
+      { x: 18, y: 2, to: 'pokemontower1f', tx: 17, ty: 1, dir: 'down' },
+      { x: 1, y: 14, to: 'pokemontower3f', tx: 2, ty: 14, dir: 'up' }
+    ],
+    npcs: [
+      { x: 10, y: 7, sprite: 'blue', dir: 'down', unlessFlag: 'blue_tower', event: 'towerRival' }
+    ]
+  });
+
+  towerFloor(3, {
+    warps: [
+      { x: 2, y: 14, to: 'pokemontower2f', tx: 2, ty: 13, dir: 'down' },
+      { x: 18, y: 1, to: 'pokemontower4f', tx: 18, ty: 2, dir: 'up' }
+    ],
+    trainers: [
+      { x: 7, y: 6, sprite: 'channeler', dir: 'down', trainer: 'pt_hope', sight: 3 },
+      { x: 14, y: 10, sprite: 'channeler', dir: 'left', trainer: 'pt_patricia', sight: 3 }
+    ]
+  });
+
+  towerFloor(4, {
+    warps: [
+      { x: 18, y: 2, to: 'pokemontower3f', tx: 17, ty: 1, dir: 'down' },
+      { x: 1, y: 14, to: 'pokemontower5f', tx: 2, ty: 14, dir: 'up' }
+    ],
+    trainers: [
+      { x: 6, y: 9, sprite: 'channeler', dir: 'right', trainer: 'pt_carly', sight: 3 },
+      { x: 15, y: 4, sprite: 'channeler', dir: 'down', trainer: 'pt_laurel', sight: 3 }
+    ],
+    items: [{ x: 3, y: 12, item: 'escaperope', once: 'pt_rope' }]
+  });
+
+  towerFloor(5, {
+    warps: [
+      { x: 2, y: 14, to: 'pokemontower4f', tx: 2, ty: 13, dir: 'down' },
+      { x: 18, y: 1, to: 'pokemontower6f', tx: 18, ty: 2, dir: 'up' }
+    ],
+    trainers: [
+      { x: 9, y: 6, sprite: 'channeler', dir: 'down', trainer: 'pt_jody', sight: 3 }
+    ],
+    items: [{ x: 16, y: 12, item: 'revive', once: 'pt_revive' }]
+  });
+
+  towerFloor(6, {
+    warps: [
+      { x: 18, y: 2, to: 'pokemontower5f', tx: 17, ty: 1, dir: 'down' },
+      { x: 1, y: 14, to: 'pokemontower7f', tx: 2, ty: 14, dir: 'up' }
+    ],
+    trainers: [
+      { x: 7, y: 4, sprite: 'channeler', dir: 'down', trainer: 'pt_tammy', sight: 3 },
+      { x: 13, y: 9, sprite: 'channeler', dir: 'left', trainer: 'pt_karina', sight: 3 }
+    ],
+    npcs: [
+      { x: 10, y: 12, sprite: 'orb_stand', obj: true, event: 'towerGhost' }
+    ]
+  });
+
+  // 7F: the Rockets, and Mr. Fuji.
+  towerFloor(7, {
+    warps: [
+      { x: 2, y: 14, to: 'pokemontower6f', tx: 2, ty: 13, dir: 'down' }
+    ],
+    signs: [
+      { x: 5, y: 3, text: 'The topmost floor. It is very cold and there is no draught to explain it.' }
+    ],
+    trainers: [
+      { x: 7, y: 8, sprite: 'rocket', dir: 'down', trainer: 'pt_rocket1', sight: 4 },
+      { x: 13, y: 6, sprite: 'rocket', dir: 'left', trainer: 'pt_rocket2', sight: 4 },
+      { x: 10, y: 4, sprite: 'rocket', dir: 'down', trainer: 'pt_rocket3', sight: 4 }
+    ],
+    npcs: [
+      { x: 10, y: 1, sprite: 'mrfuji', dir: 'down', event: 'towerFujiRescue' }
+    ]
+  });
+
+  // The restless MAROWAK. Without the SILPH SCOPE you cannot see it, and you
+  // cannot fight what you cannot see, which is the entire justification for
+  // that item existing.
+  G.EVENTS.towerGhost = function* () {
+    if (G.flags.marowakLaid) {
+      yield { t: 'text', s: 'The air here is ordinary now. Just a room.' };
+      return;
+    }
+    if (!G.flags.silphscope) {
+      yield { t: 'text', s: 'Something is here. The temperature drops.' };
+      yield { t: 'sfx', id: 'lowHp' };
+      yield { t: 'text', s: 'GHOST: Get out. GET OUT.' };
+      yield { t: 'text', s: 'You cannot make out a shape. There is nothing to aim at.' };
+      yield { t: 'text', s: '(A SILPH SCOPE would show you what this is.)' };
+      return;
+    }
+    yield { t: 'text', s: 'You raise the SILPH SCOPE.' };
+    yield { t: 'wait', frames: 20 };
+    yield { t: 'text', s: 'The shape resolves. It is a MAROWAK, and she is standing between you and the stairs.' };
+    yield { t: 'sfx', id: 'lowHp' };
+    yield {
+      t: 'custom',
+      run: function (resume) {
+        G.startBattle({ party: G.player.party, foes: [G.makeMon('marowak', 30)], wild: true },
+          { bg: 'indoor', onDone: resume });
+      }
+    };
+    yield { t: 'fn', fn: function () { G.flags.marowakLaid = 1; } };
+    yield { t: 'text', s: 'MAROWAK looks at you for a long moment, and then she is not there any more.' };
+    yield { t: 'text', s: 'The cold goes with her.' };
+  };
+
+  G.EVENTS.towerRival = function* () {
+    yield { t: 'text', s: 'Blue: You again. Of course.' };
+    yield { t: 'text', s: 'Blue: I came to see whether the ghost story was true. It is, by the way.' };
+    yield {
+      t: 'custom',
+      run: function (resume) { G.startTrainerBattle('blue_tower', { onDone: resume }); }
+    };
+    if (!G.flags.blue_tower) return;
+    yield { t: 'text', s: 'Blue: ...Fine. You are getting good at this.' };
+    yield { t: 'text', s: 'Blue: Whatever is up there is not frightened of me. Watch yourself.' };
+  };
+
+  G.EVENTS.towerFujiRescue = function* () {
+    if (G.flags.pokeflute) {
+      yield { t: 'text', s: 'Mr. Fuji: The tower is quiet again. Thank you.' };
+      return;
+    }
+    yield { t: 'text', s: 'Mr. Fuji: You came all the way up. For a stranger.' };
+    yield { t: 'text', s: 'Mr. Fuji: They wanted the graves. Something about bones being worth money.' };
+    yield { t: 'text', s: 'Mr. Fuji: She is at rest now, and so is her child. That is your doing.' };
+    yield { t: 'text', s: 'Mr. Fuji: Take this. It was made to be heard by POKéMON who do not wish to wake.' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.flags.pokeflute = 1;
+        G.player.bag.pokeflute = 1;
+      }
+    };
+    yield { t: 'sfx', id: 'catchClick' };
+    yield { t: 'text', s: 'You received the POKé FLUTE!' };
+    yield { t: 'text', s: 'Mr. Fuji: There is a SNORLAX asleep across the road south of CELADON.' };
+    yield { t: 'text', s: 'Mr. Fuji: It has been there for years. Play it something.' };
+  };
+
   // The dock. You cannot board without a ticket, and Bill has the ticket.
   G.EVENTS.ssanneDock = function* () {
     if (!G.flags.ssticket) {

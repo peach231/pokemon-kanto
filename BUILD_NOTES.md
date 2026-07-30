@@ -15,7 +15,7 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
-| Kanto maps | Pallet -> Vermilion + S.S. Anne done (44 maps). Rock Tunnel and Lavender east are next |
+| Kanto maps | Pallet -> Lavender done (59 maps). Celadon, the Rocket Hideout and Saffron are next |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
 | Region map screen | done — Kanto, landmass derived from the node graph |
 | Gen 1 move effects in battle.js | done — all 35 effect kinds handled, guarded by check.js |
@@ -23,10 +23,11 @@ inherited; the data, art sources, world and story are being replaced.
 | Story, trainers, gyms, endgame | not started |
 
 **`node tools/check.js` passes**, battle-core tests included, and the game
-BOOTS AND RENDERS. Playable from the start through to the THUNDERBADGE: Pallet -> Viridian ->
+BOOTS AND RENDERS. Playable from the start through to the Pokemon Tower: Pallet -> Viridian ->
 Viridian Forest -> Pewter (Brock) -> Mt. Moon -> Cerulean (Misty) -> Nugget
-Bridge -> Bill -> the Underground Path -> Vermilion (Lt. Surge). Nothing past
-Vermilion exists yet; the S.S. Anne gangway is a stub.
+Bridge -> Bill -> Underground Path -> Vermilion (Lt. Surge) -> S.S. Anne (Cut)
+-> Route 9 -> Rock Tunnel -> Lavender -> Pokemon Tower. The Tower's ghost is
+gated on the SILPH SCOPE, which lives in Celadon and is not built yet.
 
 check.js now also walks the WARP GRAPH from Pallet and fails on any warp that
 lands on a solid tile or out of bounds (arriving stuck inside a wall) and warns
@@ -118,7 +119,8 @@ file, and both are the classic way this engine breaks.
   Each has the right message and a real effect; none silently does nothing.
   Upgrading them needs turn-loop state in `battle.js`.
 
-- The region stops east of Vermilion. Route 11 runs out onto nothing yet.
+- The region stops at Lavender. Route 11 and Route 8 run out onto nothing.
+- The Pokemon Tower is completable only once Celadon exists (SILPH SCOPE).
 - Saffron is deliberately sealed (its gates are solid tree on Route 5). The
   Underground Path is the intended way south, exactly as in Gen 1.
 - Object tiles (trees, rocks, boulders, decorations, signs, fences) are

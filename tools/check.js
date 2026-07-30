@@ -184,6 +184,12 @@ if (G.SPECIES) {
   }
 }
 
+// --- map grid overflow ---
+// padRows records any map given more rows than its declared height (the extras
+// are silently dropped, along with anything on them) or rows wider than its
+// width. Both are invisible in the source.
+for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
+
 // --- move effect coverage ---
 // moves.js is generated and can introduce an effect kind the engine has never
 // seen. An unhandled kind does not crash -- it silently does NOTHING, which is

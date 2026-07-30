@@ -69,11 +69,25 @@
 
   // Row padding: short rows fill out with the map's base tile so layout edits
   // stay safe. tools/check.js still validates every row against the legend.
+  //
+  // The truncation is the dangerous half. Supplying MORE rows than `h` silently
+  // drops them off the bottom of the map, taking any warp that lived there with
+  // it, and nothing in the source looks wrong. That has cost real debugging
+  // time, so overflow is now recorded and reported by check.js instead of
+  // vanishing. Same for rows wider than `w`.
+  G.MAP_WARN = G.MAP_WARN || [];
   G.padRows = function (rows, w, h, fill) {
     fill = fill || '.';
+    if (rows.length > h) {
+      G.MAP_WARN.push('padRows: given ' + rows.length + ' rows for a map of height ' +
+        h + ' — the last ' + (rows.length - h) + ' were DROPPED');
+    }
     var out = [];
     for (var y = 0; y < h; y++) {
       var r = rows[y] || '';
+      if (r.length > w) {
+        G.MAP_WARN.push('padRows: row ' + y + ' is ' + r.length + ' cols for a map of width ' + w);
+      }
       while (r.length < w) r += fill;
       out.push(r.slice(0, w));
     }
@@ -713,8 +727,8 @@
       '..........pp..........',
       '..........pp..........'    // 23
     ], 2))
-      // The south street runs west out of town onto Route 4.
-      .map(function (r, i) { return i === 13 ? 'pp' + r.slice(2) : r; }),
+      // The south street runs west onto Route 4 and east onto Route 9.
+      .map(function (r, i) { return i === 13 ? 'pp' + r.slice(2, 24) + 'pp' : r; }),
       26, 24),
     deco: blank(26, 24),
     warps: [
@@ -723,6 +737,7 @@
       { x: 12, y: 23, to: 'route5', tx: 10, ty: 1, dir: 'down' },
       { x: 13, y: 23, to: 'route5', tx: 11, ty: 1, dir: 'down' },
       { x: 0, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
+      { x: 25, y: 13, to: 'route9', tx: 1, ty: 5, dir: 'right' },
       { x: 1, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
       { x: 5, y: 11, to: 'ceruleangym', tx: 5, ty: 12, dir: 'up' },
       { x: 6, y: 11, to: 'ceruleangym', tx: 6, ty: 12, dir: 'up' },
@@ -1110,11 +1125,11 @@
       'I.(..).II..TTTT..II.PP.I',
       'I......II........II....I',
       'I..o...II..o..o..II....I',
-      'IIII.IIIIII....IIIIII.III'.slice(0, 24),
-      'I.......................I',
-      'I.......................I',
-      'I.......................I',
-      'IIII.IIIIIIII.IIIIIII.III'.slice(0, 24),
+      'IIII.IIIIIII.IIIIIII.III',   // cabin doors at x=4, 12, 20
+      'I......................I',
+      'I......................I',   // the corridor
+      'I......................I',
+      'IIII.IIIIIII.IIIIIII.III',
       'I......II........II....I',
       'I.(..).II..TT....II.oo.I',
       'I......II........II....I',
@@ -1147,6 +1162,199 @@
     ],
     items: [
       { x: 22, y: 11, item: 'maxpotion', once: 'ss_maxpotion' }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 9 — east out of Cerulean toward the Rock Tunnel. A small tree blocks
+  // the way until you have CUT, which is what the S.S. Anne was for.
+  // ==========================================================================
+  G.MAPS.route9 = {
+    id: 'route9', name: 'Route 9', w: 32, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      hband(32, true),
+      hband(32, false),
+      '................................',
+      '..ggggg.......ggggg.............',
+      '..ggggg.......ggggg....ggggg....',
+      'ppppppppppppXppppppppppppppppppp',
+      'pppppppppppppppppppppppppppppppp',
+      '.....llllll.....................',
+      '..........................ggg...',
+      '..........................ggg...',
+      hband(32, true),
+      hband(32, false)
+    ], 32, 12),
+    deco: blank(32, 12),
+    encounters: (G.ENCOUNTERS || {}).route9,
+    warps: [
+      { x: 0, y: 5, to: 'cerulean', tx: 23, ty: 13, dir: 'left' },
+      { x: 0, y: 6, to: 'cerulean', tx: 23, ty: 13, dir: 'left' },
+      { x: 31, y: 5, to: 'rocktunnel1f', tx: 2, ty: 2, dir: 'right' },
+      { x: 31, y: 6, to: 'rocktunnel1f', tx: 2, ty: 2, dir: 'right' }
+    ],
+    signs: [
+      { x: 10, y: 4, text: 'A young tree has grown across the upper road. Something with CUT could clear it.' },
+      { x: 29, y: 7, text: 'ROCK TUNNEL ahead — no lights. Bring a POKéMON that knows FLASH.' }
+    ],
+    trainers: [
+      { x: 17, y: 3, sprite: 'hiker', dir: 'down', trainer: 'r9_dudley', sight: 3 },
+      { x: 22, y: 8, sprite: 'cooltrainerf', dir: 'up', trainer: 'r9_wanda', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // ROCK TUNNEL — pitch dark without FLASH, and the only road to Lavender.
+  // The layout is deliberately branching: in the dark, a corridor you can see
+  // one tile of should feel like it might be the wrong one.
+  // ==========================================================================
+  G.MAPS.rocktunnel1f = {
+    id: 'rocktunnel1f', name: 'Rock Tunnel', w: 28, h: 18,
+    music: 'cave', battleBg: 'cave', base: 'cavefloor',
+    legend: G.LEG_CAVE,
+    dark: true,
+    ground: pad([
+      '############################',
+      '#,,........#...............#',
+      '#,,...*....#....O......*...#',
+      '#####.######.####.#########',
+      '#.....#......#....#........#',
+      '#..O..#..*...#....#...O....#',
+      '#.....#......#....#........#',
+      '#.#####......#....#####.####',
+      '#.....#......#.........#...#',
+      '#..*..#......#...*.....#...#',
+      '#.....########.........#...#',
+      '#.....#........#########...#',
+      '#######...O....#.......#...#',
+      '#..............#...*...#...#',
+      '#....*.........#.......#...#',
+      '#..............#########,,,#',
+      '#..........................#',
+      '############################'
+    ], 28, 18),
+    deco: blank(28, 18),
+    encounters: (G.ENCOUNTERS || {}).rocktunnel1f,
+    warps: [
+      { x: 1, y: 1, to: 'route9', tx: 30, ty: 5, dir: 'left' },
+      { x: 2, y: 1, to: 'route9', tx: 30, ty: 6, dir: 'left' },
+      { x: 25, y: 15, to: 'route10', tx: 10, ty: 2, dir: 'down' }
+    ],
+    signs: [
+      { x: 3, y: 2, text: 'ROCK TUNNEL — Unlit. Turn back or bring a light.' }
+    ],
+    trainers: [
+      { x: 8, y: 8, sprite: 'hiker', dir: 'right', trainer: 'rt_lenny', sight: 2 },
+      { x: 20, y: 5, sprite: 'pokemaniac', dir: 'left', trainer: 'rt_ashton', sight: 2 },
+      { x: 12, y: 13, sprite: 'hiker', dir: 'down', trainer: 'rt_oliver', sight: 2 }
+    ],
+    items: [
+      { x: 4, y: 16, item: 'escaperope', once: 'rt_rope' }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 10 — the short drop from the tunnel's south mouth into Lavender.
+  // ==========================================================================
+  G.MAPS.route10 = {
+    id: 'route10', name: 'Route 10', w: 20, h: 16,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututu..tutututu',
+      'vxvxvxvxvx..vxvxvxvx'
+    ].concat(rows([
+      '........pp......',   // 2
+      '..ggg...pp......',
+      '..ggg...pp..ggg.',
+      '........pp..ggg.',
+      '.lllll..pp......',
+      '........pp......',
+      '........pp......',
+      '....y...pp....o.',
+      '........pp......',
+      '..ggg...pp......',
+      '..ggg...pp..ggg.',
+      '........pp......',
+      '........pp......',
+      '........pp......'    // 15
+    ], 2)), 20, 16),
+    deco: blank(20, 16),
+    encounters: (G.ENCOUNTERS || {}).route10,
+    warps: [
+      { x: 10, y: 0, to: 'rocktunnel1f', tx: 25, ty: 14, dir: 'up' },
+      { x: 11, y: 0, to: 'rocktunnel1f', tx: 25, ty: 14, dir: 'up' },
+      { x: 10, y: 15, to: 'lavender', tx: 12, ty: 1, dir: 'down' },
+      { x: 11, y: 15, to: 'lavender', tx: 13, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 9, y: 12, text: 'ROUTE 10 — LAVENDER TOWN to the south.' }
+    ],
+    trainers: [
+      { x: 13, y: 7, sprite: 'picnicker', dir: 'left', trainer: 'r10_carol', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // LAVENDER TOWN — no gym, no shop worth the name, and a tower full of
+  // graves. It is the only town in Kanto with nothing to sell you, which is
+  // exactly why it is the one people remember.
+  // ==========================================================================
+  G.MAPS.lavender = {
+    id: 'lavender', name: 'Lavender Town', w: 26, h: 20,
+    music: 'town', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tutututututu..tutututututu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvx'
+    ].concat(rows([
+      '..........pp..........',   // 2
+      '..7889....pp....GHHHI.',   // Centre                 the TOWER
+      '..d+mh....pp....KLLLM.',
+      '..WNEW....pp....WNEEW.',
+      '..........pp..........',
+      'pppppppppppppppppppppp',   // 7
+      '..........pp..........',
+      '...1223...pp...1223...',
+      '...4556...pp...4556...',
+      '...WNDW...pp...WNDW...',
+      '..........pp..........',
+      '..S.......pp.......Q..',
+      '..........pp..........',
+      '...qrrz...pp..........',   // 15 Mart
+      '...i$jk...pp....V.....',
+      '...WNEW...pp..........',
+      '..........pp..........',
+      '..........pp..........'    // 19
+    ], 2)), 26, 20),
+    deco: blank(26, 20),
+    warps: [
+      { x: 12, y: 0, to: 'route10', tx: 10, ty: 14, dir: 'up' },
+      { x: 13, y: 0, to: 'route10', tx: 11, ty: 14, dir: 'up' },
+      { x: 6, y: 5, to: 'lavendercentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 20, y: 5, to: 'pokemontower1f', tx: 9, ty: 13, dir: 'up' },
+      { x: 21, y: 5, to: 'pokemontower1f', tx: 10, ty: 13, dir: 'up' },
+      { x: 7, y: 11, to: 'lavenderhouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 19, y: 11, to: 'mrfujihouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 7, y: 17, to: 'lavendermart', tx: 4, ty: 6, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 13, text: 'LAVENDER TOWN — The Noble Purple Town.' },
+      { x: 19, y: 6, text: 'POKéMON TOWER — Please be respectful. People are grieving here.' }
+    ],
+    npcs: [
+      { x: 10, y: 8, sprite: 'oldwoman', dir: 'right',
+        dialog: ['They put a POKéMON TOWER here because the ground is quiet.',
+                 'It has not been quiet for weeks.'] },
+      { x: 16, y: 13, sprite: 'channeler', dir: 'down',
+        dialog: ['Something is up there that should not be.',
+                 'It will not let anyone past the third floor. It is angry, and it is grieving.',
+                 'You cannot fight what you cannot see.'] },
+      { x: 14, y: 18, sprite: 'man', dir: 'down',
+        dialog: ['Men in black uniforms have been going in and out of that tower.',
+                 'Nobody stops them. Nobody dares.'] }
     ]
   };
 })();

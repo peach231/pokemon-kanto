@@ -302,6 +302,78 @@
     intro: 'A battle! On a cruise! How marvellously uncivilised.',
     defeat: 'Splendidly done. Have a pleasant voyage.', music: 'battle' });
 
+  tr('r9_dudley', { name: 'Hiker Dudley', sprite: 'trainer_hiker', ai: 'basic', money: 700,
+    party: [{ sp: 'geodude', level: 21 }, { sp: 'onix', level: 21 }],
+    intro: 'Heading for the tunnel? Hope you brought a light.',
+    defeat: 'And a POTION, apparently.', music: 'battle' });
+  tr('r9_wanda', { name: 'Jr. Trainer Wanda', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 570,
+    party: [{ sp: 'nidoranf', level: 22 }, { sp: 'oddish', level: 22 }],
+    intro: 'Nobody goes east any more. Not since the tunnel went dark.',
+    defeat: 'Go on, then. Mind your step.', music: 'battle' });
+
+  tr('rt_lenny', { name: 'Hiker Lenny', sprite: 'trainer_hiker', ai: 'basic', money: 748,
+    party: [{ sp: 'geodude', level: 22 }, { sp: 'machop', level: 22 }],
+    intro: 'I live down here now. Mostly.',
+    defeat: 'Fine. Fine!', music: 'battle' });
+  tr('rt_ashton', { name: 'Poké Maniac Ashton', sprite: 'trainer_pokemaniac', ai: 'smart', money: 858,
+    party: [{ sp: 'cubone', level: 23 }, { sp: 'slowpoke', level: 23 }],
+    intro: 'Do you know how RARE a CUBONE is? Do you?',
+    defeat: 'Still rare. Still mine.', music: 'battle' });
+  tr('rt_oliver', { name: 'Hiker Oliver', sprite: 'trainer_hiker', ai: 'basic', money: 782,
+    party: [{ sp: 'graveler', level: 23 }],
+    intro: 'You are a long way in to be turning back.',
+    defeat: 'Keep going. It opens out.', music: 'battle' });
+
+  tr('r10_carol', { name: 'Picnicker Carol', sprite: 'trainer_picnicker', ai: 'basic', money: 460,
+    party: [{ sp: 'oddish', level: 23 }, { sp: 'bellsprout', level: 23 }],
+    intro: 'LAVENDER is just down the hill. It is a sad little place.',
+    defeat: 'You will see what I mean.', music: 'battle' });
+
+  // The tower. All channelers, because that is who is up there. They speak in
+  // the possessed register and then apologise for it, which is funnier and
+  // sadder than either half alone.
+  tr('pt_hope', { name: 'Channeler Hope', sprite: 'trainer_channeler', ai: 'smart', money: 506,
+    party: [{ sp: 'gastly', level: 23 }],
+    intro: 'BE GONE... INTRUDER...',
+    defeat: '...Oh. Oh, I am so sorry. Was I saying something?', music: 'battle' });
+  tr('pt_patricia', { name: 'Channeler Patricia', sprite: 'trainer_channeler', ai: 'smart', money: 528,
+    party: [{ sp: 'gastly', level: 24 }],
+    intro: 'GIVE... ME... YOUR... SOUL...',
+    defeat: 'Goodness. I do apologise. It comes over me.', music: 'battle' });
+  tr('pt_carly', { name: 'Channeler Carly', sprite: 'trainer_channeler', ai: 'smart', money: 506,
+    party: [{ sp: 'gastly', level: 23 }, { sp: 'gastly', level: 23 }],
+    intro: 'HAUNT... HAUNT...',
+    defeat: 'What time is it? Have I been here long?', music: 'battle' });
+  tr('pt_laurel', { name: 'Channeler Laurel', sprite: 'trainer_channeler', ai: 'smart', money: 550,
+    party: [{ sp: 'haunter', level: 25 }],
+    intro: 'YOU... ARE... NOT... WELCOME...',
+    defeat: 'Please do not tell my mother about this.', music: 'battle' });
+  tr('pt_jody', { name: 'Channeler Jody', sprite: 'trainer_channeler', ai: 'smart', money: 572,
+    party: [{ sp: 'gastly', level: 26 }],
+    intro: 'LEAVE... THIS... PLACE...',
+    defeat: 'I really must stop doing that.', music: 'battle' });
+  tr('pt_tammy', { name: 'Channeler Tammy', sprite: 'trainer_channeler', ai: 'smart', money: 594,
+    party: [{ sp: 'haunter', level: 27 }],
+    intro: 'THE DEAD DO NOT REST HERE...',
+    defeat: 'They do, normally. That is rather the problem.', music: 'battle' });
+  tr('pt_karina', { name: 'Channeler Karina', sprite: 'trainer_channeler', ai: 'smart', money: 594,
+    party: [{ sp: 'gastly', level: 27 }, { sp: 'haunter', level: 27 }],
+    intro: 'SHE IS STILL ANGRY...',
+    defeat: 'She has every right to be.', music: 'battle' });
+
+  tr('pt_rocket1', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1150,
+    party: [{ sp: 'zubat', level: 25 }, { sp: 'zubat', level: 25 }, { sp: 'golbat', level: 25 }],
+    intro: 'This is TEAM ROCKET business. Turn around.',
+    defeat: 'Ugh! You are strong!', music: 'battle' });
+  tr('pt_rocket2', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1196,
+    party: [{ sp: 'koffing', level: 26 }, { sp: 'drowzee', level: 26 }],
+    intro: 'Nobody was supposed to get past the ghost.',
+    defeat: 'How did you even SEE it?', music: 'battle' });
+  tr('pt_rocket3', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1242,
+    party: [{ sp: 'zubat', level: 23 }, { sp: 'rattata', level: 23 }, { sp: 'raticate', level: 23 }, { sp: 'zubat', level: 23 }],
+    intro: 'The old man stays until we get what we came for.',
+    defeat: 'Fine! Take him! He is not worth this.', music: 'battle' });
+
   // ================================================ starter counter cycle ===
   // Blue always takes the starter that BEATS yours. The whole relationship, in
   // one line of data.
