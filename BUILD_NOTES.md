@@ -77,9 +77,12 @@ file, and both are the classic way this engine breaks.
   re-blits each frame (`gfx.tickLive`, called from `main.js`). Do not route
   them through `_fitToBox` — it bakes to a canvas and freezes frame 0.
 - **Overworld sprites stream** from `pret/pokefirered`; that set is complete for
-  Kanto so nothing renders blank. Eric also wants to *see* hand-authored samples
-  before deciding — build a side-by-side comparison and ask. Do not switch
-  unless he says so.
+  Kanto so nothing renders blank. The hand-authored alternative was BUILT and
+  COMPARED (`node tools/compare_chars.js`, samples in `tools/sample_chars.js`):
+  the streamed set is clearly better pixel art — interior shading, readable
+  faces at 16x24, confident silhouettes — and the hand-drawn samples read flat
+  beside it. Recommendation is to keep streaming. Awaiting Eric's call; do not
+  switch unless he says so.
 - **Tileset is hand-authored**, a full new temperate Kanto set (not a retint).
 - **Music**: keep the inherited 8 tracker songs for now. Eric initially asked
   for real Gen 1 transcriptions; that was walked back because they would be
