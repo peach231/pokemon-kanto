@@ -238,6 +238,52 @@
     defeat: 'I got soaked instead.', music: 'battle'
   });
 
+  // NUGGET BRIDGE. Five in a row with no way off the bridge, then a recruiter.
+  tr('nb_1', { name: 'Bug Catcher Cale', sprite: 'trainer_bugcatcher', ai: 'basic', money: 224,
+    party: [{ sp: 'weedle', level: 14 }, { sp: 'kakuna', level: 14 }],
+    intro: 'One down, four to go. Think you can manage?', defeat: 'Four to go.', music: 'battle' });
+  tr('nb_2', { name: 'Lass Iris', sprite: 'trainer_lass', ai: 'basic', money: 285,
+    party: [{ sp: 'pidgey', level: 15 }, { sp: 'nidoranf', level: 15 }],
+    intro: 'You got past Cale? Lucky.', defeat: 'Not luck, then.', music: 'battle' });
+  tr('nb_3', { name: 'Youngster Josh', sprite: 'trainer_youngster', ai: 'basic', money: 285,
+    party: [{ sp: 'sandshrew', level: 15 }],
+    intro: 'Halfway. This is where people turn back.', defeat: 'You did not turn back.', music: 'battle' });
+  tr('nb_4', { name: 'Lass Reli', sprite: 'trainer_lass', ai: 'smart', money: 304,
+    party: [{ sp: 'nidoranm', level: 16 }],
+    intro: 'Your POKéMON must be exhausted by now.', defeat: 'Apparently not.', music: 'battle' });
+  tr('nb_5', { name: 'Jr. Trainer Ethan', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 380,
+    party: [{ sp: 'mankey', level: 17 }, { sp: 'oddish', level: 16 }],
+    intro: 'Last one. Nobody gets past me.', defeat: 'Somebody got past me.', music: 'battle' });
+  tr('nb_rocket', { name: 'Rocket Scout', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 800,
+    party: [{ sp: 'ekans', level: 17 }, { sp: 'zubat', level: 17 }],
+    intro: 'Impressive. TEAM ROCKET could use someone like you. Interested?',
+    defeat: 'Fine. Stay a hero. See where it gets you.', music: 'battle' });
+
+  tr('r25_franklin', { name: 'Hiker Franklin', sprite: 'trainer_hiker', ai: 'basic', money: 588,
+    party: [{ sp: 'machop', level: 14 }, { sp: 'geodude', level: 14 }],
+    intro: 'This cape is a nice walk. Shame about the trainers.', defeat: 'I am one of them, yes.', music: 'battle' });
+  tr('r25_ali', { name: 'Lass Ali', sprite: 'trainer_lass', ai: 'basic', money: 304,
+    party: [{ sp: 'oddish', level: 16 }, { sp: 'bellsprout', level: 16 }],
+    intro: 'Are you going to see BILL too?', defeat: 'Say hello for me.', music: 'battle' });
+
+  tr('r6_ethan', { name: 'Camper Ethan', sprite: 'trainer_camper', ai: 'basic', money: 380,
+    party: [{ sp: 'rattata', level: 19 }, { sp: 'ekans', level: 19 }],
+    intro: 'VERMILION is just down there. You still have to get past me.',
+    defeat: 'Fair enough. Off you go.', music: 'battle' });
+  tr('r6_nancy', { name: 'Picnicker Nancy', sprite: 'trainer_picnicker', ai: 'basic', money: 360,
+    party: [{ sp: 'pidgey', level: 18 }, { sp: 'nidoranf', level: 18 }],
+    intro: 'Lovely spot for a battle, is it not?', defeat: 'Still a lovely spot.', music: 'battle' });
+
+  // Surge's gym.
+  tr('vg_dwayne', { name: 'Sailor Dwayne', sprite: 'trainer_sailor', ai: 'smart', money: 462,
+    party: [{ sp: 'machop', level: 20 }, { sp: 'shellder', level: 20 }],
+    intro: 'You want the LIEUTENANT? Get past me first.',
+    defeat: 'Go on then. He is expecting you.', music: 'battle' });
+  tr('vg_luca', { name: 'Rocker Luca', sprite: 'trainer_rocker', ai: 'smart', money: 440,
+    party: [{ sp: 'voltorb', level: 20 }, { sp: 'magnemite', level: 20 }],
+    intro: 'ELECTRIC POKéMON are the loudest POKéMON. That is just science.',
+    defeat: 'Turned down. Not off. Just down.', music: 'battle' });
+
   // ================================================ starter counter cycle ===
   // Blue always takes the starter that BEATS yours. The whole relationship, in
   // one line of data.

@@ -718,6 +718,10 @@
       26, 24),
     deco: blank(26, 24),
     warps: [
+      { x: 12, y: 0, to: 'route24', tx: 10, ty: 18, dir: 'up' },
+      { x: 13, y: 0, to: 'route24', tx: 11, ty: 18, dir: 'up' },
+      { x: 12, y: 23, to: 'route5', tx: 10, ty: 1, dir: 'down' },
+      { x: 13, y: 23, to: 'route5', tx: 11, ty: 1, dir: 'down' },
       { x: 0, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
       { x: 1, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
       { x: 5, y: 11, to: 'ceruleangym', tx: 5, ty: 12, dir: 'up' },
@@ -741,6 +745,257 @@
       { x: 17, y: 20, sprite: 'oldman', dir: 'left',
         dialog: ['BILL lives north of here, up ROUTE 25.',
                  'Brilliant man. Bit odd. Ask him about the storage system.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 24 — NUGGET BRIDGE. Five trainers in a line across a bridge, one
+  // after another with no way off, and a Rocket recruiter waiting at the far
+  // end. It is the first place the game tests a whole TEAM rather than a lead.
+  // ==========================================================================
+  G.MAPS.route24 = {
+    id: 'route24', name: 'Route 24', w: 20, h: 20,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututu..tutututu',
+      'vxvxvxvxvx..vxvxvxvx'
+    ].concat(rows([
+      '........pp......',   // 2
+      '........pp......',
+      '~~~~~~~pppp~~~~~',   // 4  the bridge
+      '~~~~~~~pppp~~~~~',
+      '~~~~~~~pppp~~~~~',
+      '~~~~~~~pppp~~~~~',
+      '~~~~~~~pppp~~~~~',
+      '~~~~~~~pppp~~~~~',
+      '~~~~~~~pppp~~~~~',
+      '~~~~~~~pppp~~~~~',   // 11
+      '........pp......',
+      '..ggg...pp..ggg.',
+      '..ggg...pp..ggg.',
+      '........pp......',
+      '........pp......',
+      '........pp......',
+      '........pp......'    // 19
+    ], 2)), 20, 20),
+    deco: blank(20, 20),
+    encounters: (G.ENCOUNTERS || {}).route24,
+    warps: [
+      { x: 10, y: 0, to: 'route25', tx: 1, ty: 6, dir: 'up' },
+      { x: 11, y: 0, to: 'route25', tx: 1, ty: 6, dir: 'up' },
+      { x: 10, y: 19, to: 'cerulean', tx: 12, ty: 1, dir: 'down' },
+      { x: 11, y: 19, to: 'cerulean', tx: 13, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 8, y: 12, text: 'NUGGET BRIDGE — Beat five trainers in a row and the prize is yours.' }
+    ],
+    trainers: [
+      { x: 9, y: 10, sprite: 'bugcatcher', dir: 'down', trainer: 'nb_1', sight: 1 },
+      { x: 12, y: 9, sprite: 'lass', dir: 'down', trainer: 'nb_2', sight: 1 },
+      { x: 9, y: 8, sprite: 'youngster', dir: 'down', trainer: 'nb_3', sight: 1 },
+      { x: 12, y: 7, sprite: 'lass', dir: 'down', trainer: 'nb_4', sight: 1 },
+      { x: 9, y: 6, sprite: 'cooltrainerm', dir: 'down', trainer: 'nb_5', sight: 1 },
+      { x: 10, y: 3, sprite: 'rocket', dir: 'down', trainer: 'nb_rocket', sight: 2 }
+    ],
+    npcs: [
+      { x: 13, y: 13, sprite: 'littleboy', dir: 'left',
+        dialog: ['Five trainers, one bridge, no way off.',
+                 'Bring POTIONs. Everybody forgets the POTIONs.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 25 — the cape above the bridge, ending at Bill's cottage.
+  // ==========================================================================
+  G.MAPS.route25 = {
+    id: 'route25', name: 'Route 25', w: 32, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      hband(32, true),
+      hband(32, false),
+      '................................',
+      '..ggggg.......ggggg.............',
+      '..ggggg.......ggggg....GHI......',
+      'pppppppppppppppppppppppKLM......',
+      'pppppppppppppppppppppppWEW......',
+      '.....llllll.....................',
+      '..........................ggg...',
+      '..........................ggg...',
+      hband(32, true),
+      hband(32, false)
+    ], 32, 12),
+    deco: blank(32, 12),
+    encounters: (G.ENCOUNTERS || {}).route25,
+    warps: [
+      { x: 0, y: 5, to: 'route24', tx: 10, ty: 1, dir: 'left' },
+      { x: 0, y: 6, to: 'route24', tx: 10, ty: 1, dir: 'left' },
+      { x: 24, y: 6, to: 'billshouse', tx: 5, ty: 8, dir: 'up' }
+    ],
+    signs: [
+      { x: 22, y: 7, text: "BILL'S HOUSE — Inventor. Please knock. (The knocker is broken.)" }
+    ],
+    trainers: [
+      { x: 8, y: 3, sprite: 'hiker', dir: 'down', trainer: 'r25_franklin', sight: 3 },
+      { x: 17, y: 8, sprite: 'lass', dir: 'up', trainer: 'r25_ali', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 5 — Cerulean down toward Saffron. The city gates are shut, so the
+  // only way south is the UNDERGROUND PATH, which is exactly the detour Gen 1
+  // uses to keep Saffron sealed until much later without a locked door.
+  // ==========================================================================
+  G.MAPS.route5 = {
+    id: 'route5', name: 'Route 5', w: 20, h: 18,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututu..tutututu',
+      'vxvxvxvxvx..vxvxvxvx'
+    ].concat(rows([
+      '........pp......',   // 2
+      '..ggg...pp......',
+      '..ggg...pp..ggg.',
+      '........pp..ggg.',
+      '........pp......',
+      '.lllll..pp......',
+      '........pp......',
+      '.....GHI........',   // 9  underground path entrance
+      '.....KLM........',
+      '.....WEW........',   // 11
+      '........pp......',
+      '........pp......',
+      'tutututututututu',   // 14 — Saffron's shut gates. No road through.
+      'vxvxvxvxvxvxvxvx',
+      'tutututututututu',
+      'vxvxvxvxvxvxvxvx'
+    ], 2)), 20, 18),
+    deco: blank(20, 18),
+    encounters: (G.ENCOUNTERS || {}).route5,
+    warps: [
+      { x: 10, y: 0, to: 'cerulean', tx: 12, ty: 22, dir: 'up' },
+      { x: 11, y: 0, to: 'cerulean', tx: 13, ty: 22, dir: 'up' },
+      { x: 8, y: 11, to: 'undergroundpath', tx: 3, ty: 2, dir: 'down' }
+    ],
+    signs: [
+      { x: 11, y: 12, text: 'SAFFRON CITY is south, but the gates are shut. The UNDERGROUND PATH runs beneath.' }
+    ],
+    npcs: [
+      { x: 12, y: 6, sprite: 'gentleman', dir: 'left',
+        dialog: ['SAFFRON has closed its gates. All four of them.',
+                 'Something is going on in there and nobody will say what.',
+                 'Use the UNDERGROUND PATH. It comes out on ROUTE 6.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 6 — the last stretch down into Vermilion.
+  // ==========================================================================
+  G.MAPS.route6 = {
+    id: 'route6', name: 'Route 6', w: 20, h: 18,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'vxvxvxvxvxvxvxvxvxvx',
+      'tutututututututututu'
+    ].concat(rows([
+      '.....GHI........',   // 2  underground path exit
+      '.....KLM........',
+      '.....WEW........',
+      '........pp......',
+      '..ggg...pp......',
+      '..ggg...pp..ggg.',
+      '........pp..ggg.',
+      '.lllll..pp......',
+      '........pp......',
+      '........pp......',
+      '....y...pp....o.',
+      '........pp......',
+      '........pp......',
+      '........pp......',
+      '........pp......',
+      '........pp......'    // 17
+    ], 2)), 20, 18),
+    deco: blank(20, 18),
+    encounters: (G.ENCOUNTERS || {}).route6,
+    warps: [
+      { x: 8, y: 4, to: 'undergroundpath', tx: 3, ty: 20, dir: 'down' },
+      { x: 10, y: 17, to: 'vermilion', tx: 12, ty: 1, dir: 'down' },
+      { x: 11, y: 17, to: 'vermilion', tx: 13, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 11, y: 11, text: 'ROUTE 6 — VERMILION CITY to the south. Mind the ledges.' }
+    ],
+    trainers: [
+      { x: 13, y: 8, sprite: 'camper', dir: 'left', trainer: 'r6_ethan', sight: 3 },
+      { x: 6, y: 13, sprite: 'picnicker', dir: 'right', trainer: 'r6_nancy', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // VERMILION CITY — the port. Lt. Surge's gym, and the S.S. Anne at the dock,
+  // which will not let you aboard without a ticket.
+  // ==========================================================================
+  G.MAPS.vermilion = {
+    id: 'vermilion', name: 'Vermilion City', w: 26, h: 24,
+    music: 'town', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    gymEmblem: { x: 6, y: 15, type: 'electric' },
+    ground: pad([
+      'tutututututu..tutututututu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvx'
+    ].concat(rows([
+      '..........pp..........',   // 2
+      '..7889....pp....qrrz..',
+      '..d+mh....pp....i$jk..',
+      '..WNEW....pp....WNEW..',
+      '..........pp..........',
+      'pppppppppppppppppppppp',   // 7
+      '..........pp..........',
+      '...1223...pp...1223...',
+      '...4556...pp...4556...',
+      '...WNDW...pp...WNDW...',
+      '..........pp..........',
+      'pppppppppppppppppppppp',   // 13
+      '..........pp..........',
+      '..ABBC....pp..........',   // 15 gym
+      '..abbc....pp....S.....',
+      '..WYYW....pp..........',
+      '..........pp..........',
+      '..........pp..........',
+      '%%%%%%%%%%pp%%%%%%%%%%',   // 20 the quay
+      '^^^^^^^^^^pp^^^^^^^^^^',
+      '~~~~~~~~~~pp~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~'    // 23
+    ], 2)), 26, 24),
+    deco: blank(26, 24),
+    warps: [
+      { x: 12, y: 0, to: 'route6', tx: 10, ty: 16, dir: 'up' },
+      { x: 13, y: 0, to: 'route6', tx: 11, ty: 16, dir: 'up' },
+      { x: 5, y: 17, to: 'vermiliongym', tx: 5, ty: 12, dir: 'up' },
+      { x: 6, y: 17, to: 'vermiliongym', tx: 6, ty: 12, dir: 'up' },
+      { x: 6, y: 5, to: 'vermilioncentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 20, y: 5, to: 'vermilionmart', tx: 4, ty: 6, dir: 'up' },
+      { x: 7, y: 11, to: 'vermilionhouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 19, y: 11, to: 'vermilionfanclub', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 18, y: 18, text: 'VERMILION CITY — The Port of Exquisite Sunsets.' },
+      { x: 5, y: 18, text: 'VERMILION CITY POKéMON GYM — LEADER: LT. SURGE. The Lightning American!' }
+    ],
+    npcs: [
+      { x: 10, y: 14, sprite: 'gymguy', dir: 'right',
+        dialog: ["LT. SURGE is ex-military and he fights like it. His RAICHU is fast.",
+                 'GROUND types are completely immune to ELECTRIC. A DIGLETT would walk it.'] },
+      { x: 12, y: 21, sprite: 'sailor', dir: 'down', event: 'ssanneDock' },
+      { x: 17, y: 8, sprite: 'woman', dir: 'down',
+        dialog: ['The S.S. ANNE is in port. Invitation only, of course.',
+                 'It sails in a few days and then it is gone for a year.'] },
+      { x: 4, y: 19, sprite: 'workerm', dir: 'up',
+        dialog: ['There is a DIGLETT tunnel west of town that runs all the way to ROUTE 2.',
+                 'Full of them. Nothing but DIGLETT, top to bottom.'] }
     ]
   };
 })();

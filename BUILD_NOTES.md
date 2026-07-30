@@ -15,7 +15,7 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
-| Kanto maps | Pallet -> Cerulean done (29 maps). Routes 24/25 and Route 5 south to Vermilion are next |
+| Kanto maps | Pallet -> Vermilion done (41 maps). Diglett's Cave, the S.S. Anne and Rock Tunnel east are next |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
 | Region map screen | done — Kanto, landmass derived from the node graph |
 | Gen 1 move effects in battle.js | done — all 35 effect kinds handled, guarded by check.js |
@@ -23,9 +23,10 @@ inherited; the data, art sources, world and story are being replaced.
 | Story, trainers, gyms, endgame | not started |
 
 **`node tools/check.js` passes**, battle-core tests included, and the game
-BOOTS AND RENDERS. Playable from the start through to the CASCADEBADGE: Pallet -> Route 1 ->
-Viridian -> Route 2 -> Viridian Forest -> Pewter (Brock) -> Route 3 -> Mt. Moon
-1F/B1F -> Route 4 -> Cerulean (Misty). Nothing past Cerulean exists yet.
+BOOTS AND RENDERS. Playable from the start through to the THUNDERBADGE: Pallet -> Viridian ->
+Viridian Forest -> Pewter (Brock) -> Mt. Moon -> Cerulean (Misty) -> Nugget
+Bridge -> Bill -> the Underground Path -> Vermilion (Lt. Surge). Nothing past
+Vermilion exists yet; the S.S. Anne gangway is a stub.
 
 check.js now also walks the WARP GRAPH from Pallet and fails on any warp that
 lands on a solid tile or out of bounds (arriving stuck inside a wall) and warns
@@ -107,8 +108,10 @@ file, and both are the classic way this engine breaks.
   Each has the right message and a real effect; none silently does nothing.
   Upgrading them needs turn-loop state in `battle.js`.
 
-- The region stops at Cerulean. Its south exit to Route 5 is not wired,
-  because Route 5 has not been built.
+- The region stops at Vermilion. The S.S. Anne exists only as a dock NPC that
+  acknowledges the ticket; the ship itself is not built.
+- Saffron is deliberately sealed (its gates are solid tree on Route 5). The
+  Underground Path is the intended way south, exactly as in Gen 1.
 - Object tiles (trees, rocks, boulders, decorations, signs, fences) are
   transparent-backed on purpose so they can sit on any ground. Do NOT bake a
   grass surround back into them — that was the original Hoenn bug and it made

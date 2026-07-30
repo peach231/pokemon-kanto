@@ -652,4 +652,248 @@
     'A DOME FOSSIL, half out of the rock. Whatever it was had a shell like a shield.');
   G.EVENTS.mtmoonFossil2 = fossilEvent('helixfossil', 'domefossil',
     'A HELIX FOSSIL, spiralled and almost intact. It is heavier than it looks.');
+
+  // ============================================================ BILL'S HOUSE =
+  G.MAPS.billshouse = {
+    id: 'billshouse', name: "Bill's House", w: 12, h: 10,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'I.BB..HH..PI',
+      'I..........I',
+      'I..T....T..I',
+      'I..........I',
+      'I...o..o...I',
+      'I..........I',
+      'I..........I',
+      'I..........I',
+      'IIIII..IIIII'
+    ], 12, 10),
+    deco: blank(12, 10),
+    warps: [
+      { x: 5, y: 9, to: 'route25', tx: 24, ty: 7, dir: 'down' },
+      { x: 6, y: 9, to: 'route25', tx: 24, ty: 7, dir: 'down' }
+    ],
+    signs: [
+      { x: 7, y: 2, text: 'A wall of humming machinery. A label reads: STORAGE SYSTEM — PROTOTYPE 3.' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'bill', dir: 'down', event: 'billTalk' }
+    ]
+  };
+
+  G.EVENTS.billTalk = function* () {
+    if (G.flags.ssticket) {
+      yield { t: 'text', s: 'Bill: Off to the S.S. ANNE? Say hello to the captain. He is a martyr about that boat.' };
+      return;
+    }
+    yield { t: 'text', s: 'Bill: Ah — a visitor! Do not touch anything, most of it is live.' };
+    yield { t: 'text', s: 'Bill: I built the POKéMON storage system. Every PC in every CENTER runs on it.' };
+    yield { t: 'text', s: 'Bill: You have been using it all along, so in a small way we have already met.' };
+    yield { t: 'text', s: 'Bill: Here. I have no use for this and you clearly travel.' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.flags.ssticket = 1;
+        G.player.bag.ssticket = 1;
+      }
+    };
+    yield { t: 'sfx', id: 'catchClick' };
+    yield { t: 'text', s: 'You received the S.S. TICKET!' };
+    yield { t: 'text', s: 'Bill: The S.S. ANNE is docked at VERMILION. Go before it sails.' };
+  };
+
+  // ======================================================= UNDERGROUND PATH ==
+  // A long, dull, straight tunnel — which is the point. It is the detour you
+  // take because Saffron is shut, and it should feel like one.
+  G.MAPS.undergroundpath = {
+    id: 'undergroundpath', name: 'Underground Path', w: 7, h: 23,
+    music: 'cave', battleBg: 'indoor', base: 'metalfloor',
+    legend: { '.': 'metalfloor', '#': 'metalwall' },
+    ground: pad([
+      '#######',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '##...##',
+      '#######'
+    ], 7, 23),
+    deco: blank(7, 23),
+    warps: [
+      { x: 3, y: 1, to: 'route5', tx: 8, ty: 12, dir: 'up' },
+      { x: 3, y: 21, to: 'route6', tx: 8, ty: 5, dir: 'down' }
+    ],
+    items: [
+      { x: 2, y: 11, item: 'superpotion', once: 'up_potion' }
+    ],
+    npcs: [
+      { x: 4, y: 16, sprite: 'oldman', dir: 'up',
+        dialog: ['They dug this when SAFFRON started charging tolls at the gates.',
+                 'Now the gates are shut entirely and this is the only way through.',
+                 'Longest walk in KANTO. I do it twice a day.'] }
+    ]
+  };
+
+  // ========================================================= VERMILION CITY ==
+  healCentre('vermilioncentre', 'VERMILION', { map: 'vermilion', x: 6, y: 6 });
+  pokeMart('vermilionmart', 'VERMILION', { map: 'vermilion', x: 20, y: 6 },
+    ['potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+     'iceheal', 'pokeball', 'greatball', 'repel', 'escaperope']);
+
+  G.MAPS.vermilionhouse = {
+    id: 'vermilionhouse', name: 'Vermilion House', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'IP..TT..PI',
+      'I........I',
+      'I.B......I',
+      'I........I',
+      'I..o..o..I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'vermilion', tx: 7, ty: 12, dir: 'down' },
+      { x: 5, y: 8, to: 'vermilion', tx: 7, ty: 12, dir: 'down' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'fisher', dir: 'down',
+        dialog: ['My MAGIKARP is useless. Utterly useless.',
+                 'They keep telling me it evolves. Twenty levels, they say.',
+                 'I have had it eleven years.'] }
+    ]
+  };
+
+  // The Pokemon Fan Club. Its chairman talks for a very long time and then
+  // hands you a Bike Voucher, which is the only reason anyone ever visits.
+  G.MAPS.vermilionfanclub = {
+    id: 'vermilionfanclub', name: 'Pokémon Fan Club', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'IP..TT..PI',
+      'I........I',
+      'I.o....o.I',
+      'I........I',
+      'I.o....o.I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'vermilion', tx: 19, ty: 12, dir: 'down' },
+      { x: 5, y: 8, to: 'vermilion', tx: 19, ty: 12, dir: 'down' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'gentleman', dir: 'down', event: 'fanClubChairman' },
+      { x: 3, y: 5, sprite: 'beauty', dir: 'right',
+        dialog: ['The chairman will talk about his RAPIDASH for as long as you let him.',
+                 'Let him. It is worth it.'] }
+    ]
+  };
+
+  G.EVENTS.fanClubChairman = function* () {
+    if (G.flags.bikevoucher) {
+      yield { t: 'text', s: 'Chairman: Have I told you about my RAPIDASH? I believe I have.' };
+      return;
+    }
+    yield { t: 'text', s: 'Chairman: Ah, a fellow enthusiast! Sit, sit.' };
+    yield { t: 'text', s: 'Chairman: Let me tell you about my RAPIDASH. Her name is Sunburst.' };
+    yield { t: 'text', s: 'Chairman: Her mane. Her gait. The way she looks at me over breakfast.' };
+    yield { t: 'text', s: '...This goes on for some time.' };
+    yield { t: 'text', s: 'Chairman: — and THAT is why she is the finest POKéMON in KANTO.' };
+    yield { t: 'text', s: 'Chairman: You listened to all of it. Nobody listens to all of it.' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.flags.bikevoucher = 1;
+        G.player.bag.bikevoucher = 1;
+      }
+    };
+    yield { t: 'sfx', id: 'catchClick' };
+    yield { t: 'text', s: 'You received a BIKE VOUCHER!' };
+    yield { t: 'text', s: 'Chairman: Redeem it at the CERULEAN shop. A bicycle is faster than walking, and you walk a great deal.' };
+  };
+
+  // ----------------------------------------------------------- SURGE'S GYM --
+  G.MAPS.vermiliongym = {
+    id: 'vermiliongym', name: 'Vermilion Gym', w: 12, h: 14,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IIIII..IIIII'
+    ], 12, 14),
+    deco: blank(12, 14),
+    warps: [
+      { x: 5, y: 13, to: 'vermilion', tx: 5, ty: 18, dir: 'down' },
+      { x: 6, y: 13, to: 'vermilion', tx: 6, ty: 18, dir: 'down' }
+    ],
+    npcs: [
+      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'vermilionGymGuide' }
+    ],
+    trainers: [
+      { x: 5, y: 2, sprite: 'surge', dir: 'down', trainer: 'surge', sight: 0 },
+      { x: 3, y: 6, sprite: 'sailor', dir: 'right', trainer: 'vg_dwayne', sight: 4 },
+      { x: 8, y: 8, sprite: 'rocker', dir: 'left', trainer: 'vg_luca', sight: 4 }
+    ]
+  };
+
+  G.EVENTS.vermilionGymGuide = function* () {
+    if (G.flags.badge3) {
+      yield { t: 'text', s: 'Guide: THUNDERBADGE! That one lets your POKéMON use FLY outside of battle.' };
+      return;
+    }
+    yield { t: 'text', s: 'Guide: LT. SURGE fought in a war. He is not gentle about any of this.' };
+    yield { t: 'text', s: 'Guide: His RAICHU out-speeds most things and paralyses what it does not knock out.' };
+    yield { t: 'text', s: 'Guide: GROUND types take NOTHING from ELECTRIC. Not reduced — nothing.' };
+    yield { t: 'text', s: 'Guide: There is a DIGLETT tunnel just west of town. Go and get one.' };
+  };
+
+  // The dock. You cannot board without a ticket, and Bill has the ticket.
+  G.EVENTS.ssanneDock = function* () {
+    if (!G.flags.ssticket) {
+      yield { t: 'text', s: 'Sailor: Sorry. The S.S. ANNE is invitation only.' };
+      yield { t: 'text', s: 'Sailor: No ticket, no gangway. I do not make the rules, I just stand on them.' };
+      return;
+    }
+    yield { t: 'text', s: 'Sailor: A ticket! Welcome aboard the S.S. ANNE.' };
+    yield { t: 'text', s: '...The gangway is still being lowered. Come back shortly.' };
+  };
 })();
