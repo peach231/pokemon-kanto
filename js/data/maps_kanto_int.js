@@ -886,6 +886,55 @@
     yield { t: 'text', s: 'Guide: There is a DIGLETT tunnel just west of town. Go and get one.' };
   };
 
+  // The captain is seasick, and curing him is what gets you HM01 CUT -- which
+  // is the item that unblocks about a third of Kanto. Gen 1 hides its most
+  // important progression item behind a favour for a man being sick in a boat,
+  // and that is genuinely the correct amount of ceremony for it.
+  G.EVENTS.ssanneCaptain = function* () {
+    if (G.flags.hm_cut) {
+      yield { t: 'text', s: 'Captain: Much better, thank you. Do not tell the crew.' };
+      return;
+    }
+    if (!G.flags.blue_ssanne) {
+      yield { t: 'text', s: 'Captain: Ohh... I feel terrible...' };
+      yield { t: 'text', s: 'Captain: Please. Someone. Anyone. My back.' };
+      yield { t: 'text', s: '(He is in no state to talk. Perhaps deal with whoever is blocking the corridor first.)' };
+      return;
+    }
+    yield { t: 'text', s: 'Captain: Ohh... I feel terrible...' };
+    yield { t: 'text', s: 'Captain: Would you... would you rub my back? Just once?' };
+    yield { t: 'wait', frames: 24 };
+    yield { t: 'text', s: "You rub the CAPTAIN's back." };
+    yield { t: 'sfx', id: 'confirm' };
+    yield { t: 'text', s: 'Captain: ...Ah. AH. That is it. That is the spot.' };
+    yield { t: 'text', s: 'Captain: Thank you! I am myself again. Sorry you had to see that.' };
+    yield { t: 'text', s: 'Captain: Here — for your trouble. It is a HIDDEN MACHINE.' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.flags.hm_cut = 1;
+        G.player.bag.hm01 = 1;
+      }
+    };
+    yield { t: 'sfx', id: 'catchClick' };
+    yield { t: 'text', s: 'You received HM01 — CUT!' };
+    yield { t: 'text', s: 'Captain: Teach it to a POKéMON and it will clear the small trees that block the roads.' };
+    yield { t: 'text', s: 'Captain: You will find one across your path within the hour. They are everywhere once you can see them.' };
+  };
+
+  // Blue is aboard, in the corridor, and will not move until you beat him.
+  G.EVENTS.ssanneRival = function* () {
+    yield { t: 'text', s: 'Blue: Bonjour! Fancy meeting you on a boat.' };
+    yield { t: 'text', s: 'Blue: I already found the captain. He is useless. Let us settle this instead.' };
+    yield {
+      t: 'custom',
+      run: function (resume) { G.startTrainerBattle('blue_ssanne', { onDone: resume }); }
+    };
+    if (!G.flags.blue_ssanne) return;
+    yield { t: 'text', s: 'Blue: Fine! Go and be nice to the sick man. See what it gets you.' };
+    yield { t: 'text', s: 'Blue: I am off to LAVENDER. Something is happening at that tower.' };
+  };
+
   // The dock. You cannot board without a ticket, and Bill has the ticket.
   G.EVENTS.ssanneDock = function* () {
     if (!G.flags.ssticket) {

@@ -294,15 +294,14 @@
       'vxvxvxvxvx..vxvxvxvx'
     ].concat(rows([
       '........pp......',   // 2
-      '..ggg...pp......',
-      '..ggg...pp..ggg.',
-      '........pp..ggg.',
+      '..GHI...pp......',   // 3  Diglett's Cave — the long way round to Vermilion
+      '..KLM...pp..ggg.',
+      '..WEW...pp..ggg.',
       '........pp......',
       '....S...pp......',
       '........pp......',
       '........pp......',
       '........pp......',   // 10 — the forest's north exit lands here
-      '........pp......',
       'tutututututututu',   // 12 — the impassable band. No way around the
       'vxvxvxvxvxvxvxvx',   //      forest, only through it.
       'tutututututututu',
@@ -334,7 +333,8 @@
       { x: 11, y: 0, to: 'pewter', tx: 13, ty: 20, dir: 'up' },
       { x: 10, y: 33, to: 'viridian', tx: 12, ty: 1, dir: 'down' },
       { x: 11, y: 33, to: 'viridian', tx: 13, ty: 1, dir: 'down' },
-      { x: 10, y: 24, to: 'viridianforest', tx: 11, ty: 26, dir: 'up' }
+      { x: 10, y: 23, to: 'viridianforest', tx: 11, ty: 26, dir: 'up' },
+      { x: 5, y: 5, to: 'diglettscave', tx: 4, ty: 2, dir: 'up' }
     ],
     signs: [
       { x: 9, y: 7, text: 'ROUTE 2 — VIRIDIAN FOREST ahead. Watch out for wild POKéMON in the tall grass.' },
@@ -393,8 +393,8 @@
     warps: [
       { x: 11, y: 0, to: 'route2', tx: 10, ty: 10, dir: 'up' },
       { x: 12, y: 0, to: 'route2', tx: 11, ty: 10, dir: 'up' },
-      { x: 11, y: 27, to: 'route2', tx: 10, ty: 25, dir: 'down' },
-      { x: 12, y: 27, to: 'route2', tx: 11, ty: 25, dir: 'down' }
+      { x: 11, y: 27, to: 'route2', tx: 10, ty: 24, dir: 'down' },
+      { x: 12, y: 27, to: 'route2', tx: 10, ty: 24, dir: 'down' }
     ],
     signs: [
       { x: 10, y: 24, text: 'LEAVING VIRIDIAN FOREST — PEWTER CITY is to the north.' }
@@ -952,7 +952,7 @@
       '..d+mh....pp....i$jk..',
       '..WNEW....pp....WNEW..',
       '..........pp..........',
-      'pppppppppppppppppppppp',   // 7
+      'pppppppppppppppppppppp',   // 7  north street -- and the road east
       '..........pp..........',
       '...1223...pp...1223...',
       '...4556...pp...4556...',
@@ -969,9 +969,15 @@
       '^^^^^^^^^^pp^^^^^^^^^^',
       '~~~~~~~~~~pp~~~~~~~~~~',
       '~~~~~~~~~~~~~~~~~~~~~~'    // 23
-    ], 2)), 26, 24),
+    ], 2))
+      // The north street runs east out of town onto Route 11.
+      .map(function (r, i) { return i === 7 ? r.slice(0, 24) + 'pp' : r; }),
+      26, 24),
     deco: blank(26, 24),
     warps: [
+      { x: 23, y: 7, to: 'route11', tx: 1, ty: 5, dir: 'right' },
+      { x: 12, y: 20, to: 'ssanne', tx: 12, ty: 14, dir: 'down' },
+      { x: 13, y: 20, to: 'ssanne', tx: 13, ty: 14, dir: 'down' },
       { x: 12, y: 0, to: 'route6', tx: 10, ty: 16, dir: 'up' },
       { x: 13, y: 0, to: 'route6', tx: 11, ty: 16, dir: 'up' },
       { x: 5, y: 17, to: 'vermiliongym', tx: 5, ty: 12, dir: 'up' },
@@ -989,13 +995,158 @@
       { x: 10, y: 14, sprite: 'gymguy', dir: 'right',
         dialog: ["LT. SURGE is ex-military and he fights like it. His RAICHU is fast.",
                  'GROUND types are completely immune to ELECTRIC. A DIGLETT would walk it.'] },
-      { x: 12, y: 21, sprite: 'sailor', dir: 'down', event: 'ssanneDock' },
+      { x: 12, y: 19, sprite: 'sailor', dir: 'down', unlessFlag: 'ssticket', event: 'ssanneDock' },
+      { x: 13, y: 19, sprite: 'sailor', dir: 'down', unlessFlag: 'ssticket', event: 'ssanneDock' },
       { x: 17, y: 8, sprite: 'woman', dir: 'down',
         dialog: ['The S.S. ANNE is in port. Invitation only, of course.',
                  'It sails in a few days and then it is gone for a year.'] },
       { x: 4, y: 19, sprite: 'workerm', dir: 'up',
         dialog: ['There is a DIGLETT tunnel west of town that runs all the way to ROUTE 2.',
                  'Full of them. Nothing but DIGLETT, top to bottom.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // DIGLETT'S CAVE — a long tunnel under the mountains, and the answer to
+  // Lt. Surge. Ground-types take NOTHING from Electric, and this is where the
+  // game quietly puts one within reach right before you need it.
+  // ==========================================================================
+  G.MAPS.diglettscave = {
+    id: 'diglettscave', name: "Diglett's Cave", w: 9, h: 26,
+    music: 'cave', battleBg: 'cave', base: 'cavefloor',
+    legend: G.LEG_CAVE,
+    ground: pad([
+      '#########',
+      '##,,,,,##',
+      '##,,,,,##',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '###...###',
+      '##,,,,,##',
+      '##,,,,,##',
+      '#########'
+    ], 9, 26),
+    deco: blank(9, 26),
+    encounters: (G.ENCOUNTERS || {}).diglettscave,
+    warps: [
+      { x: 4, y: 1, to: 'route2', tx: 5, ty: 6, dir: 'down' },
+      { x: 4, y: 24, to: 'route11', tx: 1, ty: 6, dir: 'down' }
+    ],
+    signs: [
+      { x: 3, y: 2, text: "DIGLETT'S CAVE — Dug by POKéMON, not by people. Nobody is sure how far it goes." }
+    ],
+    npcs: [
+      { x: 5, y: 23, sprite: 'workerm', dir: 'up',
+        dialog: ['DIGLETT dug all of this. Every metre of it.',
+                 'We just put the lights in and pretended it was ours.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 11 — east out of Vermilion, under the Diglett tunnel's south mouth.
+  // ==========================================================================
+  G.MAPS.route11 = {
+    id: 'route11', name: 'Route 11', w: 32, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      hband(32, true),
+      hband(32, false),
+      '................................',
+      '..ggggg.........ggggg...........',
+      '..ggggg.........ggggg...........',
+      'pppppppppppppppppppppppppppppppp',
+      'pppppppppppppppppppppppppppppppp',
+      '......llllll....................',
+      '.....................ggggg......',
+      '.....................ggggg......',
+      hband(32, true),
+      hband(32, false)
+    ], 32, 12),
+    deco: blank(32, 12),
+    encounters: (G.ENCOUNTERS || {}).route11,
+    warps: [
+      { x: 0, y: 5, to: 'vermilion', tx: 23, ty: 7, dir: 'left' },
+      { x: 0, y: 6, to: 'vermilion', tx: 23, ty: 7, dir: 'left' },
+      { x: 1, y: 2, to: 'diglettscave', tx: 4, ty: 23, dir: 'up' }
+    ],
+    signs: [
+      { x: 3, y: 3, text: "DIGLETT'S CAVE — north entrance. Comes out on ROUTE 2, near PEWTER." }
+    ],
+    trainers: [
+      { x: 11, y: 8, sprite: 'youngster', dir: 'up', trainer: 'r11_eddie', sight: 3 },
+      { x: 24, y: 3, sprite: 'gambler', dir: 'down', trainer: 'r11_hugo', sight: 3 }
+    ]
+  };
+
+  // ==========================================================================
+  // S.S. ANNE — the cruise liner. Blue is aboard, the captain is seasick, and
+  // curing him is what gets you HM01 CUT, which is what unblocks half of Kanto.
+  // ==========================================================================
+  G.MAPS.ssanne = {
+    id: 'ssanne', name: 'S.S. Anne', w: 24, h: 16,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIIIIIIIIIIIIIII',
+      'I......II........II....I',
+      'I.(..).II..TTTT..II.PP.I',
+      'I......II........II....I',
+      'I..o...II..o..o..II....I',
+      'IIII.IIIIII....IIIIII.III'.slice(0, 24),
+      'I.......................I',
+      'I.......................I',
+      'I.......................I',
+      'IIII.IIIIIIII.IIIIIII.III'.slice(0, 24),
+      'I......II........II....I',
+      'I.(..).II..TT....II.oo.I',
+      'I......II........II....I',
+      'I..o...II...o....II....I',
+      'I......II........II....I',
+      'IIIIIIIIIIII..IIIIIIIIII'
+    ], 24, 16),
+    deco: blank(24, 16),
+    warps: [
+      { x: 12, y: 15, to: 'vermilion', tx: 12, ty: 20, dir: 'down' },
+      { x: 13, y: 15, to: 'vermilion', tx: 12, ty: 20, dir: 'down' }
+    ],
+    signs: [
+      { x: 4, y: 3, text: 'A guest cabin. Somebody has left a half-finished postcard on the bunk.' },
+      { x: 20, y: 3, text: 'The dining room. The buffet has been picked clean.' }
+    ],
+    npcs: [
+      { x: 12, y: 7, sprite: 'captain', dir: 'down', event: 'ssanneCaptain' },
+      { x: 4, y: 7, sprite: 'blue', dir: 'right', unlessFlag: 'blue_ssanne', event: 'ssanneRival' },
+      { x: 19, y: 12, sprite: 'gentleman', dir: 'down',
+        dialog: ['The S.S. ANNE sails tomorrow and does not come back for a year.',
+                 'Whatever you came aboard for, do it now.'] },
+      { x: 6, y: 13, sprite: 'beauty', dir: 'down',
+        dialog: ['The CAPTAIN has been green since we left port.',
+                 'A captain! Seasick! He would die before he admitted it to the crew.'] }
+    ],
+    trainers: [
+      { x: 13, y: 11, sprite: 'sailor', dir: 'left', trainer: 'ss_dylan', sight: 3 },
+      { x: 20, y: 4, sprite: 'gentleman', dir: 'left', trainer: 'ss_arthur', sight: 3 }
+    ],
+    items: [
+      { x: 22, y: 11, item: 'maxpotion', once: 'ss_maxpotion' }
     ]
   };
 })();

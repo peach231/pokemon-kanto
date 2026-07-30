@@ -284,6 +284,24 @@
     intro: 'ELECTRIC POKéMON are the loudest POKéMON. That is just science.',
     defeat: 'Turned down. Not off. Just down.', music: 'battle' });
 
+  tr('r11_eddie', { name: 'Youngster Eddie', sprite: 'trainer_youngster', ai: 'basic', money: 418,
+    party: [{ sp: 'sandshrew', level: 21 }],
+    intro: 'This road goes all the way to LAVENDER. Not past me it does not.',
+    defeat: 'It does, then.', music: 'battle' });
+  tr('r11_hugo', { name: 'Gambler Hugo', sprite: 'trainer_gambler', ai: 'smart', money: 840,
+    party: [{ sp: 'poliwag', level: 22 }, { sp: 'horsea', level: 22 }],
+    intro: 'Care to make it interesting?',
+    defeat: 'It was interesting. It was also expensive.', music: 'battle' });
+
+  tr('ss_dylan', { name: 'Sailor Dylan', sprite: 'trainer_sailor', ai: 'smart', money: 462,
+    party: [{ sp: 'machop', level: 21 }, { sp: 'shellder', level: 21 }],
+    intro: 'Passengers are not supposed to be below decks.',
+    defeat: 'Go on then. Nothing down here anyway.', music: 'battle' });
+  tr('ss_arthur', { name: 'Gentleman Arthur', sprite: 'trainer_gentleman', ai: 'smart', money: 1274,
+    party: [{ sp: 'growlithe', level: 22 }, { sp: 'ponyta', level: 22 }],
+    intro: 'A battle! On a cruise! How marvellously uncivilised.',
+    defeat: 'Splendidly done. Have a pleasant voyage.', music: 'battle' });
+
   // ================================================ starter counter cycle ===
   // Blue always takes the starter that BEATS yours. The whole relationship, in
   // one line of data.

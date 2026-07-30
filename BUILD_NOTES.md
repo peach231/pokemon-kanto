@@ -15,7 +15,7 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
-| Kanto maps | Pallet -> Vermilion done (41 maps). Diglett's Cave, the S.S. Anne and Rock Tunnel east are next |
+| Kanto maps | Pallet -> Vermilion + S.S. Anne done (44 maps). Rock Tunnel and Lavender east are next |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
 | Region map screen | done — Kanto, landmass derived from the node graph |
 | Gen 1 move effects in battle.js | done — all 35 effect kinds handled, guarded by check.js |
@@ -106,13 +106,19 @@ file, and both are the classic way this engine breaks.
 
 ## Known rough edges
 
+- **When adding rows to an existing map, update its `h`.** `padRows` TRUNCATES
+  to the declared height, so extra rows are silently dropped off the bottom —
+  including any warp that lived there. This bit once on Route 2 and was only
+  caught because the connectivity check noticed the exit had vanished. Derive
+  door coordinates by loading the map and searching the grid, not by counting
+  characters in the source.
+
 - Multi-turn move effects (Wrap, Bide, Thrash, Transform, charge moves) resolve
   as faithful SINGLE-TURN equivalents rather than holding state across turns.
   Each has the right message and a real effect; none silently does nothing.
   Upgrading them needs turn-loop state in `battle.js`.
 
-- The region stops at Vermilion. The S.S. Anne exists only as a dock NPC that
-  acknowledges the ticket; the ship itself is not built.
+- The region stops east of Vermilion. Route 11 runs out onto nothing yet.
 - Saffron is deliberately sealed (its gates are solid tree on Route 5). The
   Underground Path is the intended way south, exactly as in Gen 1.
 - Object tiles (trees, rocks, boulders, decorations, signs, fences) are
