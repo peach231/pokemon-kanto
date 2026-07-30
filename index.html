@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pokémon — Gen 3</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="wrap">
+  <canvas id="screen" width="240" height="160"></canvas>
+  <button id="mutebtn" title="Toggle sound (M)">&#128266;</button>
+</div>
+
+<!-- core -->
+<script src="js/core/util.js"></script>
+<script src="js/data/audio_config.js"></script>
+<script src="js/core/input.js"></script>
+<script src="js/core/gfx.js"></script>
+<script src="js/core/audio.js"></script>
+<script src="js/core/scene.js"></script>
+
+<!-- data: gameplay -->
+<script src="js/data/palettes.js"></script>
+<script src="js/data/font.js"></script>
+<script src="js/data/sprites_config.js"></script>
+<script src="js/data/sprite_manifest.js"></script>
+<script src="js/data/types.js"></script>
+<script src="js/data/moves.js"></script>
+<script src="js/data/species_base.js"></script>
+<script src="js/data/species_001_050.js"></script>
+<script src="js/data/species_051_100.js"></script>
+<script src="js/data/species_101_151.js"></script>
+<script src="js/data/kanto_dex.js"></script>
+<script src="js/data/items.js"></script>
+<script src="js/data/trainers.js"></script>
+
+<!-- data: art (world art stays baked; creatures load as images) -->
+<script src="js/data/sprites_ui.js"></script>
+<script src="js/data/sprites_tiles.js"></script>
+<script src="js/data/sprites_chars.js"></script>
+<script src="js/data/sprites_trainers.js"></script>
+
+<!-- data: world -->
+<script src="js/data/maps_towns.js"></script>
+<script src="js/data/maps_routes.js"></script>
+<script src="js/data/maps_dungeons.js"></script>
+<script src="js/data/maps_interiors.js"></script>
+<script src="js/data/maps_expansion.js"></script>
+<script src="js/data/maps_endgame.js"></script>
+<script src="js/data/music.js"></script>
+
+<!-- engine -->
+<script src="js/engine/mon.js"></script>
+<script src="js/engine/battle.js"></script>
+<script src="js/engine/textbox.js"></script>
+<script src="js/engine/battle_ui.js"></script>
+<script src="js/engine/overworld.js"></script>
+<script src="js/engine/menus.js"></script>
+<script src="js/engine/save.js"></script>
+<script src="js/engine/title.js"></script>
+<script src="js/engine/debug.js"></script>
+
+<script src="main.js"></script>
+</body>
+</html>

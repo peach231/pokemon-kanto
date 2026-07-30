@@ -1,0 +1,25 @@
+# dev screenshot artifacts from the headless review loop
+tools/*.png
+tools/shots/
+
+# tooling
+node_modules/
+.vercel/
+
+# raw pret/pokered .asm files cached by tools/gen_data.js — refetched on demand
+tools/cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# user-supplied creature sprites are NOT committed (copyrighted; bring your own)
+assets/sprites/pokemon/front/*.png
+assets/sprites/pokemon/back/*.png
+assets/sprites/pokemon/icon/*.png
+# user-supplied trainer/player sprites are NOT committed either (bring your own)
+assets/sprites/trainers/*.png
+
+# headless-Edge review profiles / scratch screenshots
+tools/critique/
