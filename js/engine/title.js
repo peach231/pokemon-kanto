@@ -39,9 +39,19 @@
         ctx.fillStyle = on ? (big ? '#f8e878' : '#c8c8e8') : '#33335a';
         ctx.fillRect(x, y, big ? 2 : 1, big ? 2 : 1);
       }
-      img = G.IMG.mon_rayquaza;
+      // Mewtwo hangs still among the stars; Mew streaks past behind it.
+      var mewImg = G.IMG.mon_mew;
+      if (mewImg) {
+        var mx = ((f * 1.6) % (W + 60)) - 30, my = 18 + Math.sin(f * 0.09) * 9;
+        for (i = 0; i < 10; i++) {
+          ctx.fillStyle = ((f >> 1) + i) % 2 ? '#f0b0c8' : '#f4f4f4';
+          ctx.fillRect((mx - i * 4) | 0, (my + 10 + Math.sin((f - i * 4) * 0.2) * 2) | 0, 1, 1);
+        }
+        ctx.drawImage(mewImg, mx | 0, my | 0, 22, 22);
+      }
+      img = G.IMG.mon_mewtwo;
       if (img) {
-        var rcx = mid + Math.sin(f * 0.02) * 40, ry = 40 + Math.sin(f * 0.035) * 10;
+        var rcx = mid + Math.sin(f * 0.012) * 22, ry = 46 + Math.sin(f * 0.03) * 5;
         for (i = 0; i < 8; i++) { ctx.fillStyle = ((f >> 2) + i) % 2 ? '#a0e0c0' : '#f4f4f4'; ctx.fillRect((rcx - 8 - i * 3) | 0, (ry + 34 + Math.sin((f - i * 5) * 0.12) * 3) | 0, 1, 1); }
         ctx.drawImage(img, (rcx - 32) | 0, ry | 0, 64, 64);
       }
@@ -55,8 +65,8 @@
       ctx.fillStyle = '#1a4a9a'; ctx.fillRect(0, 112, W, H - 112);
       ctx.fillStyle = '#7ec0f0';
       for (i = 0; i < 6; i++) { y = 58 + i * 10; var o = (((f >> 1) + i * 6) % 16); for (x = -16 + o; x < W; x += 16) ctx.fillRect(x, y, 8, 1); }
-      img = G.IMG.mon_wingull; if (img) { x = ((f * 1.1) % (W + 50)) - 25; y = 16 + Math.sin(f * 0.08) * 4; ctx.drawImage(img, x | 0, y | 0, 22, 22); }
-      img = G.IMG.mon_kyogre; if (img) { y = 40 + Math.sin(f * 0.05) * 7; ctx.drawImage(img, (mid - 34) | 0, y | 0, 68, 68); }
+      img = G.IMG.mon_pidgeotto; if (img) { x = ((f * 1.1) % (W + 50)) - 25; y = 16 + Math.sin(f * 0.08) * 4; ctx.drawImage(img, x | 0, y | 0, 22, 22); }
+      img = G.IMG.mon_articuno; if (img) { y = 40 + Math.sin(f * 0.05) * 7; ctx.drawImage(img, (mid - 34) | 0, y | 0, 68, 68); }
       for (i = 0; i < 12; i++) { y = 112 - ((f * 0.8 + i * 13) % 62); x = mid - 22 + i * 4 + Math.sin((f + i * 10) * 0.1) * 2; ctx.fillStyle = '#bfe8f0'; ctx.fillRect(x | 0, y | 0, 1 + (i % 2), 1 + (i % 2)); }
     } else if (name === 'land') {
       ctx.fillStyle = '#3a2244'; ctx.fillRect(0, 0, W, 26);
@@ -71,7 +81,7 @@
       var lg = (0.4 + 0.4 * (0.5 + 0.5 * Math.sin(f * 0.08))).toFixed(2);
       ctx.fillStyle = 'rgba(240,120,50,' + lg + ')';
       for (x = 0; x < W; x += 24) { ctx.fillRect(x + ((f >> 2) % 12), 122, 10, 2); ctx.fillRect(x + 6, 140, 8, 2); }
-      img = G.IMG.mon_groudon; if (img) { y = 38 + Math.sin(f * 0.045) * 2; ctx.drawImage(img, (mid - 34) | 0, y | 0, 68, 68); }
+      img = G.IMG.mon_moltres; if (img) { y = 38 + Math.sin(f * 0.045) * 2; ctx.drawImage(img, (mid - 34) | 0, y | 0, 68, 68); }
       for (i = 0; i < 16; i++) { y = 132 - ((f * 0.6 + i * 17) % 92); x = 28 + i * 13 + Math.sin((f + i * 20) * 0.08) * 4; ctx.fillStyle = ((f >> 3) + i) % 2 ? '#f09838' : '#d04a48'; ctx.fillRect(x | 0, y | 0, 1, 1); }
     } else if (name === 'meadow') {
       ctx.fillStyle = '#8fd0f4'; ctx.fillRect(0, 0, W, 86);
@@ -82,9 +92,9 @@
       ctx.fillStyle = '#3fa757'; ctx.fillRect(0, 86, W, H - 86);
       ctx.fillStyle = '#2f8f47'; for (i = 0; i < 70; i++) { x = (i * 37 + (f >> 3)) % W; y = 92 + (i * 53) % 62; ctx.fillRect(x, y, 1, 2); }
       for (i = 0; i < 10; i++) { x = (i * 47 + 20) % W; y = 104 + (i * 29) % 46; ctx.fillStyle = ['#f8e878', '#f08060', '#f4f4f4'][i % 3]; ctx.fillRect(x, y, 2, 2); }
-      img = G.IMG.mon_taillow; if (img) { x = ((f * 1.3) % (W + 40)) - 20; y = 28 + Math.sin(f * 0.1) * 6; ctx.drawImage(img, x | 0, y | 0, 22, 22); }
-      img = G.IMG.mon_zigzagoon; if (img) { x = 40 + ((f * 0.5) % 60); y = 100 - Math.abs(Math.sin(f * 0.15)) * 7; ctx.drawImage(img, x | 0, y | 0, 30, 30); }
-      img = G.IMG.mon_poochyena; if (img) { x = 160 - ((f * 0.4) % 52); y = 104 - Math.abs(Math.sin(f * 0.13 + 1)) * 6; ctx.drawImage(img, x | 0, y | 0, 28, 28); }
+      img = G.IMG.mon_pidgey; if (img) { x = ((f * 1.3) % (W + 40)) - 20; y = 28 + Math.sin(f * 0.1) * 6; ctx.drawImage(img, x | 0, y | 0, 22, 22); }
+      img = G.IMG.mon_rattata; if (img) { x = 40 + ((f * 0.5) % 60); y = 100 - Math.abs(Math.sin(f * 0.15)) * 7; ctx.drawImage(img, x | 0, y | 0, 30, 30); }
+      img = G.IMG.mon_pikachu; if (img) { x = 160 - ((f * 0.4) % 52); y = 104 - Math.abs(Math.sin(f * 0.13 + 1)) * 6; ctx.drawImage(img, x | 0, y | 0, 28, 28); }
     } else { // 'dawn' — sunrise + the three starters
       ctx.fillStyle = '#4a2a6a'; ctx.fillRect(0, 0, W, 20);
       ctx.fillStyle = '#a84a6a'; ctx.fillRect(0, 20, W, 18);
@@ -195,7 +205,7 @@
               G.world.loadMap('playerhome', 4, 4, 'down');
               G.replaceScene(G.overworldScene);
               G.pushScene(G.Textbox([
-                'A bright Hoenn morning, ' + (G.player.name || 'friend') + '! Prof. Birch is expecting you at his lab in Littleroot Town!',
+                'A bright Kanto morning, ' + (G.player.name || 'friend') + '! PROF. OAK is expecting you at his lab, just down the road.',
                 '(Arrows to move, Z to talk and confirm, X to cancel, Enter for the menu. M mutes.)'
               ]));
             };
@@ -225,7 +235,7 @@
           ctx.fillRect(sx, sy, 1, 1);
         }
         // the weather trio: Rayquaza in the sky, Groudon & Kyogre at the horizon
-        var ray = G.IMG.mon_rayquaza, gro = G.IMG.mon_groudon, kyo = G.IMG.mon_kyogre;
+        var ray = G.IMG.mon_zapdos, gro = G.IMG.mon_moltres, kyo = G.IMG.mon_articuno;
         if (ray) ctx.drawImage(ray, 150, 6);
         if (gro) ctx.drawImage(gro, 2, 78, 52, 52);
         if (kyo) ctx.drawImage(kyo, 186, 78, 52, 52);
@@ -241,7 +251,7 @@
           var lw = logo.width * 3, lh = logo.height * 3;
           ctx.drawImage(logo, (W - lw) / 2, 30, lw, lh);
         }
-        G.text(ctx, 'A Hoenn region adventure', 68, 68, '#c2c2d6', '#1a1c2c');
+        G.text(ctx, 'A Kanto region adventure', 68, 68, '#c2c2d6', '#1a1c2c');
 
         if (phase === 'press') {
           if ((G.frame >> 5) % 2 === 0) {

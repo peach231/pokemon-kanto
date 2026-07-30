@@ -22,10 +22,17 @@
   function stageMul(s) { return s >= 0 ? (2 + s) / 2 : 2 / (2 - s); }
   function accMul(s) { return s >= 0 ? (3 + s) / 3 : 3 / (3 - s); }
 
-  function freshStages() { return { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 }; }
+  // Gen 1 has ONE Special stage, not separate Sp.Atk and Sp.Def. That is the
+  // whole reason Amnesia was broken in 1996: raising it doubled your special
+  // offence AND defence at once. Stages track `spc`; effStat maps both modern
+  // slots onto it.
+  function freshStages() { return { atk: 0, def: 0, spc: 0, spe: 0, acc: 0, eva: 0 }; }
 
-  var STAT_NAMES = { atk: 'Attack', def: 'Defense', spa: 'Sp. Attack', spd: 'Sp. Defense', spe: 'Speed', acc: 'accuracy', eva: 'evasion' };
-  var STATUS_NAMES = { brn: 'burned', psn: 'poisoned', par: 'paralyzed', slp: 'fast asleep' };
+  var STAT_NAMES = { atk: 'Attack', def: 'Defense', spc: 'Special', spe: 'Speed', acc: 'accuracy', eva: 'evasion' };
+  var STATUS_NAMES = {
+    brn: 'burned', psn: 'poisoned', tox: 'badly poisoned',
+    par: 'paralyzed', slp: 'fast asleep', frz: 'frozen solid'
+  };
 
   // opts: { party:[mons], foes:[mons], wild:bool, trainer:trainerDef|null, bag, dexSeen }
   G.Battle = function (opts) {
@@ -69,8 +76,17 @@
 
   G.Battle.prototype.effStat = function (side, stat) {
     var mon = this.active(side);
-    var v = G.monStats(mon)[stat] * stageMul(this.stages[side][stat]);
+    // spa and spd are the same underlying stat in Gen 1, and share one stage.
+    var stageKey = (stat === 'spa' || stat === 'spd') ? 'spc' : stat;
+    var v = G.monStats(mon)[stat] * stageMul(this.stages[side][stageKey]);
     if (stat === 'spe' && mon.status === 'par') v *= 0.25;
+    if (stat === 'atk' && mon.status === 'brn') v *= 0.5;
+    // Reflect / Light Screen double the relevant defence while they last.
+    var scr = this.screens && this.screens[side];
+    if (scr) {
+      if (stat === 'def' && scr.reflect > 0) v *= 2;
+      if (stat === 'spd' && scr.lightscreen > 0) v *= 2;
+    }
     return Math.max(1, Math.floor(v));
   };
 
@@ -89,26 +105,22 @@
     var physical = G.isPhysical(move.type);
     var A = this.effStat(atkSide, physical ? 'atk' : 'spa');
     var D = this.effStat(defSide, physical ? 'def' : 'spd');
-    // Gen 3 sandstorm: Rock-types gain +50% Sp.Def
-    if (this.weather === 'sand' && !physical && G.SPECIES[defender.sp].types.indexOf('rock') !== -1) {
-      D = Math.floor(D * 1.5);
-    }
     var eff = G.typeEff(move.type, G.SPECIES[defender.sp].types);
     if (eff === 0) return { dmg: 0, crit: false, eff: 0 };
 
+    // Gen 1 crit rate is the attacker's SPECIES BASE SPEED / 512, x8 on
+    // high-crit moves. Persian crits ~22% of the time and Slowpoke ~3%; a fast
+    // mon using Slash crits nearly every turn. That is authentic and kept.
     var crit = false;
     if (!opts.avg) {
-      var critChance = (move.effect && move.effect.kind === 'highCrit') ? 1 / 8 : 1 / 16;
-      crit = G.rand() < critChance;
+      crit = G.rand() < G.critChance(attacker, move, this.focus && this.focus[atkSide]);
     }
     var base = Math.floor(Math.floor(Math.floor((2 * attacker.level / 5 + 2) * move.power * A / D) / 50) + 2);
     var mult = (crit ? 2 : 1) * (opts.avg ? 0.925 : (0.85 + G.rand() * 0.15));
     if (G.SPECIES[attacker.sp].types.indexOf(move.type) !== -1) mult *= 1.5; // STAB
     mult *= eff;
-    // Gen 3 weather: rain boosts Water / weakens Fire; sun boosts Fire / weakens Water
-    if (this.weather === 'rain') { if (move.type === 'water') mult *= 1.5; else if (move.type === 'fire') mult *= 0.5; }
-    else if (this.weather === 'sun') { if (move.type === 'fire') mult *= 1.5; else if (move.type === 'water') mult *= 0.5; }
-    if (attacker.status === 'brn' && physical) mult *= 0.5;
+    // No weather in Gen 1 — it did not exist. Burn's attack cut is applied in
+    // effStat rather than here, so it also affects the AI's damage estimates.
     var dmg = Math.max(1, Math.floor(base * mult));
     return { dmg: dmg, crit: crit, eff: eff };
   };
@@ -443,6 +455,15 @@
     var hitChance = move.acc * accMul(this.stages[side].acc - this.stages[other].eva);
     if (G.rand() * 100 >= hitChance) {
       yield { t: 'text', s: 'The attack missed!' };
+      // Jump Kick / Hi Jump Kick: missing means hitting the floor instead.
+      if (move.effect && move.effect.kind === 'crash') {
+        var crashDmg = Math.max(1, Math.floor(G.monStats(mon).hp * move.effect.frac));
+        var cFrom = mon.curHp;
+        mon.curHp = Math.max(0, mon.curHp - crashDmg);
+        yield { t: 'hp', side: side, from: cFrom, to: mon.curHp };
+        yield { t: 'text', s: name + ' kept going and crashed!' };
+        yield* this.checkFaints();
+      }
       return;
     }
 
@@ -464,6 +485,39 @@
       var r8 = G.irand(8); // 2-5 hits, weighted toward 2-3 like the classics
       hits = r8 < 3 ? 2 : r8 < 6 ? 3 : r8 < 7 ? 4 : 5;
     }
+    // --- damage shapes that ignore the normal formula -------------------
+    var ek0 = move.effect && move.effect.kind;
+
+    if (ek0 === 'ohko') {
+      // Gen 1 one-hit KOs fail outright against anything faster than you.
+      if (this.effStat(other, 'spe') > this.effStat(side, 'spe')) {
+        yield { t: 'text', s: 'But it failed!' };
+        return;
+      }
+      var oFrom = foe.curHp;
+      foe.curHp = 0;
+      yield { t: 'sfx', id: 'superEff' };
+      yield { t: 'hp', side: other, from: oFrom, to: 0 };
+      yield { t: 'text', s: "It's a one-hit KO!" };
+      yield* this.checkFaints();
+      return;
+    }
+
+    if (ek0 === 'fixed') {
+      var fd;
+      if (move.effect.mode === 'level') fd = mon.level;
+      else if (move.effect.mode === 'const') fd = move.effect.value;
+      else if (move.effect.mode === 'half') fd = Math.max(1, Math.floor(foe.curHp / 2));
+      else fd = Math.max(1, Math.floor(mon.level * (0.5 + G.rand())));  // Psywave
+      var xFrom = foe.curHp;
+      foe.curHp = Math.max(0, foe.curHp - fd);
+      yield { t: 'sfx', id: 'hit' };
+      yield { t: 'anim', kind: 'hit', side: other };
+      yield { t: 'hp', side: other, from: xFrom, to: foe.curHp };
+      yield* this.checkFaints();
+      return;
+    }
+
     var totalDealt = 0;
     var eff = 1;
     for (var h = 0; h < hits && foe.curHp > 0; h++) {
@@ -504,6 +558,30 @@
         yield { t: 'text', s: name + ' drained energy!' };
       }
     }
+    // Pay Day scatters coins you pick up after the battle.
+    if (move.effect && move.effect.kind === 'payday') {
+      this.payDay = (this.payDay || 0) + mon.level * 2;
+      yield { t: 'text', s: 'Coins scattered everywhere!' };
+    }
+
+    // Selfdestruct / Explosion: the user faints, always.
+    if (move.effect && move.effect.kind === 'explode') {
+      var eFrom = mon.curHp;
+      mon.curHp = 0;
+      yield { t: 'hp', side: side, from: eFrom, to: 0 };
+      yield { t: 'text', s: name + ' fainted from the blast!' };
+      yield* this.checkFaints();
+      return;
+    }
+
+    // Hyper Beam has to recharge; Jump Kick hurts you if it misses (handled
+    // in the miss branch) — here it is the successful case, so nothing to do.
+    if (move.effect && move.effect.kind === 'recharge') {
+      this.recharge = this.recharge || {};
+      this.recharge[side] = true;
+      yield { t: 'text', s: name + ' must recharge!' };
+    }
+
     if (move.effect && move.effect.kind === 'recoil' && totalDealt > 0) {
       var rec = Math.max(1, Math.floor(totalDealt * move.effect.frac));
       var rFrom = mon.curHp;
@@ -522,10 +600,13 @@
       var foe = this.active(other);
       var foeName = (other === 'f' ? 'Foe ' : '') + G.monName(foe);
       var types = G.SPECIES[foe.sp].types;
+      // Gen 1 immunities only. There is no Steel type, and ELECTRIC-types can
+      // absolutely still be paralysed — that immunity did not arrive until
+      // Gen 6, and Thunder Wave beating a Pikachu is period-correct.
       var immune =
         (effect.status === 'brn' && types.indexOf('fire') !== -1) ||
-        (effect.status === 'psn' && (types.indexOf('poison') !== -1 || types.indexOf('steel') !== -1)) ||
-        (effect.status === 'par' && types.indexOf('electric') !== -1);
+        ((effect.status === 'psn' || effect.status === 'tox') && types.indexOf('poison') !== -1) ||
+        (effect.status === 'frz' && types.indexOf('ice') !== -1);
       if (foe.status || immune) {
         if (isPrimary) yield { t: 'text', s: 'But it failed!' };
         return;
@@ -550,19 +631,177 @@
       var amount = Math.abs(next - cur) >= 2 ? 'sharply ' : '';
       yield { t: 'sfx', id: effect.delta > 0 ? 'statUp' : 'statDown' };
       yield { t: 'text', s: monName + "'s " + STAT_NAMES[effect.stat] + ' ' + (effect.delta > 0 ? amount + 'rose!' : amount + 'fell!') };
-    } else if (effect.kind === 'weather') {
-      if (this.weather === effect.weather && this.weatherTurns !== 0) {
-        if (isPrimary) yield { t: 'text', s: 'But it failed!' };
+    } else {
+      yield* this.applyGen1Effect(side, other, effect, isPrimary);
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // The rest of Gen 1's effect vocabulary.
+  //
+  // Some of these are genuinely multi-turn — Wrap holding you still, Bide
+  // storing damage, Transform copying a moveset. Rather than let them fall
+  // through the switch and silently do NOTHING, which is what an unrecognised
+  // effect kind does, each resolves to a faithful single-turn equivalent with
+  // the right message. A player should never watch a move visibly accomplish
+  // nothing and be unable to tell whether that was the design.
+  // ---------------------------------------------------------------------------
+  G.Battle.prototype.applyGen1Effect = function* (side, other, effect, isPrimary) {
+    var mon = this.active(side);
+    var foe = this.active(other);
+    var name = (side === 'f' ? 'Foe ' : '') + G.monName(mon);
+    var foeName = (other === 'f' ? 'Foe ' : '') + G.monName(foe);
+    var k = effect.kind;
+
+    this.screens = this.screens || { p: { reflect: 0, lightscreen: 0 }, f: { reflect: 0, lightscreen: 0 } };
+    this.focus = this.focus || {};
+    this.mist = this.mist || {};
+
+    if (k === 'confuse') {
+      if (foe.confused) { if (isPrimary) yield { t: 'text', s: 'But it failed!' }; return; }
+      foe.confused = 2 + G.irand(4);
+      yield { t: 'sfx', id: 'statusHit' };
+      yield { t: 'text', s: foeName + ' became confused!' };
+
+    } else if (k === 'heal' || k === 'rest') {
+      var max = G.monStats(mon).hp;
+      if (mon.curHp >= max && k === 'heal') { yield { t: 'text', s: 'But it failed!' }; return; }
+      var hFrom = mon.curHp;
+      mon.curHp = k === 'rest' ? max : Math.min(max, mon.curHp + Math.floor(max * 0.5));
+      if (k === 'rest') {
+        mon.status = 'slp';           // Rest cures everything by knocking you out
+        mon.slpTurns = 2;
+        yield { t: 'status', side: side, status: 'slp' };
+        yield { t: 'text', s: name + ' went to sleep and became healthy!' };
+      } else {
+        yield { t: 'text', s: name + ' regained health!' };
+      }
+      yield { t: 'hp', side: side, from: hFrom, to: mon.curHp };
+
+    } else if (k === 'haze') {
+      this.stages.p = { atk: 0, def: 0, spc: 0, spe: 0, acc: 0, eva: 0 };
+      this.stages.f = { atk: 0, def: 0, spc: 0, spe: 0, acc: 0, eva: 0 };
+      this.focus.p = this.focus.f = false;
+      yield { t: 'sfx', id: 'statusHit' };
+      yield { t: 'text', s: 'All stat changes were eliminated!' };
+
+    } else if (k === 'focusenergy') {
+      if (this.focus[side]) { yield { t: 'text', s: 'But it failed!' }; return; }
+      this.focus[side] = true;
+      yield { t: 'text', s: name + ' is getting pumped!' };
+
+    } else if (k === 'screen') {
+      var scr = this.screens[side];
+      if (scr[effect.which] > 0) { yield { t: 'text', s: 'But it failed!' }; return; }
+      scr[effect.which] = 5;
+      yield { t: 'sfx', id: 'statUp' };
+      yield { t: 'text', s: effect.which === 'reflect'
+        ? name + ' is shielded against physical moves!'
+        : name + ' is shielded against special moves!' };
+
+    } else if (k === 'mist') {
+      this.mist[side] = true;
+      yield { t: 'text', s: name + ' is shrouded in mist!' };
+
+    } else if (k === 'leechseed') {
+      if (G.SPECIES[foe.sp].types.indexOf('grass') !== -1) {
+        yield { t: 'text', s: "It doesn't affect " + foeName + '...' };
         return;
       }
-      this.weather = effect.weather;
-      this.weatherTurns = 5;
-      yield { t: 'sfx', id: 'statusHit' };
-      yield { t: 'weather', weather: effect.weather };
-      var msg = effect.weather === 'rain' ? 'It started to rain!'
-        : effect.weather === 'sun' ? 'The sunlight turned harsh!'
-        : 'A sandstorm kicked up!';
-      yield { t: 'text', s: msg };
+      if (foe.seeded) { yield { t: 'text', s: 'But it failed!' }; return; }
+      foe.seeded = true;
+      yield { t: 'text', s: foeName + ' was seeded!' };
+
+    } else if (k === 'trap') {
+      // Wrap / Bind / Fire Spin / Clamp. Chip damage plus a lost turn is the
+      // felt effect of Gen 1's partial-trapping lock, without reproducing the
+      // turn-skipping bug that made it genuinely unfair.
+      var tDmg = Math.max(1, Math.floor(G.monStats(foe).hp / 16));
+      var tFrom = foe.curHp;
+      foe.curHp = Math.max(0, foe.curHp - tDmg);
+      this.flinch[other] = true;
+      yield { t: 'hp', side: other, from: tFrom, to: foe.curHp };
+      yield { t: 'text', s: foeName + ' was trapped and cannot move!' };
+      yield* this.checkFaints();
+
+    } else if (k === 'switchout') {
+      if (this.wild && other === 'f') {
+        yield { t: 'text', s: foeName + ' fled!' };
+        this.over = true; this.result = 'fled';
+      } else {
+        yield { t: 'text', s: 'But it failed!' };
+      }
+
+    } else if (k === 'splash') {
+      yield { t: 'text', s: 'But nothing happened!' };
+
+    } else if (k === 'disable') {
+      var usable = foe.moves.filter(function (m) { return m.pp > 0; });
+      if (!usable.length) { yield { t: 'text', s: 'But it failed!' }; return; }
+      var dm = usable[G.irand(usable.length)];
+      dm.pp = 0;
+      yield { t: 'text', s: foeName + "'s " + G.MOVES[dm.id].name + ' was disabled!' };
+
+    } else if (k === 'substitute') {
+      var cost = Math.floor(G.monStats(mon).hp / 4);
+      if (mon.curHp <= cost) { yield { t: 'text', s: 'It was too weak to make a substitute!' }; return; }
+      var sFrom = mon.curHp;
+      mon.curHp -= cost;
+      this.stages[side].def = G.clamp(this.stages[side].def + 2, -6, 6);
+      yield { t: 'hp', side: side, from: sFrom, to: mon.curHp };
+      yield { t: 'text', s: name + ' put up a substitute!' };
+
+    } else if (k === 'metronome' || k === 'mirrormove') {
+      // Pick a real move and actually resolve it, rather than shrugging.
+      var pool = k === 'mirrormove'
+        ? foe.moves.map(function (m) { return m.id; })
+        : Object.keys(G.MOVES).filter(function (id) {
+            var e = G.MOVES[id].effect;
+            return id !== 'struggle'
+              && !(e && (e.kind === 'metronome' || e.kind === 'mirrormove'));
+          });
+      if (!pool.length) { yield { t: 'text', s: 'But it failed!' }; return; }
+      var pick = G.MOVES[pool[G.irand(pool.length)]];
+      yield { t: 'text', s: name + ' used ' + pick.name + '!' };
+      if (pick.power > 0) {
+        var res = this.calcDamage(side, pick);
+        var pFrom = foe.curHp;
+        foe.curHp = Math.max(0, foe.curHp - res.dmg);
+        yield { t: 'sfx', id: res.eff > 1 ? 'superEff' : res.eff < 1 ? 'notVery' : 'hit' };
+        yield { t: 'anim', kind: 'hit', side: other };
+        yield { t: 'hp', side: other, from: pFrom, to: foe.curHp };
+        yield* this.checkFaints();
+      } else if (pick.effect) {
+        yield* this.applyEffect(side, other, pick.effect, true);
+      }
+
+    } else if (k === 'conversion') {
+      mon.overrideTypes = G.SPECIES[foe.sp].types.slice();
+      yield { t: 'text', s: name + ' changed type to match ' + foeName + '!' };
+
+    } else if (k === 'transform') {
+      mon.overrideTypes = G.SPECIES[foe.sp].types.slice();
+      mon.moves = foe.moves.map(function (m) { return { id: m.id, pp: 5, maxPp: 5 }; });
+      yield { t: 'text', s: name + ' transformed into ' + G.SPECIES[foe.sp].name + '!' };
+
+    } else if (k === 'mimic') {
+      var fresh = foe.moves.filter(function (m) { return !G.knowsMove(mon, m.id); });
+      if (!fresh.length) { yield { t: 'text', s: 'But it failed!' }; return; }
+      var learned = fresh[G.irand(fresh.length)];
+      mon.moves[G.irand(mon.moves.length)] = { id: learned.id, pp: 5, maxPp: 5 };
+      yield { t: 'text', s: name + ' learned ' + G.MOVES[learned.id].name + '!' };
+
+    } else if (k === 'bide' || k === 'rage') {
+      // Both are "take it and hit back harder". An attack boost is the part a
+      // player actually feels.
+      this.stages[side].atk = G.clamp(this.stages[side].atk + 1, -6, 6);
+      yield { t: 'text', s: name + (k === 'bide' ? ' is storing energy!' : "'s RAGE is building!") };
+
+    } else if (k === 'charge') {
+      yield { t: 'text', s: name + ' gathered itself!' };
+
+    } else if (isPrimary) {
+      yield { t: 'text', s: 'But nothing happened...' };
     }
   };
 

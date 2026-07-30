@@ -684,7 +684,7 @@
         }
         if (shown >= party.length) {
           ct(ctx, (G.player.name || 'You') + ' and partners', W / 2, 118, G.C.white, '#1a1c2c');
-          ct(ctx, 'are now LEGENDS of Hoenn!', W / 2, 130, '#f8e878', '#5a3a10');
+          ct(ctx, 'are now LEGENDS of KANTO!', W / 2, 130, '#f8e878', '#5a3a10');
           ct(ctx, 'Z: continue', W / 2, 150, G.C.lgry);
         }
       }
@@ -693,9 +693,9 @@
 
   G.DexScene = function () {
     var RARITY_STARS = { common: '★', uncommon: '★★', rare: '★★★', elusive: '★★★★', legendary: '★★★★★' };
-    // Hoenn regional dex first (Treecko -> Deoxys), then any kept extras.
-    var ORDER = (G.HOENN_DEX || G.DEX_ORDER).concat(
-      G.DEX_ORDER.filter(function (k) { return !(G.HOENN_NO && G.HOENN_NO[k]); }));
+    // Kanto's dex IS the national dex, #1-151, so there is no separate
+    // regional numbering to reconcile.
+    var ORDER = G.KANTO_DEX || G.DEX_ORDER;
     return {
       opaque: true,
       sel: 0,
@@ -722,7 +722,7 @@
           var sp = G.SPECIES[key];
           var y = 18 + (i - top) * 14;
           var isSeen = G.player.dexSeen[key], isCaught = G.player.dexCaught[key];
-          var hno = G.HOENN_NO && G.HOENN_NO[key], num = hno || sp.id;
+          var num = sp.id;
           var label = (hno ? '#' : 'No.') + (num < 10 ? '00' : num < 100 ? '0' : '') + num + '  ' + (isSeen ? sp.name : '-----');
           // caught = bright, seen-only = grayed, unseen = darkest
           var color = isCaught ? G.C.white : isSeen ? G.C.gry : '#3a3f4e';
@@ -765,39 +765,64 @@
   };
 
   // ------------------------------------------------------------ region map --
-  // Hoenn (western/southern half) overworld map. Areas the player has entered
-  // light up; unexplored areas stay dim. Cursor inspects each; current area is
-  // ringed. Node ids are the internal map ids so visited[] lines up directly.
+  // KANTO — the town map, laid out to the real geography: Pallet in the
+  // south-west, the road north through Viridian and Pewter, east across
+  // Mt. Moon to Cerulean, then the long loop south through Saffron and
+  // Vermilion, east to Lavender, west to Celadon and Fuchsia, and out to
+  // Cinnabar and the Plateau. Areas you have entered light up; the rest stay
+  // dim. Node ids are the internal map ids, so visited[] lines up directly.
   G.RegionMapScene = function () {
-    // full western/southern Hoenn route, 8 gym towns, laid out as a serpentine
-    // an archipelago: a big mainland (west+center), the south Dewford island,
-    // and the eastern isles — sea routes (109/121/124) run over open water.
     var NODES = [
-      // --- mainland (the big volcano landmass) ---
-      { id: 'hearthvale',    label: 'Littleroot Town',  kind: 'town',   x: 30,  y: 96 },
-      { id: 'route1',        label: 'Route 101',        kind: 'route',  x: 30,  y: 78 },
-      { id: 'cobblemarch',   label: 'Rustboro City',    kind: 'gym', type: 'rock',     x: 26, y: 56 },
-      { id: 'route2',        label: 'Route 102',        kind: 'route',  x: 48,  y: 42 },
-      { id: 'verdantforest', label: 'Petalburg Woods',  kind: 'forest', x: 72,  y: 36 },
-      // --- Dewford island (south) ---
-      { id: 'brinehollow',   label: 'Dewford Town',     kind: 'gym', type: 'fighting', x: 32, y: 119 },
-      { id: 'route3',        label: 'Route 109',        kind: 'route',  x: 56,  y: 122 },
-      { id: 'hollowdeep1',   label: 'Granite Cave',     kind: 'cave',   x: 80,  y: 119 },
-      // --- mainland (center / volcano) ---
-      { id: 'coilgate',      label: 'Mauville City',    kind: 'gym', type: 'electric', x: 124, y: 48 },
-      { id: 'route4',        label: 'Route 111',        kind: 'route',  x: 126, y: 70 },
-      { id: 'aurelune',      label: 'Lavaridge Town',   kind: 'gym', type: 'fire',     x: 102, y: 64 },
-      { id: 'route5',        label: 'Route 117',        kind: 'route',  x: 82,  y: 74 },
-      { id: 'petalburg',     label: 'Petalburg City',   kind: 'gym', type: 'normal',   x: 58, y: 84 },
-      { id: 'route6',        label: 'Route 119',        kind: 'route',  x: 90,  y: 96 },
-      { id: 'fortree',       label: 'Fortree City',     kind: 'gym', type: 'flying',    x: 122, y: 92 },
-      // --- eastern isles ---
-      { id: 'route7',        label: 'Route 121',        kind: 'route',  x: 144, y: 80 },
-      { id: 'mossdeep',      label: 'Mossdeep City',    kind: 'gym', type: 'psychic',  x: 164, y: 70 },
-      { id: 'route8',        label: 'Route 124',        kind: 'route',  x: 186, y: 72 },
-      { id: 'sootopolis',    label: 'Sootopolis City',  kind: 'gym', type: 'water',    x: 208, y: 74 },
-      { id: 'summitpath',    label: 'Victory Road',     kind: 'cave',   x: 214, y: 48 },
-      { id: 'crownsummit',   label: 'Pokémon League',   kind: 'league', x: 214, y: 28 }
+      // --- the south-western road ---
+      { id: 'pallet',         label: 'Pallet Town',      kind: 'town',   x: 38,  y: 132 },
+      { id: 'route1',         label: 'Route 1',          kind: 'route',  x: 38,  y: 116 },
+      { id: 'viridian',       label: 'Viridian City',    kind: 'gym', type: 'ground', x: 38, y: 100 },
+      { id: 'route22',        label: 'Route 22',         kind: 'route',  x: 18,  y: 100 },
+      { id: 'route2',         label: 'Route 2',          kind: 'route',  x: 38,  y: 84 },
+      { id: 'viridianforest', label: 'Viridian Forest',  kind: 'forest', x: 38,  y: 70 },
+      { id: 'pewter',         label: 'Pewter City',      kind: 'gym', type: 'rock', x: 38, y: 54 },
+      // --- east across the mountain ---
+      { id: 'route3',         label: 'Route 3',          kind: 'route',  x: 58,  y: 48 },
+      { id: 'mtmoon1f',       label: 'Mt. Moon',         kind: 'cave',   x: 78,  y: 46 },
+      { id: 'route4',         label: 'Route 4',          kind: 'route',  x: 98,  y: 48 },
+      { id: 'cerulean',       label: 'Cerulean City',    kind: 'gym', type: 'water', x: 118, y: 48 },
+      { id: 'route24',        label: 'Route 24',         kind: 'route',  x: 118, y: 32 },
+      { id: 'route25',        label: 'Route 25',         kind: 'route',  x: 138, y: 24 },
+      // --- the central spine ---
+      { id: 'route5',         label: 'Route 5',          kind: 'route',  x: 118, y: 64 },
+      { id: 'saffron',        label: 'Saffron City',     kind: 'gym', type: 'psychic', x: 118, y: 80 },
+      { id: 'route6',         label: 'Route 6',          kind: 'route',  x: 118, y: 96 },
+      { id: 'vermilion',      label: 'Vermilion City',   kind: 'gym', type: 'electric', x: 118, y: 112 },
+      // --- the eastern arm ---
+      { id: 'route9',         label: 'Route 9',          kind: 'route',  x: 142, y: 46 },
+      { id: 'rocktunnel1f',   label: 'Rock Tunnel',      kind: 'cave',   x: 164, y: 48 },
+      { id: 'route10',        label: 'Route 10',         kind: 'route',  x: 176, y: 60 },
+      { id: 'lavender',       label: 'Lavender Town',    kind: 'town',   x: 176, y: 78 },
+      { id: 'route8',         label: 'Route 8',          kind: 'route',  x: 148, y: 80 },
+      { id: 'route11',        label: 'Route 11',         kind: 'route',  x: 144, y: 112 },
+      // --- the west ---
+      { id: 'route7',         label: 'Route 7',          kind: 'route',  x: 100, y: 80 },
+      { id: 'celadon',        label: 'Celadon City',     kind: 'gym', type: 'grass', x: 82, y: 80 },
+      { id: 'route16',        label: 'Route 16',         kind: 'route',  x: 82,  y: 96 },
+      { id: 'route17',        label: 'Cycling Road',     kind: 'route',  x: 82,  y: 116 },
+      { id: 'route18',        label: 'Route 18',         kind: 'route',  x: 100, y: 134 },
+      // --- the south ---
+      { id: 'route12',        label: 'Route 12',         kind: 'route',  x: 176, y: 96 },
+      { id: 'route13',        label: 'Route 13',         kind: 'route',  x: 172, y: 116 },
+      { id: 'route14',        label: 'Route 14',         kind: 'route',  x: 158, y: 128 },
+      { id: 'route15',        label: 'Route 15',         kind: 'route',  x: 140, y: 136 },
+      { id: 'fuchsia',        label: 'Fuchsia City',     kind: 'gym', type: 'poison', x: 120, y: 136 },
+      { id: 'safarizonecenter', label: 'Safari Zone',    kind: 'forest', x: 120, y: 120 },
+      // --- the sea and the island ---
+      { id: 'route19',        label: 'Route 19',         kind: 'route',  x: 104, y: 150 },
+      { id: 'route20',        label: 'Route 20',         kind: 'route',  x: 78,  y: 150 },
+      { id: 'seafoam1f',      label: 'Seafoam Islands',  kind: 'cave',   x: 62,  y: 150 },
+      { id: 'cinnabar',       label: 'Cinnabar Island',  kind: 'gym', type: 'fire', x: 38, y: 148 },
+      { id: 'route21',        label: 'Route 21',         kind: 'route',  x: 38,  y: 140 },
+      // --- the end of the road ---
+      { id: 'route23',        label: 'Route 23',         kind: 'route',  x: 18,  y: 80 },
+      { id: 'victoryroad1f',  label: 'Victory Road',     kind: 'cave',   x: 18,  y: 62 },
+      { id: 'indigo',         label: 'Indigo Plateau',   kind: 'league', x: 18,  y: 44 }
     ];
     var visited = G.player.visited || {};
     function isSeen(id) { return !!visited[id]; }
@@ -844,24 +869,35 @@
         ctx.fillStyle = '#3a86c8';
         for (var wy = 5; wy < H; wy += 7) for (var wx = (wy & 8) ? 0 : 8; wx < W; wx += 16) ctx.fillRect(wx, wy, 5, 2);
 
-        // BIG MAINLAND (volcano landmass): sand under all lobes, then green over all
-        blob(70, 60, 63, 41, '#e3d39a'); blob(112, 82, 33, 27, '#e3d39a'); blob(32, 84, 27, 27, '#e3d39a');
-        blob(70, 60, 60, 38, '#3f8a3f'); blob(112, 82, 30, 24, '#3f8a3f'); blob(32, 84, 24, 24, '#3f8a3f');
-        blob(66, 54, 40, 22, '#54a354'); // inland highlight
-        // separate islands
-        isle(54, 121, 36, 10);                 // Dewford
-        isle(164, 70, 18, 15);                 // Mossdeep
-        isle(208, 74, 18, 15); blob(208, 74, 8, 5, '#7fd0e0'); // Sootopolis + crater lake
-        isle(214, 36, 17, 20);                 // Ever Grande / League
+        // The landmass is DERIVED FROM THE NODES rather than hand-drawn: a sand
+        // blob then a green blob around every land node, which merge into one
+        // coastline. That means the map can never disagree with where the towns
+        // actually are — the previous hand-drawn silhouette was still Hoenn's
+        // archipelago long after the nodes had become Kanto.
+        //
+        // Kanto is one contiguous mainland; only Cinnabar and the Seafoam
+        // Islands sit offshore, and Routes 19-21 are open water.
+        var SEA = { route19: 1, route20: 1, route21: 1 };
+        var ISLAND = { cinnabar: 1, seafoam1f: 1 };
+        var i2;
+        for (i2 = 0; i2 < NODES.length; i2++) {
+          var nd = NODES[i2];
+          if (SEA[nd.id] || ISLAND[nd.id]) continue;
+          blob(nd.x, nd.y, 17, 15, '#e3d39a');
+        }
+        for (i2 = 0; i2 < NODES.length; i2++) {
+          var ng = NODES[i2];
+          if (SEA[ng.id] || ISLAND[ng.id]) continue;
+          blob(ng.x, ng.y, 14, 12, '#3f8a3f');
+        }
+        // A lighter interior so the mass is not one flat green — roughly the
+        // inland belt between Cerulean, Saffron and Celadon.
+        blob(100, 70, 34, 20, '#54a354');
+        // The offshore pair.
+        isle(38, 148, 15, 10);   // Cinnabar
+        isle(62, 150, 11, 8);    // Seafoam
 
-        // volcano on the mainland (Lavaridge)
-        var volc = NODES[10];
-        blob(volc.x, volc.y + 2, 10, 7, '#9a5538');
-        ctx.fillStyle = '#5a2e20'; ctx.fillRect(volc.x - 2, volc.y - 6, 5, 7);
-        ctx.fillStyle = '#e0682c'; ctx.fillRect(volc.x - 1, volc.y - 7, 3, 2);
-        ctx.fillStyle = '#d8d8d8'; ctx.fillRect(volc.x, volc.y - 12, 2, 5); // smoke
-
-        G.text(ctx, 'HOENN — REGION MAP', 8, 5, G.C.white, '#1a1c2c');
+        G.text(ctx, 'KANTO — TOWN MAP', 8, 5, G.C.white, '#1a1c2c');
 
         // route trails (sea segments look the same — they cross open water)
         for (var e = 0; e < NODES.length - 1; e++) trail(NODES[e].x, NODES[e].y, NODES[e + 1].x, NODES[e + 1].y);

@@ -17,9 +17,9 @@ inherited; the data, art sources, world and story are being replaced.
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
 | Kanto maps | Pallet -> Cerulean done (29 maps). Routes 24/25 and Route 5 south to Vermilion are next |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
-| Region map screen | still draws Hoenn |
-| Gen 1 move effects in battle.js | descriptors emitted, engine doesn't read them all yet |
-| Intro sequence | still Rayquaza/Groudon |
+| Region map screen | done — Kanto, landmass derived from the node graph |
+| Gen 1 move effects in battle.js | done — all 35 effect kinds handled, guarded by check.js |
+| Intro sequence | legendaries re-cast (Zapdos/Articuno/Moltres/Mewtwo/Mew); Oak's speech + demo battle still to do |
 | Story, trainers, gyms, endgame | not started |
 
 **`node tools/check.js` passes**, battle-core tests included, and the game
@@ -102,20 +102,14 @@ file, and both are the classic way this engine breaks.
 
 ## Known rough edges
 
+- Multi-turn move effects (Wrap, Bide, Thrash, Transform, charge moves) resolve
+  as faithful SINGLE-TURN equivalents rather than holding state across turns.
+  Each has the right message and a real effect; none silently does nothing.
+  Upgrading them needs turn-loop state in `battle.js`.
+
 - The region stops at Cerulean. Its south exit to Route 5 is not wired,
   because Route 5 has not been built.
-- `js/engine/title.js` still flies Rayquaza and Groudon.
-- `G.RegionMapScene` in `menus.js` still draws `'HOENN — REGION MAP'`.
-- `battle.js` understands the old Gen 3 effect kinds; the generated `moves.js`
-  emits a wider Gen 1 vocabulary (trap / thrash / bide / substitute / transform /
-  metronome / mirrormove / conversion / ohko / fixed / recharge / crash /
-  disable / haze / mist / screen / rest / switchout / payday / rage / explode).
-  Unhandled kinds currently fall through as plain damage.
-- `assets/sprites/*/README.txt` still describe the gen3 bring-your-own-art flow.
 - Object tiles (trees, rocks, boulders, decorations, signs, fences) are
   transparent-backed on purpose so they can sit on any ground. Do NOT bake a
   grass surround back into them — that was the original Hoenn bug and it made
   boulders show green fringes inside caves.
-- `tools/recipes.js`, `tools/bake_mons.js`, `tools/spritegen.js` are the gen3
-  creature-baking pipeline and are now dead — battlers stream. Delete once the
-  tileset work confirms nothing else uses `spritegen`.

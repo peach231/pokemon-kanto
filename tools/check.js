@@ -184,6 +184,38 @@ if (G.SPECIES) {
   }
 }
 
+// --- move effect coverage ---
+// moves.js is generated and can introduce an effect kind the engine has never
+// seen. An unhandled kind does not crash -- it silently does NOTHING, which is
+// the worst possible failure because it looks like a balance decision. So the
+// set of kinds the data emits must be a subset of the set battle.js handles.
+{
+  const HANDLED = new Set([
+    'status', 'stages', 'confuse', 'flinch', 'highCrit',
+    'drain', 'recoil', 'crash', 'multiHit', 'ohko', 'fixed', 'explode',
+    'trap', 'thrash', 'rage', 'payday', 'bide', 'charge', 'recharge',
+    'heal', 'rest', 'leechseed', 'screen', 'mist', 'haze', 'focusenergy',
+    'substitute', 'disable', 'splash', 'conversion', 'transform', 'mimic',
+    'metronome', 'mirrormove', 'switchout'
+  ]);
+  const seen = new Map();
+  for (const id in (G.MOVES || {})) {
+    const e = G.MOVES[id].effect;
+    if (!e) continue;
+    for (const k of [e.kind, e.rider && e.rider.kind]) {
+      if (!k) continue;
+      if (!seen.has(k)) seen.set(k, []);
+      seen.get(k).push(G.MOVES[id].name);
+    }
+  }
+  for (const [k, movers] of seen) {
+    if (!HANDLED.has(k)) {
+      errors.push(`MOVES: effect kind '${k}' is emitted by ${movers.length} move(s) (${movers.slice(0, 3).join(', ')}) but battle.js does not handle it — those moves would silently do nothing`);
+    }
+  }
+  console.log(`  moves: ${seen.size} distinct effect kinds, all handled`);
+}
+
 // --- world connectivity ---
 // Walk the warp graph out from the start map. Two failure modes matter and
 // neither is visible by reading a map file: a warp whose LANDING tile is solid
