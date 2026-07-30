@@ -11,307 +11,307 @@
 
   sp(101, 'electrode', 'Electrode', ['electric'], 'rare', [ 60,  50,  70,  80, 140],
      null,
-     [[17, 'sonicboom'], [22, 'selfdestruct'], [29, 'lightscreen'], [40, 'swift'], [50, 'explosion']],
+     [[1, 'tackle'], [1, 'screech'], [1, 'sonicboom'], [17, 'sonicboom'], [22, 'selfdestruct'], [29, 'lightscreen'], [40, 'swift'], [50, 'explosion']],
      "Storing more charge than it can hold makes it irritable, and then makes it explode.",
      { catchRate: 60, expYield: 150, growth: MF });
 
   sp(102, 'exeggcute', 'Exeggcute', ['grass', 'psychic'], 'rare', [ 60,  40,  80,  60,  40],
      [{ how: 'stone', item: 'leafstone', into: 'exeggutor' }],
-     [[25, 'reflect'], [28, 'leechseed'], [32, 'stunspore'], [37, 'poisonpowder'], [42, 'solarbeam'], [48, 'sleeppowder']],
+     [[1, 'barrage'], [1, 'hypnosis'], [25, 'reflect'], [28, 'leechseed'], [32, 'stunspore'], [37, 'poisonpowder'], [42, 'solarbeam'], [48, 'sleeppowder']],
      "Six of them, and they communicate constantly. A separated one becomes distressed.",
      { catchRate: 90, expYield: 98, growth: SL });
 
   sp(103, 'exeggutor', 'Exeggutor', ['grass', 'psychic'], 'elusive', [ 95,  95,  85, 125,  55],
      null,
-     [[28, 'stomp']],
+     [[1, 'barrage'], [1, 'hypnosis'], [28, 'stomp']],
      "Each head thinks independently, and a head that thinks too hard simply drops off.",
      { catchRate: 45, expYield: 212, growth: SL });
 
   sp(104, 'cubone', 'Cubone', ['ground'], 'common', [ 50,  50,  95,  40,  35],
      [{ how: 'level', level: 28, into: 'marowak' }],
-     [[25, 'leer'], [31, 'focusenergy'], [38, 'thrash'], [43, 'bonemerang'], [46, 'rage']],
+     [[1, 'boneclub'], [1, 'growl'], [25, 'leer'], [31, 'focusenergy'], [38, 'thrash'], [43, 'bonemerang'], [46, 'rage']],
      "The skull it wears belonged to its mother. It has never been seen without it.",
      { catchRate: 190, expYield: 87, growth: MF });
 
   sp(105, 'marowak', 'Marowak', ['ground'], 'rare', [ 60,  80, 110,  50,  45],
      null,
-     [[25, 'leer'], [33, 'focusenergy'], [41, 'thrash'], [48, 'bonemerang'], [55, 'rage']],
+     [[1, 'boneclub'], [1, 'growl'], [1, 'leer'], [1, 'focusenergy'], [25, 'leer'], [33, 'focusenergy'], [41, 'thrash'], [48, 'bonemerang'], [55, 'rage']],
      "It has learned to throw the bone and catch it returning, and it does not miss.",
      { catchRate: 75, expYield: 124, growth: MF });
 
   sp(106, 'hitmonlee', 'Hitmonlee', ['fighting'], 'elusive', [ 50, 120,  53,  35,  87],
      null,
-     [[33, 'rollingkick'], [38, 'jumpkick'], [43, 'focusenergy'], [48, 'hijumpkick'], [53, 'megakick']],
+     [[1, 'doublekick'], [1, 'meditate'], [33, 'rollingkick'], [38, 'jumpkick'], [43, 'focusenergy'], [48, 'hijumpkick'], [53, 'megakick']],
      "The legs extend on impact, which is why the kick lands from further away than looked possible.",
      { catchRate: 45, expYield: 139, growth: MF });
 
   sp(107, 'hitmonchan', 'Hitmonchan', ['fighting'], 'elusive', [ 50, 105,  79,  35,  76],
      null,
-     [[33, 'firepunch'], [38, 'icepunch'], [43, 'thunderpunch'], [48, 'megapunch'], [53, 'counter']],
+     [[1, 'cometpunch'], [1, 'agility'], [33, 'firepunch'], [38, 'icepunch'], [43, 'thunderpunch'], [48, 'megapunch'], [53, 'counter']],
      "It works in three-minute rounds out of habit and will not be hurried.",
      { catchRate: 45, expYield: 140, growth: MF });
 
   sp(108, 'lickitung', 'Lickitung', ['normal'], 'elusive', [ 90,  55,  75,  60,  30],
      null,
-     [[7, 'stomp'], [15, 'disable'], [23, 'defensecurl'], [31, 'slam'], [39, 'screech']],
+     [[1, 'wrap'], [1, 'supersonic'], [7, 'stomp'], [15, 'disable'], [23, 'defensecurl'], [31, 'slam'], [39, 'screech']],
      "The tongue is twice its body length and it uses it the way you would use a hand.",
      { catchRate: 45, expYield: 127, growth: MF });
 
   sp(109, 'koffing', 'Koffing', ['poison'], 'common', [ 40,  65,  95,  60,  35],
      [{ how: 'level', level: 35, into: 'weezing' }],
-     [[32, 'sludge'], [37, 'smokescreen'], [40, 'selfdestruct'], [45, 'haze'], [48, 'explosion']],
+     [[1, 'tackle'], [1, 'smog'], [32, 'sludge'], [37, 'smokescreen'], [40, 'selfdestruct'], [45, 'haze'], [48, 'explosion']],
      "It floats because what is inside it is lighter than air, and considerably worse for you.",
      { catchRate: 190, expYield: 114, growth: MF });
 
   sp(110, 'weezing', 'Weezing', ['poison'], 'rare', [ 65,  90, 120,  85,  60],
      null,
-     [[32, 'sludge'], [39, 'smokescreen'], [43, 'selfdestruct'], [49, 'haze'], [53, 'explosion']],
+     [[1, 'tackle'], [1, 'smog'], [1, 'sludge'], [32, 'sludge'], [39, 'smokescreen'], [43, 'selfdestruct'], [49, 'haze'], [53, 'explosion']],
      "Two bodies sharing one supply of gas, each making the other stronger and fouler.",
      { catchRate: 60, expYield: 173, growth: MF });
 
   sp(111, 'rhyhorn', 'Rhyhorn', ['ground', 'rock'], 'uncommon', [ 80,  85,  95,  30,  25],
      [{ how: 'level', level: 42, into: 'rhydon' }],
-     [[30, 'stomp'], [35, 'tailwhip'], [40, 'furyattack'], [45, 'horndrill'], [50, 'leer'], [55, 'takedown']],
+     [[1, 'hornattack'], [30, 'stomp'], [35, 'tailwhip'], [40, 'furyattack'], [45, 'horndrill'], [50, 'leer'], [55, 'takedown']],
      "Once it starts running it cannot turn, and it usually forgets why it started.",
      { catchRate: 120, expYield: 135, growth: SL });
 
   sp(112, 'rhydon', 'Rhydon', ['ground', 'rock'], 'rare', [105, 130, 120,  45,  40],
      null,
-     [[30, 'stomp'], [35, 'tailwhip'], [40, 'furyattack'], [48, 'horndrill'], [55, 'leer'], [64, 'takedown']],
+     [[1, 'hornattack'], [1, 'stomp'], [1, 'tailwhip'], [1, 'furyattack'], [30, 'stomp'], [35, 'tailwhip'], [40, 'furyattack'], [48, 'horndrill'], [55, 'leer'], [64, 'takedown']],
      "The horn drills through rock. The hide shrugs off heat that would melt the rock.",
      { catchRate: 60, expYield: 204, growth: SL });
 
   sp(113, 'chansey', 'Chansey', ['normal'], 'elusive', [250,   5,   5, 105,  50],
      null,
-     [[24, 'sing'], [30, 'growl'], [38, 'minimize'], [44, 'defensecurl'], [48, 'lightscreen'], [54, 'doubleedge']],
+     [[1, 'pound'], [1, 'doubleslap'], [24, 'sing'], [30, 'growl'], [38, 'minimize'], [44, 'defensecurl'], [48, 'lightscreen'], [54, 'doubleedge']],
      "It carries an egg that is genuinely nourishing, and gives it away to the injured.",
      { catchRate: 30, expYield: 255, growth: FA });
 
   sp(114, 'tangela', 'Tangela', ['grass'], 'elusive', [ 65,  55, 115, 100,  60],
      null,
-     [[29, 'absorb'], [32, 'poisonpowder'], [36, 'stunspore'], [39, 'sleeppowder'], [45, 'slam'], [49, 'growth']],
+     [[1, 'constrict'], [1, 'bind'], [29, 'absorb'], [32, 'poisonpowder'], [36, 'stunspore'], [39, 'sleeppowder'], [45, 'slam'], [49, 'growth']],
      "The vines are constantly growing and constantly being torn off, and it does not seem to mind.",
      { catchRate: 45, expYield: 166, growth: MF });
 
   sp(115, 'kangaskhan', 'Kangaskhan', ['normal'], 'elusive', [105,  95,  80,  40,  90],
      null,
-     [[26, 'bite'], [31, 'tailwhip'], [36, 'megapunch'], [41, 'leer'], [46, 'dizzypunch']],
+     [[1, 'cometpunch'], [1, 'rage'], [26, 'bite'], [31, 'tailwhip'], [36, 'megapunch'], [41, 'leer'], [46, 'dizzypunch']],
      "Approaching the young is the single most reliable way to be badly hurt in Kanto.",
      { catchRate: 45, expYield: 175, growth: MF });
 
   sp(116, 'horsea', 'Horsea', ['water'], 'common', [ 30,  40,  70,  70,  60],
      [{ how: 'level', level: 32, into: 'seadra' }],
-     [[19, 'smokescreen'], [24, 'leer'], [30, 'watergun'], [37, 'agility'], [45, 'hydropump']],
+     [[1, 'bubble'], [19, 'smokescreen'], [24, 'leer'], [30, 'watergun'], [37, 'agility'], [45, 'hydropump']],
      "It shoots ink upward when startled, which works underwater and embarrasses it in air.",
      { catchRate: 225, expYield: 83, growth: MF });
 
   sp(117, 'seadra', 'Seadra', ['water'], 'rare', [ 55,  65,  95,  95,  85],
      null,
-     [[19, 'smokescreen'], [24, 'leer'], [30, 'watergun'], [41, 'agility'], [52, 'hydropump']],
+     [[1, 'bubble'], [1, 'smokescreen'], [19, 'smokescreen'], [24, 'leer'], [30, 'watergun'], [41, 'agility'], [52, 'hydropump']],
      "Every spine carries venom, and it sleeps wedged in coral with all of them pointing out.",
      { catchRate: 75, expYield: 155, growth: MF });
 
   sp(118, 'goldeen', 'Goldeen', ['water'], 'common', [ 45,  67,  60,  50,  63],
      [{ how: 'level', level: 33, into: 'seaking' }],
-     [[19, 'supersonic'], [24, 'hornattack'], [30, 'furyattack'], [37, 'waterfall'], [45, 'horndrill'], [54, 'agility']],
+     [[1, 'peck'], [1, 'tailwhip'], [19, 'supersonic'], [24, 'hornattack'], [30, 'furyattack'], [37, 'waterfall'], [45, 'horndrill'], [54, 'agility']],
      "It looks placid until it decides to move, and then the horn arrives before you do.",
      { catchRate: 225, expYield: 111, growth: MF });
 
   sp(119, 'seaking', 'Seaking', ['water'], 'rare', [ 80,  92,  65,  80,  68],
      null,
-     [[19, 'supersonic'], [24, 'hornattack'], [30, 'furyattack'], [39, 'waterfall'], [48, 'horndrill'], [54, 'agility']],
+     [[1, 'peck'], [1, 'tailwhip'], [1, 'supersonic'], [19, 'supersonic'], [24, 'hornattack'], [30, 'furyattack'], [39, 'waterfall'], [48, 'horndrill'], [54, 'agility']],
      "It hollows a nest in a riverbed with that horn and guards it through the whole season.",
      { catchRate: 60, expYield: 170, growth: MF });
 
   sp(120, 'staryu', 'Staryu', ['water'], 'common', [ 30,  45,  55,  70,  85],
      [{ how: 'stone', item: 'waterstone', into: 'starmie' }],
-     [[17, 'watergun'], [22, 'harden'], [27, 'recover'], [32, 'swift'], [37, 'minimize'], [42, 'lightscreen'], [47, 'hydropump']],
+     [[1, 'tackle'], [17, 'watergun'], [22, 'harden'], [27, 'recover'], [32, 'swift'], [37, 'minimize'], [42, 'lightscreen'], [47, 'hydropump']],
      "The core at its centre glows in time with something, and nobody has worked out what.",
      { catchRate: 225, expYield: 106, growth: SL });
 
   sp(121, 'starmie', 'Starmie', ['water', 'psychic'], 'rare', [ 60,  75,  85, 100, 115],
      null,
-     [],
+     [[1, 'tackle'], [1, 'watergun'], [1, 'harden']],
      "The core pulses in a pattern that repeats. Several people have devoted careers to it.",
      { catchRate: 60, expYield: 207, growth: SL });
 
   sp(122, 'mrmime', 'Mr. Mime', ['psychic'], 'elusive', [ 40,  45,  65, 100,  90],
      null,
-     [[15, 'confusion'], [23, 'lightscreen'], [31, 'doubleslap'], [39, 'meditate'], [47, 'substitute']],
+     [[1, 'confusion'], [1, 'barrier'], [15, 'confusion'], [23, 'lightscreen'], [31, 'doubleslap'], [39, 'meditate'], [47, 'substitute']],
      "The barrier is real, solid and invisible, and walking into one is a genuine hazard.",
      { catchRate: 45, expYield: 136, growth: MF });
 
   sp(123, 'scyther', 'Scyther', ['bug', 'flying'], 'elusive', [ 70, 110,  80,  55, 105],
      null,
-     [[17, 'leer'], [20, 'focusenergy'], [24, 'doubleteam'], [29, 'slash'], [35, 'swordsdance'], [42, 'agility']],
+     [[1, 'quickattack'], [17, 'leer'], [20, 'focusenergy'], [24, 'doubleteam'], [29, 'slash'], [35, 'swordsdance'], [42, 'agility']],
      "It moves faster than the eye tracks, so what you see is where it has already been.",
      { catchRate: 45, expYield: 187, growth: MF });
 
   sp(124, 'jynx', 'Jynx', ['ice', 'psychic'], 'elusive', [ 65,  50,  35,  95,  95],
      null,
-     [[18, 'lick'], [23, 'doubleslap'], [31, 'icepunch'], [39, 'bodyslam'], [47, 'thrash'], [58, 'blizzard']],
+     [[1, 'pound'], [1, 'lovelykiss'], [18, 'lick'], [23, 'doubleslap'], [31, 'icepunch'], [39, 'bodyslam'], [47, 'thrash'], [58, 'blizzard']],
      "It moves in a rhythm that is difficult to look away from, which is rather the point.",
      { catchRate: 45, expYield: 137, growth: MF });
 
   sp(125, 'electabuzz', 'Electabuzz', ['electric'], 'elusive', [ 65,  83,  57,  85, 105],
      null,
-     [[34, 'thundershock'], [37, 'screech'], [42, 'thunderpunch'], [49, 'lightscreen'], [54, 'thunder']],
+     [[1, 'quickattack'], [1, 'leer'], [34, 'thundershock'], [37, 'screech'], [42, 'thunderpunch'], [49, 'lightscreen'], [54, 'thunder']],
      "It is drawn to power lines and substations, and outages in Kanto are often its fault.",
      { catchRate: 45, expYield: 156, growth: MF });
 
   sp(126, 'magmar', 'Magmar', ['fire'], 'elusive', [ 65,  95,  57,  85,  93],
      null,
-     [[36, 'leer'], [39, 'confuseray'], [43, 'firepunch'], [48, 'smokescreen'], [52, 'smog'], [55, 'flamethrower']],
+     [[1, 'ember'], [36, 'leer'], [39, 'confuseray'], [43, 'firepunch'], [48, 'smokescreen'], [52, 'smog'], [55, 'flamethrower']],
      "It is born in fire and shimmers with heat, so its outline is never quite steady.",
      { catchRate: 45, expYield: 167, growth: MF });
 
   sp(127, 'pinsir', 'Pinsir', ['bug'], 'elusive', [ 65, 125, 100,  55,  85],
      null,
-     [[25, 'seismictoss'], [30, 'guillotine'], [36, 'focusenergy'], [43, 'harden'], [49, 'slash'], [54, 'swordsdance']],
+     [[1, 'vicegrip'], [25, 'seismictoss'], [30, 'guillotine'], [36, 'focusenergy'], [43, 'harden'], [49, 'slash'], [54, 'swordsdance']],
      "The pincers grip and then squeeze, and there is no leverage that gets you out.",
      { catchRate: 45, expYield: 200, growth: SL });
 
   sp(128, 'tauros', 'Tauros', ['normal'], 'elusive', [ 75, 100,  95,  70, 110],
      null,
-     [[21, 'stomp'], [28, 'tailwhip'], [35, 'leer'], [44, 'rage'], [51, 'takedown']],
+     [[1, 'tackle'], [21, 'stomp'], [28, 'tailwhip'], [35, 'leer'], [44, 'rage'], [51, 'takedown']],
      "It whips itself with its own tails to work up a rage before charging.",
      { catchRate: 45, expYield: 211, growth: SL });
 
   sp(129, 'magikarp', 'Magikarp', ['water'], 'common', [ 20,  10,  55,  20,  80],
      [{ how: 'level', level: 20, into: 'gyarados' }],
-     [[15, 'tackle']],
+     [[1, 'splash'], [15, 'tackle']],
      "Utterly hopeless in a fight, and yet somehow there are more of them than anything else.",
      { catchRate: 255, expYield: 20, growth: SL });
 
   sp(130, 'gyarados', 'Gyarados', ['water', 'flying'], 'elusive', [ 95, 125,  79, 100,  81],
      null,
-     [[20, 'bite'], [25, 'dragonrage'], [32, 'leer'], [41, 'hydropump'], [52, 'hyperbeam']],
+     [[1, 'bite'], [1, 'dragonrage'], [1, 'leer'], [1, 'hydropump'], [20, 'bite'], [25, 'dragonrage'], [32, 'leer'], [41, 'hydropump'], [52, 'hyperbeam']],
      "Whatever happens during that change leaves it furious, and it stays furious.",
      { catchRate: 45, expYield: 214, growth: SL });
 
   sp(131, 'lapras', 'Lapras', ['water', 'ice'], 'elusive', [130,  85,  80,  95,  60],
      null,
-     [[16, 'sing'], [20, 'mist'], [25, 'bodyslam'], [31, 'confuseray'], [38, 'icebeam'], [46, 'hydropump']],
+     [[1, 'watergun'], [1, 'growl'], [16, 'sing'], [20, 'mist'], [25, 'bodyslam'], [31, 'confuseray'], [38, 'icebeam'], [46, 'hydropump']],
      "Gentle, intelligent, and now rare, because people found it easy to catch.",
      { catchRate: 45, expYield: 219, growth: SL });
 
   sp(132, 'ditto', 'Ditto', ['normal'], 'elusive', [ 48,  48,  48,  48,  48],
      null,
-     [],
+     [[1, 'transform']],
      "It rearranges its own cells to copy anything it sees, and gets it wrong when distracted.",
      { catchRate: 35, expYield: 61, growth: MF });
 
   sp(133, 'eevee', 'Eevee', ['normal'], 'elusive', [ 55,  55,  50,  65,  55],
      [{ how: 'stone', item: 'firestone', into: 'flareon' }, { how: 'stone', item: 'thunderstone', into: 'jolteon' }, { how: 'stone', item: 'waterstone', into: 'vaporeon' }],
-     [[27, 'quickattack'], [31, 'tailwhip'], [37, 'bite'], [45, 'takedown']],
+     [[1, 'tackle'], [1, 'sandattack'], [27, 'quickattack'], [31, 'tailwhip'], [37, 'bite'], [45, 'takedown']],
      "Its genes are unusually unstable, which is why exposure to a stone can rewrite it entirely.",
      { catchRate: 45, expYield: 92, growth: MF });
 
   sp(134, 'vaporeon', 'Vaporeon', ['water'], 'elusive', [130,  65,  60, 110,  65],
      null,
-     [[27, 'quickattack'], [31, 'watergun'], [37, 'tailwhip'], [40, 'bite'], [42, 'acidarmor'], [44, 'haze'], [48, 'mist'], [54, 'hydropump']],
+     [[1, 'tackle'], [1, 'sandattack'], [1, 'quickattack'], [1, 'watergun'], [27, 'quickattack'], [31, 'watergun'], [37, 'tailwhip'], [40, 'bite'], [42, 'acidarmor'], [44, 'haze'], [48, 'mist'], [54, 'hydropump']],
      "Its cells are so close to water that in still water it becomes effectively invisible.",
      { catchRate: 45, expYield: 196, growth: MF });
 
   sp(135, 'jolteon', 'Jolteon', ['electric'], 'elusive', [ 65,  65,  60, 110, 130],
      null,
-     [[27, 'quickattack'], [31, 'thundershock'], [37, 'tailwhip'], [40, 'thunderwave'], [42, 'doublekick'], [44, 'agility'], [48, 'pinmissile'], [54, 'thunder']],
+     [[1, 'tackle'], [1, 'sandattack'], [1, 'quickattack'], [1, 'thundershock'], [27, 'quickattack'], [31, 'thundershock'], [37, 'tailwhip'], [40, 'thunderwave'], [42, 'doublekick'], [44, 'agility'], [48, 'pinmissile'], [54, 'thunder']],
      "The fur stands up and holds a charge, and every hair can be fired like a needle.",
      { catchRate: 45, expYield: 197, growth: MF });
 
   sp(136, 'flareon', 'Flareon', ['fire'], 'elusive', [ 65, 130,  60, 110,  65],
      null,
-     [[27, 'quickattack'], [31, 'ember'], [37, 'tailwhip'], [40, 'bite'], [42, 'leer'], [44, 'firespin'], [48, 'rage'], [54, 'flamethrower']],
+     [[1, 'tackle'], [1, 'sandattack'], [1, 'quickattack'], [1, 'ember'], [27, 'quickattack'], [31, 'ember'], [37, 'tailwhip'], [40, 'bite'], [42, 'leer'], [44, 'firespin'], [48, 'rage'], [54, 'flamethrower']],
      "It stores fire in a sac in its chest and runs hot enough that rain steams off it.",
      { catchRate: 45, expYield: 198, growth: MF });
 
   sp(137, 'porygon', 'Porygon', ['normal'], 'elusive', [ 65,  60,  70,  75,  40],
      null,
-     [[23, 'psybeam'], [28, 'recover'], [35, 'agility'], [42, 'triattack']],
+     [[1, 'tackle'], [1, 'sharpen'], [1, 'conversion'], [23, 'psybeam'], [28, 'recover'], [35, 'agility'], [42, 'triattack']],
      "Made rather than born. It is entirely code, and it can move through systems as easily as rooms.",
      { catchRate: 45, expYield: 130, growth: MF });
 
   sp(138, 'omanyte', 'Omanyte', ['rock', 'water'], 'elusive', [ 35,  40, 100,  90,  35],
      [{ how: 'level', level: 40, into: 'omastar' }],
-     [[34, 'hornattack'], [39, 'leer'], [46, 'spikecannon'], [53, 'hydropump']],
+     [[1, 'watergun'], [1, 'withdraw'], [34, 'hornattack'], [39, 'leer'], [46, 'spikecannon'], [53, 'hydropump']],
      "Brought back from a shell in the rock. It swims by pulling with all ten tentacles at once.",
      { catchRate: 45, expYield: 120, growth: MF });
 
   sp(139, 'omastar', 'Omastar', ['rock', 'water'], 'elusive', [ 70,  60, 125, 115,  55],
      null,
-     [[34, 'hornattack'], [39, 'leer'], [44, 'spikecannon'], [49, 'hydropump']],
+     [[1, 'watergun'], [1, 'withdraw'], [1, 'hornattack'], [34, 'hornattack'], [39, 'leer'], [44, 'spikecannon'], [49, 'hydropump']],
      "The shell eventually grew too heavy to carry, which is thought to be why it died out.",
      { catchRate: 45, expYield: 199, growth: MF });
 
   sp(140, 'kabuto', 'Kabuto', ['rock', 'water'], 'elusive', [ 30,  80,  90,  45,  55],
      [{ how: 'level', level: 40, into: 'kabutops' }],
-     [[34, 'absorb'], [39, 'slash'], [44, 'leer'], [49, 'hydropump']],
+     [[1, 'scratch'], [1, 'harden'], [34, 'absorb'], [39, 'slash'], [44, 'leer'], [49, 'hydropump']],
      "The eyes on its back still work, having spent three hundred million years underground.",
      { catchRate: 45, expYield: 119, growth: MF });
 
   sp(141, 'kabutops', 'Kabutops', ['rock', 'water'], 'elusive', [ 60, 115, 105,  70,  80],
      null,
-     [[34, 'absorb'], [39, 'slash'], [46, 'leer'], [53, 'hydropump']],
+     [[1, 'scratch'], [1, 'harden'], [1, 'absorb'], [34, 'absorb'], [39, 'slash'], [46, 'leer'], [53, 'hydropump']],
      "It hunted by slicing and drinking, and the scythes are as sharp now as they were then.",
      { catchRate: 45, expYield: 201, growth: MF });
 
   sp(142, 'aerodactyl', 'Aerodactyl', ['rock', 'flying'], 'elusive', [ 80, 105,  65,  60, 130],
      null,
-     [[33, 'supersonic'], [38, 'bite'], [45, 'takedown'], [54, 'hyperbeam']],
+     [[1, 'wingattack'], [1, 'agility'], [33, 'supersonic'], [38, 'bite'], [45, 'takedown'], [54, 'hyperbeam']],
      "Revived from a tooth in amber. It is exactly as aggressive as the fossil record suggested.",
      { catchRate: 45, expYield: 202, growth: SL });
 
   sp(143, 'snorlax', 'Snorlax', ['normal'], 'elusive', [160, 110,  65,  65,  30],
      null,
-     [[35, 'bodyslam'], [41, 'harden'], [48, 'doubleedge'], [56, 'hyperbeam']],
+     [[1, 'headbutt'], [1, 'amnesia'], [1, 'rest'], [35, 'bodyslam'], [41, 'harden'], [48, 'doubleedge'], [56, 'hyperbeam']],
      "It eats, it sleeps, and it does not move for anything, including roads.",
      { catchRate: 25, expYield: 154, growth: SL });
 
   sp(144, 'articuno', 'Articuno', ['ice', 'flying'], 'legendary', [ 90,  85, 100, 125,  85],
      null,
-     [[51, 'blizzard'], [55, 'agility'], [60, 'mist']],
+     [[1, 'peck'], [1, 'icebeam'], [51, 'blizzard'], [55, 'agility'], [60, 'mist']],
      "It is said to appear to travellers lost in the snow, though accounts differ on what happens next.",
      { catchRate: 3, expYield: 215, growth: SL });
 
   sp(145, 'zapdos', 'Zapdos', ['electric', 'flying'], 'legendary', [ 90,  90,  85, 125, 100],
      null,
-     [[51, 'thunder'], [55, 'agility'], [60, 'lightscreen']],
+     [[1, 'thundershock'], [1, 'drillpeck'], [51, 'thunder'], [55, 'agility'], [60, 'lightscreen']],
      "It nests in the storm itself, and the lightning is not something it summons but something it is.",
      { catchRate: 3, expYield: 216, growth: SL });
 
   sp(146, 'moltres', 'Moltres', ['fire', 'flying'], 'legendary', [ 90, 100,  90, 125,  90],
      null,
-     [[51, 'leer'], [55, 'agility'], [60, 'skyattack']],
+     [[1, 'peck'], [1, 'firespin'], [51, 'leer'], [55, 'agility'], [60, 'skyattack']],
      "Its wings trail fire, and the old story is that it comes back from its own ashes each spring.",
      { catchRate: 3, expYield: 217, growth: SL });
 
   sp(147, 'dratini', 'Dratini', ['dragon'], 'elusive', [ 41,  64,  45,  50,  50],
      [{ how: 'level', level: 30, into: 'dragonair' }],
-     [[10, 'thunderwave'], [20, 'agility'], [30, 'slam'], [40, 'dragonrage'], [50, 'hyperbeam']],
+     [[1, 'wrap'], [1, 'leer'], [10, 'thunderwave'], [20, 'agility'], [30, 'slam'], [40, 'dragonrage'], [50, 'hyperbeam']],
      "Considered a myth until one was pulled from a lake. It sheds its skin as it grows.",
      { catchRate: 45, expYield: 67, growth: SL });
 
   sp(148, 'dragonair', 'Dragonair', ['dragon'], 'elusive', [ 61,  84,  65,  70,  70],
      [{ how: 'level', level: 55, into: 'dragonite' }],
-     [[10, 'thunderwave'], [20, 'agility'], [35, 'slam'], [45, 'dragonrage'], [55, 'hyperbeam']],
+     [[1, 'wrap'], [1, 'leer'], [1, 'thunderwave'], [10, 'thunderwave'], [20, 'agility'], [35, 'slam'], [45, 'dragonrage'], [55, 'hyperbeam']],
      "Fishermen say the weather changes when it surfaces, and they say it without smiling.",
      { catchRate: 45, expYield: 144, growth: SL });
 
   sp(149, 'dragonite', 'Dragonite', ['dragon', 'flying'], 'elusive', [ 91, 134,  95, 100,  80],
      null,
-     [[10, 'thunderwave'], [20, 'agility'], [35, 'slam'], [45, 'dragonrage'], [60, 'hyperbeam']],
+     [[1, 'wrap'], [1, 'leer'], [1, 'thunderwave'], [1, 'agility'], [10, 'thunderwave'], [20, 'agility'], [35, 'slam'], [45, 'dragonrage'], [60, 'hyperbeam']],
      "It crosses oceans without stopping and has a documented habit of guiding lost ships home.",
      { catchRate: 45, expYield: 218, growth: SL });
 
   sp(150, 'mewtwo', 'Mewtwo', ['psychic'], 'legendary', [106, 110,  90, 154, 130],
      null,
-     [[63, 'barrier'], [66, 'psychic'], [70, 'recover'], [75, 'mist'], [81, 'amnesia']],
+     [[1, 'confusion'], [1, 'disable'], [1, 'swift'], [1, 'psychic'], [63, 'barrier'], [66, 'psychic'], [70, 'recover'], [75, 'mist'], [81, 'amnesia']],
      "Made in a laboratory from something older, and it has never forgiven anyone for it.",
      { catchRate: 3, expYield: 220, growth: SL });
 
   sp(151, 'mew', 'Mew', ['psychic'], 'legendary', [100, 100, 100, 100, 100],
      null,
-     [[10, 'transform'], [20, 'megapunch'], [30, 'metronome'], [40, 'psychic']],
+     [[1, 'pound'], [10, 'transform'], [20, 'megapunch'], [30, 'metronome'], [40, 'psychic']],
      "It carries the genetic code of every Pokémon, and it has been seen perhaps a dozen times.",
      { catchRate: 45, expYield: 64, growth: MS });
 })();

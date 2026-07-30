@@ -1,11 +1,17 @@
-// Pokéram — items.js
+// pokemon-kanto — items.js
 // Items as pure descriptors; one useItem() in battle/menus interprets `kind`.
-//   heal    — restore `amount` HP
-//   cure    — clear listed statuses
-//   revive  — revive fainted to frac of max HP
-//   orb     — capture device, `mod` multiplies catch rate
-//   repel   — suppress weak wild encounters for `steps` steps
-//   key     — story item, not usable
+//   heal   — restore `amount` HP (Infinity = full)
+//   cure   — clear the listed statuses
+//   revive — revive a fainted POKéMON to `frac` of max HP
+//   ball   — capture device, `mod` multiplies the catch rate
+//   repel  — suppress weak wild encounters for `steps` steps
+//   stone  — evolution stone; G.stoneEvolution decides what it does to a mon
+//   escape — leave a cave or dungeon instantly
+//   key    — story item, cannot be used from the bag
+//
+// Gen 1's list and Gen 1's prices: no held items, no berries, no Pokéblocks.
+// Kanto's progression is gated almost entirely by KEY ITEMS rather than by
+// badges, which is why that section is by far the longest.
 
 (function () {
   var I = G.ITEMS = {};
@@ -13,27 +19,69 @@
     I[id] = Object.assign({ id: id, name: name, price: price, kind: kind, desc: desc }, props);
   }
 
-  item('potion',     'Potion',      200,  'heal',   { amount: 20 },  'Restores 20 HP.');
-  item('superpotion','Super Potion',600,  'heal',   { amount: 60 },  'Restores 60 HP.');
-  item('hyperpotion','Hyper Potion',1500, 'heal',   { amount: 150 }, 'Restores 150 HP.');
-  item('cureall',    'Cure-All',    400,  'cure',   { statuses: ['brn', 'psn', 'par', 'slp'] }, 'Heals any status condition.');
-  item('revivedust', 'Revive Dust', 900,  'revive', { frac: 0.5 },   'Revives a fainted creature to half HP.');
-  item('tameorb',    'Tame Orb',    150,  'orb',    { mod: 1.0 },    'A standard capture orb.');
-  item('greatorb',   'Great Orb',   500,  'orb',    { mod: 1.5 },    'A high-grade capture orb. 1.5x catch rate.');
-  item('ultraorb',   'Ultra Orb',   1200, 'orb',    { mod: 2.0 },    'A top-grade capture orb. 2x catch rate.');
-  item('netorb',     'Net Orb',     800,  'orb',    { mod: 1.0, special: 'net' },  '3.5x on Water- and Bug-types.');
-  item('diveorb',    'Dive Orb',    800,  'orb',    { mod: 1.0, special: 'dive' }, '3.5x while swimming on the water.');
-  item('nestorb',    'Nest Orb',    700,  'orb',    { mod: 1.0, special: 'nest' }, 'Better against lower-level wild Pokémon.');
-  item('timerorb',   'Timer Orb',   800,  'orb',    { mod: 1.0, special: 'timer' },'Stronger the longer the battle lasts.');
-  item('mythorb',    'Myth Orb',    0,    'orb',    { mod: 255 },    'A legendary orb said never to fail.');
-  item('repelmist',  'Repel Mist',  300,  'repel',  { steps: 100 },  'Repels weak wild creatures for 100 steps.');
-  item('snackbar',   'Snack Bar',   100,  'heal',   { amount: 10 },  'A chewy snack. Restores 10 HP.');
-  // exp candies — feed one to a chosen party creature for instant EXP
-  item('candyxs',    'XS Exp Candy', 30,   'xp', { amount: 100 },   'A tiny candy. A little EXP for one creature.');
-  item('candys',     'S Exp Candy',  120,  'xp', { amount: 800 },   'A small candy. Some EXP for one creature.');
-  item('candym',     'M Exp Candy',  500,  'xp', { amount: 3000 },  'A candy. A good chunk of EXP for one creature.');
-  item('candyl',     'L Exp Candy',  1500, 'xp', { amount: 10000 }, 'A big candy. A lot of EXP for one creature.');
-  // gear — held in the bag; behavior handled in the overworld, not via "use".
-  item('fishingrod', 'Fishing Rod', 1000, 'gear', { gear: 'rod' },    'Face water and press Z to fish for wild Pokémon.');
-  item('skates',     'Skates',      1200, 'gear', { gear: 'skates' }, 'Roll at double speed automatically while you have these.');
+  // -------------------------------------------------------------- healing --
+  item('potion',      'Potion',       300,  'heal', { amount: 20 },       'Restores 20 HP.');
+  item('superpotion', 'Super Potion', 700,  'heal', { amount: 50 },       'Restores 50 HP.');
+  item('hyperpotion', 'Hyper Potion', 1200, 'heal', { amount: 200 },      'Restores 200 HP.');
+  item('maxpotion',   'Max Potion',   2500, 'heal', { amount: Infinity }, 'Fully restores HP.');
+  item('fullrestore', 'Full Restore', 3000, 'heal',
+    { amount: Infinity, statuses: ['brn', 'psn', 'tox', 'par', 'slp', 'frz'] },
+    'Fully restores HP and cures any status.');
+
+  // --------------------------------------------------------------- status --
+  item('antidote',   'Antidote',     100, 'cure', { statuses: ['psn', 'tox'] }, 'Cures poisoning.');
+  item('burnheal',   'Burn Heal',    250, 'cure', { statuses: ['brn'] },        'Cures a burn.');
+  item('iceheal',    'Ice Heal',     250, 'cure', { statuses: ['frz'] },        'Thaws out a frozen POKéMON.');
+  item('awakening',  'Awakening',    200, 'cure', { statuses: ['slp'] },        'Wakes a sleeping POKéMON.');
+  item('parlyzheal', 'Paralyz Heal', 200, 'cure', { statuses: ['par'] },        'Cures paralysis.');
+  item('fullheal',   'Full Heal',    600, 'cure',
+    { statuses: ['brn', 'psn', 'tox', 'par', 'slp', 'frz'] }, 'Cures any status condition.');
+
+  // -------------------------------------------------------------- revival --
+  item('revive',    'Revive',     1500, 'revive', { frac: 0.5 }, 'Revives a fainted POKéMON to half HP.');
+  item('maxrevive', 'Max Revive', 4000, 'revive', { frac: 1.0 }, 'Revives a fainted POKéMON to full HP.');
+
+  // ---------------------------------------------------------------- balls --
+  item('pokeball',   'Poké Ball',   200,  'ball', { mod: 1.0 }, 'A device for catching wild POKéMON.');
+  item('greatball',  'Great Ball',  600,  'ball', { mod: 1.5 }, 'A good ball, with a higher catch rate.');
+  item('ultraball',  'Ultra Ball',  1200, 'ball', { mod: 2.0 }, 'An excellent ball, with a high catch rate.');
+  item('masterball', 'Master Ball', 0,    'ball', { mod: 255 }, 'The best ball. It never fails.');
+  item('safariball', 'Safari Ball', 0,    'ball', { mod: 1.5 }, 'A special ball used only in the SAFARI ZONE.');
+
+  // ------------------------------------------------------------ utilities --
+  item('repel',      'Repel',       350, 'repel',  { steps: 100 }, 'Repels weak wild POKéMON for 100 steps.');
+  item('superrepel', 'Super Repel', 500, 'repel',  { steps: 200 }, 'Repels weak wild POKéMON for 200 steps.');
+  item('maxrepel',   'Max Repel',   700, 'repel',  { steps: 250 }, 'Repels weak wild POKéMON for 250 steps.');
+  item('escaperope', 'Escape Rope', 550, 'escape', {},             'Escapes instantly from a cave or dungeon.');
+
+  // ------------------------------------------------------ evolution stones --
+  // Fourteen species evolve by stone. Eevee's three branches are the reason
+  // species carry an `evos` ARRAY rather than a single evolution target.
+  item('firestone',    'Fire Stone',   2100, 'stone', {}, 'A peculiar stone that radiates heat.');
+  item('waterstone',   'Water Stone',  2100, 'stone', {}, 'A peculiar stone the colour of deep water.');
+  item('thunderstone', 'Thunderstone', 2100, 'stone', {}, 'A peculiar stone with a thunderbolt pattern.');
+  item('leafstone',    'Leaf Stone',   2100, 'stone', {}, 'A peculiar stone with a leaf pattern.');
+  item('moonstone',    'Moon Stone',   0,    'stone', {}, 'A stone found in MT. MOON. It glows faintly.');
+
+  // ------------------------------------------------------------ key items ---
+  item('parcel',      "Oak's Parcel", 0, 'key', {}, 'A parcel from the VIRIDIAN MART, addressed to PROF. OAK.');
+  item('pokedex',     'Pokédex',      0, 'key', {}, "PROF. OAK's encyclopaedia. It fills itself in as you go.");
+  item('townmap',     'Town Map',     0, 'key', {}, 'A map of the whole KANTO region.');
+  item('bicycle',     'Bicycle',      0, 'key', {}, 'A folding bicycle. Far faster than walking.');
+  item('bikevoucher', 'Bike Voucher', 0, 'key', {}, 'Redeemable for one BICYCLE at the CERULEAN shop.');
+  item('ssticket',    'S.S. Ticket',  0, 'key', {}, 'A boarding pass for the S.S. ANNE.');
+  item('oldrod',      'Old Rod',      0, 'key', {}, 'A cheap fishing rod. It only ever catches MAGIKARP.');
+  item('goodrod',     'Good Rod',     0, 'key', {}, 'A decent fishing rod.');
+  item('superrod',    'Super Rod',    0, 'key', {}, 'The best fishing rod there is.');
+  item('itemfinder',  'Item Finder',  0, 'key', {}, 'Detects items buried nearby.');
+  item('cardkey',     'Card Key',     0, 'key', {}, 'A magnetic card that opens the doors in SILPH CO.');
+  item('liftkey',     'Lift Key',     0, 'key', {}, "The key to the lift in TEAM ROCKET's hideout.");
+  item('silphscope',  'Silph Scope',  0, 'key', {}, 'Reveals what is really inside a POKéMON TOWER ghost.');
+  item('pokeflute',   'Poké Flute',   0, 'key', {}, 'Its sound wakes any POKéMON, however deeply asleep.');
+  item('secretkey',   'Secret Key',   0, 'key', {}, "The key to CINNABAR ISLAND's gym.");
+  item('goldteeth',   'Gold Teeth',   0, 'key', {}, 'Someone in the SAFARI ZONE is missing these.');
+  item('domefossil',  'Dome Fossil',  0, 'key', {}, 'A fossilised shell. Something lived in it, once.');
+  item('helixfossil', 'Helix Fossil', 0, 'key', {}, 'A fossilised spiral shell. Very, very old.');
+  item('oldamber',    'Old Amber',    0, 'key', {}, 'Amber with something ancient sealed inside it.');
+  item('coincase',    'Coin Case',    0, 'key', {}, 'A case for GAME CORNER coins.');
 })();

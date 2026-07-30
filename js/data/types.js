@@ -31,7 +31,9 @@
   };
 
   // Gen 1: the move's TYPE decides whether it uses Attack or Special.
+  // There is no per-move category and no way to override it.
   G.PHYS_TYPES = { normal: 1, fighting: 1, flying: 1, poison: 1, ground: 1, rock: 1, bug: 1, ghost: 1 };
+  G.isPhysical = function (type) { return !!G.PHYS_TYPES[type]; };
 
   G.typeEff = function (moveType, defTypes) {
     var mult = 1;

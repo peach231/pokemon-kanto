@@ -347,10 +347,9 @@
     loadTrainerSprites: function () {
       if (!G.TRAINER_CFG) return;
       var cfg = G.TRAINER_CFG, box = cfg.box || 64;
-      var keys = [];
-      for (var name in G.ART) {
-        if (name.indexOf('trainer_') === 0) keys.push(name);
-      }
+      // The keyMap is the source of truth for which portraits exist -- baked
+      // art is no longer shipped for them, so iterating G.ART would find none.
+      var keys = Object.keys(cfg.keyMap || {});
       keys.forEach(function (key) {
         var urls = G.trainerSpriteUrl(key);
         var i = 0;

@@ -15,17 +15,17 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
-| **Kanto maps** | next — this is the big one |
-| Encounter tables | parser ready (`pokered.loadWild`), not wired |
+| Kanto maps | Pallet / Route 1 / Viridian + 8 interiors done; the rest of the region is next |
+| Encounter tables | done — all 56 wild maps generated from the ROM |
 | Region map screen | still draws Hoenn |
 | Gen 1 move effects in battle.js | descriptors emitted, engine doesn't read them all yet |
 | Intro sequence | still Rayquaza/Groudon |
 | Story, trainers, gyms, endgame | not started |
 
-**`node tools/check.js` currently fails with ~436 errors.** Every one is a
-still-Hoenn map or trainer referencing a species that no longer exists. That is
-expected at this point and resolves as the maps are replaced. The game does not
-run yet.
+**`node tools/check.js` passes**, battle-core tests included, and the game
+BOOTS AND RENDERS — you can walk Pallet, take a starter from Oak, and go north
+through Route 1 into Viridian. Everything past Viridian's north exit does not
+exist yet.
 
 ## Workflows (CRITICAL)
 
@@ -97,7 +97,8 @@ run yet.
 
 ## Known rough edges
 
-- `js/data/maps_*.js` and `js/data/trainers.js` are still Hoenn's.
+- Only Pallet, Route 1 and Viridian exist. Viridian's north exit to
+  Route 2 is not wired, because Route 2 has not been built.
 - `js/engine/title.js` still flies Rayquaza and Groudon.
 - `G.RegionMapScene` in `menus.js` still draws `'HOENN — REGION MAP'`.
 - `battle.js` understands the old Gen 3 effect kinds; the generated `moves.js`

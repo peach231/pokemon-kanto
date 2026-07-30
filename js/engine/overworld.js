@@ -41,7 +41,7 @@
   G.updateFollower = function () {
     G.world.follower = null;
     var id = G.world.mapId;
-    if (id === 'hearthvale') G.attachFollower('mom', 'momTalk', 'Mom');
+    if (id === 'pallet' && !G.flags.gotDex) G.attachFollower('mom', 'momTalk', 'Mum');
     else if (id === 'route1' && G.flags.starter && !G.flags.friendGone && G.flags.remyGreetSeen) G.attachFollower('boy', 'friendHeal', 'Remy');
   };
 
@@ -62,14 +62,14 @@
     var avoid = {};
     function mark(a) { (a || []).forEach(function (o) { avoid[o.x + ',' + o.y] = 1; }); }
     mark(map.warps); mark(map.signs); mark(map.items); mark(map.npcs); mark(map.trainers);
-    // tropical region: palms everywhere, heavier on the coast; cinders at the volcano
+    // Kanto is TEMPERATE woodland, so the scatter is ferns, bracken, cut stumps
+    // and loose stones -- no palms, no seashells, no volcanic cinders. Density
+    // is moderate: enough that a route reads as a lived-in place, not so much
+    // that it fights the tall grass for attention.
     var bg = map.battleBg || 'meadow';
-    // moderate density so towns/routes read as lived-in places, not bare fields
-    var palette = map.volcano ? [['Z', 0.08], ['o', 0.05], ['Q', 0.02]]
-      : bg === 'water' ? [['P', 0.07], ['H', 0.04], ['Q', 0.03], [',', 0.05]]
-      : bg === 'cave' ? [['o', 0.07], ['Q', 0.03]]
-      : bg === 'indoor' ? [['f', 0.06], ['y', 0.05], [',', 0.06]]
-      : [['P', 0.03], ['f', 0.06], ['y', 0.045], [',', 0.06], ['Q', 0.03]]; // meadow/forest
+    var palette = bg === 'cave' ? [['o', 0.07], ['Q', 0.03]]
+      : bg === 'indoor' ? [['f', 0.05], ['y', 0.04], [',', 0.06]]
+      : [['f', 0.05], ['y', 0.04], [',', 0.06], ['Q', 0.03], ['J', 0.03], ['V', 0.012], ['o', 0.02]];
     var rng = mulberry32(strHash(map.id));
     var deco = map.deco.map(function (r) { return r.split(''); });
     for (var y = 0; y < map.h; y++) {
@@ -865,9 +865,8 @@
 
   // Fishing: face water with the Fishing Rod to reel up a water-type wild. The
   // water pool is filtered to whatever's in the dex, so it scales as the dex grows.
-  var WATER_POOL = ['magikarp', 'tentacool', 'wingull', 'marill', 'lotad', 'barboach', 'carvanha', 'wailmer',
-    'corphish', 'goldeen', 'poliwag', 'horsea', 'staryu', 'remoraid', 'chinchou', 'psyduck', 'krabby',
-    'shellder', 'qwilfish', 'wooper', 'slowpoke', 'tentacruel', 'seaking'];
+  var WATER_POOL = ['magikarp', 'tentacool', 'goldeen', 'poliwag', 'horsea',
+    'staryu', 'shellder', 'krabby', 'psyduck', 'slowpoke', 'seaking', 'tentacruel'];
   var WATER_RARE = ['gyarados', 'sharpedo', 'lanturn', 'huntail', 'gorebyss', 'kingdra', 'lapras', 'milotic'];
 
   G.fish = function (map) {

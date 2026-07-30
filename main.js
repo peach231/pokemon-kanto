@@ -7,7 +7,7 @@
 
   G.frame = 0; // global frame counter (drives tile animation, cursors, etc.)
 
-  var STARTERS = ['treecko', 'torchic', 'mudkip'];
+  var STARTERS = ['bulbasaur', 'charmander', 'squirtle'];
 
   function boot() {
     G.gfx.init();
@@ -44,7 +44,7 @@
     // Optional real overworld walking sprites for NPC classes (sliced from sheets).
     if (G.gfx.loadOverworldSprites) G.gfx.loadOverworldSprites();
     // Default player character (overridden by the new-game select or a save).
-    if (G.applyCharacter) G.applyCharacter((G.player && G.player.charKey) || 'brendan');
+    if (G.applyCharacter) G.applyCharacter((G.player && G.player.charKey) || 'red');
   }
 
   function drawLoading(info) {
@@ -66,8 +66,8 @@
     var hashIs = function (tag) { return location.hash.indexOf('#' + tag) === 0; };
     var mapMatch = location.hash.match(/#map=(\w+),(\d+),(\d+)/);
     if (mapMatch) {
-      G.player.party = [G.makeMon('treecko', 20)];
-      G.flags.starter = 'treecko';
+      G.player.party = [G.makeMon('charmander', 20)];
+      G.flags.starter = 'charmander';
       var chId = (location.hash.match(/char=(\w+)/) || [])[1];
       if (chId && G.applyCharacter) { G.player.charKey = chId; G.applyCharacter(chId); }
       G.world.loadMap(mapMatch[1], parseInt(mapMatch[2], 10), parseInt(mapMatch[3], 10), (location.hash.match(/dir=(\w+)/) || [])[1] || 'down');
@@ -77,30 +77,30 @@
     } else if (hashIs('sheet') && G.debug && G.debug.SheetScene) {
       G.pushScene(G.debug.SheetScene());
     } else if (hashIs('regionmap') && G.RegionMapScene) {
-      G.player.party = [G.makeMon('treecko', 5)];
-      ['hearthvale', 'route1', 'cobblemarch', 'route2', 'verdantforest', 'brinehollow', 'route3', 'hollowdeep1', 'coilgate', 'route4', 'aurelune', 'route5', 'petalburg', 'route6', 'fortree', 'route7', 'mossdeep', 'route8', 'sootopolis', 'summitpath', 'crownsummit'].forEach(function (m) { G.player.visited[m] = 1; });
-      G.world.loadMap('hearthvale', 5, 6, 'down');
+      G.player.party = [G.makeMon('charmander', 5)];
+      ['pallet', 'route1', 'viridian'].forEach(function (m) { G.player.visited[m] = 1; });
+      G.world.loadMap('pallet', 5, 6, 'down');
       G.pushScene(G.overworldScene);
       G.pushScene(G.RegionMapScene());
     } else if (hashIs('battle') || hashIs('wild')) {
       // battle-UI test harness
-      G.player.party = [G.makeMon('mudkip', 10), G.makeMon('torchic', 8)];
+      G.player.party = [G.makeMon('squirtle', 10), G.makeMon('charmander', 8)];
       if (G.MAPS && G.MAPS.route1) G.world.loadMap('route1', 8, 14, 'down');
       G.pushScene(G.overworldScene);
       var auto = location.hash.indexOf('auto') !== -1;
       if (hashIs('battle')) {
-        var t = G.TRAINERS[(location.hash.match(/tr=(\w+)/) || [])[1]] || G.TRAINERS.rival1 || G.TRAINERS[Object.keys(G.TRAINERS)[0]];
+        var t = G.TRAINERS[(location.hash.match(/tr=(\w+)/) || [])[1]] || G.TRAINERS.blue_lab || G.TRAINERS[Object.keys(G.TRAINERS)[0]];
         G.pushScene(G.BattleScene(new G.Battle({ party: G.player.party, foes: G.trainerParty(t), trainer: t }), { bg: 'meadow', autoPlay: auto }));
       } else {
-        var wildKey = G.SPECIES.poochyena ? 'poochyena' : G.DEX_ORDER[0];
+        var wildKey = G.SPECIES.pidgey ? 'pidgey' : G.DEX_ORDER[0];
         G.pushScene(G.BattleScene(new G.Battle({ party: G.player.party, foes: [G.makeMon(wildKey, 7)], wild: true }), { bg: 'meadow', autoPlay: auto }));
       }
     } else if (hashIs('charsel') && G.CharSelectScene) {
       G.pushScene(G.CharSelectScene(function () {}));
     } else if (G.TitleScene) {
       G.pushScene(G.TitleScene());
-    } else if (G.MAPS && G.MAPS.hearthvale) {
-      G.world.loadMap('hearthvale', 5, 6, 'down');
+    } else if (G.MAPS && G.MAPS.pallet) {
+      G.world.loadMap('pallet', 5, 6, 'down');
       G.pushScene(G.overworldScene);
     } else {
       G.pushScene(testCard());

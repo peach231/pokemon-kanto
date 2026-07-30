@@ -2,21 +2,21 @@
 // Canonical player state + versioned localStorage persistence.
 
 (function () {
-  var KEY = 'pmgen3_save_v1';
+  var KEY = 'pmkanto_save_v1';
 
   G.newGame = function (name) {
     G.player = {
-      name: name || 'RAM',
-      money: 1500,
+      name: name || 'RED',
+      money: 3000,
       party: [],
-      box: [],            // Birch's Lab storage (overflow beyond the party of 6)
-      bag: { potion: 2, tameorb: 5 },
+      box: [],            // Bill's storage system (overflow beyond the party of 6)
+      bag: { potion: 1 },   // Gen 1 starts you with almost nothing on purpose
       badges: [false, false, false, false, false, false, false, false],
       dexSeen: {}, dexCaught: {},
       visited: {},        // mapId -> 1 once entered (region map shading)
       repelSteps: 0,
       playSeconds: 0,
-      respawn: { mapId: 'playerhome', x: 4, y: 4 }
+      respawn: { mapId: 'playerhome', x: 4, y: 7 }
     };
     G.flags = {};
   };
@@ -54,7 +54,7 @@
     if (!G.player.box) G.player.box = [];          // back-compat for older saves
     if (!G.player.visited) G.player.visited = {};  // explored-map tracking
     G.flags = data.flags || {};
-    if (G.applyCharacter) G.applyCharacter(G.player.charKey || 'brendan'); // restore chosen sprite
+    if (G.applyCharacter) G.applyCharacter(G.player.charKey || 'red'); // restore chosen sprite
     if (data.muted && !G.audio.muted) G.audio.toggleMute();
     G.world.loadMap(data.pos.mapId, data.pos.x, data.pos.y, data.pos.dir);
     return true;

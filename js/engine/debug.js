@@ -97,34 +97,38 @@
 
     // type chart spot checks (Gen 3, 17 types)
     assert(G.typeEff('electric', ['ground']) === 0, 'electric->ground should be 0');
-    assert(G.typeEff('dark', ['psychic']) === 2, 'dark->psychic should be 2');
-    assert(G.typeEff('fire', ['grass', 'steel']) === 4, 'fire->grass/steel should be 4');
+    assert(G.typeEff('ghost', ['psychic']) === 2, 'ghost->psychic should be 2 (our un-bugging)');
+    assert(G.typeEff('fire', ['grass', 'bug']) === 4, 'fire->grass/bug should be 4');
     assert(G.typeEff('fighting', ['ghost']) === 0, 'fighting->ghost should be 0');
     assert(G.typeEff('water', ['water', 'dragon']) === 0.25, 'water->water/dragon should be 0.25');
-    assert(G.typeEff('ghost', ['steel']) === 0.5, 'gen3: steel resists ghost');
-    assert(G.typeEff('dark', ['steel']) === 0.5, 'gen3: steel resists dark');
-    assert(G.TYPE_ORDER.indexOf('fairy') === -1, 'gen3: no fairy type');
-    assert(G.isPhysical('ghost') && !G.isPhysical('dark'), 'gen3 split: ghost phys, dark special');
+    assert(G.typeEff('bug', ['poison']) === 2, 'gen1: bug and poison are mutually 2x');
+    assert(G.typeEff('ice', ['fire']) === 1, 'gen1: ice is neutral on fire');
+    assert(G.TYPE_ORDER.length === 15, 'gen1: exactly 15 types');
+    assert(G.isPhysical('ghost') && !G.isPhysical('psychic'), 'gen1 split by type: ghost physical, psychic special');
 
     // level curve boundaries (medium-slow: 1.2L^3 - 15L^2 + 100L - 140)
-    assert(G.expForLevel(10) === 560, 'exp(10)=560, got ' + G.expForLevel(10));
-    assert(G.expForLevel(6) - G.expForLevel(5) === 44, 'L5->6 gap should be 44');
+    assert(G.expForLevel(10, 'mediumSlow') === 560, 'mediumSlow exp(10)=560, got ' + G.expForLevel(10, 'mediumSlow'));
+    assert(G.expForLevel(6, 'mediumSlow') - G.expForLevel(5, 'mediumSlow') === 44, 'mediumSlow L5->6 gap should be 44');
     // medium-fast curve: exp(10) === 1000
     assert(G.expForLevel(10, 'mediumFast') === 1000, 'mediumFast exp(10)=1000');
-    var m = G.makeMon('treecko', 9); // treecko is medium-slow (default curve)
-    G.gainExp(m, G.expForLevel(10) - G.expForLevel(9));
+    var m = G.makeMon('bulbasaur', 9); // bulbasaur is medium-slow
+    G.gainExp(m, G.expForLevel(10, 'mediumSlow') - G.expForLevel(9, 'mediumSlow'));
     assert(m.level === 10, 'gainExp boundary -> level 10, got ' + m.level);
 
     // stat formula known answer
-    var probe = G.makeMon('manectric', 50, { dvs: { atk: 10, def: 10, spc: 10, spe: 10 } });
+    // Gen 1 doubles the DV as well as the base stat, and the HP DV is derived
+    // from the parity of the other four rather than rolled.
+    var probe = G.makeMon('raichu', 50, { dvs: { atk: 11, def: 11, spc: 11, spe: 11 } });
     var st = G.monStats(probe);
-    var expectHp = Math.floor((2 * G.SPECIES.manectric.base.hp + 10) * 50 / 100) + 50 + 10;
+    assert(probe.dvs.hp === 15, 'all-odd DVs must give HP DV 15, got ' + probe.dvs.hp);
+    var expectHp = Math.floor((G.SPECIES.raichu.base.hp + 15) * 2 * 50 / 100) + 50 + 10;
     assert(st.hp === expectHp, 'hp formula mismatch: ' + st.hp + ' vs ' + expectHp);
+    assert(st.spa === st.spd, 'gen1 has ONE Special stat, mirrored into both slots');
 
     // damage range check: 200 samples fall within [min, max] closed form
     G.seedRng(1234);
     var atk = G.makeMon('geodude', 12, { dvs: { atk: 8, def: 8, spc: 8, spe: 8 }, moves: ['rockthrow'] });
-    var def = G.makeMon('zigzagoon', 12, { dvs: { atk: 8, def: 8, spc: 8, spe: 8 } });
+    var def = G.makeMon('rattata', 12, { dvs: { atk: 8, def: 8, spc: 8, spe: 8 } });
     var battle = new G.Battle({ party: [atk], foes: [def], wild: true });
     var A = G.monStats(atk).atk, D = G.monStats(def).def;
     var base = Math.floor(Math.floor(Math.floor((2 * 12 / 5 + 2) * 50 * A / D) / 50) + 2);
@@ -137,20 +141,20 @@
 
     // catch distribution: known a -> probability within tolerance (whismur catchRate 190)
     G.seedRng(99);
-    var wild = G.makeMon('whismur', 5);
+    var wild = G.makeMon('pidgey', 5);
     wild.curHp = 1;
-    var cb = new G.Battle({ party: [G.makeMon('treecko', 5)], foes: [wild], wild: true });
+    var cb = new G.Battle({ party: [G.makeMon('bulbasaur', 5)], foes: [wild], wild: true });
     var caught = 0, N = 4000;
     for (var c = 0; c < N; c++) {
       wild.curHp = 1;
       cb.over = false; cb.result = null;
-      var gen = cb.doOrb('tameorb');
+      var gen = cb.doOrb('pokeball');
       var r = gen.next();
       while (!r.done) r = gen.next();
       if (cb.result === 'caught') caught++;
     }
     var stats = G.monStats(wild);
-    var a = Math.floor((3 * stats.hp - 2 * 1) * 190 * 1.0 / (3 * stats.hp));
+    var a = Math.floor((3 * stats.hp - 2 * 1) * G.SPECIES.pidgey.catchRate * 1.0 / (3 * stats.hp));
     var p = a >= 255 ? 1 : Math.pow(Math.floor(65536 / Math.pow(255 / a, 0.25)) / 65536, 4);
     var observed = caught / N;
     assert(Math.abs(observed - p) < 0.03, 'catch rate ' + observed.toFixed(3) + ' vs analytic ' + p.toFixed(3));
@@ -160,7 +164,7 @@
     (function () {
       var realStart = G.startBattle;
       var realPlayer = G.player;
-      G.player = { party: [G.makeMon('treecko', 8)], repelSteps: 0, dexSeen: {}, dexCaught: {} };
+      G.player = { party: [G.makeMon('bulbasaur', 8)], repelSteps: 0, dexSeen: {}, dexCaught: {} };
       var started = 0, lastSpecies = {};
       G.startBattle = function (bo) {
         started++;
@@ -178,16 +182,19 @@
         if (!G.MAPS.route1.encounters.table.some(function (e) { return e.sp === spk; })) tableOk = false;
       }
       assert(tableOk, 'encounter produced species not in the map table');
-      assert(Object.keys(lastSpecies).length >= 3, 'encounter variety too low: ' + Object.keys(lastSpecies).join(','));
+      // Route 1's ROM table is Pidgey and Rattata and nothing else, so two is
+      // the correct answer here -- an assertion of 3+ was a Hoenn assumption.
+      assert(Object.keys(lastSpecies).length >= 2, 'encounter variety too low: ' + Object.keys(lastSpecies).join(','));
+      assert(!lastSpecies.caterpie, 'Route 1 must not spawn Viridian Forest species');
     })();
 
     // determinism: same seed -> same battle log
-    var log1 = G.debug.simBattle('torchic', 'treecko', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
-    var log2 = G.debug.simBattle('torchic', 'treecko', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
+    var log1 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
+    var log2 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
     assert(log1 === log2, 'seeded battles should be deterministic');
 
     // full-battle smoke: strong endpoints can finish a battle
-    var pairs = [['sceptile', 'blaziken'], ['swampert', 'metagross'], ['salamence', 'aggron']];
+    var pairs = [['venusaur', 'charizard'], ['blastoise', 'alakazam'], ['dragonite', 'snorlax']];
     for (var pi = 0; pi < pairs.length; pi++) {
       var s = G.debug.simBattle(pairs[pi][0], pairs[pi][1], { n: 4, seed: 7 + pi, level: 50 });
       if (typeof s !== 'string') fails.push('sim failed for ' + pairs[pi][0]);

@@ -72,7 +72,9 @@ ${rows}
   };
 
   // Gen 1: the move's TYPE decides whether it uses Attack or Special.
+  // There is no per-move category and no way to override it.
   G.PHYS_TYPES = { ${PHYS_TYPES.map(t => t + ': 1').join(', ')} };
+  G.isPhysical = function (type) { return !!G.PHYS_TYPES[type]; };
 
   G.typeEff = function (moveType, defTypes) {
     var mult = 1;
@@ -413,6 +415,9 @@ async function main() {
   write('species_101_151.js', emitSpeciesChunk(d.dexOrder.slice(100, 151), d.species, 101, 151));
   write('kanto_dex.js', emitDex(d.dexOrder));
 
+  const wild = await pokered.loadWild([...new Set(Object.values(WILD_MAPS))]);
+  write('encounters.js', emitEncounters(wild));
+
   // ---- report ----
   const stoneEvos = d.dexOrder.filter(k => d.species[k].evos.some(e => e.how === 'item'));
   const tradeEvos = d.dexOrder.filter(k => d.species[k].evos.some(e => e.how === 'trade'));
@@ -422,3 +427,96 @@ async function main() {
 }
 
 main().catch(e => { console.error('\nFAILED:', e.message); process.exit(1); });
+
+// ========================================================== encounters =====
+// Wild tables, straight from data/wild/maps/*.asm. Gen 1 gives every map a
+// single encounter RATE (0-255, chance per step out of 256) and ten weighted
+// SLOTS; the slot index decides its frequency, not the species. Slot weights
+// are the ROM's: 20/20/15/15/10/10/5/5/4/1 percent.
+//
+// Left side is our map id, right side is the pokered file. Ids are inherited
+// by warps and MUST NOT be renamed once maps exist.
+const WILD_MAPS = {
+  route1: 'Route1', route2: 'Route2', route3: 'Route3', route4: 'Route4',
+  route5: 'Route5', route6: 'Route6', route7: 'Route7', route8: 'Route8',
+  route9: 'Route9', route10: 'Route10', route11: 'Route11', route12: 'Route12',
+  route13: 'Route13', route14: 'Route14', route15: 'Route15', route16: 'Route16',
+  route17: 'Route17', route18: 'Route18', route21: 'Route21', route22: 'Route22',
+  route23: 'Route23', route24: 'Route24', route25: 'Route25',
+  viridianforest: 'ViridianForest',
+  mtmoon1f: 'MtMoon1F', mtmoonb1f: 'MtMoonB1F', mtmoonb2f: 'MtMoonB2F',
+  diglettscave: 'DiglettsCave',
+  rocktunnel1f: 'RockTunnel1F', rocktunnelb1f: 'RockTunnelB1F',
+  powerplant: 'PowerPlant',
+  pokemontower3f: 'PokemonTower3F', pokemontower4f: 'PokemonTower4F',
+  pokemontower5f: 'PokemonTower5F', pokemontower6f: 'PokemonTower6F',
+  pokemontower7f: 'PokemonTower7F',
+  seafoam1f: 'SeafoamIslands1F', seafoamb1f: 'SeafoamIslandsB1F',
+  seafoamb2f: 'SeafoamIslandsB2F', seafoamb3f: 'SeafoamIslandsB3F',
+  seafoamb4f: 'SeafoamIslandsB4F',
+  mansion1f: 'PokemonMansion1F', mansion2f: 'PokemonMansion2F',
+  mansion3f: 'PokemonMansion3F', mansionb1f: 'PokemonMansionB1F',
+  victoryroad1f: 'VictoryRoad1F', victoryroad2f: 'VictoryRoad2F',
+  victoryroad3f: 'VictoryRoad3F',
+  ceruleancave1f: 'CeruleanCave1F', ceruleancave2f: 'CeruleanCave2F',
+  ceruleancaveb1f: 'CeruleanCaveB1F',
+  safarizonecenter: 'SafariZoneCenter', safarizoneeast: 'SafariZoneEast',
+  safarizonenorth: 'SafariZoneNorth', safarizonewest: 'SafariZoneWest',
+  searoutes: 'SeaRoutes'
+};
+
+const SLOT_PCT = [20, 20, 15, 15, 10, 10, 5, 5, 4, 1];
+
+// Collapse the ten slots into one weighted entry per species, summing the
+// weights of repeated species and taking their level range.
+function foldSlots(slots) {
+  const by = {};
+  slots.forEach((s, i) => {
+    const e = by[s.key] || (by[s.key] = { key: s.key, w: 0, min: s.level, max: s.level });
+    e.w += SLOT_PCT[i] || 1;
+    if (s.level < e.min) e.min = s.level;
+    if (s.level > e.max) e.max = s.level;
+  });
+  return Object.values(by).sort((a, b) => b.w - a.w);
+}
+
+function emitEncounters(wild) {
+  const blocks = [];
+  for (const [id, file] of Object.entries(WILD_MAPS)) {
+    const w = wild[file];
+    if (!w || (!w.grass && !w.water)) continue;
+
+    // The engine wants { rate, table:[{sp,min,max,w}] } with rate as a per-step
+    // PROBABILITY. Gen 1 stores it as a byte out of 256, so convert.
+    const NL = '\n';
+    const section = (k) => {
+      const rows = foldSlots(w[k].slots)
+        .map(e => `      { sp: '${e.key}', min: ${e.min}, max: ${e.max}, w: ${e.w} }`)
+        .join(',' + NL);
+      return `rate: ${(w[k].rate / 256).toFixed(3)}, table: [` + NL + rows + NL + '    ]';
+    };
+
+    const parts = [];
+    if (w.grass) parts.push('    ' + section('grass'));
+    if (w.water) parts.push('    water: { ' + section('water') + ' }');
+    blocks.push(`  ${id}: {` + NL + parts.join(',' + NL) + NL + '  }');
+  }
+  return HEAD + `// pokemon-kanto — encounters.js
+// Wild encounter tables from data/wild/maps/*.asm. These are the real Red/Blue
+// numbers: Route 1 really is Pidgey and Rattata at levels 2-5, and Route 22
+// really does hide a 1-in-100 Nidoran before you have a single badge.
+//
+//   rate   : per-step encounter probability (the ROM byte, divided by 256)
+//   table  : one entry per species; w is its summed percentage across the ten
+//            ROM slots, min/max the level range over those slots
+//   water  : the Surf table, same shape, used once you have HM03
+//
+// G.rollEncounter (overworld.js) picks by weight.
+
+(function () {
+  G.ENCOUNTERS = {
+${blocks.join(',\n')}
+  };
+})();
+`;
+}

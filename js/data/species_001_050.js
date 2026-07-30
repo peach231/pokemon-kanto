@@ -11,301 +11,301 @@
 
   sp(  1, 'bulbasaur', 'Bulbasaur', ['grass', 'poison'], 'starter', [ 45,  49,  49,  65,  45],
      [{ how: 'level', level: 16, into: 'ivysaur' }],
-     [[7, 'leechseed'], [13, 'vinewhip'], [20, 'poisonpowder'], [27, 'razorleaf'], [34, 'growth'], [41, 'sleeppowder'], [48, 'solarbeam']],
+     [[1, 'tackle'], [1, 'growl'], [7, 'leechseed'], [13, 'vinewhip'], [20, 'poisonpowder'], [27, 'razorleaf'], [34, 'growth'], [41, 'sleeppowder'], [48, 'solarbeam']],
      "The bulb on its back was planted at birth and grows with it, feeding on the same sunlight.",
      { catchRate: 45, expYield: 64, growth: MS });
 
   sp(  2, 'ivysaur', 'Ivysaur', ['grass', 'poison'], 'starter', [ 60,  62,  63,  80,  60],
      [{ how: 'level', level: 32, into: 'venusaur' }],
-     [[7, 'leechseed'], [13, 'vinewhip'], [22, 'poisonpowder'], [30, 'razorleaf'], [38, 'growth'], [46, 'sleeppowder'], [54, 'solarbeam']],
+     [[1, 'tackle'], [1, 'growl'], [1, 'leechseed'], [7, 'leechseed'], [13, 'vinewhip'], [22, 'poisonpowder'], [30, 'razorleaf'], [38, 'growth'], [46, 'sleeppowder'], [54, 'solarbeam']],
      "When the bud grows heavy enough that it can no longer stand upright, bloom is close.",
      { catchRate: 45, expYield: 141, growth: MS });
 
   sp(  3, 'venusaur', 'Venusaur', ['grass', 'poison'], 'starter', [ 80,  82,  83, 100,  80],
      null,
-     [[7, 'leechseed'], [13, 'vinewhip'], [22, 'poisonpowder'], [30, 'razorleaf'], [43, 'growth'], [55, 'sleeppowder'], [65, 'solarbeam']],
+     [[1, 'tackle'], [1, 'growl'], [1, 'leechseed'], [1, 'vinewhip'], [7, 'leechseed'], [13, 'vinewhip'], [22, 'poisonpowder'], [30, 'razorleaf'], [43, 'growth'], [55, 'sleeppowder'], [65, 'solarbeam']],
      "Its flower turns to follow the sun all day, and the whole clearing smells sweet by evening.",
      { catchRate: 45, expYield: 208, growth: MS });
 
   sp(  4, 'charmander', 'Charmander', ['fire'], 'starter', [ 39,  52,  43,  50,  65],
      [{ how: 'level', level: 16, into: 'charmeleon' }],
-     [[9, 'ember'], [15, 'leer'], [22, 'rage'], [30, 'slash'], [38, 'flamethrower'], [46, 'firespin']],
+     [[1, 'scratch'], [1, 'growl'], [9, 'ember'], [15, 'leer'], [22, 'rage'], [30, 'slash'], [38, 'flamethrower'], [46, 'firespin']],
      "The flame at its tail burns low when it sleeps and gutters badly when it is unwell.",
      { catchRate: 45, expYield: 65, growth: MS });
 
   sp(  5, 'charmeleon', 'Charmeleon', ['fire'], 'starter', [ 58,  64,  58,  65,  80],
      [{ how: 'level', level: 36, into: 'charizard' }],
-     [[9, 'ember'], [15, 'leer'], [24, 'rage'], [33, 'slash'], [42, 'flamethrower'], [56, 'firespin']],
+     [[1, 'scratch'], [1, 'growl'], [1, 'ember'], [9, 'ember'], [15, 'leer'], [24, 'rage'], [33, 'slash'], [42, 'flamethrower'], [56, 'firespin']],
      "It seeks out strong opponents on purpose, and the tail flame burns blue-white when it finds one.",
      { catchRate: 45, expYield: 142, growth: MS });
 
   sp(  6, 'charizard', 'Charizard', ['fire', 'flying'], 'starter', [ 78,  84,  78,  85, 100],
      null,
-     [[9, 'ember'], [15, 'leer'], [24, 'rage'], [36, 'slash'], [46, 'flamethrower'], [55, 'firespin']],
+     [[1, 'scratch'], [1, 'growl'], [1, 'ember'], [1, 'leer'], [9, 'ember'], [15, 'leer'], [24, 'rage'], [36, 'slash'], [46, 'flamethrower'], [55, 'firespin']],
      "It can melt stone, so it climbs high and breathes upward, away from anything that might catch.",
      { catchRate: 45, expYield: 209, growth: MS });
 
   sp(  7, 'squirtle', 'Squirtle', ['water'], 'starter', [ 44,  48,  65,  50,  43],
      [{ how: 'level', level: 16, into: 'wartortle' }],
-     [[8, 'bubble'], [15, 'watergun'], [22, 'bite'], [28, 'withdraw'], [35, 'skullbash'], [42, 'hydropump']],
+     [[1, 'tackle'], [1, 'tailwhip'], [8, 'bubble'], [15, 'watergun'], [22, 'bite'], [28, 'withdraw'], [35, 'skullbash'], [42, 'hydropump']],
      "The shell is not just armour — the curve of it makes the creature faster in water than out.",
      { catchRate: 45, expYield: 66, growth: MS });
 
   sp(  8, 'wartortle', 'Wartortle', ['water'], 'starter', [ 59,  63,  80,  65,  58],
      [{ how: 'level', level: 36, into: 'blastoise' }],
-     [[8, 'bubble'], [15, 'watergun'], [24, 'bite'], [31, 'withdraw'], [39, 'skullbash'], [47, 'hydropump']],
+     [[1, 'tackle'], [1, 'tailwhip'], [1, 'bubble'], [8, 'bubble'], [15, 'watergun'], [24, 'bite'], [31, 'withdraw'], [39, 'skullbash'], [47, 'hydropump']],
      "Its tail is said to darken and thicken with age, and old ones are treated with real respect.",
      { catchRate: 45, expYield: 143, growth: MS });
 
   sp(  9, 'blastoise', 'Blastoise', ['water'], 'starter', [ 79,  83, 100,  85,  78],
      null,
-     [[8, 'bubble'], [15, 'watergun'], [24, 'bite'], [31, 'withdraw'], [42, 'skullbash'], [52, 'hydropump']],
+     [[1, 'tackle'], [1, 'tailwhip'], [1, 'bubble'], [1, 'watergun'], [8, 'bubble'], [15, 'watergun'], [24, 'bite'], [31, 'withdraw'], [42, 'skullbash'], [52, 'hydropump']],
      "It braces its legs and locks its knees before firing, or the recoil would knock it flat.",
      { catchRate: 45, expYield: 210, growth: MS });
 
   sp( 10, 'caterpie', 'Caterpie', ['bug'], 'common', [ 45,  30,  35,  20,  45],
      [{ how: 'level', level: 7, into: 'metapod' }],
-     [],
+     [[1, 'tackle'], [1, 'stringshot']],
      "Its feet grip so well it can walk up glass, though the smell it releases when frightened is dreadful.",
      { catchRate: 255, expYield: 53, growth: MF });
 
   sp( 11, 'metapod', 'Metapod', ['bug'], 'uncommon', [ 50,  20,  55,  25,  30],
      [{ how: 'level', level: 10, into: 'butterfree' }],
-     [],
+     [[1, 'harden']],
      "The shell is hard but the creature inside is soft, so it does nothing all day but wait.",
      { catchRate: 120, expYield: 72, growth: MF });
 
   sp( 12, 'butterfree', 'Butterfree', ['bug', 'flying'], 'elusive', [ 60,  45,  50,  80,  70],
      null,
-     [[12, 'confusion'], [15, 'poisonpowder'], [16, 'stunspore'], [17, 'sleeppowder'], [21, 'supersonic'], [26, 'whirlwind'], [32, 'psybeam']],
+     [[1, 'confusion'], [12, 'confusion'], [15, 'poisonpowder'], [16, 'stunspore'], [17, 'sleeppowder'], [21, 'supersonic'], [26, 'whirlwind'], [32, 'psybeam']],
      "The dust on its wings repels water, letting it forage in rain when nothing else will.",
      { catchRate: 45, expYield: 160, growth: MF });
 
   sp( 13, 'weedle', 'Weedle', ['bug', 'poison'], 'common', [ 40,  35,  30,  20,  50],
      [{ how: 'level', level: 7, into: 'kakuna' }],
-     [],
+     [[1, 'poisonsting'], [1, 'stringshot']],
      "The barb on its head carries a poison strong enough to make a grown hiker sit down.",
      { catchRate: 255, expYield: 52, growth: MF });
 
   sp( 14, 'kakuna', 'Kakuna', ['bug', 'poison'], 'uncommon', [ 45,  25,  50,  25,  35],
      [{ how: 'level', level: 10, into: 'beedrill' }],
-     [],
+     [[1, 'harden']],
      "It can barely move, but it can raise its temperature enough to discourage anything curious.",
      { catchRate: 120, expYield: 71, growth: MF });
 
   sp( 15, 'beedrill', 'Beedrill', ['bug', 'poison'], 'elusive', [ 65,  80,  40,  45,  75],
      null,
-     [[12, 'furyattack'], [16, 'focusenergy'], [20, 'twineedle'], [25, 'rage'], [30, 'pinmissile'], [35, 'agility']],
+     [[1, 'furyattack'], [12, 'furyattack'], [16, 'focusenergy'], [20, 'twineedle'], [25, 'rage'], [30, 'pinmissile'], [35, 'agility']],
      "They defend a nest as one. Disturbing a single one is a mistake you make only once.",
      { catchRate: 45, expYield: 159, growth: MF });
 
   sp( 16, 'pidgey', 'Pidgey', ['normal', 'flying'], 'common', [ 40,  45,  40,  35,  56],
      [{ how: 'level', level: 18, into: 'pidgeotto' }],
-     [[5, 'sandattack'], [12, 'quickattack'], [19, 'whirlwind'], [28, 'wingattack'], [36, 'agility'], [44, 'mirrormove']],
+     [[1, 'gust'], [5, 'sandattack'], [12, 'quickattack'], [19, 'whirlwind'], [28, 'wingattack'], [36, 'agility'], [44, 'mirrormove']],
      "It kicks up sand to blind whatever is bothering it, then simply leaves rather than fight.",
      { catchRate: 255, expYield: 55, growth: MS });
 
   sp( 17, 'pidgeotto', 'Pidgeotto', ['normal', 'flying'], 'uncommon', [ 63,  60,  55,  50,  71],
      [{ how: 'level', level: 36, into: 'pidgeot' }],
-     [[5, 'sandattack'], [12, 'quickattack'], [21, 'whirlwind'], [31, 'wingattack'], [40, 'agility'], [49, 'mirrormove']],
+     [[1, 'gust'], [1, 'sandattack'], [5, 'sandattack'], [12, 'quickattack'], [21, 'whirlwind'], [31, 'wingattack'], [40, 'agility'], [49, 'mirrormove']],
      "It claims a wide territory and patrols the whole boundary daily, driving off every rival.",
      { catchRate: 120, expYield: 113, growth: MS });
 
   sp( 18, 'pidgeot', 'Pidgeot', ['normal', 'flying'], 'elusive', [ 83,  80,  75,  70,  91],
      null,
-     [[5, 'sandattack'], [12, 'quickattack'], [21, 'whirlwind'], [31, 'wingattack'], [44, 'agility'], [54, 'mirrormove']],
+     [[1, 'gust'], [1, 'sandattack'], [1, 'quickattack'], [5, 'sandattack'], [12, 'quickattack'], [21, 'whirlwind'], [31, 'wingattack'], [44, 'agility'], [54, 'mirrormove']],
      "At full speed the air behind it cracks, and the crest feathers lie flat against its skull.",
      { catchRate: 45, expYield: 172, growth: MS });
 
   sp( 19, 'rattata', 'Rattata', ['normal'], 'common', [ 30,  56,  35,  25,  72],
      [{ how: 'level', level: 20, into: 'raticate' }],
-     [[7, 'quickattack'], [14, 'hyperfang'], [23, 'focusenergy'], [34, 'superfang']],
+     [[1, 'tackle'], [1, 'tailwhip'], [7, 'quickattack'], [14, 'hyperfang'], [23, 'focusenergy'], [34, 'superfang']],
      "Its teeth never stop growing, so it gnaws constantly — through wood, wire and sometimes walls.",
      { catchRate: 255, expYield: 57, growth: MF });
 
   sp( 20, 'raticate', 'Raticate', ['normal'], 'rare', [ 55,  81,  60,  50,  97],
      null,
-     [[7, 'quickattack'], [14, 'hyperfang'], [27, 'focusenergy'], [41, 'superfang']],
+     [[1, 'tackle'], [1, 'tailwhip'], [1, 'quickattack'], [7, 'quickattack'], [14, 'hyperfang'], [27, 'focusenergy'], [41, 'superfang']],
      "It swims well, using its whiskers to judge the current, and will cross a river to reach food.",
      { catchRate: 90, expYield: 116, growth: MF });
 
   sp( 21, 'spearow', 'Spearow', ['normal', 'flying'], 'common', [ 40,  60,  30,  31,  70],
      [{ how: 'level', level: 20, into: 'fearow' }],
-     [[9, 'leer'], [15, 'furyattack'], [22, 'mirrormove'], [29, 'drillpeck'], [36, 'agility']],
+     [[1, 'peck'], [1, 'growl'], [9, 'leer'], [15, 'furyattack'], [22, 'mirrormove'], [29, 'drillpeck'], [36, 'agility']],
      "Too poor a flier to travel far, so it stays low, loud and extremely bad-tempered.",
      { catchRate: 255, expYield: 58, growth: MF });
 
   sp( 22, 'fearow', 'Fearow', ['normal', 'flying'], 'rare', [ 65,  90,  65,  61, 100],
      null,
-     [[9, 'leer'], [15, 'furyattack'], [25, 'mirrormove'], [34, 'drillpeck'], [43, 'agility']],
+     [[1, 'peck'], [1, 'growl'], [1, 'leer'], [9, 'leer'], [15, 'furyattack'], [25, 'mirrormove'], [34, 'drillpeck'], [43, 'agility']],
      "The long neck and beak let it strike into soil or water without slowing its flight.",
      { catchRate: 90, expYield: 162, growth: MF });
 
   sp( 23, 'ekans', 'Ekans', ['poison'], 'common', [ 35,  60,  44,  40,  55],
      [{ how: 'level', level: 22, into: 'arbok' }],
-     [[10, 'poisonsting'], [17, 'bite'], [24, 'glare'], [31, 'screech'], [38, 'acid']],
+     [[1, 'wrap'], [1, 'leer'], [10, 'poisonsting'], [17, 'bite'], [24, 'glare'], [31, 'screech'], [38, 'acid']],
      "It unhinges its jaw to swallow eggs whole, and lies still for days afterwards.",
      { catchRate: 255, expYield: 62, growth: MF });
 
   sp( 24, 'arbok', 'Arbok', ['poison'], 'rare', [ 60,  85,  69,  65,  80],
      null,
-     [[10, 'poisonsting'], [17, 'bite'], [27, 'glare'], [36, 'screech'], [47, 'acid']],
+     [[1, 'wrap'], [1, 'leer'], [1, 'poisonsting'], [10, 'poisonsting'], [17, 'bite'], [27, 'glare'], [36, 'screech'], [47, 'acid']],
      "The pattern on its hood differs by region, and each pattern is said to mean something.",
      { catchRate: 90, expYield: 147, growth: MF });
 
   sp( 25, 'pikachu', 'Pikachu', ['electric'], 'common', [ 35,  55,  30,  50,  90],
      [{ how: 'stone', item: 'thunderstone', into: 'raichu' }],
-     [[9, 'thunderwave'], [16, 'quickattack'], [26, 'swift'], [33, 'agility'], [43, 'thunder']],
+     [[1, 'thundershock'], [1, 'growl'], [9, 'thunderwave'], [16, 'quickattack'], [26, 'swift'], [33, 'agility'], [43, 'thunder']],
      "It discharges into the ground when startled, which is why nothing grows where a colony sleeps.",
      { catchRate: 190, expYield: 82, growth: MF });
 
   sp( 26, 'raichu', 'Raichu', ['electric'], 'rare', [ 60,  90,  55,  90, 100],
      null,
-     [],
+     [[1, 'thundershock'], [1, 'growl'], [1, 'thunderwave']],
      "The tail is an earthing rod. Without it the creature would shock itself with its own charge.",
      { catchRate: 75, expYield: 122, growth: MF });
 
   sp( 27, 'sandshrew', 'Sandshrew', ['ground'], 'common', [ 50,  75,  85,  30,  40],
      [{ how: 'level', level: 22, into: 'sandslash' }],
-     [[10, 'sandattack'], [17, 'slash'], [24, 'poisonsting'], [31, 'swift'], [38, 'furyswipes']],
+     [[1, 'scratch'], [10, 'sandattack'], [17, 'slash'], [24, 'poisonsting'], [31, 'swift'], [38, 'furyswipes']],
      "It curls up so tightly that the seams of its hide vanish, and simply lets danger pass.",
      { catchRate: 255, expYield: 93, growth: MF });
 
   sp( 28, 'sandslash', 'Sandslash', ['ground'], 'rare', [ 75, 100, 110,  55,  65],
      null,
-     [[10, 'sandattack'], [17, 'slash'], [27, 'poisonsting'], [36, 'swift'], [47, 'furyswipes']],
+     [[1, 'scratch'], [1, 'sandattack'], [10, 'sandattack'], [17, 'slash'], [27, 'poisonsting'], [36, 'swift'], [47, 'furyswipes']],
      "The spines are hardened hide, and it sheds and regrows them after a hard season.",
      { catchRate: 90, expYield: 163, growth: MF });
 
   sp( 29, 'nidoranf', 'Nidoran♀', ['poison'], 'common', [ 55,  47,  52,  40,  41],
      [{ how: 'level', level: 16, into: 'nidorina' }],
-     [[8, 'scratch'], [14, 'poisonsting'], [21, 'tailwhip'], [29, 'bite'], [36, 'furyswipes'], [43, 'doublekick']],
+     [[1, 'growl'], [1, 'tackle'], [8, 'scratch'], [14, 'poisonsting'], [21, 'tailwhip'], [29, 'bite'], [36, 'furyswipes'], [43, 'doublekick']],
      "Small and cautious, but the horn carries venom, and it will use it without warning.",
      { catchRate: 235, expYield: 59, growth: MS });
 
   sp( 30, 'nidorina', 'Nidorina', ['poison'], 'uncommon', [ 70,  62,  67,  55,  56],
      [{ how: 'stone', item: 'moonstone', into: 'nidoqueen' }],
-     [[8, 'scratch'], [14, 'poisonsting'], [23, 'tailwhip'], [32, 'bite'], [41, 'furyswipes'], [50, 'doublekick']],
+     [[1, 'growl'], [1, 'tackle'], [1, 'scratch'], [8, 'scratch'], [14, 'poisonsting'], [23, 'tailwhip'], [32, 'bite'], [41, 'furyswipes'], [50, 'doublekick']],
      "It grows calmer as it matures, and will place itself between danger and anything smaller.",
      { catchRate: 120, expYield: 117, growth: MS });
 
   sp( 31, 'nidoqueen', 'Nidoqueen', ['poison', 'ground'], 'elusive', [ 90,  82,  87,  75,  76],
      null,
-     [[8, 'scratch'], [14, 'poisonsting'], [23, 'bodyslam']],
+     [[1, 'tackle'], [1, 'scratch'], [1, 'tailwhip'], [1, 'bodyslam'], [8, 'scratch'], [14, 'poisonsting'], [23, 'bodyslam']],
      "The overlapping scales stiffen when it tenses, turning its whole body into a shield.",
      { catchRate: 45, expYield: 194, growth: MS });
 
   sp( 32, 'nidoranm', 'Nidoran♂', ['poison'], 'common', [ 46,  57,  40,  40,  50],
      [{ how: 'level', level: 16, into: 'nidorino' }],
-     [[8, 'hornattack'], [14, 'poisonsting'], [21, 'focusenergy'], [29, 'furyattack'], [36, 'horndrill'], [43, 'doublekick']],
+     [[1, 'leer'], [1, 'tackle'], [8, 'hornattack'], [14, 'poisonsting'], [21, 'focusenergy'], [29, 'furyattack'], [36, 'horndrill'], [43, 'doublekick']],
      "It listens with those oversized ears and stands very still, deciding whether to run or charge.",
      { catchRate: 235, expYield: 60, growth: MS });
 
   sp( 33, 'nidorino', 'Nidorino', ['poison'], 'uncommon', [ 61,  72,  57,  55,  65],
      [{ how: 'stone', item: 'moonstone', into: 'nidoking' }],
-     [[8, 'hornattack'], [14, 'poisonsting'], [23, 'focusenergy'], [32, 'furyattack'], [41, 'horndrill'], [50, 'doublekick']],
+     [[1, 'leer'], [1, 'tackle'], [1, 'hornattack'], [8, 'hornattack'], [14, 'poisonsting'], [23, 'focusenergy'], [32, 'furyattack'], [41, 'horndrill'], [50, 'doublekick']],
      "The horn is harder than diamond drill bits, and it tests this on rocks constantly.",
      { catchRate: 120, expYield: 118, growth: MS });
 
   sp( 34, 'nidoking', 'Nidoking', ['poison', 'ground'], 'elusive', [ 81,  92,  77,  75,  85],
      null,
-     [[8, 'hornattack'], [14, 'poisonsting'], [23, 'thrash']],
+     [[1, 'tackle'], [1, 'hornattack'], [1, 'poisonsting'], [1, 'thrash'], [8, 'hornattack'], [14, 'poisonsting'], [23, 'thrash']],
      "One swing of that tail can snap a transmission tower. It is not a creature for cities.",
      { catchRate: 45, expYield: 195, growth: MS });
 
   sp( 35, 'clefairy', 'Clefairy', ['normal'], 'uncommon', [ 70,  45,  48,  60,  35],
      [{ how: 'stone', item: 'moonstone', into: 'clefable' }],
-     [[13, 'sing'], [18, 'doubleslap'], [24, 'minimize'], [31, 'metronome'], [39, 'defensecurl'], [48, 'lightscreen']],
+     [[1, 'pound'], [1, 'growl'], [13, 'sing'], [18, 'doubleslap'], [24, 'minimize'], [31, 'metronome'], [39, 'defensecurl'], [48, 'lightscreen']],
      "Sightings cluster around Mt. Moon on clear nights, which has never been satisfactorily explained.",
      { catchRate: 150, expYield: 68, growth: FA });
 
   sp( 36, 'clefable', 'Clefable', ['normal'], 'elusive', [ 95,  70,  73,  85,  60],
      null,
-     [],
+     [[1, 'sing'], [1, 'doubleslap'], [1, 'minimize'], [1, 'metronome']],
      "It hears a pin drop half a mile off, which is why almost nobody has ever seen one up close.",
      { catchRate: 25, expYield: 129, growth: FA });
 
   sp( 37, 'vulpix', 'Vulpix', ['fire'], 'common', [ 38,  41,  40,  65,  65],
      [{ how: 'stone', item: 'firestone', into: 'ninetales' }],
-     [[16, 'quickattack'], [21, 'roar'], [28, 'confuseray'], [35, 'flamethrower'], [42, 'firespin']],
+     [[1, 'ember'], [1, 'tailwhip'], [16, 'quickattack'], [21, 'roar'], [28, 'confuseray'], [35, 'flamethrower'], [42, 'firespin']],
      "It is born with one white tail that splits as it grows. Six is the usual end state.",
      { catchRate: 190, expYield: 63, growth: MF });
 
   sp( 38, 'ninetales', 'Ninetales', ['fire'], 'rare', [ 73,  76,  75, 100, 100],
      null,
-     [],
+     [[1, 'ember'], [1, 'tailwhip'], [1, 'quickattack'], [1, 'roar']],
      "Its eyes are unsettling to meet, and the old stories about grudges are told very seriously.",
      { catchRate: 75, expYield: 178, growth: MF });
 
   sp( 39, 'jigglypuff', 'Jigglypuff', ['normal'], 'uncommon', [115,  45,  20,  25,  20],
      [{ how: 'stone', item: 'moonstone', into: 'wigglytuff' }],
-     [[9, 'pound'], [14, 'disable'], [19, 'defensecurl'], [24, 'doubleslap'], [29, 'rest'], [34, 'bodyslam'], [39, 'doubleedge']],
+     [[1, 'sing'], [9, 'pound'], [14, 'disable'], [19, 'defensecurl'], [24, 'doubleslap'], [29, 'rest'], [34, 'bodyslam'], [39, 'doubleedge']],
      "It inflates its lungs to sing longer than anything listening can stay awake.",
      { catchRate: 170, expYield: 76, growth: FA });
 
   sp( 40, 'wigglytuff', 'Wigglytuff', ['normal'], 'elusive', [140,  70,  45,  50,  45],
      null,
-     [],
+     [[1, 'sing'], [1, 'disable'], [1, 'defensecurl'], [1, 'doubleslap']],
      "The fur is famously fine, and the creature is famously unwilling to let you touch it.",
      { catchRate: 50, expYield: 109, growth: FA });
 
   sp( 41, 'zubat', 'Zubat', ['poison', 'flying'], 'common', [ 40,  45,  35,  40,  55],
      [{ how: 'level', level: 22, into: 'golbat' }],
-     [[10, 'supersonic'], [15, 'bite'], [21, 'confuseray'], [28, 'wingattack'], [36, 'haze']],
+     [[1, 'leechlife'], [10, 'supersonic'], [15, 'bite'], [21, 'confuseray'], [28, 'wingattack'], [36, 'haze']],
      "It has no eyes at all. In daylight it is helpless, so it simply never goes out in it.",
      { catchRate: 255, expYield: 54, growth: MF });
 
   sp( 42, 'golbat', 'Golbat', ['poison', 'flying'], 'rare', [ 75,  80,  70,  75,  90],
      null,
-     [[10, 'supersonic'], [15, 'bite'], [21, 'confuseray'], [32, 'wingattack'], [43, 'haze']],
+     [[1, 'leechlife'], [1, 'screech'], [1, 'bite'], [10, 'supersonic'], [15, 'bite'], [21, 'confuseray'], [32, 'wingattack'], [43, 'haze']],
      "It drinks until it is too heavy to fly, then drops off and waddles away, which is worse.",
      { catchRate: 90, expYield: 171, growth: MF });
 
   sp( 43, 'oddish', 'Oddish', ['grass', 'poison'], 'common', [ 45,  50,  55,  75,  30],
      [{ how: 'level', level: 21, into: 'gloom' }],
-     [[15, 'poisonpowder'], [17, 'stunspore'], [19, 'sleeppowder'], [24, 'acid'], [33, 'petaldance'], [46, 'solarbeam']],
+     [[1, 'absorb'], [15, 'poisonpowder'], [17, 'stunspore'], [19, 'sleeppowder'], [24, 'acid'], [33, 'petaldance'], [46, 'solarbeam']],
      "It buries itself by day and walks on its roots at night, seeking richer soil.",
      { catchRate: 255, expYield: 78, growth: MS });
 
   sp( 44, 'gloom', 'Gloom', ['grass', 'poison'], 'uncommon', [ 60,  65,  70,  85,  40],
      [{ how: 'stone', item: 'leafstone', into: 'vileplume' }],
-     [[15, 'poisonpowder'], [17, 'stunspore'], [19, 'sleeppowder'], [28, 'acid'], [38, 'petaldance'], [52, 'solarbeam']],
+     [[1, 'absorb'], [1, 'poisonpowder'], [1, 'stunspore'], [15, 'poisonpowder'], [17, 'stunspore'], [19, 'sleeppowder'], [28, 'acid'], [38, 'petaldance'], [52, 'solarbeam']],
      "The smell carries two miles downwind. A small number of people insist they like it.",
      { catchRate: 120, expYield: 132, growth: MS });
 
   sp( 45, 'vileplume', 'Vileplume', ['grass', 'poison'], 'elusive', [ 75,  80,  85, 100,  50],
      null,
-     [[15, 'poisonpowder'], [17, 'stunspore'], [19, 'sleeppowder']],
+     [[1, 'stunspore'], [1, 'sleeppowder'], [1, 'acid'], [1, 'petaldance'], [15, 'poisonpowder'], [17, 'stunspore'], [19, 'sleeppowder']],
      "The largest petals in Kanto, and every one of them loaded with allergenic pollen.",
      { catchRate: 45, expYield: 184, growth: MS });
 
   sp( 46, 'paras', 'Paras', ['bug', 'grass'], 'common', [ 35,  70,  55,  55,  25],
      [{ how: 'level', level: 24, into: 'parasect' }],
-     [[13, 'stunspore'], [20, 'leechlife'], [27, 'spore'], [34, 'slash'], [41, 'growth']],
+     [[1, 'scratch'], [13, 'stunspore'], [20, 'leechlife'], [27, 'spore'], [34, 'slash'], [41, 'growth']],
      "The mushrooms are in charge. The bug is, increasingly, along for the ride.",
      { catchRate: 190, expYield: 70, growth: MF });
 
   sp( 47, 'parasect', 'Parasect', ['bug', 'grass'], 'rare', [ 60,  95,  80,  80,  30],
      null,
-     [[13, 'stunspore'], [20, 'leechlife'], [30, 'spore'], [39, 'slash'], [48, 'growth']],
+     [[1, 'scratch'], [1, 'stunspore'], [1, 'leechlife'], [13, 'stunspore'], [20, 'leechlife'], [30, 'spore'], [39, 'slash'], [48, 'growth']],
      "By this stage the fungus has won entirely, and what walks is the mushroom.",
      { catchRate: 75, expYield: 128, growth: MF });
 
   sp( 48, 'venonat', 'Venonat', ['bug', 'poison'], 'common', [ 60,  55,  50,  40,  45],
      [{ how: 'level', level: 31, into: 'venomoth' }],
-     [[24, 'poisonpowder'], [27, 'leechlife'], [30, 'stunspore'], [35, 'psybeam'], [38, 'sleeppowder'], [43, 'psychic']],
+     [[1, 'tackle'], [1, 'disable'], [24, 'poisonpowder'], [27, 'leechlife'], [30, 'stunspore'], [35, 'psybeam'], [38, 'sleeppowder'], [43, 'psychic']],
      "Those compound eyes see in the dark, which is when the insects it eats are out.",
      { catchRate: 190, expYield: 75, growth: MF });
 
   sp( 49, 'venomoth', 'Venomoth', ['bug', 'poison'], 'rare', [ 70,  65,  60,  90,  90],
      null,
-     [[24, 'poisonpowder'], [27, 'leechlife'], [30, 'stunspore'], [38, 'psybeam'], [43, 'sleeppowder'], [50, 'psychic']],
+     [[1, 'tackle'], [1, 'disable'], [1, 'poisonpowder'], [1, 'leechlife'], [24, 'poisonpowder'], [27, 'leechlife'], [30, 'stunspore'], [38, 'psybeam'], [43, 'sleeppowder'], [50, 'psychic']],
      "The scales it sheds are fine enough to hang in the air for an hour after it has gone.",
      { catchRate: 75, expYield: 138, growth: MF });
 
   sp( 50, 'diglett', 'Diglett', ['ground'], 'common', [ 10,  55,  25,  45,  95],
      [{ how: 'level', level: 26, into: 'dugtrio' }],
-     [[15, 'growl'], [19, 'dig'], [24, 'sandattack'], [31, 'slash'], [40, 'earthquake']],
+     [[1, 'scratch'], [15, 'growl'], [19, 'dig'], [24, 'sandattack'], [31, 'slash'], [40, 'earthquake']],
      "Nobody agrees on what is below the neck, because nobody has ever managed to see it.",
      { catchRate: 255, expYield: 81, growth: MF });
 })();

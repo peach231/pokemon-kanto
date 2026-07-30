@@ -78,7 +78,21 @@
     skn0: '#8a4a30', skn1: '#d08858', skn2: '#f0b888', skn3: '#fce0c0',
 
     // ice cyans
-    ice0: '#2a6a8e', ice1: '#5cb4cc', ice2: '#a0e0e8', ice3: '#e0f8f8'
+    ice0: '#2a6a8e', ice1: '#5cb4cc', ice2: '#a0e0e8', ice3: '#e0f8f8',
+
+    // ---- special interiors -----------------------------------------------
+    // Silph Co. / Power Plant / Rocket Hideout: industrial steel plate.
+    mtl0: '#1e222b', mtl1: '#333a47', mtl2: '#4a5464', mtl3: '#66738a', mtl4: '#8a97ad',
+    // Indigo Plateau marble. The end of the road should look expensive.
+    mrb0: '#5a5468', mrb1: '#8d879e', mrb2: '#b8b2c6', mrb3: '#d9d5e2',
+    // Mt. Moon limestone (warm) and Victory Road granite (cold).
+    lim0: '#241a14', lim1: '#3d2c20', lim2: '#584134', lim3: '#75594a', lim4: '#8f7160',
+    gra0: '#141420', gra1: '#242436', gra2: '#38384e', gra3: '#4e4e68', gra4: '#6a6a86',
+    // Indoor floorboards and plaster.
+    wud0: '#9a7a54', wud1: '#b8946c', wud2: '#cfae86',
+    pls0: '#5c6a86', pls1: '#7d8aa6', pls2: '#9daac4',
+    // Gym floor.
+    gfl0: '#4a5568', gfl1: '#5f6d84', gfl2: '#77879e'
   };
 
   // UI text colors (GBA convention: dark gray text, light gray drop shadow).

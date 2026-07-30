@@ -162,6 +162,14 @@ function parseBaseStats(text, fileKey) {
       out.hp = +m[1]; out.atk = +m[2]; out.def = +m[3]; out.spe = +m[4]; out.spc = +m[5];
       continue;
     }
+    // The LEVEL-1 learnset lives here, not in evos_moves.asm — that file only
+    // lists moves learned above level 1. Four move constants, NO_MOVE padding
+    // for unused slots. Missing this is why every species came out with an
+    // empty starting moveset.
+    if ((m = l.match(/^db\s+([A-Z0-9_]+),\s*([A-Z0-9_]+),\s*([A-Z0-9_]+),\s*([A-Z0-9_]+)$/))) {
+      out.startMoves = [m[1], m[2], m[3], m[4]].filter(function (k) { return k !== 'NO_MOVE'; });
+      continue;
+    }
     if ((m = l.match(/^db\s+([A-Z_]+),\s*([A-Z_]+)$/)) && !out.types) {
       const t1 = typeId(m[1]), t2 = typeId(m[2]);
       out.types = t1 === t2 ? [t1] : [t1, t2];
@@ -306,8 +314,15 @@ async function load() {
   const evos = parseEvosMoves(await raw('data/pokemon/evos_moves.asm'), moveByConst);
   for (const key of dexOrder) {
     const e = evos[key] || { evos: [], learnset: [] };
-    species[key].evos = e.evos;
-    species[key].learnset = e.learnset;
+    const s = species[key];
+    s.evos = e.evos;
+    // Level-1 moves from base_stats first, then the level-up list.
+    const start = (s.startMoves || [])
+      .map(c => moveByConst[c])
+      .filter(Boolean)
+      .map(mv => [1, mv.key]);
+    s.learnset = start.concat(e.learnset);
+    if (!s.learnset.length) throw new Error(`${key} has no moves at all`);
   }
 
   return { moves, chart, dexOrder, species, moveByConst };

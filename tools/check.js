@@ -123,8 +123,12 @@ for (const id in (G.MAPS || {})) {
   for (const npc of (m.npcs || [])) {
     // creature sprites (mon_*) load as IMAGE files at runtime, not baked art
     if (npc.sprite && npc.sprite.indexOf('mon_') === 0) continue;
-    if (npc.sprite && G.ART && !G.ART['ch_' + npc.sprite + '_d0'] && !G.ART[npc.sprite]) {
-      warn.push(`MAP ${id}: npc sprite '${npc.sprite}' has no art yet`);
+    // Overworld characters stream from pret/pokefirered at runtime (see
+    // OVERWORLD_CFG.sheets), so baked art is only the fallback. Flag a sprite
+    // ONLY when neither source can supply it -- that is a real missing NPC.
+    const streamed = G.OVERWORLD_CFG && G.OVERWORLD_CFG.sheets && G.OVERWORLD_CFG.sheets[npc.sprite];
+    if (npc.sprite && !streamed && G.ART && !G.ART['ch_' + npc.sprite + '_d0'] && !G.ART[npc.sprite]) {
+      errors.push(`MAP ${id}: npc sprite '${npc.sprite}' has no art AND no stream source`);
     }
   }
   // encounter-table species must be in the roster
@@ -174,28 +178,35 @@ if (G.SPECIES) {
     if (!s.learnset.some(e => e[0] === 1)) errors.push(`SPECIES ${id}: no level-1 move`);
     if (s.growth && G.EXP_GROUPS && !G.EXP_GROUPS[s.growth]) errors.push(`SPECIES ${id}: unknown growth group '${s.growth}'`);
     const bst = Object.values(s.base).reduce((a, b) => a + b, 0);
-    const bands = { common: [170, 540], uncommon: [200, 560], rare: [220, 680], elusive: [240, 600], legendary: [560, 700], starter: [300, 540] };
+    const bands = { common: [140, 540], uncommon: [180, 560], rare: [200, 680], elusive: [200, 620], legendary: [560, 780], starter: [290, 540] };
     const band = bands[s.rarity];
     if (band && (bst < band[0] || bst > band[1])) warn.push(`SPECIES ${id}: BST ${bst} outside ${s.rarity} band [${band}]`);
   }
 }
 
-// --- Gen 3 type-chart sanity ---
+// --- Gen 1 type-chart sanity ---
+// Fifteen types. Dark, Steel and Fairy do not exist. The two mutual Bug/Poison
+// matchups and Psychic's near-invulnerability are the signature of the era, so
+// they are asserted rather than merely tolerated.
 if (G.TYPE_ORDER) {
-  if (G.TYPE_ORDER.length !== 17) errors.push(`TYPES: expected 17 types, got ${G.TYPE_ORDER.length}`);
-  if (G.TYPE_ORDER.includes('fairy')) errors.push('TYPES: fairy must not exist in Gen 3');
-  if (G.typeEff('ghost', ['steel']) !== 0.5) errors.push('TYPES: Steel should resist Ghost in Gen 3');
-  if (G.typeEff('dark', ['steel']) !== 0.5) errors.push('TYPES: Steel should resist Dark in Gen 3');
+  if (G.TYPE_ORDER.length !== 15) errors.push(`TYPES: expected 15 types, got ${G.TYPE_ORDER.length}`);
+  for (const gone of ['dark', 'steel', 'fairy']) {
+    if (G.TYPE_ORDER.includes(gone)) errors.push(`TYPES: ${gone} must not exist in Gen 1`);
+  }
+  if (G.typeEff('bug', ['poison']) !== 2) errors.push('TYPES: Bug should be 2x on Poison in Gen 1');
+  if (G.typeEff('poison', ['bug']) !== 2) errors.push('TYPES: Poison should be 2x on Bug in Gen 1');
+  if (G.typeEff('ice', ['fire']) !== 1) errors.push('TYPES: Ice is NEUTRAL against Fire in Gen 1');
+  // Deliberately un-bugged: the ROM shipped this as 0x.
+  if (G.typeEff('ghost', ['psychic']) !== 2) errors.push('TYPES: Ghost -> Psychic should be 2x (our fix)');
 }
 
 // --- trainer integrity (resolve _starter*; party species + moves valid) ---
-const STARTER_KEYS = ['treecko', 'torchic', 'mudkip', 'grovyle', 'combusken', 'marshtomp', 'sceptile', 'blaziken', 'swampert'];
+// Blue's party placeholders resolve at battle time to the line that counters
+// the player's starter; for validation any concrete stage will do.
 function resolveStarter(key) {
-  if (key === '_starter') return 'treecko';
-  if (key === '_starter2') return 'grovyle';
-  if (key === '_starter3') return 'sceptile';
-  if (key === '_otherlegend') return 'kyogre'; // resolves to the uncaught titan in-game
-  if (key === '_weathertrio') return 'rayquaza'; // resolves to a random rare/legend in-game
+  if (key === '_starter') return 'charmander';
+  if (key === '_starter2') return 'charmeleon';
+  if (key === '_starter3') return 'charizard';
   return key;
 }
 for (const tid in (G.TRAINERS || {})) {

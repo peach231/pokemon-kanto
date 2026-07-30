@@ -256,7 +256,7 @@
   // Beach sand. It has to be unmistakable against the dirt path, which is a
   // similar tan — so sand is a step LIGHTER, and carries wind ripples rather
   // than the path's compacted ruts.
-  var SA = { a: C.tan0, b: C.tan1, c: '#fdf1cf', d: C.brn3 };
+  var SA = { a: C.tan0, b: C.tan1, c: C.white, d: C.brn3 };
   T('t_sand', SA, [
     'bbbbbbbbbbbbbbbb',
     'bccbbbbbbbccbbbb',
@@ -294,7 +294,7 @@
   }
   water('t_water1', 0); water('t_water2', 3); water('t_water3', 6); water('t_water4', 9);
 
-  var DW = { a: C.blu0, b: '#12294d', c: C.blu1, d: C.blu2 };
+  var DW = { a: C.blu0, b: C.gra1, c: C.blu1, d: C.blu2 };
   function deep(name, off) {
     var rows = [];
     for (var y = 0; y < 16; y++) {
@@ -766,8 +766,8 @@
   ]);
 
   // ========================================================== INTERIORS =====
-  var WOOD = '#b8946c';
-  var IF = { a: '#9a7a54', b: WOOD, c: '#cfae86' };
+  var WOOD = C.wud1;
+  var IF = { a: C.wud0, b: WOOD, c: C.wud2 };
   T('t_ifloor', IF, [
     'bbbbbbbbbbbbbbbb', 'bcbbbbbbbbbbbbcb', 'bbbbbbbbbbbbbbbb',
     fill('a'), 'bbbbbbbbbbbbbbbb', 'bbbbbbcbbbbbbbbb',
@@ -776,7 +776,7 @@
     'bbbbbbbbbbbbbbbb', 'bbbbbbbbcbbbbbbb', 'bbbbbbbbbbbbbbbb',
     fill('a')
   ]);
-  T('t_iwall', { a: '#5c6a86', b: '#7d8aa6', c: '#9daac4', o: C.ink }, [
+  T('t_iwall', { a: C.pls0, b: C.pls1, c: C.pls2, o: C.ink }, [
     fill('c'), fill('b'), fill('b'), fill('b'), fill('a'), fill('b'),
     fill('b'), fill('b'), fill('a'), fill('b'), fill('b'), fill('b'),
     fill('a'), fill('b'), fill('b'), fill('o')
@@ -862,7 +862,7 @@
     'obbbbbbbbbbbbbbo', 'obbbbbbbbbbbbbbo', 'oaaaaaaaaaaaaaao',
     fill('o')
   ]);
-  T('t_gfloor', { a: '#4a5568', b: '#5f6d84', c: '#77879e' }, [
+  T('t_gfloor', { a: C.gfl0, b: C.gfl1, c: C.gfl2 }, [
     fill('c'), 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
     'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
     'bbbbbbbbbbbbbbba', fill('a'), fill('c'),
@@ -878,7 +878,7 @@
     'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'yaaaaaaaaaaaaaay',
     fill('y')
   ]);
-  T('t_statue', { o: C.ink, a: C.stn1, b: C.stn2, c: C.stn3, f: '#77879e' }, [
+  T('t_statue', { o: C.ink, a: C.stn1, b: C.stn2, c: C.stn3, f: C.gfl2 }, [
     fill('f'), 'ffffffooooffffff', 'fffffocccbofffff',
     'fffffocbcbofffff', 'fffffobbbbofffff', 'ffffoobbbbooffff',
     'ffffocbbbbcoffff', 'ffffocbbbbcoffff', 'ffffoabbbbaoffff',
@@ -917,8 +917,8 @@
       fill('o')
     ]);
   }
-  var CV  = { o: '#241a14', a: '#3d2c20', b: '#584134', c: '#75594a', d: '#8f7160' };
-  var GRA = { o: '#141420', a: '#242436', b: '#38384e', c: '#4e4e68', d: '#6a6a86' };
+  var CV  = { o: C.lim0, a: C.lim1, b: C.lim2, c: C.lim3, d: C.lim4 };
+  var GRA = { o: C.gra0, a: C.gra1, b: C.gra2, c: C.gra3, d: C.gra4 };
   var IC  = { o: C.ice0, a: C.ice1, b: C.ice2, c: C.ice3, d: C.white };
 
   caveFloor('t_cavefloor', CV);   caveWall('t_cavewall', CV);
@@ -929,7 +929,7 @@
 
   // ==================================================== SPECIAL INTERIORS ===
   // Pokemon Tower — cold violet stone. Lavender's tower should feel wrong.
-  var TW = { o: C.twr0, a: C.twr1, b: C.twr2, c: '#8f74aa', w: C.pale };
+  var TW = { o: C.twr0, a: C.twr1, b: C.twr2, c: C.pur3, w: C.pale };
   T('t_towerfloor', TW, [
     fill('a'), 'abaaaaaaaabaaaaa', 'aaaaaaaaaaaaaaaa',
     fill('o'), fill('a'), 'aaaabaaaaaaaabaa',
@@ -955,7 +955,7 @@
   ]);
 
   // Silph Co. / Power Plant / Rocket Hideout — industrial steel plate.
-  var MT = { o: '#1e222b', a: '#333a47', b: '#4a5464', c: '#66738a', d: '#8a97ad' };
+  var MT = { o: C.mtl0, a: C.mtl1, b: C.mtl2, c: C.mtl3, d: C.mtl4 };
   T('t_metalfloor', MT, [
     fill('d'), 'dbbbbbbbdbbbbbbd', 'dbccccccdbccccbd',
     'dbcbbbbcdbcbbcbd', 'dbcbbbbcdbcbbcbd', 'dbccccccdbccccbd',
@@ -974,7 +974,7 @@
   ]);
 
   // Indigo Plateau — pale marble. The end of the road should look expensive.
-  var MB = { o: '#5a5468', a: '#8d879e', b: '#b8b2c6', c: '#d9d5e2', w: C.white };
+  var MB = { o: C.mrb0, a: C.mrb1, b: C.mrb2, c: C.mrb3, w: C.white };
   T('t_marble', MB, [
     fill('c'), 'cbccccccccccccbc', 'ccccccbccccccccc',
     fill('o'), fill('c'), 'ccccbccccccbcccc',
