@@ -430,13 +430,45 @@
     };
   };
 
+  // Key items mostly just describe themselves, but a few DO something when
+  // used from the bag. Returning a string replaces the default description.
+  function useKeyItem(id) {
+    if (id === 'townmap') { G.pushScene(G.RegionMapScene()); return ' '; }
+    if (id === 'pokeflute') {
+      // Out of battle the flute is a story object; it wakes exactly one thing.
+      return 'You played the POKé FLUTE. The melody drifts away over the rooftops.';
+    }
+    if (id === 'itemfinder') {
+      return 'The ITEM FINDER hums flatly. Nothing is buried here.';
+    }
+    if (id === 'coincase') {
+      return 'COIN CASE: ' + (G.player.coins || 0) + ' coins.';
+    }
+    if (id === 'bicycle') {
+      if (G.world.map && G.world.map.indoors) return 'No cycling indoors.';
+      G.player.onBike = !G.player.onBike;
+      return G.player.onBike ? 'You got on the BICYCLE.' : 'You folded up the BICYCLE.';
+    }
+    return null;
+  }
+
   // -------------------------------------------------------------- bag screen --
   G.BagScene = function () {
+    // Gen 1 had one flat bag of twenty slots, which was agony. This keeps one
+    // list but ORDERS it into pockets — usables, then machines, then key items
+    // — so the thing you reach for most is never buried under thirty TMs.
+    var POCKET = { heal: 0, cure: 0, revive: 0, ball: 1, repel: 2, escape: 2, stone: 2, tm: 3, key: 4 };
     function usable() {
       var list = [];
       for (var id in G.player.bag) {
-        if (G.player.bag[id] > 0) list.push(id);
+        if (G.player.bag[id] > 0 && G.ITEMS[id]) list.push(id);
       }
+      list.sort(function (a, b) {
+        var pa = POCKET[G.ITEMS[a].kind], pb = POCKET[G.ITEMS[b].kind];
+        pa = pa === undefined ? 5 : pa; pb = pb === undefined ? 5 : pb;
+        if (pa !== pb) return pa - pb;
+        return G.ITEMS[a].name < G.ITEMS[b].name ? -1 : 1;
+      });
       return list;
     }
     return {
@@ -454,7 +486,11 @@
           G.audio.sfx('confirm');
           var id = ids[this.sel];
           var item = G.ITEMS[id];
-          if (item.kind === 'orb') {
+          if (item.kind === 'tm') {
+            G.teachMachine(id);
+          } else if (item.kind === 'key') {
+            G.pushScene(G.Textbox(useKeyItem(id) || item.desc));
+          } else if (item.kind === 'orb') {
             G.pushScene(G.Textbox('Better saved for a wild battle!'));
           } else if (item.kind === 'repel') {
             G.player.bag[id]--;
@@ -542,7 +578,7 @@
     };
   };
 
-  // --------------------------------------------------- Birch's Lab storage PC --
+  // ------------------------------------------------- Bill's PC storage system --
   // Two columns: PARTY (left, max 6) and LAB box (right, scrollable). Z transfers
   // the highlighted creature across; the party can never drop below 1 or exceed 6.
   G.PCScene = function () {
@@ -551,7 +587,7 @@
       opaque: true,
       col: 0,        // 0 = party, 1 = box
       pSel: 0, bSel: 0, bTop: 0,
-      msg: 'Move creatures between your party and the Lab.',
+      msg: "Move POKéMON between your party and BILL's PC.",
       _list: function () { return this.col === 0 ? G.player.party : G.player.box; },
       _sel: function () { return this.col === 0 ? this.pSel : this.bSel; },
       _setSel: function (v) { if (this.col === 0) this.pSel = v; else this.bSel = v; },
@@ -841,6 +877,17 @@
         if (G.input.justPressed('B') || G.input.justPressed('start')) { G.audio.sfx('cancel'); G.popScene(); return; }
         if (G.input.repeat('right') || G.input.repeat('down')) { this.sel = (this.sel + 1) % NODES.length; G.audio.sfx('menuMove'); }
         if (G.input.repeat('left') || G.input.repeat('up')) { this.sel = (this.sel + NODES.length - 1) % NODES.length; G.audio.sfx('menuMove'); }
+        // FLY. Only to towns you have actually stood in — flying somewhere you
+        // have only read about on a map would hand you the geography.
+        if (G.input.justPressed('A')) {
+          var node = NODES[this.sel];
+          var pt = G.FLY_POINTS && G.FLY_POINTS[node.id];
+          if (!pt) { G.audio.sfx('cancel'); return; }
+          if (!isSeen(node.id)) { G.audio.sfx('cancel'); G.pushScene(G.Textbox('You have never been to ' + node.label + '.')); return; }
+          if (!G.canFly()) { G.audio.sfx('cancel'); return; }
+          if (G.world.map && G.world.map.indoors) { G.audio.sfx('cancel'); G.pushScene(G.Textbox('There is no room to FLY indoors.')); return; }
+          G.ask('FLY to ' + node.label + '?', function () { G.flyTo(node.id); });
+        }
       },
       draw: function (ctx) {
         // ---- pixel-art helpers (crisp fillRect blocks, no anti-aliasing) ----
@@ -940,7 +987,9 @@
         G.text(ctx, seenSel ? sNode.label : '? ? ? (unexplored)', 8, H - 23, seenSel ? G.UI.text : G.C.gry, G.UI.textShadow);
         if (this.sel === cur) G.text(ctx, 'You are here.', 150, H - 23, G.UI.hpGreen, G.UI.textShadow);
         G.text(ctx, 'Explored ' + seenCount + '/' + NODES.length, 8, H - 12, G.C.lgry);
-        G.text(ctx, '<>: move   X: back', W - 110, H - 12, G.C.lgry);
+        var flyable = G.canFly && G.canFly() && G.FLY_POINTS[sNode.id] && seenSel;
+        G.text(ctx, flyable ? 'Z: FLY   X: back' : '<>: move   X: back', W - 110, H - 12,
+          flyable ? '#f8e878' : G.C.lgry);
       }
     };
   };

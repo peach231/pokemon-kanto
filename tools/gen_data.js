@@ -37,6 +37,24 @@ const CHART_FIXES = {
 };
 
 // Gen 1 decides physical/special by TYPE, not per-move.
+// TM/HM move order, from the add_hm/add_tm macro calls in
+// constants/item_constants.asm. HMs come FIRST in the item table even though
+// they are numbered after the TMs, which is why the compatibility bitfield in
+// base_stats reads in this order.
+const TM_HM_ORDER = [
+  'CUT', 'FLY', 'SURF', 'STRENGTH', 'FLASH',
+  'MEGA_PUNCH', 'RAZOR_WIND', 'SWORDS_DANCE', 'WHIRLWIND', 'MEGA_KICK',
+  'TOXIC', 'HORN_DRILL', 'BODY_SLAM', 'TAKE_DOWN', 'DOUBLE_EDGE',
+  'BUBBLEBEAM', 'WATER_GUN', 'ICE_BEAM', 'BLIZZARD', 'HYPER_BEAM',
+  'PAY_DAY', 'SUBMISSION', 'COUNTER', 'SEISMIC_TOSS', 'RAGE',
+  'MEGA_DRAIN', 'SOLARBEAM', 'DRAGON_RAGE', 'THUNDERBOLT', 'THUNDER',
+  'EARTHQUAKE', 'FISSURE', 'DIG', 'PSYCHIC_M', 'TELEPORT',
+  'MIMIC', 'DOUBLE_TEAM', 'REFLECT', 'BIDE', 'METRONOME',
+  'SELFDESTRUCT', 'EGG_BOMB', 'FIRE_BLAST', 'SWIFT', 'SKULL_BASH',
+  'SOFTBOILED', 'DREAM_EATER', 'SKY_ATTACK', 'REST', 'THUNDER_WAVE',
+  'PSYWAVE', 'EXPLOSION', 'ROCK_SLIDE', 'TRI_ATTACK', 'SUBSTITUTE'
+];
+
 const PHYS_TYPES = ['normal', 'fighting', 'flying', 'poison', 'ground', 'rock', 'bug', 'ghost'];
 
 function emitTypes(chart) {
@@ -396,6 +414,75 @@ ${rows.join(',\n')}
 `;
 }
 
+// ========================================================== TMs and HMs ====
+
+// The 50 TMs and 5 HMs, in ROM order, and per-species compatibility straight
+// from the `tmhm` line in each base_stats file. Nothing here is invented: if
+// Red/Blue let a Gastly learn MEGA DRAIN, so do we.
+//
+// TMs are SINGLE USE, as they were in Gen 1 — the whole reason a TM felt like
+// treasure. HMs are permanent and cannot be forgotten.
+function emitTms(species, dexOrder) {
+  // PSYCHIC_M is the ROM's disambiguation between the MOVE and PSYCHIC_TYPE.
+  // Mechanically renaming it would give us a move called "psychicm" that no
+  // species learnset ever references.
+  const CONST_FIX = { PSYCHIC_M: 'psychic' };
+  const list = TM_HM_ORDER.map((c, i) => {
+    const id = i < 5 ? 'hm0' + (i + 1) : 'tm' + String(i - 4).padStart(2, '0');
+    return { id: id, move: CONST_FIX[c] || pokered.moveKey(c), constant: c };
+  });
+
+  const compat = dexOrder.map(key => {
+    const s = species[key];
+    // Mew's row ends in UNUSED — the ROM pads its bitfield out to a whole
+    // byte and the assembler needs a name for the spare bit. It is not a move.
+    const learn = (s.tms || []).filter(c => c !== 'UNUSED').map(c => {
+      const hit = list.find(e => e.constant === c);
+      if (!hit) throw new Error(`${key} lists TM/HM move ${c}, which is not in the TM table`);
+      return hit.id;
+    });
+    return `    ${key}: ${JSON.stringify(learn).replace(/","/g, "', '").replace(/^\["/, "['").replace(/"\]$/, "']").replace(/^\[\]$/, '[]')}`;
+  }).join(',\n');
+
+  return HEAD + `// pokemon-kanto — tms.js
+// The 50 TMs and 5 HMs of Kanto, and which species can learn each.
+//
+// Gen 1 rules, kept deliberately:
+//   * a TM is CONSUMED when it is used, so every one is a real decision
+//   * an HM is permanent, reusable, and its move cannot be forgotten
+//   * compatibility is the ROM's own table, quirks included — Mr. Mime learns
+//     THUNDERBOLT, Charizard never learns a FLYING move worth the name
+
+(function () {
+  G.TM_MOVES = {
+${list.map(e => `    ${e.id}: ${q(e.move)}`).join(',\n')}
+  };
+
+  // Field moves. The badge requirement is Gen 1's own: you cannot SURF into
+  // deep water on the strength of an HM alone, the region has to decide you
+  // are allowed to.
+  G.FIELD_MOVES = {
+    cut:      { hm: 'hm01', move: 'cut',      badge: 'badge2', badgeName: 'CASCADE BADGE' },
+    fly:      { hm: 'hm02', move: 'fly',      badge: 'badge3', badgeName: 'THUNDER BADGE' },
+    surf:     { hm: 'hm03', move: 'surf',     badge: 'badge5', badgeName: 'SOUL BADGE' },
+    strength: { hm: 'hm04', move: 'strength', badge: 'badge4', badgeName: 'RAINBOW BADGE' },
+    flash:    { hm: 'hm05', move: 'flash',    badge: 'badge1', badgeName: 'BOULDER BADGE' }
+  };
+
+  G.TM_COMPAT = {
+${compat}
+  };
+
+  G.canLearnTm = function (mon, tmId) {
+    var sp = mon && G.SPECIES[mon.species];
+    if (!sp) return false;
+    var list = G.TM_COMPAT[mon.species] || [];
+    return list.indexOf(tmId) !== -1;
+  };
+})();
+`;
+}
+
 // ================================================================= main ====
 
 async function main() {
@@ -414,6 +501,7 @@ async function main() {
   write('species_051_100.js', emitSpeciesChunk(d.dexOrder.slice(50, 100), d.species, 51, 100));
   write('species_101_151.js', emitSpeciesChunk(d.dexOrder.slice(100, 151), d.species, 101, 151));
   write('kanto_dex.js', emitDex(d.dexOrder));
+  write('tms.js', emitTms(d.species, d.dexOrder));
 
   const wild = await pokered.loadWild([...new Set(Object.values(WILD_MAPS))]);
   write('encounters.js', emitEncounters(wild));

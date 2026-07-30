@@ -84,4 +84,23 @@
   item('helixfossil', 'Helix Fossil', 0, 'key', {}, 'A fossilised spiral shell. Very, very old.');
   item('oldamber',    'Old Amber',    0, 'key', {}, 'Amber with something ancient sealed inside it.');
   item('coincase',    'Coin Case',    0, 'key', {}, 'A case for GAME CORNER coins.');
+
+  // -------------------------------------------------------- TMs and HMs ----
+  // Built from the generated TM table so the two can never drift apart. A TM
+  // is consumed on use — which is why the Game Corner's TM prizes and the ones
+  // lying on the floor of Silph Co. are worth crossing a city for. HMs are
+  // permanent, and their price is a party slot rather than money.
+  //
+  // Prices follow the Gen 1 mart lists: the four TMs actually sold in Celadon's
+  // department store are priced, and the rest are unsellable finds.
+  var TM_PRICE = { tm09: 2000, tm10: 4000, tm11: 3000, tm17: 2000, tm18: 3000,
+                   tm20: 1000, tm22: 3000, tm31: 4000, tm32: 1000, tm33: 4000,
+                   tm34: 4000, tm40: 2000, tm44: 3000 };
+  for (var tid in G.TM_MOVES) {
+    var mv = G.MOVES[G.TM_MOVES[tid]];
+    var isHm = tid.indexOf('hm') === 0;
+    item(tid, tid.toUpperCase(), TM_PRICE[tid] || 0, 'tm', { move: G.TM_MOVES[tid], hm: isHm },
+      (isHm ? 'HM' : 'TM') + ' — teaches ' + mv.name.toUpperCase() + '. ' +
+      (isHm ? 'Reusable, and the move cannot be forgotten.' : 'It breaks after one use.'));
+  }
 })();

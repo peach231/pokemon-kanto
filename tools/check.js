@@ -293,6 +293,61 @@ if (G.SPECIES) {
   console.log(`  items: ${granted.size} obtainable`);
 }
 
+// --- HMs and field moves ---
+// Kanto is gated on the five HMs more than on the eight badges. An HM that
+// nothing in the world hands out is not a missing item, it is a region that
+// cannot be finished — so this is an ERROR, not a warning.
+{
+  const granted = new Set();
+  for (const eid in (G.EVENTS || {})) {
+    const src = String(G.EVENTS[eid]);
+    for (const mt of src.matchAll(/bag\.([A-Za-z_$][\w$]*)\s*=/g)) granted.add(mt[1]);
+    for (const mt of src.matchAll(/bag\[['"]([^'"]+)['"]\]/g)) granted.add(mt[1]);
+    for (const mt of src.matchAll(/give\w*\(\s*['"]([^'"]+)['"]/g)) granted.add(mt[1]);
+  }
+  for (const id in G.MAPS) {
+    for (const it of (G.MAPS[id].items || [])) granted.add(it.item);
+    for (const sid of (G.MAPS[id].shopInventory || [])) granted.add(sid);
+  }
+  for (const kind in (G.FIELD_MOVES || {})) {
+    const f = G.FIELD_MOVES[kind];
+    if (!G.ITEMS[f.hm]) errors.push(`FIELD MOVE ${kind}: item '${f.hm}' does not exist`);
+    if (!G.MOVES[f.move]) errors.push(`FIELD MOVE ${kind}: move '${f.move}' does not exist`);
+    if (!granted.has(f.hm)) errors.push(`FIELD MOVE ${kind}: nothing in the world gives ${f.hm.toUpperCase()} — the region cannot be completed`);
+  }
+  // A tile flagged cut/strength/water is only passable if the matching HM
+  // exists; and every TM the compatibility table names must be a real machine.
+  for (const key in (G.TM_COMPAT || {})) {
+    for (const tm of G.TM_COMPAT[key]) {
+      if (!G.TM_MOVES[tm]) { errors.push(`TM_COMPAT ${key}: unknown machine '${tm}'`); break; }
+    }
+  }
+  const learnable = new Set();
+  for (const key in (G.TM_COMPAT || {})) for (const tm of G.TM_COMPAT[key]) learnable.add(tm);
+  for (const tm in (G.TM_MOVES || {})) {
+    if (!learnable.has(tm)) warn.push(`${tm.toUpperCase()} (${G.TM_MOVES[tm]}) can be learned by NOTHING`);
+  }
+  console.log(`  HMs: ${Object.keys(G.FIELD_MOVES || {}).length} field moves, all obtainable; ${Object.keys(G.TM_MOVES || {}).length} machines`);
+}
+
+// --- fly destinations ---
+{
+  for (const id in (G.FLY_POINTS || {})) {
+    const pt = G.FLY_POINTS[id];
+    const m = G.MAPS[pt.map];
+    if (!m) { errors.push(`FLY POINT ${id}: map '${pt.map}' does not exist`); continue; }
+    if (pt.x < 0 || pt.y < 0 || pt.x >= m.w || pt.y >= m.h) {
+      errors.push(`FLY POINT ${id}: (${pt.x},${pt.y}) is outside ${pt.map} (${m.w}x${m.h})`);
+      continue;
+    }
+    const name = (m.deco && m.deco[pt.y][pt.x] !== '.' ? m.legend[m.deco[pt.y][pt.x]] : null) ||
+                 m.legend[m.ground[pt.y][pt.x]] || m.base;
+    const def = G.TILES[name];
+    if (!def || def.solid) errors.push(`FLY POINT ${id}: lands on '${name}', which is solid`);
+  }
+  console.log(`  fly: ${Object.keys(G.FLY_POINTS || {}).length} destinations, all landable`);
+}
+
 // --- map grid overflow ---
 // padRows records any map given more rows than its declared height (the extras
 // are silently dropped, along with anything on them) or rows wider than its

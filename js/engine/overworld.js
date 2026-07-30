@@ -149,6 +149,27 @@
     }
   }
 
+  // Tile-blocky cave darkness. `radius` is in TILES: 1 without FLASH, 3 with.
+  // Drawn as full-alpha black outside the lit ring and a single dim band on
+  // its edge, so the boundary is a visible staircase of squares.
+  function drawDarkness(ctx, cam, radius) {
+    var TILEPX = 16;
+    var p = G.world.player;
+    var px = G.world.pixelPos(p);
+    var cx = Math.floor((px.x + 8) / TILEPX), cy = Math.floor((px.y + 8) / TILEPX);
+    var x0 = Math.floor(cam.x / TILEPX) - 1, y0 = Math.floor(cam.y / TILEPX) - 1;
+    var x1 = x0 + Math.ceil(G.SCREEN_W / TILEPX) + 2, y1 = y0 + Math.ceil(G.SCREEN_H / TILEPX) + 2;
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        var dx = Math.abs(x - cx), dy = Math.abs(y - cy);
+        var d = Math.max(dx, dy);
+        if (d <= radius - 1) continue;
+        ctx.fillStyle = (d === radius) ? 'rgba(8,8,16,0.55)' : 'rgba(8,8,16,0.97)';
+        ctx.fillRect(x * TILEPX - cam.x, y * TILEPX - cam.y, TILEPX, TILEPX);
+      }
+    }
+  }
+
   G.world = {
     mapId: null, map: null,
     player: makeActor('player', 0, 0, 'down'),
@@ -186,6 +207,14 @@
     tileNameAt: function (layer, x, y) {
       var map = this.map;
       if (x < 0 || y < 0 || x >= map.w || y >= map.h) return null;
+      // HM edits (a felled tree, a shoved boulder) sit on top of the map data
+      // rather than in it — see field.js for why. An edited tile replaces the
+      // GROUND and clears whatever decoration was standing on it, so cutting a
+      // tree does not leave its canopy hanging in the air.
+      if (G.tileEditAt) {
+        var edit = G.tileEditAt(this.mapId, x, y);
+        if (edit) return layer === 'ground' ? edit : null;
+      }
       var rows = map[layer];
       if (!rows) return null;
       var ch = rows[y][x];
@@ -198,6 +227,13 @@
       // deco overrides ground for gameplay properties
       var name = this.tileNameAt('deco', x, y) || this.tileNameAt('ground', x, y);
       return name ? G.TILES[name] : null;
+    },
+
+    // Called after an HM changes the map. The renderer reads the grid every
+    // frame, so there is no cache to bust — but callers should not have to
+    // know that, and a decorated map may need its scenery re-scattered.
+    refreshTiles: function () {
+      if (this.map && G.decorateMap) G.decorateMap(this.map);
     },
 
     npcAt: function (x, y) {
@@ -357,6 +393,12 @@
       var blocked = (p.vehicle && destWater)
         ? ((nx < 0 || ny < 0 || nx >= w.map.w || ny >= w.map.h) || !!w.npcAt(nx, ny) || !!w.itemAt(nx, ny))
         : w.isBlocked(nx, ny);
+      // Walking into a boulder with STRENGTH switched on shoves it one tile
+      // and you follow it in — one press, one push, the way Gen 1 does it.
+      if (blocked && destDef && destDef.strength && G.pushBoulder &&
+          G.pushBoulder(nx, ny, d.dx, d.dy)) {
+        blocked = false;
+      }
       if (blocked) {
         if (!p.bumpCool) {
           G.audio.sfx('bump');
@@ -568,24 +610,30 @@
         return;
       }
 
-      // water's edge: from the BEACH you can swim out, or fish with a rod.
-      // (No fishing while already swimming — you must cast from shore.)
+      // ---- HM obstacles ----
+      // Facing one of these is the whole gating system of Kanto: a tree, a
+      // boulder or a stretch of water is a locked door, and the key is an HM
+      // plus the badge that licenses it.
       var fdef = w.tileDefAt(fx, fy);
+      if (fdef && fdef.cut && G.tryCut) { G.tryCut(fx, fy); return; }
+      if (fdef && fdef.strength && G.tryStrength) { G.tryStrength(fx, fy); return; }
+
+      // water's edge: SURF across it, or fish from the bank with a rod.
+      // (No fishing while already surfing — you must cast from shore.)
       if (fdef && fdef.water && !p.vehicle) {
-        var rod = G.player.bag && G.player.bag.fishingrod;
-        var dive = function () {
-          p.vehicle = 'swim';
-          p.fromX = p.x; p.fromY = p.y; p.x = fx; p.y = fy;
-          p.moving = true; p.step = 0; p.stride = !p.stride;
-          G.audio.sfx('confirm');
-        };
-        if (rod) {
+        var rods = ['superrod', 'goodrod', 'oldrod'].filter(function (r) {
+          return G.player.bag && G.player.bag[r];
+        });
+        if (rods.length) {
           G.pushScene(G.Chooser({
-            items: ['Swim', 'Fish', 'Cancel'], cancelIndex: 2,
-            onPick: function (i) { if (i === 0) dive(); else if (i === 1) G.fish(w.map); }
+            items: ['Surf', 'Fish', 'Cancel'], cancelIndex: 2,
+            onPick: function (i) {
+              if (i === 0) G.trySurf(fx, fy);
+              else if (i === 1) G.fish(w.map, rods[0]);
+            }
           }));
         } else {
-          dive();
+          G.trySurf(fx, fy);
         }
         return;
       }
@@ -642,6 +690,14 @@
 
       this._drawLayer(ctx, 'over', x0, y0, x1, y1, cam);
 
+      // Unlit caves. Without FLASH you see one tile around you and nothing
+      // else, which is exactly as miserable as ROCK TUNNEL was in 1996 and
+      // exactly as memorable. The mask is drawn in hard tile-sized blocks
+      // rather than a soft radial gradient, because a smooth falloff reads as
+      // a modern lighting effect and this should read as a Game Boy.
+      if (map.dark && !G.flags.flashOn) drawDarkness(ctx, cam, 1);
+      else if (map.dark) drawDarkness(ctx, cam, 3);
+
       // weather overlay (rain / sandstorm / harsh sun) — over the world, under HUD
       if (map.weather) drawMapWeather(ctx, map.weather);
 
@@ -672,7 +728,8 @@
         var wfx = pl.x + pd.dx, wfy = pl.y + pd.dy;
         var wfd = w.tileDefAt(wfx, wfy);
         if (wfd && wfd.water) {
-          var label = (G.player.bag && G.player.bag.fishingrod) ? 'Z: Swim / Fish' : 'Z: Swim';
+          var hasRod = G.player.bag && (G.player.bag.oldrod || G.player.bag.goodrod || G.player.bag.superrod);
+          var label = hasRod ? 'Z: Surf / Fish' : 'Z: Surf';
           var lw = G.textWidth(label) + 6;
           var lx = Math.round(wfx * TILE - cam.x + 8 - lw / 2);
           var ly = wfy * TILE - cam.y - 11;
@@ -864,63 +921,103 @@
     return true;
   };
 
-  // Fishing: face water with the Fishing Rod to reel up a water-type wild. The
-  // water pool is filtered to whatever's in the dex, so it scales as the dex grows.
-  var WATER_POOL = ['magikarp', 'tentacool', 'goldeen', 'poliwag', 'horsea',
-    'staryu', 'shellder', 'krabby', 'psyduck', 'slowpoke', 'seaking', 'tentacruel'];
-  var WATER_RARE = ['gyarados', 'sharpedo', 'lanturn', 'huntail', 'gorebyss', 'kingdra', 'lapras', 'milotic'];
+  // ---------------------------------------------------------------- water --
+  // Gen 1 has three rods and they are three different items, not one item that
+  // gets better. The OLD ROD catches Magikarp and nothing else, forever — it is
+  // a joke the game plays on you, and the joke only works if it is never
+  // quietly upgraded. The GOOD ROD is a real but narrow pool. Only the SUPER
+  // ROD reaches the interesting water.
+  var ROD_POOLS = {
+    oldrod:  { lv: [5, 5],   pool: ['magikarp'] },
+    goodrod: { lv: [10, 10], pool: ['poliwag', 'goldeen'] },
+    superrod: null   // uses the area's own surf table, below
+  };
 
-  G.fish = function (map) {
-    if (!G.player.party.length) { G.pushScene(G.Textbox('You need a Pokémon with you to fish.')); return; }
-    G.audio.sfx('confirm');
-    if (!G.chance(0.72)) { G.pushScene(G.Textbox('... Not even a nibble.')); return; }
-    var pool = WATER_POOL.filter(function (k) { return G.SPECIES[k]; });
-    var rare = WATER_RARE.filter(function (k) { return G.SPECIES[k]; });
-    if (!pool.length) { G.pushScene(G.Textbox('... Not even a nibble.')); return; }
-    var key = (rare.length && G.chance(0.06)) ? G.pick(rare) : G.pick(pool);
-    var lv;
+  // The Super Rod's own tables per region band. Kanto's ROM keeps these per
+  // map; this is the same set of species, grouped by where in the region you
+  // are, which reads identically in play and is a fraction of the data.
+  var SUPER_ROD = {
+    fresh: ['poliwag', 'poliwhirl', 'goldeen', 'seaking', 'psyduck', 'slowpoke', 'krabby', 'kingler'],
+    sea:   ['tentacool', 'tentacruel', 'staryu', 'horsea', 'shellder', 'krabby', 'goldeen', 'magikarp'],
+    deep:  ['seadra', 'seaking', 'kingler', 'gyarados', 'dewgong', 'cloyster']
+  };
+  var SEA_MAPS = /^(route19|route20|route21|cinnabar|seafoam|fuchsia|vermilion|pallet)/;
+
+  function waterBand(map) {
+    if (SEA_MAPS.test(map.id || '')) return 'sea';
+    return 'fresh';
+  }
+
+  function areaLevel(map, lo, hi) {
     var t = map.encounters && map.encounters.table;
     if (t && t.length) {
-      var lo = Math.min.apply(null, t.map(function (e) { return e.min; }));
-      var hi = Math.max.apply(null, t.map(function (e) { return e.max; }));
-      lv = G.irandIn(lo, hi);
-    } else {
-      var b = (G.player.badges || []).filter(Boolean).length;
-      lv = G.irandIn(5 + b * 4, 9 + b * 4);
+      return G.irandIn(
+        Math.min.apply(null, t.map(function (e) { return e.min; })),
+        Math.max.apply(null, t.map(function (e) { return e.max; }))
+      );
     }
+    var b = (G.player.badges || []).filter(Boolean).length;
+    return G.irandIn(lo != null ? lo : 5 + b * 4, hi != null ? hi : 9 + b * 4);
+  }
+
+  G.fish = function (map, rodId) {
+    rodId = rodId || 'oldrod';
+    if (!G.player.party.length) { G.pushScene(G.Textbox('You need a POKéMON with you to fish.')); return; }
+    G.audio.sfx('confirm');
+    // Better rods bite more often. The Old Rod's low rate is the other half of
+    // its joke: you wait, and then it is a Magikarp anyway.
+    var biteChance = rodId === 'superrod' ? 0.75 : rodId === 'goodrod' ? 0.6 : 0.45;
+    if (!G.chance(biteChance)) { G.pushScene(G.Textbox('... Not even a nibble.')); return; }
+
+    var key, lv;
+    if (rodId === 'superrod') {
+      var band = waterBand(map);
+      var pool = SUPER_ROD[band].filter(function (k) { return G.SPECIES[k]; });
+      if (G.chance(0.08)) pool = SUPER_ROD.deep.filter(function (k) { return G.SPECIES[k]; });
+      key = G.pick(pool);
+      lv = areaLevel(map, 15, 35);
+    } else {
+      var cfg = ROD_POOLS[rodId] || ROD_POOLS.oldrod;
+      key = G.pick(cfg.pool.filter(function (k) { return G.SPECIES[k]; }));
+      lv = G.irandIn(cfg.lv[0], cfg.lv[1]);
+    }
+    if (!key) { G.pushScene(G.Textbox('... Not even a nibble.')); return; }
+
     var wild = G.makeMon(key, lv);
     G.player.dexSeen[key] = 1;
     G.pushScene(G.Textbox('Oh! A bite!', { onDone: function () {
       G.startBattle(
-        { party: G.player.party, foes: [wild], wild: true, weather: map.weather || null },
+        { party: G.player.party, foes: [wild], wild: true },
         { bg: 'water', onEnd: G.afterBattle }
       );
     } }));
   };
 
-  // Swimming through deep water can turn up water-types (like surfing). Uses the
-  // same water pool as fishing, scaled to the area's level band.
+  // SURF encounters. Every water map in the ROM carries its own surf table, and
+  // the generator emitted them as `encounters.water` — so this uses the real
+  // numbers wherever they exist and only falls back to a generic sea pool for
+  // the odd pond nobody tabulated.
   G.hooks.waterStep = function (map) {
     if (!G.player.party.length || G.player.repelSteps > 0) return false;
-    if (!G.chance(0.09)) return false;
-    var pool = WATER_POOL.filter(function (k) { return G.SPECIES[k]; });
-    var rare = WATER_RARE.filter(function (k) { return G.SPECIES[k]; });
-    if (!pool.length) return false;
-    var key = (rare.length && G.chance(0.05)) ? G.pick(rare) : G.pick(pool);
-    var lv;
-    var t = map.encounters && map.encounters.table;
-    if (t && t.length) {
-      var lo = Math.min.apply(null, t.map(function (e) { return e.min; }));
-      var hi = Math.max.apply(null, t.map(function (e) { return e.max; }));
-      lv = G.irandIn(lo, hi);
-    } else {
-      var b = (G.player.badges || []).filter(Boolean).length;
-      lv = G.irandIn(5 + b * 4, 9 + b * 4);
+    var tbl = map.encounters && map.encounters.water;
+    if (!tbl) tbl = (G.ENCOUNTERS.searoutes || {}).water;
+    if (!tbl || !tbl.table || !tbl.table.length) return false;
+    if (!G.chance(tbl.rate || 0.05)) return false;
+
+    var weighted = tbl.table.map(function (e) { return { e: e, w: e.w || 50 }; });
+    var pick = G.pickWeighted(weighted).e;
+    var level = G.irandIn(pick.min, pick.max);
+
+    var lead = null;
+    for (var i = 0; i < G.player.party.length; i++) {
+      if (G.player.party[i].curHp > 0) { lead = G.player.party[i]; break; }
     }
-    var wild = G.makeMon(key, lv);
-    G.player.dexSeen[key] = 1;
+    if (G.player.repelSteps > 0 && lead && level <= lead.level) return false;
+
+    var wild = G.makeMon(pick.sp, level);
+    G.player.dexSeen[pick.sp] = 1;
     G.startBattle(
-      { party: G.player.party, foes: [wild], wild: true, weather: map.weather || null },
+      { party: G.player.party, foes: [wild], wild: true },
       { bg: 'water', onEnd: G.afterBattle }
     );
     return true;
@@ -937,8 +1034,8 @@
       var nm = G.monName(mon);
       // A catch always succeeds, even with a full party. Afterward a screen asks
       // where it should go: into the party (swapping a member to the Lab if the
-      // party is already 6), or straight to Birch's Lab. Party stays capped at 6.
-      var toLab = function () { G.player.box.push(mon); G.pushScene(G.Textbox(nm + " was sent to Birch's Lab.")); };
+      // party is already 6), or straight to the storage PC. Party stays capped at 6.
+      var toLab = function () { G.player.box.push(mon); G.pushScene(G.Textbox(nm + " was sent to the storage PC.")); };
       var toParty = function () {
         if (G.player.party.length < 6) {
           G.player.party.push(mon);
@@ -959,7 +1056,7 @@
       var askWhere = function () {
         G.pushScene(G.Textbox('Where should ' + nm + ' go?', { onDone: function () {
           G.pushScene(G.Chooser({
-            items: ['Add to party', "Birch's Lab"], cancelIndex: 1,
+            items: ['Add to party', "the storage PC"], cancelIndex: 1,
             onPick: function (i) { if (i === 0) toParty(); else toLab(); }
           }));
         } }));
