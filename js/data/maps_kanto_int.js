@@ -1952,9 +1952,12 @@
   // Every dead end has a ninja in it who has clearly been waiting some time.
   G.MAPS.fuchsiagym = {
     id: 'fuchsiagym', name: 'Fuchsia Gym', w: 19, h: 17,
-    music: 'gym', battleBg: 'indoor', base: 'gfloor', indoors: true,
+    music: 'gym', battleBg: 'indoor', base: 'marble', indoors: true,
     gymTint: '#a040a0',
-    legend: { '.': 'gfloor', 'I': 'iwall' },
+    // A FLAT floor. `gfloor` is banded, and banded floor next to banded wall
+    // is why this maze was invisible the first time: the walls have to be the
+    // only pattern on the screen for the shape of the room to read at all.
+    legend: { '.': 'marble', 'I': 'gymwall' },
     ground: pad([
       'IIIIIIIIIIIIIIIIIII',
       'I...I.....I.......I',
@@ -2702,9 +2705,9 @@
   // idea in Gen 1's level design. Keeping it was not optional.
   G.MAPS.cinnabargym = {
     id: 'cinnabargym', name: 'Cinnabar Gym', w: 12, h: 18,
-    music: 'gym', battleBg: 'indoor', base: 'gfloor', indoors: true,
+    music: 'gym', battleBg: 'indoor', base: 'marble', indoors: true,
     gymTint: '#e05030',
-    legend: { '.': 'gfloor', 'I': 'iwall', 'Q': 'quizdoor' },
+    legend: { '.': 'marble', 'I': 'gymwall', 'Q': 'quizdoor' },
     ground: pad([
       'IIIIIIIIIIII',
       'I..........I',

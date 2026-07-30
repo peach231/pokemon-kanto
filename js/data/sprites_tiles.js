@@ -870,6 +870,19 @@
     'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba', 'bbbbbbbbbbbbbbba',
     fill('a')
   ]);
+  // Gym walls. The maze gyms (KOGA's and BLAINE's) were unreadable because
+  // `gfloor` and `iwall` are both mid-grey at nearly the same value — a maze
+  // you cannot see is worse than no maze at all. This is a hard dark block
+  // with a lit top face, so a wall reads as raised at a glance and the
+  // corridor between two of them reads as floor.
+  T('t_gymwall', { o: C.ink, a: C.gym0, b: C.gym1, c: C.gym2 }, [
+    fill('c'), fill('b'),
+    'aaaaaaaaaaaaaaao', 'aaaaaaaaaaaaaaao', 'aaaaaaaaaaaaaaao', fill('o'),
+    'aaaaaaaaaaaaaaao', 'aaaaaaaaaaaaaaao', 'aaaaaaaaaaaaaaao', fill('o'),
+    'aaaaaaaaaaaaaaao', 'aaaaaaaaaaaaaaao', 'aaaaaaaaaaaaaaao', fill('o'),
+    'aaaaaaaaaaaaaaao', fill('o')
+  ]);
+
   T('t_redcarpet', { a: C.red0, b: C.red1, c: C.red2, y: C.yel1 }, [
     fill('y'), 'ycccccccccccccay', 'ybbbbbbbbbbbbbay',
     'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay', 'ybbbbbbbbbbbbbay',
@@ -1101,6 +1114,7 @@
     icounter:  { img: 't_icounter', solid: true },
     ihealm:    { img: 't_ihealm', solid: true },
     gfloor:    { img: 't_gfloor' },
+    gymwall:   { img: 't_gymwall', solid: true },
     redcarpet: { img: 't_redcarpet' },
     statue:    { img: 't_statue', solid: true },
     stairs:    { img: 't_stairs' },
