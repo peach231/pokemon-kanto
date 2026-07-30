@@ -269,15 +269,37 @@
       { x: 5, y: 9, to: 'viridian', tx: 6, ty: 20, dir: 'down' },
       { x: 6, y: 9, to: 'viridian', tx: 6, ty: 20, dir: 'down' }
     ],
+    gymTint: '#b08040',
     signs: [
-      { x: 5, y: 4, text: 'A notice, taped up and curling at the corners: GYM CLOSED UNTIL FURTHER NOTICE.' }
+      { x: 5, y: 4, text: 'A notice, taped up and curling at the corners: GYM CLOSED UNTIL FURTHER NOTICE. Somebody has torn it half off.' }
     ],
     npcs: [
-      { x: 8, y: 6, sprite: 'gymguy', dir: 'left',
+      { x: 8, y: 6, sprite: 'gymguy', dir: 'left', unlessFlag: 'rh_giovanni',
         dialog: ['Empty, see? Has been for months.',
                  "Whoever the LEADER is, he's got business elsewhere.",
-                 "...I've said too much."] }
+                 "...I've said too much."] },
+      { x: 9, y: 8, sprite: 'gymguy', dir: 'left', ifFlag: 'silph_giovanni', event: 'viridianGymGuide' }
+    ],
+    trainers: [
+      { x: 5, y: 1, sprite: 'giovanni', dir: 'down', trainer: 'giovanni_viridian', sight: 0,
+        ifFlag: 'silph_giovanni' },
+      { x: 2, y: 4, sprite: 'cooltrainerm', dir: 'right', trainer: 'vg_arthur', sight: 3,
+        ifFlag: 'silph_giovanni' },
+      { x: 9, y: 4, sprite: 'blackbelt', dir: 'left', trainer: 'vg_atsushi', sight: 3,
+        ifFlag: 'silph_giovanni' },
+      { x: 5, y: 6, sprite: 'cooltrainerf', dir: 'down', trainer: 'vg_samantha', sight: 3,
+        ifFlag: 'silph_giovanni' }
     ]
+  };
+
+  G.EVENTS.viridianGymGuide = function* () {
+    if (G.flags.badge8) {
+      yield { t: 'text', s: 'Guide: Eight. That is all of them. ROUTE 22, west of town, and then the long road up.' };
+      return;
+    }
+    yield { t: 'text', s: 'Guide: So this is where he was. The eighth GYM, sat empty in the first town you ever walked through.' };
+    yield { t: 'text', s: 'Guide: GROUND types. Nothing he has can touch a WATER, GRASS or ICE move, and everything he has will flatten anything ELECTRIC.' };
+    yield { t: 'text', s: 'Guide: He knows that. He has known it for years. He is here anyway.' };
   };
 
   // ============================================================== EVENTS ====
@@ -2082,10 +2104,15 @@
     }
     yield { t: 'text', s: 'ATTENDANT: Welcome to the SAFARI ZONE! ₽500 for thirty SAFARI BALLs and six hundred steps. Would you like to play?' };
     var yes = { v: false };
-    yield { t: 'custom', scene: G.Chooser({
-      items: ['Yes', 'No'], cancelIndex: 1,
-      onPick: function (i) { yes.v = (i === 0); }
-    }) };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.Chooser({
+          items: ['Yes', 'No'], cancelIndex: 1,
+          onPick: function (i) { yes.v = (i === 0); done(); }
+        }));
+      }
+    };
     if (!yes.v) {
       yield { t: 'text', s: 'ATTENDANT: Do come back!' };
       return;
@@ -2218,14 +2245,17 @@
     yield { t: 'fn', f: function () {
       if (here === 'route12') G.flags.snorlax12 = 1; else G.flags.snorlax16 = 1;
     } };
-    yield { t: 'custom', scene: (function () {
-      var wild = G.makeMon('snorlax', 30);
-      G.player.dexSeen.snorlax = 1;
-      return G.BattleScene(
-        { party: G.player.party, foes: [wild], wild: true },
-        { bg: 'meadow', onEnd: G.afterBattle }
-      );
-    })() };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        var wild = G.makeMon('snorlax', 30);
+        G.player.dexSeen.snorlax = 1;
+        G.startBattle(
+          { party: G.player.party, foes: [wild], wild: true },
+          { bg: 'meadow', onEnd: function (res, b) { G.afterBattle(res, b); done(); } }
+        );
+      }
+    };
     yield { t: 'text', s: 'The road is clear.' };
   };
 
@@ -2464,9 +2494,15 @@
     }
     yield { t: 'text', s: 'SCIENTIST: A RAICHU! Yes. Trade it for my PONYTA?' };
     var yes = { v: false };
-    yield { t: 'custom', scene: G.Chooser({
-      items: ['Yes', 'No'], cancelIndex: 1, onPick: function (i) { yes.v = (i === 0); }
-    }) };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.Chooser({
+          items: ['Yes', 'No'], cancelIndex: 1,
+          onPick: function (i) { yes.v = (i === 0); done(); }
+        }));
+      }
+    };
     if (!yes.v) { yield { t: 'text', s: 'SCIENTIST: The offer stands.' }; return; }
     yield { t: 'fn', f: function () {
       var lvl = G.player.party[idx].level;
@@ -2639,17 +2675,21 @@
     yield { t: 'wait', frames: 24 };
     yield { t: 'text', s: 'ZAPDOS is sitting in the switchgear. It has been here long enough that the whole plant has started to sound like it.' };
     yield { t: 'fn', f: function () { G.flags.zapdos_seen = 1; } };
-    yield { t: 'custom', scene: (function () {
-      var wild = G.makeMon('zapdos', 50);
-      G.player.dexSeen.zapdos = 1;
-      return G.BattleScene(
-        { party: G.player.party, foes: [wild], wild: true },
-        { bg: 'indoor', onEnd: function (res, b) {
-            if (res === 'caught' || res === 'won') G.flags.zapdos_caught = 1;
-            G.afterBattle(res, b);
-          } }
-      );
-    })() };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        var wild = G.makeMon('zapdos', 50);
+        G.player.dexSeen.zapdos = 1;
+        G.startBattle(
+          { party: G.player.party, foes: [wild], wild: true },
+          { bg: 'indoor', music: 'gymleader', onEnd: function (res, b) {
+              if (res === 'caught' || res === 'win') G.flags.zapdos_caught = 1;
+              G.afterBattle(res, b);
+              done();
+            } }
+        );
+      }
+    };
   };
 
   // ================================================== CINNABAR GYM — BLAINE =
@@ -2744,10 +2784,15 @@
     yield { t: 'text', s: 'A shutter, with a question stencilled across it.' };
     yield { t: 'text', s: 'BLAINE: ' + quiz.q };
     var said = { v: null };
-    yield { t: 'custom', scene: G.Chooser({
-      items: ['Yes', 'No'], cancelIndex: 1,
-      onPick: function (i) { said.v = (i === 0); }
-    }) };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.Chooser({
+          items: ['Yes', 'No'], cancelIndex: 1,
+          onPick: function (i) { said.v = (i === 0); done(); }
+        }));
+      }
+    };
     var right = (said.v === quiz.a);
     var open = function () {
       // Both shutter tiles on this row, so the corridor is actually passable.
@@ -2859,17 +2904,21 @@
     yield { t: 'sfx', s: 'confirm' };
     yield { t: 'wait', frames: 24 };
     yield { t: 'text', s: 'ARTICUNO has been sitting in the cold long enough that the cold is coming from it.' };
-    yield { t: 'custom', scene: (function () {
-      var wild = G.makeMon('articuno', 50);
-      G.player.dexSeen.articuno = 1;
-      return G.BattleScene(
-        { party: G.player.party, foes: [wild], wild: true },
-        { bg: 'cave', onEnd: function (res, b) {
-            if (res === 'caught' || res === 'won') G.flags.articuno_caught = 1;
-            G.afterBattle(res, b);
-          } }
-      );
-    })() };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        var wild = G.makeMon('articuno', 50);
+        G.player.dexSeen.articuno = 1;
+        G.startBattle(
+          { party: G.player.party, foes: [wild], wild: true },
+          { bg: 'cave', music: 'gymleader', onEnd: function (res, b) {
+              if (res === 'caught' || res === 'win') G.flags.articuno_caught = 1;
+              G.afterBattle(res, b);
+              done();
+            } }
+        );
+      }
+    };
   };
 
   // OAK's aide on ROUTE 2 with HM05. FLASH is the only HM you are handed for
@@ -2893,5 +2942,215 @@
     yield { t: 'fn', f: function () { G.player.bag.hm05 = 1; G.flags.got_flash = 1; } };
     yield { t: 'text', s: 'You received HM05 FLASH!' };
     yield { t: 'text', s: 'AIDE: There are caves in KANTO you cannot see your own feet in. ROCK TUNNEL is one. You will know the others when the screen goes dark.' };
+  };
+
+  // ========================================================== THE LEAGUE ====
+
+  // The badge gates on ROUTE 23. Seven of them, and each one counts.
+  G.EVENTS.badgeCheck = function* () {
+    var have = (G.player.badges || []).filter(Boolean).length;
+    // Which gate is this? The one you are standing below.
+    var GATES = [29, 25, 21, 17, 13, 9, 5];
+    var y = G.world.player.y;
+    var need = 1;
+    for (var i = 0; i < GATES.length; i++) if (Math.abs(GATES[i] - y) <= 2) need = i + 1;
+    if (have >= need) {
+      yield { t: 'text', s: 'The gate reads your BADGE CASE and lets you through without looking up.' };
+      return;
+    }
+    yield { t: 'text', s: 'GATE ' + need + ': You need ' + need + ' BADGE' + (need > 1 ? 'S' : '') +
+      ' to pass. You have ' + have + '.' };
+    yield { t: 'text', s: 'Nothing else in KANTO checks your credentials. This road checks them seven times.' };
+  };
+
+  G.EVENTS.leagueWarning = function* () {
+    if (G.flags.champion) {
+      yield { t: 'text', s: 'Guide: Back again? The doors still only open one way. They do not care who you are now.' };
+      return;
+    }
+    yield { t: 'text', s: 'Guide: Heal here. Buy here. Think here.' };
+    yield { t: 'text', s: 'Guide: Past the carpet there is none of the three. Five rooms, five doors, and every one of them locks behind you.' };
+    yield { t: 'text', s: 'Guide: No healing between. No saving. No leaving. Lose to any of them and you are back out here starting at LORELEI.' };
+    yield { t: 'text', s: 'Guide: So do it now. Whatever you were going to do — do it now.' };
+  };
+
+  // The five chambers, in order. Beating one opens the door at the far end;
+  // losing anywhere puts you back in the lobby with all four to do again.
+  G.EVENTS.leagueSealed = function* () {
+    yield { t: 'text', s: 'The door will not open. Whoever is in this room is still standing.' };
+  };
+
+  // ------------------------------------------------------- HALL OF FAME ----
+  G.EVENTS.hallOfFameCeremony = function* () {
+    yield { t: 'fn', f: function () { G.audio.playMusic('title'); } };
+    yield { t: 'text', s: 'The machine at the end of the hall wakes up as you step onto the carpet.' };
+    yield { t: 'wait', frames: 30 };
+    yield { t: 'text', s: 'It records your POKéMON, one at a time, and takes its time about each of them.' };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        if (G.HallOfFameScene) G.pushScene(G.HallOfFameScene(done));
+        else done();
+      }
+    };
+    yield { t: 'fn', f: function () {
+      G.flags.champion = 1;
+      G.player.champion = 1;
+    } };
+    yield { t: 'text', s: 'OAK: I have watched a lot of people walk through that door.' };
+    yield { t: 'text', s: 'OAK: Most of them came here to prove something. You came here because you kept going, which is not the same thing and is worth considerably more.' };
+    yield { t: 'text', s: 'OAK: Come home. There is something in the LAB I want to show you, and it will keep until you have slept.' };
+    yield { t: 'wait', frames: 20 };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.FadeScene(function () {
+          G.world.loadMap('playerhome', 4, 6, 'down');
+          done();
+        }));
+      }
+    };
+    yield { t: 'text', s: 'You are home. Your bed has been made, which you definitely did not do.' };
+    yield { t: 'text', s: 'MOM: There you are. It is on the television. It has been on the television all afternoon.' };
+    yield { t: 'text', s: '(The HALL OF CHAMPIONS at INDIGO PLATEAU is open to you now. You can FLY there whenever you like.)' };
+  };
+
+  G.EVENTS.oakHallTalk = function* () {
+    yield { t: 'text', s: 'OAK: Your names are on the wall. All six of them, in the order you sent them out.' };
+    yield { t: 'text', s: 'OAK: They put mine up here once. It is two floors down and behind a pillar, and I have never once minded.' };
+  };
+
+  // -------------------------------------------------- HALL OF CHAMPIONS ----
+  G.EVENTS.hallOfChampionsDoor = function* () {
+    if (!G.flags.champion) return;
+    yield { t: 'text', s: 'OAK: There is a hall behind this one. Five plinths, four names, and the fifth brass plate polished every week by somebody who will not say why.' };
+    if (!G.flags.hoc_open) {
+      yield { t: 'text', s: 'OAK: Every CHAMPION before you kept the title for a while, and every one of them found something out there that nobody has found since.' };
+      yield { t: 'text', s: 'OAK: They are all still here. They all still train. They have been waiting for somebody to be worth the trouble.' };
+      yield { t: 'fn', f: function () { G.flags.hoc_open = 1; } };
+    }
+    yield { t: 'text', s: 'OAK: Go through whenever you are ready. There is no clock on this one.' };
+    var go = { v: false };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.Chooser({
+          items: ['Go through', 'Not yet'], cancelIndex: 1,
+          onPick: function (i) { go.v = (i === 0); done(); }
+        }));
+      }
+    };
+    if (!go.v) return;
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.FadeScene(function () {
+          G.world.loadMap('hallofchampions', 9, 17, 'up');
+          done();
+        }));
+      }
+    };
+  };
+
+  // ------------------------------------------------------- THE RIVAL -------
+  G.EVENTS.blueRoute22Final = function* () {
+    yield { t: 'text', s: 'BLUE: Stop right there.' };
+    yield { t: 'text', s: 'BLUE: Eight badges. You actually did it. I did not think you would — I want to be honest about that, because I have not been honest about much.' };
+    yield { t: 'text', s: 'BLUE: This is the same field where I told you to forget it. Day one. You remember.' };
+    yield { t: 'text', s: 'BLUE: So we do it here, and then whoever is left walks up that road.' };
+    yield { t: 'fn', f: function () { G.flags.blue_route22b = 1; } };
+    yield {
+      t: 'custom',
+      run: function (done) { G.startTrainerBattle('blue_route22b', { onEnd: function () { done(); } }); }
+    };
+  };
+
+  // ------------------------------------------------------- LEGENDARIES -----
+  // Three birds, one cat, and a thing under a lorry. Every one of them is a
+  // fixed encounter you walk up to rather than a roll of the dice — a
+  // legendary you can SEE from across the room is worth more than any amount
+  // of text telling you it is rare.
+  // A fixed legendary encounter. Not a roll of the dice — you walk up to it,
+  // it is standing there, and the battle starts because you chose to start it.
+  // Whether you catch it or knock it out, it is gone from the map afterwards:
+  // there is one of each in KANTO and the game does not offer second chances.
+  function legendary(key, level, before, bg) {
+    return function* () {
+      for (var i = 0; i < before.length; i++) yield { t: 'text', s: before[i] };
+      yield { t: 'sfx', s: 'confirm' };
+      yield { t: 'wait', frames: 24 };
+      yield {
+        t: 'custom',
+        run: function (done) {
+          var wild = G.makeMon(key, level);
+          G.player.dexSeen[key] = 1;
+          G.startBattle(
+            { party: G.player.party, foes: [wild], wild: true },
+            { bg: bg || 'cave', music: 'gymleader', onEnd: function (res, b) {
+                if (res === 'caught' || res === 'win') G.flags[key + '_caught'] = 1;
+                G.afterBattle(res, b);
+                done();
+              } }
+          );
+        }
+      };
+    };
+  }
+
+  // Declared for the flag audit in tools/check.js. The factory above writes
+  // G.flags[key + '_caught'], which no static reader can follow — so rather
+  // than weaken the audit (its whole value is that it catches gates nothing
+  // opens), the computed names are listed here where a reader can see them.
+  G.DYNAMIC_FLAGS = (G.DYNAMIC_FLAGS || []).concat([
+    'articuno_caught', 'zapdos_caught', 'moltres_caught', 'mewtwo_caught', 'mew_caught'
+  ]);
+
+  G.EVENTS.moltresEncounter = legendary('moltres', 50, [
+    'The air in this part of VICTORY ROAD is twenty degrees warmer than the rest of it.',
+    'MOLTRES has been roosting at the top of the LEAGUE road for years. Every challenger walks past it. Almost nobody looks up.'
+  ], 'cave');
+
+  G.EVENTS.mewtwoEncounter = legendary('mewtwo', 70, [
+    'The cave goes quiet in a way that caves do not.',
+    'MEWTWO is sitting in the middle of the chamber with its back to you, and it has known you were coming since CERULEAN.',
+    'It does not look round.'
+  ], 'cave');
+
+  // MEW, under the lorry by the VERMILION dock. This is the oldest rumour in
+  // the game and it was never true — so here it is, made true, and it costs
+  // exactly what the playground said it would: STRENGTH, and the patience to
+  // try something stupid.
+  G.EVENTS.mewTruck = function* () {
+    if (G.flags.mew_caught) {
+      yield { t: 'text', s: 'A lorry, parked by the dock. There is a dent in the tarmac underneath it, and nothing else.' };
+      return;
+    }
+    if (!G.flags.strengthOn) {
+      yield { t: 'text', s: 'A lorry, parked by the dock. It has been here as long as anyone can remember and nobody knows whose it is.' };
+      yield { t: 'text', s: 'It is far too heavy to move.' };
+      return;
+    }
+    yield { t: 'text', s: 'A lorry, parked by the dock. Nobody knows whose it is.' };
+    yield { t: 'text', s: 'You put your shoulder against it, which is a ridiculous thing to do, and your POKéMON does the rest.' };
+    yield { t: 'sfx', s: 'confirm' };
+    yield { t: 'wait', frames: 30 };
+    yield { t: 'text', s: 'The lorry rolls back four feet.' };
+    yield { t: 'wait', frames: 20 };
+    yield { t: 'text', s: 'There is something asleep underneath it.' };
+    yield {
+      t: 'custom',
+      run: function (done) {
+        var wild = G.makeMon('mew', 30);
+        G.player.dexSeen.mew = 1;
+        G.startBattle(
+          { party: G.player.party, foes: [wild], wild: true },
+          { bg: 'meadow', music: 'gymleader', onEnd: function (res, b) {
+              if (res === 'caught' || res === 'win') G.flags.mew_caught = 1;
+              G.afterBattle(res, b);
+              done();
+            } }
+        );
+      }
+    };
   };
 })();

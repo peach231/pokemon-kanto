@@ -940,6 +940,28 @@
   // A roller shutter, ribbed and industrial, with a question stencilled on
   // it. Deliberately reads as machinery rather than as a door: it is the
   // only thing in KANTO that opens for an ANSWER.
+  // The LEAGUE's chamber doors: dark bronze, banded, with a seam down the
+  // middle that never quite lines up.
+  T('t_leaguedoor', { o: C.brk0, a: C.brk1, b: C.brk2, c: C.mtl3, w: C.pale }, [
+    'oooooooooooooooo', 'obbbbbbccbbbbbbo', 'obaaaaabbaaaaabo',
+    'obaoooabbaooo abo'.replace(' ', 'a'), 'obaoooabbaoooabo', 'obaaaaabbaaaaabo',
+    'obbbbbbccbbbbbbo', 'owwwwwwccwwwwwwo', 'obbbbbbccbbbbbbo',
+    'obaaaaabbaaaaabo', 'obaoooabbaoooabo', 'obaoooabbaoooabo',
+    'obaaaaabbaaaaabo', 'obbbbbbccbbbbbbo', 'oooooooooooooooo',
+    'oooooooooooooooo'
+  ]);
+
+  // The LEAGUE's chamber doors: dark bronze, banded, with a seam down the
+  // middle that never quite lines up.
+  T('t_leaguedoor', { o: C.brk0, a: C.brk1, b: C.brk2, c: C.mtl3, w: C.pale }, [
+    'oooooooooooooooo', 'obbbbbbccbbbbbbo', 'obaaaaabbaaaaabo',
+    'obaoooabbaooo abo'.replace(' ', 'a'), 'obaoooabbaoooabo', 'obaaaaabbaaaaabo',
+    'obbbbbbccbbbbbbo', 'owwwwwwccwwwwwwo', 'obbbbbbccbbbbbbo',
+    'obaaaaabbaaaaabo', 'obaoooabbaoooabo', 'obaoooabbaoooabo',
+    'obaaaaabbaaaaabo', 'obbbbbbccbbbbbbo', 'oooooooooooooooo',
+    'oooooooooooooooo'
+  ]);
+
   T('t_quizdoor', { o: C.mtl0, a: C.mtl1, b: C.mtl2, c: C.mtl3, w: C.white }, [
     'oooooooooooooooo', 'abababababababab', 'bbbbbbbbbbbbbbbb',
     'aaaaaaaaaaaaaaaa', 'oooooooooooooooo', 'abababababababab',
@@ -1107,6 +1129,16 @@
     // BLAINE's shutters. Solid until the question on them is answered, at
     // which point field.js edits the tile away.
     quizdoor:   { img: 't_quizdoor', solid: true, story: true },
+    // The LEAGUE's doors. Not solid — you can walk right up to one and put
+    // your hand on it. It simply does not open, and the warp underneath it
+    // tells you why. A wall would be a level-design decision; a door that
+    // will not open is a statement about you.
+    leaguedoor: { img: 't_leaguedoor' },
+    // The LEAGUE's doors. Not solid — you can walk right up to one and put
+    // your hand on it. It simply does not open, and the warp underneath it
+    // tells you why. A wall would be a level-design decision; a door that
+    // will not open is a statement about you.
+    leaguedoor: { img: 't_leaguedoor' },
     burntfloor: { img: 't_burntfloor' },
     burntwall:  { img: 't_burntwall', solid: true },
     marble:     { img: 't_marble' },

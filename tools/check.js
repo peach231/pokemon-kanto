@@ -253,6 +253,9 @@ if (G.SPECIES) {
   for (const id in G.MAPS) {
     for (const it of (G.MAPS[id].items || [])) if (it.flag) set.add(it.flag);
   }
+  // Flags built by string concatenation, declared where a reader can see
+  // them rather than weakening the audit to accommodate them.
+  for (const f of (G.DYNAMIC_FLAGS || [])) set.add(f);
   for (const [flag, where] of read) {
     if (!set.has(flag)) {
       errors.push(`UNSETTABLE FLAG '${flag}' gates ${where.join(', ')} but nothing ever sets it — permanent wall`);
@@ -418,6 +421,16 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
       if (!tile) errors.push(`WARP ${id} -> ${w.to}: lands out of bounds at (${w.tx},${w.ty})`);
       else if (tile.solid && !tile.water) errors.push(`WARP ${id} -> ${w.to}: lands on SOLID '${t.legend[ch]}' at (${w.tx},${w.ty}) — soft-lock`);
       queue.push(w.to);
+    }
+    // Not every transition is a warp. The HALL OF FAME hands you back to your
+    // own bedroom, and the HALL OF CHAMPIONS is opened by talking to OAK —
+    // both are `loadMap` calls inside an event, and a graph walk that only
+    // follows warps would report them as unreachable content.
+    for (const eid in (G.EVENTS || {})) {
+      const src = String(G.EVENTS[eid]);
+      for (const mt of src.matchAll(/loadMap\(\s*['"]([a-z0-9_]+)['"]/g)) {
+        if (G.MAPS[mt[1]]) queue.push(mt[1]);
+      }
     }
   }
   for (const id of Object.keys(G.MAPS)) {

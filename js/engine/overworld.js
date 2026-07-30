@@ -286,6 +286,18 @@
       return null;
     },
 
+    // A warp can require a flag. This is how the LEAGUE's doors work and how
+    // CERULEAN CAVE stays shut: the tile is walkable, you can stand on it and
+    // put your hand on the door, and it simply does not open. A wall would be
+    // a level-design decision; a door that will not open is a statement.
+    warpBlocked: function (w) {
+      if (!w.needFlag || G.flags[w.needFlag]) return false;
+      G.audio.sfx('bump');
+      G.pushScene(G.Textbox(w.deniedText ||
+        'The door will not open. Whoever is in this room is still standing.'));
+      return true;
+    },
+
     warpTo: function (warp) {
       var self = this;
       var go = function () {
@@ -460,7 +472,11 @@
       if (G.player.daycare && G.player.daycare.hatch > 0) G.player.daycare.hatch--;
 
       var warp = w.warpAt(p.x, p.y);
-      if (warp) { w.warpTo(warp); return; }
+      if (warp) {
+        if (w.warpBlocked(warp)) return;
+        w.warpTo(warp);
+        return;
+      }
 
       // script triggers (event system arrives with the region build)
       var scripts = w.map.scripts || [];
@@ -1088,6 +1104,18 @@
       G.player.money -= lost;
       for (var i = 0; i < G.player.party.length; i++) G.healMon(G.player.party[i]);
       var r = G.player.respawn;
+
+      // Losing anywhere inside the LEAGUE puts the whole gauntlet back. You do
+      // not get to bank LORELEI and come back for BRUNO tomorrow — the five
+      // rooms are one fight with four intermissions, and that is the only
+      // reason the ending has any weight to it at all.
+      if (G.world.map && G.world.map.league) {
+        ['e4_lorelei', 'e4_bruno', 'e4_agatha', 'e4_lance', 'e4_champion',
+         'lorelei', 'bruno', 'agatha', 'lance', 'blue_champion'].forEach(function (f) {
+          delete G.flags[f];
+        });
+        r = { mapId: 'indigo', x: 9, y: 16 };
+      }
       G.pushScene(G.Textbox(
         ['You whited out!' + (lost ? ' You dropped $' + lost + ' in the panic...' : ''),
          'You scurried back to safety.'],

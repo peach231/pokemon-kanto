@@ -275,6 +275,8 @@
       { x: 20, y: 5, to: 'viridianmart', tx: 4, ty: 6, dir: 'up' },
       { x: 7, y: 11, to: 'viridianhouse', tx: 4, ty: 7, dir: 'up' },
       { x: 19, y: 11, to: 'viridianschool', tx: 4, ty: 6, dir: 'up' },
+      { x: 0, y: 15, to: 'route22', tx: 20, ty: 5, dir: 'left' },
+      { x: 1, y: 15, to: 'route22', tx: 20, ty: 6, dir: 'left' },
       { x: 6, y: 19, to: 'viridiangym', tx: 5, ty: 8, dir: 'up' },
       { x: 7, y: 19, to: 'viridiangym', tx: 5, ty: 8, dir: 'up' }
     ],
@@ -709,7 +711,7 @@
       'vxvxvxvxvxvx..vxvxvxvxvxvx'
     ].concat(rows([
       '..........pp..........',   // 2
-      '~~~~~~....pp....7889..',
+      'E~~~~~....pp....7889..',   // 3  the cave door, across the water
       '~~~~~~....pp....d+mh..',
       '~~~~~~....pp....WNEW..',
       '..........pp..........',
@@ -747,11 +749,14 @@
       { x: 20, y: 5, to: 'ceruleancentre', tx: 4, ty: 6, dir: 'up' },
       { x: 20, y: 17, to: 'ceruleanmart', tx: 4, ty: 6, dir: 'up' },
       { x: 20, y: 11, to: 'ceruleanhouse', tx: 4, ty: 7, dir: 'up' },
-      { x: 7, y: 17, to: 'robbedhouse', tx: 4, ty: 7, dir: 'up' }
+      { x: 7, y: 17, to: 'robbedhouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 2, y: 3, to: 'ceruleancave1f', tx: 1, ty: 15, dir: 'up', needFlag: 'badge7',
+        deniedText: 'A steel shutter, with a notice bolted to it: UNSTABLE. LEAGUE PERSONNEL ONLY. Seven BADGES is what the LEAGUE counts as personnel.' }
     ],
     signs: [
       { x: 4, y: 19, text: 'CERULEAN CITY — A Mysterious, Blue Aura Surrounds It.' },
-      { x: 5, y: 12, text: 'CERULEAN CITY POKéMON GYM — LEADER: MISTY. The Tomboyish Mermaid!' }
+      { x: 5, y: 12, text: 'CERULEAN CITY POKéMON GYM — LEADER: MISTY. The Tomboyish Mermaid!' },
+      { x: 3, y: 6, text: 'Across the water: UNKNOWN DUNGEON. Closed by order of the POKéMON LEAGUE.' }
     ],
     npcs: [
       { x: 10, y: 8, sprite: 'gymguy', dir: 'right',
@@ -1007,6 +1012,7 @@
     ],
     signs: [
       { x: 18, y: 18, text: 'VERMILION CITY — The Port of Exquisite Sunsets.' },
+      { x: 20, y: 16, text: 'A lorry, parked by the dock. No plates, no markings, and no record of it in the harbour office.' },
       { x: 5, y: 18, text: 'VERMILION CITY POKéMON GYM — LEADER: LT. SURGE. The Lightning American!' }
     ],
     npcs: [
@@ -2490,6 +2496,649 @@
     ],
     npcs: [
       { x: 10, y: 1, sprite: 'zapdos', obj: true, dir: 'down', unlessFlag: 'zapdos_caught', event: 'zapdosEncounter' }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 22 — west out of VIRIDIAN, and the road you were turned away from on
+  // day one. BLUE is here again, because he has been ahead of you the entire
+  // game and this is the last time that is true.
+  // ==========================================================================
+  G.MAPS.route22 = {
+    id: 'route22', name: 'Route 22', w: 22, h: 13,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvx',
+      'tu..................tu',
+      'vx..ggggg...........vx',
+      'tu..ggggg...........tu',
+      'pppppppppppppppppppppp',
+      'pppppppppppppppppppppp',
+      'vx......llllll......vx',
+      'tu..........ggggg...tu',
+      'vx..........ggggg...vx',
+      'tu..................tu',
+      'vxvxvxvxvxvxvxvxvxvxvx',
+      'tututututututututututu'
+    ], 22, 13),
+    deco: blank(22, 13),
+    encounters: (G.ENCOUNTERS || {}).route22,
+    warps: [
+      { x: 21, y: 5, to: 'viridian', tx: 2, ty: 15, dir: 'right' },
+      { x: 21, y: 6, to: 'viridian', tx: 2, ty: 15, dir: 'right' },
+      { x: 0, y: 5, to: 'route23', tx: 9, ty: 32, dir: 'left' },
+      { x: 0, y: 6, to: 'route23', tx: 10, ty: 32, dir: 'left' }
+    ],
+    signs: [
+      { x: 8, y: 4, text: 'ROUTE 22 — POKéMON LEAGUE reception gate ahead. BADGES REQUIRED.' }
+    ],
+    npcs: [
+      { x: 5, y: 8, sprite: 'blue', dir: 'right', ifFlag: 'badge8',
+        unlessFlag: 'blue_route22b', event: 'blueRoute22Final' }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 23 — the badge road. Seven checkpoints between VIRIDIAN and VICTORY
+  // ROAD, each one a gate that reads your case and does not argue about it.
+  // Nothing else in KANTO checks your credentials; this road checks them seven
+  // times in a row, and that is the point.
+  // ==========================================================================
+  G.MAPS.route23 = {
+    id: 'route23', name: 'Route 23', w: 20, h: 34,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      'tutututupppptutututu',
+      'vxvxvxvxppppvxvxvxvx',
+      'tu................tu',
+      'vx................vx',
+      'tu................tu',
+      'vx###...####...###vx',
+      'tu................tu',
+      'vx..~~~....~~~~...vx',
+      'tu................tu',
+      'vx###...####...###vx',
+      'tu................tu',
+      'vx................vx',
+      'tu................tu',
+      'vx###...####...###vx',
+      'tu................tu',
+      'vx..~~~....~~~~...vx',
+      'tu................tu',
+      'vx###...####...###vx',
+      'tu................tu',
+      'vx................vx',
+      'tu................tu',
+      'vx###...####...###vx',
+      'tu................tu',
+      'vx..~~~....~~~~...vx',
+      'tu................tu',
+      'vx###...####...###vx',
+      'tu................tu',
+      'vx................vx',
+      'tu................tu',
+      'vx###...####...###vx',
+      'tu................tu',
+      'vx................vx',
+      'tutututupppptutututu',
+      'vxvxvxvxppppvxvxvxvx'
+    ], 20, 34),
+    deco: blank(20, 34),
+    encounters: (G.ENCOUNTERS || {}).route23,
+    warps: [
+      { x: 9, y: 33, to: 'route22', tx: 1, ty: 5, dir: 'down' },
+      { x: 10, y: 33, to: 'route22', tx: 1, ty: 6, dir: 'down' },
+      { x: 9, y: 0, to: 'victoryroad1f', tx: 9, ty: 17, dir: 'up' },
+      { x: 10, y: 0, to: 'victoryroad1f', tx: 10, ty: 17, dir: 'up' }
+    ],
+    signs: [
+      { x: 8, y: 30, text: 'BADGE CHECK GATE 1 — VICTORY ROAD lies beyond. Present all eight BADGES.' }
+    ],
+    npcs: [
+      { x: 9, y: 29, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
+      { x: 9, y: 25, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
+      { x: 9, y: 21, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
+      { x: 9, y: 17, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
+      { x: 9, y: 13, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
+      { x: 9, y: 9, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
+      { x: 9, y: 5, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' }
+    ]
+  };
+
+  // ==========================================================================
+  // VICTORY ROAD — three floors of boulder work. Every staircase is behind
+  // something you have to shove, which makes it the only genuinely mechanical
+  // puzzle in KANTO and the last thing the region asks of you before it stops
+  // asking. MOLTRES is on the top floor and has been for some time.
+  // ==========================================================================
+  function victoryFloor(id, name, rowsIn, opts) {
+    G.MAPS[id] = {
+      id: id, name: name, w: 20, h: opts.h,
+      music: 'cave', battleBg: 'cave', base: 'darkfloor', indoors: true,
+      legend: G.LEG_CAVE, dark: true,
+      ground: pad(rowsIn, 20, opts.h),
+      deco: blank(20, opts.h),
+      encounters: (G.ENCOUNTERS || {})[id],
+      warps: opts.warps,
+      signs: opts.signs || [],
+      npcs: opts.npcs || [],
+      items: opts.items || [],
+      trainers: opts.trainers || []
+    };
+  }
+
+  victoryFloor('victoryroad1f', 'Victory Road 1F', [
+      '####################',
+      '#..................#',
+      '#.####.######.####.#',
+      '#.#..#.#....#.#..#.#',
+      '#.#..#.#.O..#.#..#.#',
+      '#.#..#.#....#.#..#.#',
+      '#.####.###.##.####.#',
+      '#........O.........#',
+      '#.##.############.##',
+      '#..#.#..........#..#',
+      '#.O#.#.########.#..#',
+      '#..#.#.#......#.#..#',
+      '#..#...#..>...#....#',
+      '#..#####..#####..###',
+      '#................###',
+      '#.####.#######.#####',
+      '#......#.....#......',
+      '########.....#######',
+      '#..................#',
+      '####################'
+    ], {
+    h: 20,
+    warps: [
+      { x: 9, y: 18, to: 'route23', tx: 9, ty: 1, dir: 'down' },
+      { x: 10, y: 18, to: 'route23', tx: 10, ty: 1, dir: 'down' },
+      { x: 10, y: 12, to: 'victoryroad2f', tx: 8, ty: 8, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 14, text: 'VICTORY ROAD. Someone has scratched a tally into the wall. It stops at forty-one.' }
+    ],
+    items: [
+      { x: 3, y: 16, item: 'tm05', flag: 'vr_tm05' }
+    ],
+    trainers: [
+      { x: 6, y: 9, sprite: 'cooltrainerm', dir: 'down', trainer: 'vr_naoko', sight: 3 },
+      { x: 15, y: 14, sprite: 'cooltrainerf', dir: 'left', trainer: 'vr_george', sight: 3 }
+    ]
+  });
+
+  victoryFloor('victoryroad2f', 'Victory Road 2F', [
+      '####################',
+      '#..................#',
+      '#.##############.#.#',
+      '#.#............#.#.#',
+      '#.#.##########.#.#.#',
+      '#.#.#........#.#.#.#',
+      '#.#.#.######.#.#.#.#',
+      '#.#.#.#....#.#.#.#.#',
+      '#.#.#.#.>O.#.#.#.#.#',
+      '#.#.#.#....#.#.#...#',
+      '#.#.#.###.##.#.####.',
+      '#.#.#......#.#.....#',
+      '#.#.########.#####.#',
+      '#.#.........O.....##',
+      '#.###############..#',
+      '#.................>#',
+      '####################'
+    ], {
+    h: 17,
+    warps: [
+      { x: 8, y: 8, to: 'victoryroad1f', tx: 11, ty: 12, dir: 'down' },
+      { x: 18, y: 15, to: 'victoryroad3f', tx: 9, ty: 15, dir: 'up' }
+    ],
+    signs: [
+      { x: 5, y: 11, text: 'A boulder, seated in a socket worn smooth. It has been pushed into place many times.' }
+    ],
+    items: [
+      { x: 3, y: 3, item: 'maxrevive', flag: 'vr_maxrevive' },
+      { x: 17, y: 1, item: 'fullrestore', flag: 'vr_full' }
+    ],
+    trainers: [
+      { x: 5, y: 5, sprite: 'cooltrainerm', dir: 'right', trainer: 'vr_daisuke', sight: 3 },
+      { x: 12, y: 11, sprite: 'pokemaniac', dir: 'left', trainer: 'vr_dawson', sight: 3 }
+    ]
+  });
+
+  victoryFloor('victoryroad3f', 'Victory Road 3F', [
+      '####################',
+      '#..................#',
+      '#.####.#....#.####.#',
+      '#.#..#.#....#.#..#.#',
+      '#.#..#.#....#.#..#.#',
+      '#.####.#.O..#.####.#',
+      '#......#....#......#',
+      '#.####.######.####.#',
+      '#.#..............#.#',
+      '#.#.O..........O.#.#',
+      '#.#..............#.#',
+      '#.################.#',
+      '#..................#',
+      '#.####.######.####.#',
+      '#.#..#.#....#.#..#.#',
+      '#.#..#.#.>..#.#..#.#',
+      '#.####.######.####.#',
+      '#..................#',
+      '####################'
+    ], {
+    h: 19,
+    warps: [
+      { x: 9, y: 15, to: 'victoryroad2f', tx: 17, ty: 15, dir: 'down' },
+      { x: 9, y: 1, to: 'indigo', tx: 9, ty: 18, dir: 'up' },
+      { x: 10, y: 1, to: 'indigo', tx: 10, ty: 18, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 12, text: 'Light from above. The exit is close, and it is the last piece of KANTO you will walk through as a challenger.' }
+    ],
+    items: [
+      { x: 16, y: 17, item: 'tm47', flag: 'vr_tm47' }
+    ],
+    trainers: [
+      { x: 4, y: 6, sprite: 'cooltrainerf', dir: 'right', trainer: 'vr_caroline', sight: 3 }
+    ],
+    npcs: [
+      { x: 15, y: 12, sprite: 'moltres', obj: true, dir: 'down',
+        unlessFlag: 'moltres_caught', event: 'moltresEncounter' }
+    ]
+  });
+
+  // ==========================================================================
+  // CERULEAN CAVE — the one door in KANTO that stays shut until the region
+  // decides you are finished. Seven badges gets you past the guard; the eighth
+  // is not the point. MEWTWO is on the second floor, at level 70, and it is
+  // the only encounter in the game that was not designed to be fair.
+  // ==========================================================================
+  G.MAPS.ceruleancave1f = {
+    id: 'ceruleancave1f', name: 'Cerulean Cave 1F', w: 20, h: 17,
+    music: 'cave', battleBg: 'cave', base: 'darkfloor', indoors: true, dark: true,
+    legend: G.LEG_CAVE,
+    ground: pad([
+      '####################',
+      '#..................#',
+      '#.####.######.####.#',
+      '#.#..#.#~~~~#.#..#.#',
+      '#.#..#.#~~~~#.#..#.#',
+      '#.####.######.####.#',
+      '#..................#',
+      '#.##############.###',
+      '#.#............#...#',
+      '#.#.##########.#.#.#',
+      '#.#.#........#.#.#.#',
+      '#.#.#.>......#...#.#',
+      '#.#.##########.###.#',
+      '#.#............#...#',
+      '#.##############.###',
+      '#..................#',
+      '####################'
+    ], 20, 17),
+    deco: blank(20, 17),
+    encounters: (G.ENCOUNTERS || {}).ceruleancave1f,
+    warps: [
+      { x: 1, y: 15, to: 'cerulean', tx: 3, ty: 3, dir: 'down' },
+      { x: 6, y: 11, to: 'ceruleancave2f', tx: 9, ty: 13, dir: 'down' }
+    ],
+    signs: [
+      { x: 4, y: 6, text: 'The rock here is scored in long parallel lines, at a height nothing native to this cave could reach.' }
+    ],
+    items: [
+      { x: 17, y: 1, item: 'fullrestore', flag: 'cc_full' }
+    ]
+  };
+
+  G.MAPS.ceruleancave2f = {
+    id: 'ceruleancave2f', name: 'Cerulean Cave B1F', w: 20, h: 15,
+    music: 'cave', battleBg: 'cave', base: 'darkfloor', indoors: true, dark: true,
+    legend: G.LEG_CAVE,
+    ground: pad([
+      '####################',
+      '#..................#',
+      '#.################.#',
+      '#.#~~~~~~~~~~~~~~#.#',
+      '#.#~~~~~~~~~~~~~~#.#',
+      '#.#~~~##########~#.#',
+      '#.#~~~#........#~#.#',
+      '#.#~~~#........#~#.#',
+      '#.#~~~#........#~#.#',
+      '#.#~~~##.#######~#.#',
+      '#.#~~~~~~~~~~~~~~#.#',
+      '#.#~~~~~~~~~~~~~~#.#',
+      '#.################.#',
+      '#........>.........#',
+      '####################'
+    ], 20, 15),
+    deco: blank(20, 15),
+    encounters: (G.ENCOUNTERS || {}).ceruleancaveb1f,
+    warps: [
+      { x: 9, y: 13, to: 'ceruleancave1f', tx: 7, ty: 11, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 13, text: 'The water in here does not move. Not with the current, not with your footsteps. Not at all.' }
+    ],
+    items: [
+      { x: 18, y: 11, item: 'maxrevive', flag: 'cc_maxrevive' }
+    ],
+    npcs: [
+      { x: 10, y: 7, sprite: 'mewtwo', obj: true, dir: 'down',
+        unlessFlag: 'mewtwo_caught', event: 'mewtwoEncounter' }
+    ]
+  };
+
+  // ==========================================================================
+  // INDIGO PLATEAU — one building, and you walk through all of it. The lobby
+  // has a CENTRE and a shop, and then a single red carpet running north into
+  // five sealed chambers with no way back out.
+  //
+  // Once you step onto the carpet the doors behind you close. There is no
+  // healing, no saving, and no leaving between the ELITE FOUR — lose to Lance
+  // and you start again at LORELEI, with whatever you have left. That is the
+  // whole shape of the ending, and it is the reason the lobby matters: it is
+  // the last place you can change your mind.
+  // ==========================================================================
+  G.MAPS.indigo = {
+    id: 'indigo', name: 'Indigo Plateau', w: 20, h: 20,
+    music: 'gym', battleBg: 'indoor', base: 'marble', indoors: true,
+    legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet',
+              'E': 'ihealm', 'C': 'icounter' },
+    ground: pad([
+      '####################',
+      '#..................#',
+      '#....##########....#',
+      '#....#........#....#',
+      '#....#.RRRRRR.#....#',
+      '#....#.RRRRRR.#....#',
+      '#....#.RRRRRR.#....#',
+      '#....##.RRRR.##....#',
+      '#.....#.RRRR.#.....#',
+      '#.....#.RRRR.#.....#',
+      '#.EEE.#.RRRR.#.CCC.#',
+      '#.....#.RRRR.#.....#',
+      '#.....#.RRRR.#.....#',
+      '#.....#.RRRR.#.....#',
+      '#.....#.RRRR.#.....#',
+      '#.....#.RRRR.#.....#',
+      '#.....##RRRR##.....#',
+      '#......RRRRRR......#',
+      '#..................#',
+      '#########..#########'
+    ], 20, 20),
+    deco: blank(20, 20),
+    warps: [
+      { x: 9, y: 19, to: 'victoryroad3f', tx: 9, ty: 2, dir: 'down' },
+      { x: 10, y: 19, to: 'victoryroad3f', tx: 10, ty: 2, dir: 'down' },
+      { x: 9, y: 1, to: 'e4lorelei', tx: 9, ty: 11, dir: 'up' },
+      { x: 10, y: 1, to: 'e4lorelei', tx: 10, ty: 11, dir: 'up' }
+    ],
+    respawnPoint: { mapId: 'indigo', x: 9, y: 16 },
+    signs: [
+      { x: 6, y: 17, text: 'INDIGO PLATEAU — POKéMON LEAGUE HEADQUARTERS. Beyond this hall, the doors only open one way.' }
+    ],
+    npcs: [
+      { x: 2, y: 11, sprite: 'nurse', dir: 'right', event: 'nurseHeal' },
+      { x: 17, y: 11, sprite: 'clerk', dir: 'left', event: 'shopBuy' },
+      { x: 8, y: 17, sprite: 'gymguy', dir: 'right', event: 'leagueWarning' },
+      { x: 13, y: 8, sprite: 'gentleman', dir: 'left',
+        dialog: ['Heal here. Buy here. Think here.',
+                 'Past the carpet there is none of the three.'] },
+      { x: 6, y: 4, sprite: 'oak', dir: 'down', ifFlag: 'champion', event: 'hallOfChampionsDoor' }
+    ],
+    shopInventory: ['fullrestore', 'maxpotion', 'fullheal', 'maxrevive', 'ultraball', 'hyperpotion']
+  };
+
+  // The five chambers. The architecture is deliberately identical every time —
+  // same room, same doors, same walk — because what changes is the person
+  // standing in it, and making the ROOMS escalate would do that work for them.
+  function leagueChamber(id, name, rowsIn, opts) {
+    G.MAPS[id] = {
+      id: id, name: name, w: 20, h: 14,
+      music: 'gym', battleBg: 'indoor', base: opts.floor || 'marble', indoors: true,
+      gymTint: opts.tint,
+      legend: { '#': 'marblewall', '.': opts.floor || 'marble',
+                'L': 'leaguedoor', 'O': 'boulder', 'U': 'statue' },
+      ground: pad(rowsIn, 20, 14),
+      deco: blank(20, 14),
+      warps: opts.warps,
+      trainers: opts.trainers,
+      npcs: opts.npcs || [],
+      signs: opts.signs || [],
+      league: true
+    };
+  }
+
+  leagueChamber('e4lorelei', 'Lorelei', [
+      '####################',
+      '#..................#',
+      '#........LL........#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#........LL........#',
+      '####################'
+    ], {
+    floor: 'icefloor', tint: '#78c8f0',
+    warps: [
+      { x: 9, y: 2, to: 'e4bruno', tx: 9, ty: 11, dir: 'up', needFlag: 'e4_lorelei' },
+      { x: 10, y: 2, to: 'e4bruno', tx: 10, ty: 11, dir: 'up', needFlag: 'e4_lorelei' }
+    ],
+    trainers: [
+      { x: 9, y: 4, sprite: 'lorelei', dir: 'down', trainer: 'lorelei', sight: 0 }
+    ],
+    signs: [
+      { x: 4, y: 12, text: 'The door you came through has closed. There is no handle on this side.' }
+    ]
+  });
+
+  leagueChamber('e4bruno', 'Bruno', [
+      '####################',
+      '#..................#',
+      '#........LL........#',
+      '#..................#',
+      '#....OO......OO....#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#........LL........#',
+      '####################'
+    ], {
+    floor: 'cavefloor', tint: '#c07038',
+    warps: [
+      { x: 9, y: 2, to: 'e4agatha', tx: 9, ty: 11, dir: 'up', needFlag: 'e4_bruno' },
+      { x: 10, y: 2, to: 'e4agatha', tx: 10, ty: 11, dir: 'up', needFlag: 'e4_bruno' }
+    ],
+    trainers: [
+      { x: 9, y: 4, sprite: 'bruno', dir: 'down', trainer: 'bruno', sight: 0 }
+    ]
+  });
+
+  leagueChamber('e4agatha', 'Agatha', [
+      '####################',
+      '#..................#',
+      '#........LL........#',
+      '#..................#',
+      '#....UU......UU....#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#........LL........#',
+      '####################'
+    ], {
+    floor: 'towerfloor', tint: '#7040a0',
+    warps: [
+      { x: 9, y: 2, to: 'e4lance', tx: 9, ty: 11, dir: 'up', needFlag: 'e4_agatha' },
+      { x: 10, y: 2, to: 'e4lance', tx: 10, ty: 11, dir: 'up', needFlag: 'e4_agatha' }
+    ],
+    trainers: [
+      { x: 9, y: 4, sprite: 'agatha', dir: 'down', trainer: 'agatha', sight: 0 }
+    ]
+  });
+
+  leagueChamber('e4lance', 'Lance', [
+      '####################',
+      '#..................#',
+      '#........LL........#',
+      '#..................#',
+      '#....UU......UU....#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#........LL........#',
+      '####################'
+    ], {
+    floor: 'marble', tint: '#5060c0',
+    warps: [
+      { x: 9, y: 2, to: 'e4champion', tx: 9, ty: 11, dir: 'up', needFlag: 'e4_lance' },
+      { x: 10, y: 2, to: 'e4champion', tx: 10, ty: 11, dir: 'up', needFlag: 'e4_lance' }
+    ],
+    trainers: [
+      { x: 9, y: 4, sprite: 'lance', dir: 'down', trainer: 'lance', sight: 0 }
+    ]
+  });
+
+  leagueChamber('e4champion', 'Champion', [
+      '####################',
+      '#..................#',
+      '#........LL........#',
+      '#..................#',
+      '#....UU......UU....#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#..................#',
+      '#........LL........#',
+      '####################'
+    ], {
+    floor: 'redcarpet', tint: '#d0b040',
+    warps: [
+      { x: 9, y: 2, to: 'halloffame', tx: 9, ty: 12, dir: 'up', needFlag: 'e4_champion' },
+      { x: 10, y: 2, to: 'halloffame', tx: 10, ty: 12, dir: 'up', needFlag: 'e4_champion' }
+    ],
+    trainers: [
+      { x: 9, y: 4, sprite: 'blue', dir: 'down', trainer: 'blue_champion', sight: 0 }
+    ],
+    signs: [
+      { x: 4, y: 12, text: 'A trophy plinth, and the trophy is not on it yet. Somebody was extremely confident about the timing.' }
+    ]
+  });
+
+  // ==========================================================================
+  // THE HALL OF FAME — the room the whole game points at. Nothing happens here
+  // except that a machine writes down the names of six POKéMON, and that is
+  // the correct amount of ceremony: the walk was the achievement.
+  // ==========================================================================
+  G.MAPS.halloffame = {
+    id: 'halloffame', name: 'Hall of Fame', w: 20, h: 14,
+    music: 'gym', battleBg: 'indoor', base: 'marble', indoors: true,
+    legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet', 'U': 'statue' },
+    ground: pad([
+      '####################',
+      '#..................#',
+      '#..UU..........UU..#',
+      '#..................#',
+      '#....RRRRRRRRRR....#',
+      '#....RRRRRRRRRR....#',
+      '#....RRRRRRRRRR....#',
+      '#....RRRRRRRRRR....#',
+      '#..UU.RRRRRRRR.UU..#',
+      '#.....RRRRRRRR.....#',
+      '#.....RRRRRRRR.....#',
+      '#.......RRRR.......#',
+      '#........RR........#',
+      '####################'
+    ], 20, 14),
+    deco: blank(20, 14),
+    warps: [],
+    scripts: [
+      { x: [8, 11], y: 8, run: 'hallOfFameCeremony', once: 'champion' }
+    ],
+    npcs: [
+      { x: 8, y: 5, sprite: 'oak', dir: 'down', ifFlag: 'champion', event: 'oakHallTalk' }
+    ]
+  };
+
+  // ==========================================================================
+  // THE HALL OF CHAMPIONS — five plinths down a long hall, and the people on
+  // them are not statues.
+  //
+  // This does not exist in Red/Blue. It exists here because the ELITE FOUR are
+  // the end of the CHALLENGE and this is the end of the GAME, and those should
+  // not be the same room. Every champion before you kept the title for a
+  // while, and every one of them found something in KANTO that nobody has
+  // found since — which is where the legendaries went.
+  //
+  // The fifth plinth is empty until the other four are done.
+  // ==========================================================================
+  G.MAPS.hallofchampions = {
+    id: 'hallofchampions', name: 'Hall of Champions', w: 20, h: 20,
+    music: 'gymleader', battleBg: 'indoor', base: 'marble', indoors: true,
+    legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet', 'U': 'statue' },
+    ground: pad([
+      '####################',
+      '#..................#',
+      '#..UU..........UU..#',
+      '#........RR........#',
+      '#........RR........#',
+      '#..UU....RR....UU..#',
+      '#........RR........#',
+      '#........RR........#',
+      '#..UU....RR....UU..#',
+      '#........RR........#',
+      '#........RR........#',
+      '#..UU....RR....UU..#',
+      '#........RR........#',
+      '#........RR........#',
+      '#..UU....RR....UU..#',
+      '#........RR........#',
+      '#........RR........#',
+      '#........RR........#',
+      '#..................#',
+      '####################'
+    ], 20, 20),
+    deco: blank(20, 20),
+    warps: [
+      { x: 9, y: 18, to: 'indigo', tx: 9, ty: 4, dir: 'down' },
+      { x: 10, y: 18, to: 'indigo', tx: 10, ty: 4, dir: 'down' }
+    ],
+    trainers: [
+      { x: 9, y: 15, sprite: 'cooltrainerf', dir: 'down', trainer: 'champ_wren', sight: 0 },
+      { x: 10, y: 12, sprite: 'hiker', dir: 'down', trainer: 'champ_halden', sight: 0 },
+      { x: 9, y: 9, sprite: 'psychicf', dir: 'down', trainer: 'champ_ines', sight: 0 },
+      { x: 10, y: 6, sprite: 'cooltrainerm', dir: 'down', trainer: 'champ_corvo', sight: 0 },
+      { x: 9, y: 3, sprite: 'red', dir: 'down', trainer: 'champ_red', sight: 0,
+        ifFlag: 'champ_corvo' }
+    ],
+    signs: [
+      { x: 4, y: 15, text: 'PLINTH I — WREN. Champion for six years. Retired the day she lost, and never said to whom.' },
+      { x: 15, y: 12, text: 'PLINTH II — HALDEN. Champion for two. Came up out of the MT. MOON tunnels and went back down them.' },
+      { x: 4, y: 9, text: 'PLINTH III — INES. Champion for nine. The longest anyone has held it, and nobody can name a single battle she lost.' },
+      { x: 15, y: 6, text: 'PLINTH IV — CORVO. Champion for one afternoon. The shortest reign on record, and he has never once explained it.' },
+      { x: 4, y: 3, text: 'PLINTH V — no name, no dates. The brass is polished anyway.' }
     ]
   };
 })();

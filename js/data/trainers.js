@@ -796,4 +796,201 @@
     intro: 'Last shutter. He is right behind it.',
     defeat: 'Go on.'
   });
+
+  // ======================================================= VIRIDIAN GYM =====
+  // The eighth gym is the first town you ever walked through, and it has been
+  // shut the whole game because its LEADER was busy running a criminal
+  // organisation out of a department store basement.
+  tr('vg_arthur', {
+    name: 'Arthur', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 2196,
+    party: [{ sp: 'nidorino', level: 42 }, { sp: 'nidoking', level: 44 }],
+    intro: 'He came back. That is all any of us know.',
+    defeat: 'Ask him yourself.'
+  });
+  tr('vg_atsushi', {
+    name: 'Atsushi', cls: 'Black Belt', sprite: 'trainer_blackbelt', ai: 'smart', money: 946,
+    party: [{ sp: 'machoke', level: 42 }, { sp: 'machamp', level: 44 }],
+    intro: 'The GYM reopened last week. No announcement. It was just open.',
+    defeat: 'Go on through.'
+  });
+  tr('vg_samantha', {
+    name: 'Samantha', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 2244,
+    party: [{ sp: 'rhyhorn', level: 43 }, { sp: 'dugtrio', level: 43 }, { sp: 'rhydon', level: 45 }],
+    intro: 'Everybody says he is finished. Everybody says that about him.',
+    defeat: 'He is behind me. He has always been behind me.'
+  });
+  tr('giovanni_viridian', {
+    name: 'Giovanni', cls: 'Leader', sprite: 'trainer_giovanni', ai: 'smart', money: 5049,
+    party: [
+      { sp: 'rhyhorn', level: 45 }, { sp: 'dugtrio', level: 42 },
+      { sp: 'nidoqueen', level: 44 }, { sp: 'nidoking', level: 45 },
+      { sp: 'rhydon', level: 50 }
+    ],
+    intro: 'So. You again. Three times now — the tower, the hideout, and my own front room.',
+    defeat: 'Again? And in my own GYM. ...Very well. Take the EARTHBADGE. It is the last one, and it is honestly earned.',
+    reward: { badge: 7, flag: 'badge8', text: 'You received the EARTHBADGE!' },
+    music: 'gymleader'
+  });
+
+  // ========================================================= VICTORY ROAD ===
+  tr('vr_naoko', {
+    name: 'Naoko', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 2352,
+    party: [{ sp: 'persian', level: 44 }, { sp: 'ninetales', level: 45 }],
+    intro: 'Nobody on this road is here by accident.',
+    defeat: 'Keep climbing.'
+  });
+  tr('vr_george', {
+    name: 'George', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 2400,
+    party: [{ sp: 'exeggutor', level: 45 }, { sp: 'kingler', level: 45 }, { sp: 'arcanine', level: 46 }],
+    intro: 'Third attempt. The first two do not count. That is what I tell people.',
+    defeat: 'Fourth attempt, then.'
+  });
+  tr('vr_daisuke', {
+    name: 'Daisuke', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 2448,
+    party: [{ sp: 'kingler', level: 45 }, { sp: 'tentacruel', level: 46 }, { sp: 'blastoise', level: 47 }],
+    intro: 'You will want the boulders. There is no way up without them.',
+    defeat: 'Push them where they will not roll back.'
+  });
+  tr('vr_dawson', {
+    name: 'Dawson', cls: 'Poké Maniac', sprite: 'trainer_pokemaniac', ai: 'basic', money: 1908,
+    party: [{ sp: 'rhyhorn', level: 45 }, { sp: 'lickitung', level: 45 }, { sp: 'rhydon', level: 47 }],
+    intro: 'MOLTRES is up there. On the top floor. I have seen it twice.',
+    defeat: 'Twice! And nobody believes me!'
+  });
+  tr('vr_caroline', {
+    name: 'Caroline', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 2496,
+    party: [{ sp: 'dewgong', level: 46 }, { sp: 'exeggutor', level: 46 }, { sp: 'nidoqueen', level: 48 }],
+    intro: 'Last one before the door. I have been the last one for six years.',
+    defeat: 'Six years, and you are the fourth to get past me. Go on.'
+  });
+
+  // ========================================================== ELITE FOUR ====
+  // Red/Blue levels, Red/Blue parties. The difficulty of the ELITE FOUR was
+  // never in any one of them — it is that there are four, and then a fifth,
+  // and you cannot heal between any of them.
+  tr('lorelei', {
+    name: 'Lorelei', cls: 'Elite Four', sprite: 'trainer_lorelei', ai: 'smart', money: 5544,
+    party: [
+      { sp: 'dewgong', level: 54 }, { sp: 'cloyster', level: 53 },
+      { sp: 'slowbro', level: 54 }, { sp: 'jynx', level: 56 },
+      { sp: 'lapras', level: 56 }
+    ],
+    intro: 'Welcome. No one can best me when it comes to icy POKéMON. Freezing moves are powerful — your POKéMON will be at my mercy when they are frozen solid!',
+    defeat: 'You are better than I thought. Go on ahead. You only have three more to face.',
+    reward: { flag: 'e4_lorelei' },
+    music: 'gymleader'
+  });
+  tr('bruno', {
+    name: 'Bruno', cls: 'Elite Four', sprite: 'trainer_bruno', ai: 'smart', money: 5643,
+    party: [
+      { sp: 'onix', level: 53 }, { sp: 'hitmonchan', level: 55 },
+      { sp: 'hitmonlee', level: 55 }, { sp: 'onix', level: 56 },
+      { sp: 'machamp', level: 58 }
+    ],
+    intro: 'I am BRUNO of the ELITE FOUR. Through rigorous training, people and POKéMON can become stronger without limit. We will grind you down!',
+    defeat: 'Why? How could I lose? My POKéMON and I trained for this.',
+    reward: { flag: 'e4_bruno' },
+    music: 'gymleader'
+  });
+  tr('agatha', {
+    name: 'Agatha', cls: 'Elite Four', sprite: 'trainer_agatha', ai: 'smart', money: 5742,
+    party: [
+      { sp: 'gengar', level: 56 }, { sp: 'golbat', level: 56 },
+      { sp: 'haunter', level: 55 }, { sp: 'arbok', level: 58 },
+      { sp: 'gengar', level: 60 }
+    ],
+    intro: 'I am AGATHA of the ELITE FOUR. OAK talks a great deal about you. That old duff was a good trainer once, and now he is a doting old fool.',
+    defeat: 'Oh my! You are something special, child.',
+    reward: { flag: 'e4_agatha' },
+    music: 'gymleader'
+  });
+  tr('lance', {
+    name: 'Lance', cls: 'Elite Four', sprite: 'trainer_lance', ai: 'smart', money: 6039,
+    party: [
+      { sp: 'gyarados', level: 58 }, { sp: 'dragonair', level: 56 },
+      { sp: 'dragonair', level: 56 }, { sp: 'aerodactyl', level: 60 },
+      { sp: 'dragonite', level: 62 }
+    ],
+    intro: 'I am LANCE, the DRAGON master. There are no DRAGON tamers left but me, and there is a reason for that.',
+    defeat: 'That is it, then. I am beaten. But do not get too comfortable — you have one more.',
+    reward: { flag: 'e4_lance' },
+    music: 'gymleader'
+  });
+  tr('blue_champion', {
+    name: 'Blue', cls: 'Champion', sprite: 'trainer_blue_champ', ai: 'smart', money: 6435,
+    party: [
+      { sp: 'pidgeot', level: 61 }, { sp: 'alakazam', level: 59 },
+      { sp: 'rhydon', level: 61 }, { sp: 'arcanine', level: 61 },
+      { sp: 'exeggutor', level: 61 }, { sp: '_starter3', level: 63 }
+    ],
+    intro: 'Hey. I was here first, and I have been sat in this chair for about eleven minutes.',
+    defeat: 'NO! That cannot be! You beat my best. ...You beat my best.',
+    reward: { flag: 'e4_champion' },
+    music: 'gymleader'
+  });
+
+  // ==================================================== HALL OF CHAMPIONS ===
+  // Four predecessors and one nobody will name. Each holds one of the things
+  // KANTO only has one of — which is the answer to the question the dex asks
+  // and never answers: where did the rest of them go.
+  tr('champ_wren', {
+    name: 'Wren', cls: 'Champion I', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 8000,
+    party: [
+      { sp: 'nidoqueen', level: 65 }, { sp: 'clefable', level: 65 },
+      { sp: 'starmie', level: 66 }, { sp: 'venusaur', level: 68 },
+      { sp: 'articuno', level: 70 }
+    ],
+    intro: 'Six years I held that chair. I lost it on a Tuesday and I have never told anyone to whom.',
+    defeat: 'Ah. To you, apparently. That is going to be much easier to say out loud.',
+    reward: { flag: 'champ_wren' },
+    music: 'gymleader'
+  });
+  tr('champ_halden', {
+    name: 'Halden', cls: 'Champion II', sprite: 'trainer_hiker', ai: 'smart', money: 8400,
+    party: [
+      { sp: 'golem', level: 66 }, { sp: 'dugtrio', level: 66 },
+      { sp: 'rhydon', level: 68 }, { sp: 'machamp', level: 68 },
+      { sp: 'zapdos', level: 70 }
+    ],
+    intro: 'I came up out of the MT. MOON tunnels with a GEODUDE and no plan. Held it two years and went back down.',
+    defeat: 'Still the best two years of it. Go on — INES is next, and INES is the problem.',
+    reward: { flag: 'champ_halden' },
+    music: 'gymleader'
+  });
+  tr('champ_ines', {
+    name: 'Ines', cls: 'Champion III', sprite: 'trainer_psychicf', ai: 'smart', money: 8800,
+    party: [
+      { sp: 'alakazam', level: 68 }, { sp: 'slowbro', level: 68 },
+      { sp: 'exeggutor', level: 69 }, { sp: 'gengar', level: 69 },
+      { sp: 'lapras', level: 70 }, { sp: 'moltres', level: 72 }
+    ],
+    intro: 'Nine years. Not one recorded loss. People find that impressive; I find it tiring.',
+    defeat: 'There. Now there is one. Thank you — genuinely.',
+    reward: { flag: 'champ_ines' },
+    music: 'gymleader'
+  });
+  tr('champ_corvo', {
+    name: 'Corvo', cls: 'Champion IV', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 9200,
+    party: [
+      { sp: 'dragonite', level: 70 }, { sp: 'gyarados', level: 70 },
+      { sp: 'arcanine', level: 70 }, { sp: 'machamp', level: 70 },
+      { sp: 'aerodactyl', level: 71 }, { sp: 'mewtwo', level: 74 }
+    ],
+    intro: 'One afternoon. Shortest reign on record. I have never explained it and I am not going to now.',
+    defeat: 'Four hours and eleven minutes, if you must know. I have not wanted it back since.',
+    reward: { flag: 'champ_corvo' },
+    music: 'gymleader'
+  });
+  tr('champ_red', {
+    name: 'Red', cls: '???', sprite: 'trainer_red', ai: 'smart', money: 10000,
+    party: [
+      { sp: 'pikachu', level: 78 }, { sp: 'venusaur', level: 77 },
+      { sp: 'snorlax', level: 76 }, { sp: 'blastoise', level: 77 },
+      { sp: 'charizard', level: 77 }, { sp: 'mew', level: 80 }
+    ],
+    intro: '...',
+    defeat: '...',
+    reward: { flag: 'champ_red' },
+    music: 'gymleader'
+  });
 })();
