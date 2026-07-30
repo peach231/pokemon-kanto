@@ -15,7 +15,7 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
-| Kanto maps | Pallet -> Lavender done (59 maps). Celadon, the Rocket Hideout and Saffron are next |
+| Kanto maps | Pallet -> Celadon done (70 maps). Saffron, Fuchsia, Cinnabar and the League are next |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
 | Region map screen | done — Kanto, landmass derived from the node graph |
 | Gen 1 move effects in battle.js | done — all 35 effect kinds handled, guarded by check.js |
@@ -26,8 +26,10 @@ inherited; the data, art sources, world and story are being replaced.
 BOOTS AND RENDERS. Playable from the start through to the Pokemon Tower: Pallet -> Viridian ->
 Viridian Forest -> Pewter (Brock) -> Mt. Moon -> Cerulean (Misty) -> Nugget
 Bridge -> Bill -> Underground Path -> Vermilion (Lt. Surge) -> S.S. Anne (Cut)
--> Route 9 -> Rock Tunnel -> Lavender -> Pokemon Tower. The Tower's ghost is
-gated on the SILPH SCOPE, which lives in Celadon and is not built yet.
+-> Route 9 -> Rock Tunnel -> Lavender -> Pokemon Tower -> Route 8 -> the
+east-west Underground Path -> Route 7 -> Celadon (Erika, Game Corner, Rocket
+Hideout). The Tower loop CLOSES: the Silph Scope is now obtainable, so the
+Marowak can be laid to rest and the Poke Flute collected.
 
 check.js now also walks the WARP GRAPH from Pallet and fails on any warp that
 lands on a solid tile or out of bounds (arriving stuck inside a wall) and warns
@@ -119,8 +121,9 @@ file, and both are the classic way this engine breaks.
   Each has the right message and a real effect; none silently does nothing.
   Upgrading them needs turn-loop state in `battle.js`.
 
-- The region stops at Lavender. Route 11 and Route 8 run out onto nothing.
-- The Pokemon Tower is completable only once Celadon exists (SILPH SCOPE).
+- The region stops at Celadon. Saffron is sealed on all four sides by design
+  and stays that way until Silph Co. is built.
+- Route 11's east end and Route 16 (Snorlax) are not built yet.
 - Saffron is deliberately sealed (its gates are solid tree on Route 5). The
   Underground Path is the intended way south, exactly as in Gen 1.
 - Object tiles (trees, rocks, boulders, decorations, signs, fences) are

@@ -1328,9 +1328,14 @@
       '...WNEW...pp..........',
       '..........pp..........',
       '..........pp..........'    // 19
-    ], 2)), 26, 20),
+    ], 2))
+      // The main street runs west out of town onto Route 8.
+      .map(function (r, i) { return i === 7 ? 'pp' + r.slice(2) : r; }),
+      26, 20),
     deco: blank(26, 20),
     warps: [
+      { x: 0, y: 7, to: 'route8', tx: 30, ty: 5, dir: 'left' },
+      { x: 1, y: 7, to: 'route8', tx: 30, ty: 6, dir: 'left' },
       { x: 12, y: 0, to: 'route10', tx: 10, ty: 14, dir: 'up' },
       { x: 13, y: 0, to: 'route10', tx: 11, ty: 14, dir: 'up' },
       { x: 6, y: 5, to: 'lavendercentre', tx: 4, ty: 6, dir: 'up' },
@@ -1357,4 +1362,149 @@
                  'Nobody stops them. Nobody dares.'] }
     ]
   };
+
+  // ==========================================================================
+  // ROUTE 8 — Lavender west toward Saffron. Saffron's east gate is shut like
+  // all the others, so the road onward is the second UNDERGROUND PATH: the
+  // east-west one, mirroring the north-south tunnel that got you to Vermilion.
+  // Kanto seals a whole city and then quietly digs around it twice.
+  // ==========================================================================
+  G.MAPS.route8 = {
+    id: 'route8', name: 'Route 8', w: 32, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      hband(32, true),
+      hband(32, false),
+      '................................',
+      '.....GHI........ggggg...........',
+      '.....KLM........ggggg...........',
+      'pppppWEWpppppppppppppppppppppppp',
+      'pppppppppppppppppppppppppppppppp',
+      '..........llllll................',
+      '.......................ggg......',
+      '.......................ggg......',
+      hband(32, true),
+      hband(32, false)
+    ], 32, 12),
+    deco: blank(32, 12),
+    encounters: (G.ENCOUNTERS || {}).route8,
+    warps: [
+      { x: 31, y: 5, to: 'lavender', tx: 2, ty: 7, dir: 'right' },
+      { x: 31, y: 6, to: 'lavender', tx: 2, ty: 7, dir: 'right' },
+      { x: 6, y: 5, to: 'undergroundpath2', tx: 3, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 10, y: 4, text: 'SAFFRON CITY — east gate. CLOSED. Use the UNDERGROUND PATH.' }
+    ],
+    trainers: [
+      { x: 18, y: 8, sprite: 'gambler', dir: 'up', trainer: 'r8_stan', sight: 3 },
+      { x: 26, y: 3, sprite: 'cooltrainerm', dir: 'down', trainer: 'r8_hector', sight: 3 }
+    ],
+    npcs: [
+      { x: 12, y: 7, sprite: 'policeman', dir: 'up',
+        dialog: ['All four SAFFRON gates are shut and the guards will not say why.',
+                 'Word is SILPH CO. has visitors it did not invite.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 7 — the short hop from the tunnel's west mouth into Celadon.
+  // ==========================================================================
+  G.MAPS.route7 = {
+    id: 'route7', name: 'Route 7', w: 20, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      hband(20, true),
+      hband(20, false),
+      '....................',
+      '..ggg.....GHI.......',
+      '..ggg.....KLM.......',
+      'pppppppppppppppppppp',
+      'pppppppppppppppppppp',
+      '.....lllll..........',
+      '................ggg.',
+      '................ggg.',
+      hband(20, true),
+      hband(20, false)
+    ], 20, 12),
+    deco: blank(20, 12),
+    encounters: (G.ENCOUNTERS || {}).route7,
+    warps: [
+      { x: 0, y: 5, to: 'celadon', tx: 25, ty: 13, dir: 'left' },
+      { x: 0, y: 6, to: 'celadon', tx: 25, ty: 13, dir: 'left' },
+      { x: 11, y: 5, to: 'undergroundpath2', tx: 21, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 14, y: 4, text: 'SAFFRON CITY — west gate. CLOSED. UNDERGROUND PATH to LAVENDER below.' }
+    ]
+  };
+
+  // ==========================================================================
+  // CELADON CITY — the biggest city in Kanto. A department store, a gym behind
+  // its own hedge, and a Game Corner that is very obviously a front.
+  // ==========================================================================
+  G.MAPS.celadon = {
+    id: 'celadon', name: 'Celadon City', w: 28, h: 24,
+    music: 'town', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    gymEmblem: { x: 6, y: 16, type: 'grass' },
+    ground: pad([
+      'tutututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu......................pptu',
+      'vx..GHHHI.......7889....ppvx',
+      'tu..KLLLM.......d+mh....pptu',
+      'vx..WNEEW.......WNEW....ppvx',
+      'tu......................pptu',
+      'vxppppppppppppppppppppppppvx',
+      'tu......................pptu',
+      'vx..GHHHI.......1223....ppvx',
+      'tu..KLLLM.......4556....pptu',
+      'vx..WNEEW.......WNDW....ppvx',
+      'tu......................pptu',
+      'vxpppppppppppppppppppppppppp',
+      'tu......................pptu',
+      'vx..ABBC......f.........ppvx',
+      'tu..abbc................pptu',
+      'vx..WYYW.........Q......ppvx',
+      'tu......................pptu',
+      'vx..S...................ppvx',
+      'tu......................pptu',
+      'vx......................ppvx',
+      'tu......................pptu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], 28, 24),
+    deco: blank(28, 24),
+    warps: [
+      { x: 25, y: 13, to: 'route7', tx: 1, ty: 5, dir: 'right' },
+      { x: 6, y: 5, to: 'celadonstore', tx: 6, ty: 10, dir: 'up' },
+      { x: 7, y: 5, to: 'celadonstore', tx: 7, ty: 10, dir: 'up' },
+      { x: 18, y: 5, to: 'celadoncentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 6, y: 11, to: 'gamecorner', tx: 8, ty: 12, dir: 'up' },
+      { x: 7, y: 11, to: 'gamecorner', tx: 9, ty: 12, dir: 'up' },
+      { x: 18, y: 11, to: 'celadonhouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 5, y: 17, to: 'celadongym', tx: 5, ty: 12, dir: 'up' },
+      { x: 6, y: 17, to: 'celadongym', tx: 6, ty: 12, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 20, text: 'CELADON CITY — The City of Rainbow Dreams.' },
+      { x: 5, y: 6, text: 'CELADON DEPARTMENT STORE — Six floors. Everything you could want.' },
+      { x: 5, y: 12, text: 'ROCKET GAME CORNER — The playground where everyone plays!' },
+      { x: 5, y: 18, text: 'CELADON CITY POKéMON GYM — LEADER: ERIKA. The Nature-Loving Princess!' }
+    ],
+    npcs: [
+      { x: 10, y: 15, sprite: 'gymguy', dir: 'right',
+        dialog: ["ERIKA's POKéMON are GRASS types, and they will put you to sleep.",
+                 'FIRE, ICE, FLYING or PSYCHIC. Anything else and you are in for a long afternoon.'] },
+      { x: 20, y: 8, sprite: 'beauty', dir: 'down',
+        dialog: ['The GAME CORNER has been here for years and I have never once seen anyone win.',
+                 'Odd, that. For a casino.'] },
+      { x: 14, y: 19, sprite: 'oldman', dir: 'down',
+        dialog: ['A SNORLAX has been asleep across ROUTE 16 for as long as I can remember.',
+                 'Nothing wakes it. People have tried everything short of music.'] }
+    ]
+  };
+
 })();

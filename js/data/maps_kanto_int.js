@@ -1243,4 +1243,314 @@
     yield { t: 'text', s: 'Sailor: A ticket! Welcome aboard the S.S. ANNE.' };
     yield { t: 'text', s: '...The gangway is still being lowered. Come back shortly.' };
   };
+
+  // =========================================================== CELADON CITY ==
+  healCentre('celadoncentre', 'CELADON', { map: 'celadon', x: 18, y: 6 });
+
+  // The department store stands in for the Mart, with the deepest stock in the
+  // game -- which is the reward for having come this far around the loop.
+  G.MAPS.celadonstore = {
+    id: 'celadonstore', name: 'Celadon Dept. Store', w: 14, h: 12,
+    music: 'center', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIIIII',
+      'I.BBB..BBB..PI',
+      'I............I',
+      'I............I',
+      'I.BBB..BBB...I',
+      'I............I',
+      'I............I',
+      'I.BBB..BBB...I',
+      'I............I',
+      'I............I',
+      'I............I',
+      'IIIIII..IIIIII'
+    ], 14, 12),
+    deco: blank(14, 12),
+    warps: [
+      { x: 6, y: 11, to: 'celadon', tx: 6, ty: 6, dir: 'down' },
+      { x: 7, y: 11, to: 'celadon', tx: 7, ty: 6, dir: 'down' }
+    ],
+    shopInventory: [
+      'potion', 'superpotion', 'hyperpotion', 'maxpotion', 'fullrestore',
+      'antidote', 'burnheal', 'iceheal', 'awakening', 'parlyzheal', 'fullheal',
+      'revive', 'pokeball', 'greatball', 'ultraball',
+      'repel', 'superrepel', 'maxrepel', 'escaperope',
+      'firestone', 'waterstone', 'thunderstone', 'leafstone'
+    ],
+    npcs: [
+      { x: 4, y: 3, sprite: 'clerk', dir: 'down', event: 'shopBuy' },
+      { x: 10, y: 6, sprite: 'woman2', dir: 'left',
+        dialog: ['Fourth floor sells EVOLUTION STONES. Real ones.',
+                 'A THUNDERSTONE on a PIKACHU, a WATER STONE on an EEVEE. Life-changing, for them.'] },
+      { x: 3, y: 9, sprite: 'richboy', dir: 'right',
+        dialog: ['Daddy buys me whatever I want here.', 'I mostly want the lift.'] }
+    ]
+  };
+
+  G.MAPS.celadonhouse = {
+    id: 'celadonhouse', name: 'Celadon House', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'IP..TT..PI',
+      'I........I',
+      'I.B......I',
+      'I........I',
+      'I..o..o..I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'celadon', tx: 19, ty: 12, dir: 'down' },
+      { x: 5, y: 8, to: 'celadon', tx: 19, ty: 12, dir: 'down' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'gentleman', dir: 'down',
+        dialog: ['My grandson goes to that GAME CORNER every day and never comes home richer.',
+                 'I have started to wonder what he is actually doing in there.'] }
+    ]
+  };
+
+  // ------------------------------------------------------------ ERIKA'S GYM -
+  G.MAPS.celadongym = {
+    id: 'celadongym', name: 'Celadon Gym', w: 12, h: 14,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'IGGGGGGGGGGI',
+      'IGGPGGGGPGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGPGGGGPGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGPGGGGPGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IIIII..IIIII'
+    ], 12, 14),
+    deco: blank(12, 14),
+    warps: [
+      { x: 5, y: 13, to: 'celadon', tx: 6, ty: 18, dir: 'down' },
+      { x: 6, y: 13, to: 'celadon', tx: 6, ty: 18, dir: 'down' }
+    ],
+    npcs: [
+      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'celadonGymGuide' }
+    ],
+    trainers: [
+      { x: 5, y: 1, sprite: 'erika', dir: 'down', trainer: 'erika', sight: 0 },
+      { x: 3, y: 6, sprite: 'beauty', dir: 'right', trainer: 'cg_tamia', sight: 4 },
+      { x: 8, y: 9, sprite: 'picnicker', dir: 'left', trainer: 'cg_lynn', sight: 4 }
+    ]
+  };
+
+  G.EVENTS.celadonGymGuide = function* () {
+    if (G.flags.badge4) {
+      yield { t: 'text', s: 'Guide: The RAINBOWBADGE. Your POKéMON can use STRENGTH outside battle now.' };
+      return;
+    }
+    yield { t: 'text', s: 'Guide: ERIKA looks half asleep. Do not read anything into it.' };
+    yield { t: 'text', s: 'Guide: GRASS types, and every one of them carries SLEEP POWDER or STUN SPORE.' };
+    yield { t: 'text', s: 'Guide: If your lead goes down, you lose the tempo and the fight. Bring an AWAKENING.' };
+    yield { t: 'text', s: 'Guide: FIRE or FLYING ends it fast. A CHARMELEON walks this gym.' };
+  };
+
+  // ------------------------------------------------------------ GAME CORNER -
+  // Per the design brief there is no slot minigame: the Corner exists for its
+  // story beat, which is the poster nobody is allowed to stand near.
+  G.MAPS.gamecorner = {
+    id: 'gamecorner', name: 'Rocket Game Corner', w: 18, h: 14,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIIIIIIIII',
+      'I.HHH.HHH.HHH...PI',
+      'I................I',
+      'I.HHH.HHH.HHH....I',
+      'I................I',
+      'I.HHH.HHH.HHH....I',
+      'I................I',
+      'I.HHH.HHH.HHH....I',
+      'I................I',
+      'I................I',
+      'I................I',
+      'I................I',
+      'IIIIIIII..IIIIIIII',
+      'IIIIIIIIIIIIIIIIII'
+    ], 18, 14),
+    deco: blank(18, 14),
+    warps: [
+      { x: 8, y: 12, to: 'celadon', tx: 6, ty: 12, dir: 'down' },
+      { x: 9, y: 12, to: 'celadon', tx: 7, ty: 12, dir: 'down' },
+      { x: 15, y: 9, to: 'rockethideout1', tx: 2, ty: 1, dir: 'down' }
+    ],
+    signs: [
+      { x: 4, y: 2, text: 'A slot machine. The reels are worn smooth. It has not paid out in a very long time.' }
+    ],
+    npcs: [
+      { x: 14, y: 9, sprite: 'rocket', dir: 'left', event: 'gameCornerPoster' },
+      { x: 5, y: 10, sprite: 'gambler', dir: 'down',
+        dialog: ['Been here eleven hours. Down four thousand.',
+                 'The machines are fine. It is me. It must be me.'] },
+      { x: 11, y: 10, sprite: 'beauty', dir: 'down',
+        dialog: ['That man by the back poster has not played a single game all day.',
+                 'He just stands there. Watching the wall.'] }
+    ]
+  };
+
+  G.EVENTS.gameCornerPoster = function* () {
+    if (G.flags.hideoutOpen) {
+      yield { t: 'text', s: 'The poster hangs open on its hinge. Stairs lead down into the dark.' };
+      return;
+    }
+    yield { t: 'text', s: 'Rocket: Beat it, kid. Nothing back here.' };
+    yield { t: 'text', s: 'He is standing in front of a poster. Not playing. Not moving.' };
+    yield { t: 'text', s: 'You look at the poster. You look at him. He stops smiling.' };
+    yield { t: 'text', s: 'Rocket: ...You saw nothing. Understand?' };
+    yield {
+      t: 'custom',
+      run: function (resume) { G.startTrainerBattle('gc_rocket', { onDone: resume }); }
+    };
+    if (!G.flags.gc_rocket) return;
+    yield { t: 'fn', fn: function () { G.flags.hideoutOpen = 1; } };
+    yield { t: 'sfx', id: 'doorOpen' };
+    yield { t: 'text', s: 'The grunt bolts. The poster swings loose behind him.' };
+    yield { t: 'text', s: 'There is a staircase behind it, going down.' };
+  };
+
+  // --------------------------------------------------------- ROCKET HIDEOUT -
+  function hideoutFloor(n, opts) {
+    var id = 'rockethideout' + n;
+    G.MAPS[id] = {
+      id: id, name: 'Rocket Hideout B' + n + 'F', w: 20, h: 16,
+      music: 'cave', battleBg: 'indoor', base: 'metalfloor',
+      legend: { '.': 'metalfloor', '#': 'metalwall', '>': 'stairs' },
+      ground: pad([
+        '####################',
+        '#..................#',
+        '#..####....####....#',
+        '#..#..........#....#',
+        '#..#..####....#....#',
+        '#.....#..#.........#',
+        '#..####..####..#####',
+        '#..............#...#',
+        '#..#####..####.#...#',
+        '#......#..#........#',
+        '#..###.#..#..####..#',
+        '#....#.#..#..#.....#',
+        '#....#....#..#..####',
+        '#....######..#.....#',
+        '#..................#',
+        '####################'
+      ], 20, 16),
+      deco: blank(20, 16),
+      warps: opts.warps,
+      signs: opts.signs || [],
+      npcs: opts.npcs || [],
+      trainers: opts.trainers || [],
+      items: opts.items || []
+    };
+  }
+
+  hideoutFloor(1, {
+    warps: [
+      { x: 2, y: 1, to: 'gamecorner', tx: 15, ty: 8, dir: 'up' },
+      { x: 17, y: 14, to: 'rockethideout2', tx: 2, ty: 1, dir: 'down' }
+    ],
+    trainers: [
+      { x: 9, y: 1, sprite: 'rocket', dir: 'down', trainer: 'rh_grunt1', sight: 4 },
+      { x: 12, y: 7, sprite: 'rocket', dir: 'left', trainer: 'rh_grunt2', sight: 3 }
+    ],
+    items: [{ x: 5, y: 14, item: 'superpotion', once: 'rh_potion' }]
+  });
+
+  hideoutFloor(2, {
+    warps: [
+      { x: 2, y: 1, to: 'rockethideout1', tx: 17, ty: 13, dir: 'up' }
+    ],
+    signs: [
+      { x: 6, y: 14, text: 'A steel door, badly dented. Someone has tried to get through it from this side.' }
+    ],
+    trainers: [
+      { x: 9, y: 7, sprite: 'rocket', dir: 'down', trainer: 'rh_grunt3', sight: 4 },
+      { x: 16, y: 11, sprite: 'rocket', dir: 'left', trainer: 'rh_grunt4', sight: 3 }
+    ],
+    npcs: [
+      { x: 9, y: 14, sprite: 'giovanni', dir: 'down', unlessFlag: 'rh_giovanni', event: 'hideoutBoss' },
+      { x: 14, y: 1, sprite: 'orb_stand', obj: true, event: 'hideoutScope' }
+    ]
+  });
+
+  G.EVENTS.hideoutBoss = function* () {
+    yield { t: 'text', s: '???: You are a very long way from anywhere you should be.' };
+    yield { t: 'text', s: '???: I am GIOVANNI. This is my operation, and you are standing in it.' };
+    yield { t: 'text', s: 'Giovanni: A casino launders money. A tower supplies bone. It is all inventory.' };
+    yield {
+      t: 'custom',
+      run: function (resume) { G.startTrainerBattle('giovanni_hideout', { onDone: resume }); }
+    };
+    if (!G.flags.rh_giovanni) return;
+    yield { t: 'text', s: 'Giovanni: ...Hm. You are better than the reports said.' };
+    yield { t: 'text', s: 'Giovanni: Keep the building. I have another one.' };
+    yield { t: 'text', s: 'He walks out past you, unhurried, and nobody stops him.' };
+  };
+
+  G.EVENTS.hideoutScope = function* () {
+    if (G.flags.silphscope) {
+      yield { t: 'text', s: 'An empty case on a bench.' };
+      return;
+    }
+    if (!G.flags.rh_giovanni) {
+      yield { t: 'text', s: 'A case on a bench, locked. The man at the far end of the room is watching you.' };
+      return;
+    }
+    yield { t: 'text', s: 'The case is open now. Inside is a lens on a handle.' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.flags.silphscope = 1;
+        G.player.bag.silphscope = 1;
+      }
+    };
+    yield { t: 'sfx', id: 'catchClick' };
+    yield { t: 'text', s: 'You received the SILPH SCOPE!' };
+    yield { t: 'text', s: 'It shows you what is really there. The TOWER in LAVENDER has something that needs seeing.' };
+  };
+
+
+  // The EAST-WEST Underground Path: Route 8 to Route 7, under Saffron. Kanto
+  // seals one city and digs around it twice, and this is the second tunnel.
+  G.MAPS.undergroundpath2 = {
+    id: 'undergroundpath2', name: 'Underground Path', w: 25, h: 5,
+    music: 'cave', battleBg: 'indoor', base: 'metalfloor',
+    legend: { '.': 'metalfloor', '#': 'metalwall' },
+    ground: pad([
+      '#########################',
+      '###.#################.###',
+      '#.......................#',
+      '#.......................#',
+      '#########################'
+    ], 25, 5),
+    deco: blank(25, 5),
+    warps: [
+      { x: 3, y: 1, to: 'route8', tx: 6, ty: 6, dir: 'down' },
+      { x: 21, y: 1, to: 'route7', tx: 11, ty: 6, dir: 'down' }
+    ],
+    items: [
+      { x: 12, y: 3, item: 'fullheal', once: 'up2_fullheal' }
+    ],
+    npcs: [
+      { x: 8, y: 2, sprite: 'oldman', dir: 'right',
+        dialog: ['Two tunnels under one city. Somebody in SAFFRON is very good at annoying people.'] }
+    ]
+  };
+
 })();

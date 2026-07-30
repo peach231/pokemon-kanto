@@ -374,6 +374,55 @@
     intro: 'The old man stays until we get what we came for.',
     defeat: 'Fine! Take him! He is not worth this.', music: 'battle' });
 
+  tr('r8_stan', { name: 'Gambler Stan', sprite: 'trainer_gambler', ai: 'smart', money: 1040,
+    party: [{ sp: 'poliwag', level: 26 }, { sp: 'horsea', level: 26 }],
+    intro: 'Double or nothing?',
+    defeat: 'Nothing, then. As usual.', music: 'battle' });
+  tr('r8_hector', { name: 'Jr. Trainer Hector', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 700,
+    party: [{ sp: 'growlithe', level: 27 }, { sp: 'nidorino', level: 27 }],
+    intro: 'SAFFRON is shut. You will have to go under, like everyone else.',
+    defeat: 'The tunnel entrance is back west.', music: 'battle' });
+
+  // Erika's gym.
+  tr('cg_tamia', { name: 'Beauty Tamia', sprite: 'trainer_beauty', ai: 'smart', money: 800,
+    party: [{ sp: 'bellsprout', level: 27 }, { sp: 'weepinbell', level: 27 }],
+    intro: 'The garden is lovely at this hour. Do try not to trample it.',
+    defeat: 'You trampled it.', music: 'battle' });
+  tr('cg_lynn', { name: 'Picnicker Lynn', sprite: 'trainer_picnicker', ai: 'smart', money: 560,
+    party: [{ sp: 'oddish', level: 28 }, { sp: 'gloom', level: 28 }],
+    intro: 'Careful. Everything in here puts you to sleep.',
+    defeat: 'Not quite everything, apparently.', music: 'battle' });
+
+  // Team Rocket, Celadon operation.
+  tr('gc_rocket', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1288,
+    party: [{ sp: 'raticate', level: 28 }, { sp: 'zubat', level: 28 }],
+    intro: 'You saw nothing. Understand?',
+    defeat: 'I saw nothing either! Nothing!', music: 'battle' });
+  tr('rh_grunt1', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1334,
+    party: [{ sp: 'grimer', level: 29 }, { sp: 'koffing', level: 29 }],
+    intro: 'Nobody comes down here by accident.',
+    defeat: 'How did you even find the stairs?', music: 'battle' });
+  tr('rh_grunt2', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1380,
+    party: [{ sp: 'zubat', level: 30 }, { sp: 'golbat', level: 30 }],
+    intro: 'The BOSS is downstairs and he does not like interruptions.',
+    defeat: 'Go on then. Interrupt him. See what happens.', music: 'battle' });
+  tr('rh_grunt3', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1426,
+    party: [{ sp: 'drowzee', level: 30 }, { sp: 'grimer', level: 30 }, { sp: 'koffing', level: 30 }],
+    intro: 'This floor is restricted. Very restricted.',
+    defeat: 'Evidently not restricted enough.', music: 'battle' });
+  tr('rh_grunt4', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1472,
+    party: [{ sp: 'raticate', level: 31 }, { sp: 'golbat', level: 31 }],
+    intro: 'Last one before the BOSS. Turn back.',
+    defeat: 'I did warn you.', music: 'battle' });
+  tr('giovanni_hideout', {
+    name: 'Giovanni', cls: 'Team Rocket', sprite: 'trainer_giovanni', ai: 'smart', money: 3100,
+    party: [{ sp: 'onix', level: 25 }, { sp: 'rhyhorn', level: 24 }, { sp: 'kangaskhan', level: 29 }],
+    intro: 'You are standing in my operation.',
+    defeat: 'Hm. You are better than the reports said.',
+    reward: { flag: 'rh_giovanni', text: 'GIOVANNI walks out, unhurried.' },
+    music: 'gymleader'
+  });
+
   // ================================================ starter counter cycle ===
   // Blue always takes the starter that BEATS yours. The whole relationship, in
   // one line of data.

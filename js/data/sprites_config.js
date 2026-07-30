@@ -220,6 +220,9 @@
       cooltrainerf: 'cooltrainer_f',
       beauty:     'beauty',
       gentleman:  'gentleman',
+      // No gambler sheet exists in pokefirered; the gentleman reads correctly
+      // for a man in a waistcoat losing money in a casino.
+      gambler:    'gentleman',
       richboy:    'rich_boy',
       policeman:  'policeman',
       clerk:      'clerk',
