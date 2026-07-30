@@ -503,4 +503,153 @@
     yield { t: 'text', s: 'Guide: If you took BULBASAUR or SQUIRTLE, you already have the answer. If you took CHARMANDER... good luck.' };
     yield { t: 'text', s: 'Guide: Catch a MANKEY on ROUTE 22, west of VIRIDIAN. FIGHTING moves crack rock wide open.' };
   };
+
+  // ========================================================== CERULEAN CITY =
+  healCentre('ceruleancentre', 'CERULEAN', { map: 'cerulean', x: 20, y: 6 });
+  pokeMart('ceruleanmart', 'CERULEAN', { map: 'cerulean', x: 20, y: 18 },
+    ['potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+     'pokeball', 'greatball', 'repel', 'escaperope']);
+
+  G.MAPS.ceruleanhouse = {
+    id: 'ceruleanhouse', name: 'Cerulean House', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'IP..TT..PI',
+      'I........I',
+      'I.B......I',
+      'I........I',
+      'I..o..o..I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'cerulean', tx: 20, ty: 12, dir: 'down' },
+      { x: 5, y: 8, to: 'cerulean', tx: 20, ty: 12, dir: 'down' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'woman3', dir: 'down',
+        dialog: ['MISTY is the youngest of four sisters and the only one who battles.',
+                 'The other three do a water ballet. She finds this excruciating.'] }
+    ]
+  };
+
+  // The burgled house. You can walk in through the hole they left.
+  G.MAPS.robbedhouse = {
+    id: 'robbedhouse', name: 'Ransacked House', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'I..T...PII',
+      'I........I',
+      'I.B......I',
+      'I........I',
+      'I..o.....I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'cerulean', tx: 7, ty: 18, dir: 'down' },
+      { x: 5, y: 8, to: 'cerulean', tx: 7, ty: 18, dir: 'down' }
+    ],
+    signs: [
+      { x: 8, y: 2, text: 'The back wall has a hole in it roughly the size of a person. It was not made from the inside.' }
+    ],
+    npcs: [
+      { x: 3, y: 4, sprite: 'baldingman', dir: 'down', event: 'robbedTalk' }
+    ]
+  };
+
+  // ---------------------------------------------------------- CERULEAN GYM --
+  // Pools rather than a plain floor: the room should say WATER before Misty
+  // opens her mouth.
+  G.MAPS.ceruleangym = {
+    id: 'ceruleangym', name: 'Cerulean Gym', w: 12, h: 14,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IIIII..IIIII'
+    ], 12, 14),
+    deco: blank(12, 14),
+    warps: [
+      { x: 5, y: 13, to: 'cerulean', tx: 5, ty: 12, dir: 'down' },
+      { x: 6, y: 13, to: 'cerulean', tx: 6, ty: 12, dir: 'down' }
+    ],
+    npcs: [
+      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'ceruleanGymGuide' }
+    ],
+    trainers: [
+      { x: 5, y: 2, sprite: 'misty', dir: 'down', trainer: 'misty', sight: 0 },
+      { x: 3, y: 6, sprite: 'swimmerf', dir: 'right', trainer: 'cg_diana', sight: 4 },
+      { x: 8, y: 8, sprite: 'swimmer', dir: 'left', trainer: 'cg_luis', sight: 4 }
+    ]
+  };
+
+  G.EVENTS.ceruleanGymGuide = function* () {
+    if (G.flags.badge2) {
+      yield { t: 'text', s: 'Guide: The CASCADEBADGE! Nice. South out of town for VERMILION.' };
+      return;
+    }
+    yield { t: 'text', s: "Guide: MISTY's STARMIE is the problem, not her STARYU." };
+    yield { t: 'text', s: 'Guide: It is fast, it hits hard on the SPECIAL side, and it will out-speed almost anything you have.' };
+    yield { t: 'text', s: 'Guide: ELECTRIC or GRASS. A PIKACHU from VIRIDIAN FOREST would do it in one.' };
+  };
+
+  G.EVENTS.robbedTalk = function* () {
+    yield { t: 'text', s: 'Man: They came through the wall. THROUGH IT.' };
+    yield { t: 'text', s: 'Man: Black uniforms. A red R on the front. They took a TM and went out the back.' };
+    yield { t: 'text', s: 'Man: The police say they went south. Nobody has seen them since.' };
+    if (!G.flags.rocketSeen) {
+      yield { t: 'fn', fn: function () { G.flags.rocketSeen = 1; } };
+    }
+  };
+
+  // ------------------------------------------------------- the two fossils --
+  // Mt. Moon's set piece. You take ONE, and the one you leave is gone for good
+  // — which is the point. It is the first irreversible choice in the game, and
+  // both fossils were on display in the Pewter museum so it is an informed one.
+  function fossilEvent(item, other, blurb) {
+    return function* () {
+      if (G.flags.fossil) {
+        yield { t: 'text', s: 'The other fossil is gone. Someone took it while you were deciding.' };
+        return;
+      }
+      yield { t: 'text', s: blurb };
+      yield { t: 'text', s: 'There is only time to carry one out.' };
+      yield {
+        t: 'fn',
+        fn: function () {
+          G.flags.fossil = item;
+          G.player.bag[item] = (G.player.bag[item] || 0) + 1;
+        }
+      };
+      yield { t: 'sfx', id: 'catchClick' };
+      yield { t: 'text', s: 'You took the ' + G.ITEMS[item].name + '!' };
+      yield { t: 'text', s: 'The ' + G.ITEMS[other].name + ' stays where it is. You will not get another chance at it.' };
+      yield { t: 'text', s: 'They can revive these on CINNABAR ISLAND, apparently. A long way from here.' };
+    };
+  }
+  G.EVENTS.mtmoonFossil = fossilEvent('domefossil', 'helixfossil',
+    'A DOME FOSSIL, half out of the rock. Whatever it was had a shell like a shield.');
+  G.EVENTS.mtmoonFossil2 = fossilEvent('helixfossil', 'domefossil',
+    'A HELIX FOSSIL, spiralled and almost intact. It is heavier than it looks.');
 })();

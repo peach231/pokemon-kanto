@@ -61,8 +61,8 @@
 
   // CAVE — Mt. Moon, Rock Tunnel, Victory Road, Cerulean Cave.
   G.LEG_CAVE = {
-    '.': 'cavefloor', '#': 'cavewall', 'O': 'boulder', '*': 'rock',
-    '>': 'stairs', '~': 'water', 'g': 'tallgrass',
+    '.': 'cavefloor', ',': 'cavecalm', '#': 'cavewall', 'O': 'boulder',
+    '*': 'rock', '>': 'stairs', '~': 'water',
     ':': 'darkfloor', '%': 'darkwall',
     'i': 'icefloor', 'I': 'icewall'
   };
@@ -426,7 +426,7 @@
       '....KLLLM...........',
       '....WNEEW...........',
       '....................',
-      'pppppppppppppppppppp',   // 6  north street
+      'pppppppppppppppppppp',   // 6  north street -- and the road east
       '....................',
       '..ABBC......7889....',   // 8  gym            Centre
       '..abbc......d+mh....',
@@ -442,11 +442,16 @@
       '..........pp........',
       '..........pp........',
       '..........pp........'    // 21
-    ], 2)), 24, 22),
+    ], 2))
+      // The north street runs straight out of town onto Route 3, so its east
+      // tree border is replaced by road.
+      .map(function (r, i) { return i === 6 ? r.slice(0, 22) + 'pp' : r; }),
+      24, 22),
     deco: blank(24, 22),
     warps: [
       { x: 12, y: 21, to: 'route2', tx: 10, ty: 1, dir: 'down' },
       { x: 13, y: 21, to: 'route2', tx: 11, ty: 1, dir: 'down' },
+      { x: 23, y: 6, to: 'route3', tx: 1, ty: 5, dir: 'right' },
       { x: 8, y: 4, to: 'pewtermuseum', tx: 6, ty: 10, dir: 'up' },
       { x: 9, y: 4, to: 'pewtermuseum', tx: 7, ty: 10, dir: 'up' },
       { x: 5, y: 10, to: 'pewtergym', tx: 5, ty: 12, dir: 'up' },
@@ -469,6 +474,273 @@
                  'Nobody can agree what it was.'] },
       { x: 15, y: 19, sprite: 'littlegirl', dir: 'down',
         dialog: ['MT. MOON is east of here, past ROUTE 3.', "It's dark inside. Really dark."] }
+    ]
+  };
+
+  // Horizontal routes are framed top and bottom instead of left and right, so
+  // they get their own border rows rather than the row() helper.
+  function hband(w, even) {
+    var pair = even ? 'tu' : 'vx', r = '';
+    while (r.length < w) r += pair;
+    return r.slice(0, w);
+  }
+
+  // ==========================================================================
+  // ROUTE 3 — the climb east out of Pewter. Gen 1 packs this route with more
+  // trainers than anywhere else so far, and the ledges let you fall back west
+  // toward the Centre without re-fighting any of them.
+  // ==========================================================================
+  G.MAPS.route3 = {
+    id: 'route3', name: 'Route 3', w: 36, h: 12,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      hband(36, true),
+      hband(36, false),
+      '....................................',
+      '..ggggg......ggggg.......ggggg......',
+      '..ggggg......ggggg.......ggggg......',
+      'pppppppppppppppppppppppppppppppppppp',
+      'pppppppppppppppppppppppppppppppppppp',
+      '.....llllll........llllll...........',
+      '..........................ggggg.....',
+      '..........................ggggg.....',
+      hband(36, true),
+      hband(36, false)
+    ], 36, 12),
+    deco: blank(36, 12),
+    encounters: (G.ENCOUNTERS || {}).route3,
+    warps: [
+      { x: 0, y: 5, to: 'pewter', tx: 22, ty: 6, dir: 'left' },
+      { x: 0, y: 6, to: 'pewter', tx: 22, ty: 6, dir: 'left' },
+      { x: 35, y: 5, to: 'mtmoon1f', tx: 2, ty: 15, dir: 'right' },
+      { x: 35, y: 6, to: 'mtmoon1f', tx: 2, ty: 15, dir: 'right' }
+    ],
+    signs: [
+      { x: 33, y: 4, text: 'MT. MOON — Cave entrance. A light source is strongly advised.' }
+    ],
+    trainers: [
+      { x: 8, y: 4, sprite: 'youngster', dir: 'down', trainer: 'r3_calvin', sight: 3 },
+      { x: 19, y: 8, sprite: 'lass', dir: 'up', trainer: 'r3_janice', sight: 3 },
+      { x: 28, y: 3, sprite: 'bugcatcher', dir: 'down', trainer: 'r3_colton', sight: 3 }
+    ],
+    items: [
+      { x: 3, y: 9, item: 'potion', once: 'r3_potion' }
+    ],
+    npcs: [
+      { x: 31, y: 7, sprite: 'hiker', dir: 'left',
+        dialog: ['MT. MOON has three levels and no lights in any of them.',
+                 'Take ESCAPE ROPEs. Take more than you think.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // MT. MOON 1F — the first cave. Every floor tile is an encounter tile (see
+  // the note in sprites_tiles.js), so the route through is a running battle;
+  // the entrance chamber and the junctions use the quiet variant so it never
+  // becomes unplayable.
+  // ==========================================================================
+  G.MAPS.mtmoon1f = {
+    id: 'mtmoon1f', name: 'Mt. Moon', w: 28, h: 18,
+    music: 'cave', battleBg: 'cave', base: 'cavefloor',
+    legend: G.LEG_CAVE,
+    ground: pad([
+      '############################',
+      '#.........#........#.......#',
+      '#..*......#....O...#...*...#',
+      '#.................#....O...#',
+      '#.........####.....#.......#',
+      '####.####....#.....#####.###',
+      '#..............*.......,>,.#',
+      '#....O.........#...........#',
+      '#..............#....*......#',
+      '####.......#####...........#',
+      '#..........#...............#',
+      '#....*.....#....O..........#',
+      '#..........#...............#',
+      '#..........#####.......#####',
+      '#..............#...........#',
+      '#,,....*.......#....O......#',
+      '#,,............#...........#',
+      '############################'
+    ], 28, 18),
+    deco: blank(28, 18),
+    encounters: (G.ENCOUNTERS || {}).mtmoon1f,
+    warps: [
+      { x: 1, y: 15, to: 'route3', tx: 34, ty: 5, dir: 'left' },
+      { x: 1, y: 16, to: 'route3', tx: 34, ty: 6, dir: 'left' },
+      { x: 24, y: 6, to: 'mtmoonb1f', tx: 3, ty: 3, dir: 'down' }
+    ],
+    signs: [
+      { x: 2, y: 14, text: 'MT. MOON 1F — The way out is west. The way on is somewhere in the dark.' }
+    ],
+    trainers: [
+      { x: 13, y: 3, sprite: 'bugcatcher', dir: 'down', trainer: 'mm_kent', sight: 3 },
+      { x: 20, y: 11, sprite: 'hiker', dir: 'left', trainer: 'mm_marcos', sight: 3 }
+    ],
+    items: [
+      { x: 5, y: 2, item: 'potion', once: 'mm_potion' },
+      { x: 22, y: 15, item: 'escaperope', once: 'mm_rope' }
+    ]
+  };
+
+  // ==========================================================================
+  // MT. MOON B1F — the bottom. Team Rocket are down here arguing over the two
+  // fossils, and whichever one you take is the one you can revive on Cinnabar.
+  // ==========================================================================
+  G.MAPS.mtmoonb1f = {
+    id: 'mtmoonb1f', name: 'Mt. Moon B1F', w: 28, h: 18,
+    music: 'cave', battleBg: 'cave', base: 'cavefloor',
+    legend: G.LEG_CAVE,
+    ground: pad([
+      '############################',
+      '#..,,......#...............#',
+      '#..,,......#....*......O...#',
+      '#..,>,.....#...............#',
+      '#..........#####.....#######',
+      '#....O..............#......#',
+      '####.....####.......#......#',
+      '#........#..........#..*...#',
+      '#...*....#..........#......#',
+      '#........#....O.....#......#',
+      '#........####.......####.###',
+      '#...................#......#',
+      '#####.####..........#..,,..#',
+      '#........#.....*....#..,,..#',
+      '#........#..........#.,,,,.#',
+      '#...O....#..........#.,,,,.#',
+      '#........#..........#..,>,.#',
+      '############################'
+    ], 28, 18),
+    deco: blank(28, 18),
+    encounters: (G.ENCOUNTERS || {}).mtmoonb1f,
+    warps: [
+      { x: 4, y: 3, to: 'mtmoon1f', tx: 24, ty: 7, dir: 'up' },
+      { x: 24, y: 16, to: 'route4', tx: 1, ty: 6, dir: 'right' }
+    ],
+    signs: [
+      { x: 23, y: 14, text: 'A hand-painted board: TO ROUTE 4 AND CERULEAN. Someone has added, in pen: FINALLY.' }
+    ],
+    trainers: [
+      { x: 14, y: 5, sprite: 'rocket', dir: 'down', trainer: 'mm_rocket1', sight: 4 },
+      { x: 22, y: 8, sprite: 'rocket', dir: 'left', trainer: 'mm_rocket2', sight: 3 },
+      { x: 6, y: 13, sprite: 'scientist', dir: 'right', trainer: 'mm_miguel', sight: 3 }
+    ],
+    npcs: [
+      { x: 15, y: 13, sprite: 'orb_stand', obj: true, event: 'mtmoonFossil' },
+      { x: 16, y: 13, sprite: 'orb_stand', obj: true, event: 'mtmoonFossil2' }
+    ],
+    items: [
+      { x: 3, y: 8, item: 'moonstone', once: 'mm_moonstone' }
+    ]
+  };
+
+  // ==========================================================================
+  // ROUTE 4 — a short ledge-strewn shelf down into Cerulean. In Gen 1 this is
+  // where the map opens up: the first water you cannot cross yet is right here.
+  // ==========================================================================
+  G.MAPS.route4 = {
+    id: 'route4', name: 'Route 4', w: 32, h: 14,
+    music: 'route', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    ground: pad([
+      hband(32, true),
+      hband(32, false),
+      '................................',
+      '..ggggg...............ggggg.....',
+      '..ggggg...............ggggg.....',
+      'pppppppppppppppppppppppppppppppp',
+      'pppppppppppppppppppppppppppppppp',
+      '.......llllllll.................',
+      '................................',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      hband(32, true),
+      hband(32, false)
+    ], 32, 14),
+    deco: blank(32, 14),
+    encounters: (G.ENCOUNTERS || {}).route4,
+    warps: [
+      { x: 0, y: 5, to: 'mtmoonb1f', tx: 23, ty: 16, dir: 'left' },
+      { x: 0, y: 6, to: 'mtmoonb1f', tx: 23, ty: 16, dir: 'left' },
+      { x: 31, y: 5, to: 'cerulean', tx: 2, ty: 13, dir: 'right' },
+      { x: 31, y: 6, to: 'cerulean', tx: 2, ty: 13, dir: 'right' }
+    ],
+    signs: [
+      { x: 12, y: 8, text: 'ROUTE 4 — CERULEAN CITY to the east. Deep water beyond the shelf; SURF only.' }
+    ],
+    npcs: [
+      { x: 20, y: 8, sprite: 'fisher', dir: 'down',
+        dialog: ['I have been casting off this shelf for thirty years.',
+                 'MAGIKARP. Every single time. Thirty years of MAGIKARP.'] }
+    ]
+  };
+
+  // ==========================================================================
+  // CERULEAN CITY — a lake town. Misty's gym, and the house Team Rocket
+  // burgled, which is where the story turns from "collect badges" to "somebody
+  // is doing something."
+  // ==========================================================================
+  G.MAPS.cerulean = {
+    id: 'cerulean', name: 'Cerulean City', w: 26, h: 24,
+    music: 'town', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    gymEmblem: { x: 6, y: 8, type: 'water' },
+    ground: pad([
+      'tutututututu..tutututututu',
+      'vxvxvxvxvxvx..vxvxvxvxvxvx'
+    ].concat(rows([
+      '..........pp..........',   // 2
+      '~~~~~~....pp....7889..',
+      '~~~~~~....pp....d+mh..',
+      '~~~~~~....pp....WNEW..',
+      '..........pp..........',
+      'pppppppppppppppppppppp',   // 7
+      '..........pp..........',
+      '..ABBC....pp....1223..',   // 9  gym            house
+      '..abbc....pp....4556..',
+      '..WYYW....pp....WNDW..',
+      '..........pp..........',
+      'pppppppppppppppppppppp',   // 13
+      '..........pp..........',
+      '...1223...pp....qrrz..',   // 15 robbed house   Mart
+      '...4556...pp....i$jk..',
+      '...WNDW...pp....WNEW..',
+      '..........pp..........',
+      '..S.......pp.......Q..',
+      '..........pp..........',
+      '..........pp..........',
+      '..........pp..........'    // 23
+    ], 2))
+      // The south street runs west out of town onto Route 4.
+      .map(function (r, i) { return i === 13 ? 'pp' + r.slice(2) : r; }),
+      26, 24),
+    deco: blank(26, 24),
+    warps: [
+      { x: 0, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
+      { x: 1, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
+      { x: 5, y: 11, to: 'ceruleangym', tx: 5, ty: 12, dir: 'up' },
+      { x: 6, y: 11, to: 'ceruleangym', tx: 6, ty: 12, dir: 'up' },
+      { x: 20, y: 5, to: 'ceruleancentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 20, y: 17, to: 'ceruleanmart', tx: 4, ty: 6, dir: 'up' },
+      { x: 20, y: 11, to: 'ceruleanhouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 7, y: 17, to: 'robbedhouse', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 19, text: 'CERULEAN CITY — A Mysterious, Blue Aura Surrounds It.' },
+      { x: 5, y: 12, text: 'CERULEAN CITY POKéMON GYM — LEADER: MISTY. The Tomboyish Mermaid!' }
+    ],
+    npcs: [
+      { x: 10, y: 8, sprite: 'gymguy', dir: 'right',
+        dialog: ['MISTY uses WATER POKéMON, and her STARMIE is fast and hits hard.',
+                 'ELECTRIC or GRASS moves. Anything else and you are just chipping at it.'] },
+      { x: 9, y: 18, sprite: 'policeman', dir: 'down',
+        dialog: ['A house was broken into last night. Went straight through the back wall.',
+                 'Black uniforms, red R on the chest. Nobody will say the name out loud.'] },
+      { x: 17, y: 20, sprite: 'oldman', dir: 'left',
+        dialog: ['BILL lives north of here, up ROUTE 25.',
+                 'Brilliant man. Bit odd. Ask him about the storage system.'] }
     ]
   };
 })();

@@ -15,7 +15,7 @@ inherited; the data, art sources, world and story are being replaced.
 | Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
 | Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
 | Kanto tileset | done — 110 tiles, rendered and reviewed |
-| Kanto maps | Pallet -> Pewter done (19 maps). Route 3 east to Mt. Moon is next |
+| Kanto maps | Pallet -> Cerulean done (29 maps). Routes 24/25 and Route 5 south to Vermilion are next |
 | Encounter tables | done — all 56 wild maps generated from the ROM |
 | Region map screen | still draws Hoenn |
 | Gen 1 move effects in battle.js | descriptors emitted, engine doesn't read them all yet |
@@ -23,9 +23,9 @@ inherited; the data, art sources, world and story are being replaced.
 | Story, trainers, gyms, endgame | not started |
 
 **`node tools/check.js` passes**, battle-core tests included, and the game
-BOOTS AND RENDERS. Playable from the start through to the BOULDERBADGE:
-Pallet -> Route 1 -> Viridian -> Route 2 -> Viridian Forest -> Pewter -> Brock.
-Nothing east of Pewter exists yet.
+BOOTS AND RENDERS. Playable from the start through to the CASCADEBADGE: Pallet -> Route 1 ->
+Viridian -> Route 2 -> Viridian Forest -> Pewter (Brock) -> Route 3 -> Mt. Moon
+1F/B1F -> Route 4 -> Cerulean (Misty). Nothing past Cerulean exists yet.
 
 check.js now also walks the WARP GRAPH from Pallet and fails on any warp that
 lands on a solid tile or out of bounds (arriving stuck inside a wall) and warns
@@ -102,7 +102,8 @@ file, and both are the classic way this engine breaks.
 
 ## Known rough edges
 
-- The region stops at Pewter. Pewter has no east exit yet (Route 3).
+- The region stops at Cerulean. Its south exit to Route 5 is not wired,
+  because Route 5 has not been built.
 - `js/engine/title.js` still flies Rayquaza and Groudon.
 - `G.RegionMapScene` in `menus.js` still draws `'HOENN — REGION MAP'`.
 - `battle.js` understands the old Gen 3 effect kinds; the generated `moves.js`

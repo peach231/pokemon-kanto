@@ -184,6 +184,60 @@
     defeat: 'Not shiny enough, apparently.', music: 'battle'
   });
 
+  tr('r3_colton', {
+    name: 'Bug Catcher Colton', sprite: 'trainer_bugcatcher', ai: 'basic', money: 189,
+    party: [{ sp: 'caterpie', level: 10 }, { sp: 'weedle', level: 10 }, { sp: 'caterpie', level: 10 }],
+    intro: 'Hey! You have POKéMON! Let us battle!',
+    defeat: 'Three of them and not one held up.', music: 'battle'
+  });
+
+  // Mt. Moon. The Rockets are here for the fossils, which is the first sign
+  // that anyone in Kanto is doing something worse than losing a battle.
+  tr('mm_kent', {
+    name: 'Bug Catcher Kent', sprite: 'trainer_bugcatcher', ai: 'basic', money: 231,
+    party: [{ sp: 'weedle', level: 11 }, { sp: 'kakuna', level: 11 }],
+    intro: 'Are you also here for the MOON STONE?',
+    defeat: 'Fine, it is all yours.', music: 'battle'
+  });
+  tr('mm_marcos', {
+    name: 'Hiker Marcos', sprite: 'trainer_hiker', ai: 'basic', money: 462,
+    party: [{ sp: 'geodude', level: 11 }, { sp: 'onix', level: 11 }],
+    intro: 'I came up here for the rocks. Found POKéMON made of rock. Better!',
+    defeat: 'Solid effort. Ha. Solid.', music: 'battle'
+  });
+  tr('mm_miguel', {
+    name: 'Super Nerd Miguel', sprite: 'trainer_supernerd', ai: 'smart', money: 550,
+    party: [{ sp: 'grimer', level: 12 }, { sp: 'voltorb', level: 12 }, { sp: 'koffing', level: 12 }],
+    intro: 'The fossils are MINE. I found them first!',
+    defeat: 'Fine! Take one. Just one!', music: 'battle'
+  });
+  tr('mm_rocket1', {
+    name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 605,
+    party: [{ sp: 'rattata', level: 13 }, { sp: 'zubat', level: 13 }],
+    intro: 'You are in TEAM ROCKET business now. Bad move.',
+    defeat: 'Ow! You are strong!', music: 'battle'
+  });
+  tr('mm_rocket2', {
+    name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 660,
+    party: [{ sp: 'sandshrew', level: 11 }, { sp: 'rattata', level: 11 }, { sp: 'zubat', level: 11 }],
+    intro: 'Nobody gets past me. Nobody!',
+    defeat: 'Somebody got past me.', music: 'battle'
+  });
+
+  // Misty's gym.
+  tr('cg_diana', {
+    name: 'Swimmer Diana', sprite: 'trainer_swimmerf', ai: 'basic', money: 320,
+    party: [{ sp: 'goldeen', level: 16 }],
+    intro: 'I am going to be the next MISTY!',
+    defeat: 'Maybe the one after next.', music: 'battle'
+  });
+  tr('cg_luis', {
+    name: 'Swimmer Luis', sprite: 'trainer_swimmer', ai: 'basic', money: 360,
+    party: [{ sp: 'horsea', level: 16 }, { sp: 'shellder', level: 16 }],
+    intro: 'You are gonna get soaked!',
+    defeat: 'I got soaked instead.', music: 'battle'
+  });
+
   // ================================================ starter counter cycle ===
   // Blue always takes the starter that BEATS yours. The whole relationship, in
   // one line of data.

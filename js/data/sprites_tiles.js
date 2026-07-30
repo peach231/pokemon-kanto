@@ -907,14 +907,19 @@
       'bbbbbbbbbbbbbbbb'
     ]);
   }
+  // Walls have to be unmistakably NOT floor. The first pass shared the floor's
+  // mid-tone and the two read as one surface at a glance, which is dangerous in
+  // a cave where the whole game is "where can I actually walk". So the wall is
+  // pushed down the ramp — dark body, a single bright cap on each course — and
+  // ends up several steps darker than the floor it sits against.
   function caveWall(name, pal) {
     T(name, pal, [
-      fill('d'), 'ccccccccccccccca', 'cbcbccbcbccbcbca',
-      'bbbbbbbbbbbbbbba', 'baabaaabaabaaaba', fill('a'),
-      'aoaaoaaoaaoaaoaa', fill('o'), fill('a'),
-      'ccccccccccccccca', 'cbccbcbccbcbccba', 'bbbbbbbbbbbbbbba',
-      'baaabaabaaabaaba', fill('a'), 'aoaoaaoaaoaaoaaa',
-      fill('o')
+      fill('d'), fill('c'), 'baabaaabaabaaaba',
+      fill('a'), 'aoaaoaaoaaoaaoaa', fill('o'),
+      'oooaoooaoooaooao', fill('o'),
+      fill('c'), 'baabaaabaabaaaba',
+      fill('a'), 'aoaaoaaoaaoaaoaa', fill('o'),
+      'ooaoooaoooaoooao', fill('o'), fill('o')
     ]);
   }
   var CV  = { o: C.lim0, a: C.lim1, b: C.lim2, c: C.lim3, d: C.lim4 };
@@ -1062,12 +1067,19 @@
     stairs:    { img: 't_stairs' },
 
     // ---- caves ----
-    cavefloor: { img: 't_cavefloor', cave: true },
+    // Cave floors carry `grass: true` because in Gen 1 a cave has encounters on
+    // EVERY tile, not in marked patches — walking through Mt. Moon is supposed
+    // to be a running battle. The flag drives the encounter hook; the art is
+    // still plain rock.
+    cavefloor: { img: 't_cavefloor', cave: true, grass: true },
     cavewall:  { img: 't_cavewall', solid: true },
-    darkfloor: { img: 't_darkfloor', cave: true },
+    darkfloor: { img: 't_darkfloor', cave: true, grass: true },
     darkwall:  { img: 't_darkwall', solid: true },
-    icefloor:  { img: 't_icefloor', cave: true },
+    icefloor:  { img: 't_icefloor', cave: true, grass: true },
     icewall:   { img: 't_icewall', solid: true },
+    // A quiet cave tile for entrance chambers and junctions, where a battle
+    // every other step would just be irritating.
+    cavecalm:  { img: 't_cavefloor', cave: true },
 
     // ---- special interiors ----
     towerfloor: { img: 't_towerfloor' },
