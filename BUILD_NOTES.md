@@ -1,72 +1,106 @@
-# Pokéram — build notes (for development continuity)
+# pokemon-kanto — build notes
 
-GBA-style monster-catching RPG. Vanilla JS + Canvas, no build step — double-click
-`index.html`. Plan: `~/.claude/plans/make-a-pok-mon-clone-glowing-bear.md`.
+A Generation 1 / Kanto monster-catching RPG. Vanilla JS + Canvas, logical
+240×160 integer-scaled, global `G`, **no build step** — open `index.html`.
+
+Forked from `../pokemon-gen3` (itself the `pokeram` engine). The engine layer is
+inherited; the data, art sources, world and story are being replaced.
+
+## Status
+
+| Phase | State |
+|---|---|
+| Engine fork + scaffold | done |
+| Gen 1 data layer (151 species, 165 moves, type chart) | done — generated from `pret/pokered` |
+| Gen 1 mechanics (DVs, single Special, speed crits, stones) | done |
+| Art pipeline (animated battlers, FRLG portraits + overworld, cries) | done — all 122 URLs verified |
+| **Kanto tileset** | next |
+| **Kanto maps** | not started — this is the big one |
+| Encounter tables | parser ready (`pokered.loadWild`), not wired |
+| Region map screen | still draws Hoenn |
+| Gen 1 move effects in battle.js | descriptors emitted, engine doesn't read them all yet |
+| Intro sequence | still Rayquaza/Groudon |
+| Story, trainers, gyms, endgame | not started |
+
+**`node tools/check.js` currently fails with ~436 errors.** Every one is a
+still-Hoenn map or trainer referencing a species that no longer exists. That is
+expected at this point and resolves as the maps are replaced. The game does not
+run yet.
 
 ## Workflows (CRITICAL)
 
-- **Validate everything**: `node tools/check.js` — loads all scripts in index.html
-  order under Node, lints art grids / maps / species / moves, runs nothing visual.
-- **Battle logic tests**: loaded scripts expose `G.debug.runTests()` (run by check
-  via #debug in browser; under node: see how tools/check.js loads, then call it).
-- **Sel-out shading** is applied automatically at bake time (postShade in bake_mons.js): fill pixels touching the outline below/right get a darker master-palette shade. Don't hand-shade rims in recipes.
-- **Creature art pipeline**: recipes in `tools/recipes.js` (shape grammar from
-  `tools/spritegen.js`: ball/ellipse/tri/line/rect/ring/eye/outline/seam) →
-  `node tools/bake_mons.js` → bakes palette-indexed grids into
-  `js/data/sprites_mons_a..f.js` + `js/data/sprites_trainers.js`. NEVER hand-edit
-  baked files. Char 'K' = eye shine. Light always upper-left. Outline char 'o'.
-- **Visual review**: headless Edge screenshots:
-  `& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless
-  --disable-gpu --screenshot=tools\shot.png --window-size=1000,700
-  --virtual-time-budget=6000 "file:///...index.html#HASH"` then Read the png.
-  Hash modes: `#gallery&p=N` (sprite gallery page N), `#wild&ff=400` (wild battle,
-  fast-forward 400 frames), `#battle&auto&ff=N` (autoplay trainer battle),
-  `#debug` (runs tests + cheats). `ff=N` steps N logic frames synchronously at boot.
+- **Regenerate data**: `node tools/gen_data.js`. NEVER hand-edit
+  `js/data/{types,moves,species_*,kanto_dex}.js` — they carry a generated
+  header. Edit `tools/gen_data.js` or `tools/blurbs.js` and re-run.
+- **Validate**: `node tools/check.js` — loads every script in `index.html`
+  order under Node, lints art grids / maps / species / moves, runs the battle
+  tests. Run after EVERY map or data edit.
+- **Visual review**: headless Edge screenshots. Use `--headless=new` AND a
+  unique `--user-data-dir` per invocation — the default profile locks and
+  silently writes no PNG.
 
-## Architecture snapshot
+      msedge --headless=new --disable-gpu --user-data-dir=<unique tmp>
+             --screenshot=tools\shot.png --window-size=1000,700
+             --virtual-time-budget=9000 "file:///.../index.html#HASH"
 
-- Global namespace `G`; script order in index.html (core → data → engine → main).
-- Scene stack `G.scenes` (opaque flag controls draw-down). Transitions are scenes.
-- Battle: `G.Battle` (js/engine/battle.js) yields descriptor objects from
-  generators; `G.BattleScene` (battle_ui.js) animates them; `G.debug.simBattle`
-  pumps headless. Descriptors: text/sfx/anim/hp/expbar/sendOut/recall/status/
-  shake/catch/choose/end. `choose` is interactive — UI passes pick into gen.next().
-- Overworld: `G.world` + `G.overworldScene` (movement FSM, warps, signs, npcs,
-  events). Events = generators in `G.EVENTS` yielding text/fn/wait/custom.
-  Wild grass → `G.hooks.grassStep` (wired in overworld.js bottom).
-  `G.startTrainerBattle(id, opts)`, `G.afterBattle` handle outcomes/white-out.
-- Maps: char-grid layers (ground/deco/over) + legend + base tile; `G.LEG_EXT` /
-  `G.LEG_INT` shared legends in maps_towns.js.
-- Player state: `G.player` + `G.flags` (save.js; localStorage `pokeram_save_v1`).
-- `G.trainerParty(def)` resolves `_starter`/`_starter2`/`_starter3` placeholders
-  to the rival's counter-starter line (COUNTER cycle in trainers.js).
+  Hashes: `#gallery&p=N`, `#wild&ff=400`, `#battle&auto&ff=N`, `#debug`,
+  `#map=<id>,<x>,<y>`.
 
-## Status: ALL PHASES COMPLETE
+## Architecture
 
-1-5 ✅ shell, world, battle core+UI, catch & growth.
-6 ✅ Region: 35 maps (Hearthvale→Crown Summit), all 100 creature sprites baked,
-   9 trainer portraits via makeHuman() in recipes, ~30 trainers + 4 leaders +
-   rival ×4 + champion, LOS engagement, badge gates, item pickups, shops/heals
-   (factory-stamped per town), Slumbear set-piece, post-game legendaries.
-7 ✅ Menus: StartMenu (Enter), Party (+reorder), Summary, Bag (+repel),
-   Dex (seen/caught + rarity stars), Save via localStorage, Title screen.
-8 ✅ Audio: 4-channel WebAudio tracker (square/square/triangle/noise),
-   8 songs + 4 jingles in music.js, full synthesized SFX bank, M-mute.
-9 ✅ Polish: balance sims at gym levels (type-advantage sweeps, same-type
-   walls, champion ace ~50/50 vs final starter), README, this file.
+- Global `G`; script order in `index.html` (core → data → engine → main).
+- Scene stack `G.scenes`; transitions are themselves scenes.
+- Battle: `G.Battle` (battle.js) yields descriptor objects from generators;
+  `G.BattleScene` (battle_ui.js) animates them. Descriptors: text/sfx/anim/hp/
+  expbar/sendOut/recall/status/shake/catch/choose/end. `choose` is interactive.
+- Overworld: `G.world` + `G.overworldScene`. Events are generators in `G.EVENTS`
+  yielding text/fn/wait/custom.
+- Maps: char-grid layers (ground/deco/over) + a legend + a base tile.
+- Player state: `G.player` + `G.flags` (save.js, localStorage).
 
-## Known rough edges (future passes)
+## Decisions locked with Eric
 
-- Fire starter line = black panthers (Emberpaw/Pyranther/Umbranther; species key 'emberynx' kept for save compat). Type is 'dark' (renamed from shadow).
-- Battles resolve fast (2-5 turns) with damage-max AI; real play with items/
-  switching is longer. A turn-economy pass could raise HP ~15%.
-- Auto-back sprites are weakest for face-forward designs; authored backs exist
-  for the 12 starters only.
-- Houses are 1 wall-row tall (squat); cavewall reads as recessed band.
-- No PC storage — catches blocked at party of 6 (by design, plan §risks).
-- Shop has no sell flow. No nicknames. Evolution move-learning at the evolve
-  level itself is skipped (only level-up learns).
-- Audio not yet human-audited (composed blind; tracker patterns may want
-  rebalancing after a listen — channel gains in audio.js CHAN_VOL).
+- **Literal Kanto** — Pallet → Viridian → Pewter → … → Indigo Plateau, real
+  geography, real routes 1–25.
+- **Animated Gen-5 battlers.** They are GIFs, so gfx keeps them LIVE and
+  re-blits each frame (`gfx.tickLive`, called from `main.js`). Do not route
+  them through `_fitToBox` — it bakes to a canvas and freezes frame 0.
+- **Overworld sprites stream** from `pret/pokefirered`; that set is complete for
+  Kanto so nothing renders blank. Eric also wants to *see* hand-authored samples
+  before deciding — build a side-by-side comparison and ask. Do not switch
+  unless he says so.
+- **Tileset is hand-authored**, a full new temperate Kanto set (not a retint).
+- **Music**: keep the inherited 8 tracker songs for now. Eric initially asked
+  for real Gen 1 transcriptions; that was walked back because they would be
+  guessed melodies and a copyright liability in a public repo.
+- **Player**: choose Red or Leaf. **Rival**: always Blue, no name entry.
+- **Intro**: full sequence — legendary cinematic → parade title → Oak's welcome
+  → Nidorino vs Gengar demo → name entry.
+- **Elite Four**: Gen-1-accurate sealed gauntlet. Centre + shop at the entrance,
+  then five sealed chambers, no healing, no saving, no exit. Lose anywhere and
+  you restart from Lorelei. Rooms themed to their master.
+- **Pacing**: real levels and encounters, `G.EXP_RATE = 1.5` so no grinding.
+- **Side systems**: TMs (50, single-use) and fossils + Cinnabar Lab are IN.
+  Safari Zone, Game Corner and Rocket Hideout exist as full maps with their
+  story beats and items (Surf, Silph Scope) but WITHOUT the minigames — no step
+  counter, no bait/rock, no slot machine.
+- **Legendaries**: static, gated by HM/badge reachability, findable mid-journey.
+  Birds during the game; Cerulean Cave (Mewtwo) and Mew stay endgame.
+- **Hall of Champions**: invented predecessor champions each holding one legend,
+  then Red with Mewtwo as the secret final boss.
+- **Mechanics**: Gen 1 feel, game-breakers fixed (see the `types.js` header).
 
+## Known rough edges
 
+- `js/data/maps_*.js` and `js/data/trainers.js` are still Hoenn's.
+- `js/engine/title.js` still flies Rayquaza and Groudon.
+- `G.RegionMapScene` in `menus.js` still draws `'HOENN — REGION MAP'`.
+- `battle.js` understands the old Gen 3 effect kinds; the generated `moves.js`
+  emits a wider Gen 1 vocabulary (trap / thrash / bide / substitute / transform /
+  metronome / mirrormove / conversion / ohko / fixed / recharge / crash /
+  disable / haze / mist / screen / rest / switchout / payday / rage / explode).
+  Unhandled kinds currently fall through as plain damage.
+- `assets/sprites/*/README.txt` still describe the gen3 bring-your-own-art flow.
+- `tools/recipes.js`, `tools/bake_mons.js`, `tools/spritegen.js` are the gen3
+  creature-baking pipeline and are now dead — battlers stream. Delete once the
+  tileset work confirms nothing else uses `spritegen`.
