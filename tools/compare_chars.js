@@ -200,4 +200,8 @@ async function main() {
   PAIRS.forEach(([k]) => console.log('  - ' + HAND[k].label));
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+// Exported so tools/export_chars.js can reuse the decoder and the sheet-slicing
+// rules rather than reimplementing them and drifting out of sync.
+module.exports = { decodePng, encodePng, surface, put, hex, HAND, PAIRS, SHEET_BASE };
+
+if (require.main === module) main().catch(e => { console.error(e); process.exit(1); });

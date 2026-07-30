@@ -1,0 +1,273 @@
+<title>Overworld sprites: streamed vs hand-authored</title>
+<style>
+  :root {
+    --ink:        #14161f;
+    --ground:     #eceef0;
+    --surface:    #ffffff;
+    --line:       #d3d8dd;
+    --text:       #1c2028;
+    --text-dim:   #5c6672;
+    --streamed:   #2a6cb4;
+    --hand:       #bc3038;
+    --verdict:    #9a7b00;
+    --stage:      #dfe4e8;
+    --shadow:     0 1px 2px rgba(20,22,31,.06), 0 6px 20px -10px rgba(20,22,31,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:   #14161f;
+      --surface:  #1d212c;
+      --line:     #2e3442;
+      --text:     #e4e8ee;
+      --text-dim: #9aa4b2;
+      --streamed: #6fa8e8;
+      --hand:     #e8686c;
+      --verdict:  #e8c038;
+      --stage:    #10131a;
+      --shadow:   0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161f; --surface:#1d212c; --line:#2e3442; --text:#e4e8ee;
+    --text-dim:#9aa4b2; --streamed:#6fa8e8; --hand:#e8686c; --verdict:#e8c038;
+    --stage:#10131a; --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+  }
+  :root[data-theme="light"] {
+    --ground:#eceef0; --surface:#ffffff; --line:#d3d8dd; --text:#1c2028;
+    --text-dim:#5c6672; --streamed:#2a6cb4; --hand:#bc3038; --verdict:#9a7b00;
+    --stage:#dfe4e8; --shadow:0 1px 2px rgba(20,22,31,.06), 0 6px 20px -10px rgba(20,22,31,.18);
+  }
+
+  .mono, .side__tag, .side__src, .controls, .meta {
+    font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 48px 24px 72px; }
+
+  header { border-bottom: 1px solid var(--line); padding-bottom: 28px; }
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+    font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--text-dim); margin: 0 0 12px;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.15; margin: 0 0 14px;
+    text-wrap: balance; letter-spacing: -.02em; font-weight: 650;
+  }
+  .lede { margin: 0; max-width: 62ch; color: var(--text-dim); font-size: 1.02rem; }
+
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin: 26px 0 0; font-size: .74rem;
+  }
+  .controls > span { color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; }
+  button {
+    font: inherit; cursor: pointer; padding: 5px 11px;
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--line); border-radius: 3px;
+    letter-spacing: .06em;
+  }
+  button[aria-pressed="true"] { background: var(--text); color: var(--surface); border-color: var(--text); }
+  button:focus-visible { outline: 2px solid var(--streamed); outline-offset: 2px; }
+
+  .grid { display: grid; gap: 22px; margin-top: 34px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 4px; padding: 20px 22px 18px; box-shadow: var(--shadow);
+  }
+  .card__name { margin: 0 0 16px; font-size: 1.02rem; font-weight: 640; letter-spacing: -.01em; }
+
+  .rig { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .side { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+  .side__tag {
+    font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 700;
+  }
+  .side--streamed .side__tag { color: var(--streamed); }
+  .side--hand     .side__tag { color: var(--hand); }
+  .side__src { margin: 0; font-size: .66rem; color: var(--text-dim); }
+
+  .stage {
+    background: var(--stage); border: 1px solid var(--line); border-radius: 3px;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding: 14px; min-height: 96px; overflow: auto;
+  }
+  body[data-bg="grass"] .stage { background: #4c9152; border-color: #356b45; }
+
+  .px {
+    image-rendering: pixelated;
+    width: calc(16px * var(--zoom, 8));
+    height: calc(24px * var(--zoom, 8));
+    display: block;
+  }
+
+  .card__note { margin: 15px 0 0; font-size: .88rem; color: var(--text-dim); max-width: 68ch; }
+
+  .verdict {
+    margin-top: 40px; padding: 24px 26px;
+    border: 1px solid var(--line); border-left: 3px solid var(--verdict);
+    border-radius: 4px; background: var(--surface); box-shadow: var(--shadow);
+  }
+  .verdict h2 { margin: 0 0 10px; font-size: 1.05rem; font-weight: 650; }
+  .verdict p { margin: 0 0 12px; max-width: 68ch; }
+  .verdict p:last-child { margin-bottom: 0; }
+  .verdict strong { color: var(--text); }
+
+  .meta {
+    margin-top: 34px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: .72rem; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 18px;
+  }
+
+  @media (max-width: 620px) {
+    .rig { grid-template-columns: 1fr; }
+    .wrap { padding: 32px 16px 56px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">pokemon-kanto &middot; art direction</p>
+    <h1>Overworld sprites: streamed or hand-authored?</h1>
+    <p class="lede">
+      Four characters, both ways. Left of each pair is the real FireRed sprite the game
+      streams today; right is the same character hand-drawn in the engine&rsquo;s native
+      16&times;24 palette format. Both are sliced and bottom-anchored by identical code,
+      so neither side is flattered by framing.
+    </p>
+
+    <div class="controls">
+      <span>Zoom</span>
+      <button type="button" data-zoom="1">1&times; (actual)</button>
+      <button type="button" data-zoom="4">4&times;</button>
+      <button type="button" data-zoom="8" aria-pressed="true">8&times;</button>
+      <button type="button" data-zoom="14">14&times;</button>
+      <span style="margin-left:14px">Ground</span>
+      <button type="button" data-bg="neutral" aria-pressed="true">Neutral</button>
+      <button type="button" data-bg="grass">Kanto grass</button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+      <article class="card">
+        <h2 class="card__name">Red (player)</h2>
+        <div class="rig">
+          <div class="side side--streamed">
+            <span class="side__tag">Streamed</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAA40lEQVR42u1SuQ3DMAzUOh5BpdqM4tal1/AIKVN6BY+QNiN4BQZH4ASCFqUEaSPgIJt3Oj5SSv91WfM0SQ/Dw0fOIvOtCXBdE5DRYSI0GGX/pAolRy0A0HYNiPMUhY+3DOSxFi1t358q4m6/sUMDrTeR17ZoMOe1ZvYAZ7WXKtZSlISwBXDQhDOAAJBjUxF2+00+MkisgJlo4OPRO6o92gPuYNVcMiMTezVXVYEYeVbVLJ0GvDZ7nRxksxUz3foaeX18heTDOSDDcj9snxWOC5eKIQSi/64BB+WEUTyu4ov4b+sN4B3Goj7eRowAAAAASUVORK5CYII=" alt="Red (player), streamed from pret/pokefirered"></div>
+            <p class="side__src">pokefirered / <span class="mono">red_normal</span></p>
+          </div>
+          <div class="side side--hand">
+            <span class="side__tag">Hand-authored</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAnUlEQVR42mNgoCaQktH5jw8T1HzBSB8vxmsIVQz48uULXkzQgH55ObyYoAFxbgb/P+zowIpBcgQNAClED3mYAcjyeA0ghPEacKEjAi8mKi2QnZBgBujHr8CKibIdWQMs7ok2hOoGkOwNUBQRMgCkBq8BhAIRrwEUxwLMAEvHGJyYqKgkWzM2A5D59DPggKU2GCPnARifpJKZkBgMAAAT4bXZiGn81gAAAABJRU5ErkJggg==" alt="Red (player), hand-authored"></div>
+            <p class="side__src">tools/<span class="mono">sample_chars.js</span></p>
+          </div>
+        </div>
+        <p class="card__note">The clearest gap. The streamed Red has a lit side and a shadow side on every surface — cap, sleeve, trouser leg. Mine is flat fill plus outline, so the jacket reads as a blue rectangle.</p>
+      </article>
+
+      <article class="card">
+        <h2 class="card__name">Prof. Oak</h2>
+        <div class="rig">
+          <div class="side side--streamed">
+            <span class="side__tag">Streamed</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAABAUlEQVR42t2SIRLCMBBFewyuwBEqY3MEJBJb2SPU5hhILLISWYvkCNhlfqY/swnZhlp25s+E5P+XzdKu+6/q+4NQ4+Bkd/hxPScBoIFQ82aENMQCVgFbYa0mpNUFOzEB73sQWW5RDPE3zixAPMQBzZAOU/DAi0wGeIYhDbIMaSA88JaABOE72TKfxH0rHGt0LoWwhjlCi33ze2CIb2SIa8KsvKD4lJq0J0t6f5J5XoS13pIJeyx4kckAuAFF2DQFeV18FNYMoeDNAHpgMLMIYOFMD/ZrgBBvQ4X+GMW2cUZfdYpsn+L79V7Weu2fAN0CqOFuANYvrjBa+3WIYfopvLs+iIEgefN1J40AAAAASUVORK5CYII=" alt="Prof. Oak, streamed from pret/pokefirered"></div>
+            <p class="side__src">pokefirered / <span class="mono">prof_oak</span></p>
+          </div>
+          <div class="side side--hand">
+            <span class="side__tag">Hand-authored</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAn0lEQVR42mNgoCaQktH5jw8T1LxjxxG8GK8hIMmurlk4MVEGgBR92NGBgUHiIEMIGoBNMwwTFQZUMQAW4sgakeVo64ILHRE4MUEDKE5IMAO+fPmCFRPlBWQNCwwMSDMEZsCNG0+wGgASJ8oAfBivAaCoImQASA1eAwgFIl4DKI4FqhmQHWSBFZNlADKffgZYaSmAMXIegPFJKpkJicEAAID+C4uVgEDAAAAAAElFTkSuQmCC" alt="Prof. Oak, hand-authored"></div>
+            <p class="side__src">tools/<span class="mono">sample_chars.js</span></p>
+          </div>
+        </div>
+        <p class="card__note">Closest of the four. A white coat is mostly one value anyway, so flat shading costs less here. The streamed version still wins on the face and the hair silhouette.</p>
+      </article>
+
+      <article class="card">
+        <h2 class="card__name">Brock</h2>
+        <div class="rig">
+          <div class="side side--streamed">
+            <span class="side__tag">Streamed</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAA4klEQVR42u1SsRECIRCkBEugDUNaoBVDQ0PTL8ESTC3D9MswxVnGxYV74M1lZofj7nbZ49+5/zIrRp+AUTwl3y7fXeOhSPTBEFsUIR9SV2APjMAv5E0RHNR6et5NrLn8Fo2LtC6nXHg9ltysRAI19KAXnEqARe5KBLSGvRUoLlAE9HbEzG/dbpx8GgpJzyOycdFidrvz4ZCAcwi5WYEc693b2YCZaZtATgRqEajrvPwnSOS313cBpxKgVQqQwJhnHcmMsEU4Xm2u+5CYryUoUBs9YnGBRqB3Hgo0Vmf5vou9+Tdamcgnyg+pLQAAAABJRU5ErkJggg==" alt="Brock, streamed from pret/pokefirered"></div>
+            <p class="side__src">pokefirered / <span class="mono">brock</span></p>
+          </div>
+          <div class="side side--hand">
+            <span class="side__tag">Hand-authored</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAnUlEQVR42mNgoBaQktH5D6NxsQkakO2l9R9GY2MTZQA+jNcQkGRXkgVOzSA5ggZc6IjAiYnyAsUGdHkZgDEs9NH59HMBNkzQAOSEgwsTZcCVMi2smCgvwBTbV3nBMdUMIGgIPucTZQAoqggZAFKD1wBCgYjXAJg3FoRIYMVER6OXVwRWPDAGIPPpZ4CWlgkYI+cBGJ/o0hldMb7MBABxOn2+WSE5HAAAAABJRU5ErkJggg==" alt="Brock, hand-authored"></div>
+            <p class="side__src">tools/<span class="mono">sample_chars.js</span></p>
+          </div>
+        </div>
+        <p class="card__note">The only one where mine competes, and only because the hair does the work. Spiky brown mass over an orange vest is identifiable at any fidelity.</p>
+      </article>
+
+      <article class="card">
+        <h2 class="card__name">Bug Catcher</h2>
+        <div class="rig">
+          <div class="side side--streamed">
+            <span class="side__tag">Streamed</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAA8ElEQVR42u1SsRHCMAzMCIyQNSjdUnoVSsqUtBkhI9BmDNqMQWvuzb3uLSy4HC26+7MtvV6y5WH4W2g5j0WxO7Hcbw2+CpGwTK/kxzpbMveIdYXgAGlMh7LNZ0vAqnvEwMHeRJisAhRR0E8BE6EAgsfr0Ih4IAYOC5iAVqRID4hpR/oWJuLXng8rcvwgyiWlCiXqnvFesnXBUeEsI7MRR9WrsTqr8QreH/2lOm9exU+ArZPzVll/3nKaSDLApz+z6UQr5jFVcg+IhVeR163kbV4baFfhO/CzYPVXcLHQKhlEIDp/FOAdHTHyx13s8P9mT8378RBt/NjCAAAAAElFTkSuQmCC" alt="Bug Catcher, streamed from pret/pokefirered"></div>
+            <p class="side__src">pokefirered / <span class="mono">bug_catcher</span></p>
+          </div>
+          <div class="side side--hand">
+            <span class="side__tag">Hand-authored</span>
+            <div class="stage"><img class="px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAoUlEQVR42mNgoBaQktH5TwzGqfnBgQSiMFZDQIIbJhgQhfG6gmwvIBvyYUcHVkxQM1UNgDkXxqavCy50RGBgojQTig2iNX/58gUrRjbkxIkb/0nSjG4IRQaANIMwhrcoNgAUVYQMAKnBawChQASpwRkGMG94dVlhxQRjgRQD8KYDdE0kG4Ce/pHFSC4PsPEJGhDlYADGyPkAWYzozERIDAYAUawZDMDMH8UAAAAASUVORK5CYII=" alt="Bug Catcher, hand-authored"></div>
+            <p class="side__src">tools/<span class="mono">sample_chars.js</span></p>
+          </div>
+        </div>
+        <p class="card__note">Mine is weakest here. The streamed sprite sells the straw hat with a brim shadow; mine is two flat bands. The net I added reads as noise at 1x.</p>
+      </article>
+  </div>
+
+  <section class="verdict">
+    <h2>Recommendation: keep streaming</h2>
+    <p>
+      The streamed set is better pixel art and it isn&rsquo;t close. Every surface has a lit
+      side and a shadow side; mine are flat fills with an outline round them. Set the zoom
+      to <strong>1&times;</strong> above &mdash; that is the size these actually appear in
+      game &mdash; and the streamed faces still read while mine mostly collapse.
+    </p>
+    <p>
+      The one honest argument for hand-authoring is <strong>palette coherence</strong>: my
+      samples draw from the same master palette as the tileset, so they would sit in the
+      world by construction. But the streamed sprites already look right on the Kanto tiles
+      in-game, so that advantage stays theoretical while the quality gap does not.
+    </p>
+    <p>
+      Streaming is also already wired and complete &mdash; pokefirered covers the entire
+      Kanto cast, so nothing renders as a placeholder. Choosing it costs nothing; choosing
+      hand-drawn costs a full cast at this quality bar or worse.
+    </p>
+  </section>
+
+  <p class="meta">
+    <span>4 pairs &middot; 16&times;24 px each</span>
+    <span>streamed: pret/pokefirered</span>
+    <span>hand: tools/sample_chars.js</span>
+    <span>render: tools/compare_chars.js</span>
+  </p>
+</div>
+
+<script>
+  var root = document.documentElement;
+  function group(attr, apply) {
+    var btns = document.querySelectorAll('button[data-' + attr + ']');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        btns.forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+        apply(b.getAttribute('data-' + attr));
+      });
+    });
+  }
+  group('zoom', function (v) { root.style.setProperty('--zoom', v); });
+  group('bg', function (v) { document.body.setAttribute('data-bg', v); });
+  root.style.setProperty('--zoom', '8');
+  document.body.setAttribute('data-bg', 'neutral');
+</script>

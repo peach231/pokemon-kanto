@@ -23,3 +23,7 @@ assets/sprites/trainers/*.png
 
 # headless-Edge review profiles / scratch screenshots
 tools/critique/
+
+# generated comparison assets (rebuild with tools/export_chars.js)
+tools/chars.json
+tools/chars.png
