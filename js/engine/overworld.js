@@ -41,8 +41,9 @@
   G.updateFollower = function () {
     G.world.follower = null;
     var id = G.world.mapId;
+    // Kanto has no tag-along companion. Mum walks with you around Pallet until
+    // you take the Pokedex, and that is the whole system.
     if (id === 'pallet' && !G.flags.gotDex) G.attachFollower('mom', 'momTalk', 'Mum');
-    else if (id === 'route1' && G.flags.starter && !G.flags.friendGone && G.flags.remyGreetSeen) G.attachFollower('boy', 'friendHeal', 'Remy');
   };
 
   // -------------------------------------------------------------------------

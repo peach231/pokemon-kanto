@@ -1392,7 +1392,9 @@
     warps: [
       { x: 31, y: 5, to: 'lavender', tx: 2, ty: 7, dir: 'right' },
       { x: 31, y: 6, to: 'lavender', tx: 2, ty: 7, dir: 'right' },
-      { x: 6, y: 5, to: 'undergroundpath2', tx: 3, ty: 1, dir: 'down' }
+      { x: 6, y: 5, to: 'undergroundpath2', tx: 3, ty: 1, dir: 'down' },
+      { x: 0, y: 5, to: 'saffron', tx: 25, ty: 7, dir: 'left' },
+      { x: 0, y: 6, to: 'saffron', tx: 25, ty: 7, dir: 'left' }
     ],
     signs: [
       { x: 10, y: 4, text: 'SAFFRON CITY — east gate. CLOSED. Use the UNDERGROUND PATH.' }
@@ -1404,7 +1406,9 @@
     npcs: [
       { x: 12, y: 7, sprite: 'policeman', dir: 'up',
         dialog: ['All four SAFFRON gates are shut and the guards will not say why.',
-                 'Word is SILPH CO. has visitors it did not invite.'] }
+                 'Word is SILPH CO. has visitors it did not invite.'] },
+      { x: 1, y: 5, sprite: 'rocket', dir: 'right', unlessFlag: 'rh_giovanni', event: 'saffronGate' },
+      { x: 1, y: 6, sprite: 'rocket', dir: 'right', unlessFlag: 'rh_giovanni', event: 'saffronGate' }
     ]
   };
 
@@ -1434,10 +1438,16 @@
     warps: [
       { x: 0, y: 5, to: 'celadon', tx: 25, ty: 13, dir: 'left' },
       { x: 0, y: 6, to: 'celadon', tx: 25, ty: 13, dir: 'left' },
+      { x: 19, y: 5, to: 'saffron', tx: 2, ty: 7, dir: 'right' },
+      { x: 19, y: 6, to: 'saffron', tx: 2, ty: 7, dir: 'right' },
       { x: 11, y: 5, to: 'undergroundpath2', tx: 21, ty: 1, dir: 'down' }
     ],
     signs: [
-      { x: 14, y: 4, text: 'SAFFRON CITY — west gate. CLOSED. UNDERGROUND PATH to LAVENDER below.' }
+      { x: 14, y: 4, text: 'SAFFRON CITY — west gate. UNDERGROUND PATH to LAVENDER below.' }
+    ],
+    npcs: [
+      { x: 18, y: 5, sprite: 'rocket', dir: 'left', unlessFlag: 'rh_giovanni', event: 'saffronGate' },
+      { x: 18, y: 6, sprite: 'rocket', dir: 'left', unlessFlag: 'rh_giovanni', event: 'saffronGate' }
     ]
   };
 
@@ -1504,6 +1514,84 @@
       { x: 14, y: 19, sprite: 'oldman', dir: 'down',
         dialog: ['A SNORLAX has been asleep across ROUTE 16 for as long as I can remember.',
                  'Nothing wakes it. People have tried everything short of music.'] }
+    ]
+  };
+
+
+  // ==========================================================================
+  // SAFFRON CITY — sealed for the whole midgame, and this is where it opens.
+  // Team Rocket took SILPH CO. and closed the gates from the inside; losing the
+  // Celadon hideout is what forces them to consolidate here, so beating
+  // Giovanni underground is what lets you through the doors.
+  //
+  // The city is full of Rockets standing in the street. Nobody else is out.
+  // ==========================================================================
+  G.MAPS.saffron = {
+    id: 'saffron', name: 'Saffron City', w: 28, h: 24,
+    music: 'town', battleBg: 'meadow', base: 'grass',
+    legend: G.LEG_EXT,
+    gymEmblem: { x: 6, y: 16, type: 'psychic' },
+    ground: pad([
+      'tutututututututututututututu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvx',
+      'tu......................pptu',
+      'vx..GHHHI.......7889....ppvx',
+      'tu..KLLLM.......d+mh....pptu',
+      'vx..WNEEW.......WNEW....ppvx',
+      'tu......................pptu',
+      'pppppppppppppppppppppppppppp',
+      'tu......................pptu',
+      'vx..............qrrz....ppvx',
+      'tu..GHHHI.......i$jk....pptu',
+      'vx..KLLLM.......WNEW....ppvx',
+      'tu..WNEEW...............pptu',
+      'pppppppppppppppppppppppppppp',
+      'tu......................pptu',
+      'vx..ABBC.......1223.....ppvx',
+      'tu..abbc.......4556.....pptu',
+      'vx..WYYW.......WNDW.....ppvx',
+      'tu......................pptu',
+      'vx..S...................ppvx',
+      'tu......................pptu',
+      'vx......................ppvx',
+      'tu......................pptu',
+      'vxvxvxvxvxvxvxvxvxvxvxvxvxvx'
+    ], 28, 24),
+    deco: blank(28, 24),
+    warps: [
+      { x: 0, y: 7, to: 'route7', tx: 18, ty: 5, dir: 'left' },
+      { x: 1, y: 7, to: 'route7', tx: 18, ty: 5, dir: 'left' },
+      { x: 27, y: 7, to: 'route8', tx: 1, ty: 5, dir: 'right' },
+      { x: 26, y: 7, to: 'route8', tx: 1, ty: 5, dir: 'right' },
+      { x: 6, y: 5, to: 'silphco1f', tx: 10, ty: 16, dir: 'up' },
+      { x: 7, y: 5, to: 'silphco1f', tx: 11, ty: 16, dir: 'up' },
+      { x: 18, y: 5, to: 'saffroncentre', tx: 4, ty: 6, dir: 'up' },
+      { x: 18, y: 11, to: 'saffronmart', tx: 4, ty: 6, dir: 'up' },
+      { x: 6, y: 12, to: 'fightingdojo', tx: 6, ty: 11, dir: 'up' },
+      { x: 7, y: 12, to: 'fightingdojo', tx: 7, ty: 11, dir: 'up' },
+      { x: 5, y: 17, to: 'saffrongym', tx: 5, ty: 12, dir: 'up' },
+      { x: 6, y: 17, to: 'saffrongym', tx: 6, ty: 12, dir: 'up' },
+      { x: 17, y: 17, to: 'saffronhouse', tx: 4, ty: 7, dir: 'up' }
+    ],
+    signs: [
+      { x: 4, y: 20, text: 'SAFFRON CITY — Shining, Golden Land of Commerce.' },
+      { x: 5, y: 6, text: 'SILPH CO. — HEAD OFFICE. Visitors report to reception. (Reception is empty.)' },
+      { x: 5, y: 18, text: 'SAFFRON CITY POKéMON GYM — LEADER: SABRINA. The Master of Psychic POKéMON!' },
+      { x: 5, y: 13, text: 'FIGHTING DOJO — Karate master within. Challengers welcome.' }
+    ],
+    npcs: [
+      { x: 12, y: 8, sprite: 'rocket', dir: 'down',
+        dialog: ['Nothing to see. Move along.',
+                 'The whole city is ours until the BOSS says otherwise.'] },
+      { x: 20, y: 14, sprite: 'rocket', dir: 'left',
+        dialog: ['SILPH is making something worth more than this entire town.',
+                 'We are just here to collect it.'] },
+      { x: 10, y: 19, sprite: 'gymguy', dir: 'right',
+        dialog: ["SABRINA bent a spoon with her mind when she was a child, and it frightened her.",
+                 'PSYCHIC has almost no counters this generation. BUG moves, and not much else.'] },
+      { x: 22, y: 20, sprite: 'oldwoman', dir: 'down',
+        dialog: ['They shut the gates for weeks. Nobody in, nobody out.',
+                 'And every one of us just... waited. That is the part I cannot forgive.'] }
     ]
   };
 

@@ -282,6 +282,55 @@
 
   // ============================================================== EVENTS ====
 
+  // Buying. The clerk offers whatever the map's `shopInventory` lists, priced
+  // from items.js, and the loop keeps running until you pick Done — so stocking
+  // up does not mean re-opening the menu once per Potion.
+  G.EVENTS.shopBuy = function* () {
+    var inv = (G.world.map.shopInventory || []).filter(function (id) { return G.ITEMS[id]; });
+    if (!inv.length) {
+      yield { t: 'text', s: 'Clerk: Sorry, we are waiting on a delivery.' };
+      return;
+    }
+    yield { t: 'text', s: 'Clerk: Welcome! How can I help you?' };
+
+    var done = { v: false };
+    while (!done.v) {
+      var choice = { i: -1 };
+      yield {
+        t: 'custom',
+        run: function (resume) {
+          var labels = inv.map(function (id) {
+            return G.ITEMS[id].name + '  $' + G.ITEMS[id].price;
+          });
+          labels.push('Done');
+          G.pushScene(G.Chooser({
+            items: labels, cols: 2, x: 6, y: 8,
+            cancelIndex: labels.length - 1,
+            onPick: function (i) { choice.i = i; resume(); }
+          }));
+        }
+      };
+
+      if (choice.i < 0 || choice.i >= inv.length) { done.v = true; break; }
+
+      var item = G.ITEMS[inv[choice.i]];
+      if (G.player.money < item.price) {
+        yield { t: 'text', s: 'Clerk: You do not have enough money for that.' };
+        continue;
+      }
+      yield {
+        t: 'fn',
+        fn: function () {
+          G.player.money -= item.price;
+          G.player.bag[item.id] = (G.player.bag[item.id] || 0) + 1;
+        }
+      };
+      yield { t: 'sfx', id: 'confirm' };
+      yield { t: 'text', s: 'You bought a ' + item.name + '.  ($' + G.player.money + ' left)' };
+    }
+    yield { t: 'text', s: 'Clerk: Please come again!' };
+  };
+
   G.EVENTS.nurseHeal = function* () {
     yield { t: 'text', s: 'Nurse: Welcome to our POKéMON CENTER! Shall I heal your POKéMON?' };
     yield {
@@ -1551,6 +1600,292 @@
       { x: 8, y: 2, sprite: 'oldman', dir: 'right',
         dialog: ['Two tunnels under one city. Somebody in SAFFRON is very good at annoying people.'] }
     ]
+  };
+
+
+  // ============================================================ SAFFRON CITY =
+  healCentre('saffroncentre', 'SAFFRON', { map: 'saffron', x: 18, y: 6 });
+  pokeMart('saffronmart', 'SAFFRON', { map: 'saffron', x: 18, y: 12 },
+    ['potion', 'superpotion', 'hyperpotion', 'maxpotion', 'fullrestore',
+     'antidote', 'parlyzheal', 'awakening', 'fullheal', 'revive',
+     'pokeball', 'greatball', 'ultraball', 'repel', 'escaperope']);
+
+  G.MAPS.saffronhouse = {
+    id: 'saffronhouse', name: 'Saffron House', w: 10, h: 9,
+    music: 'town', battleBg: 'indoor', base: 'ifloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIII',
+      'IP..TT..PI',
+      'I........I',
+      'I.B......I',
+      'I........I',
+      'I..o..o..I',
+      'I........I',
+      'I........I',
+      'IIII..IIII'
+    ], 10, 9),
+    deco: blank(10, 9),
+    warps: [
+      { x: 4, y: 8, to: 'saffron', tx: 17, ty: 18, dir: 'down' },
+      { x: 5, y: 8, to: 'saffron', tx: 17, ty: 18, dir: 'down' }
+    ],
+    npcs: [
+      { x: 6, y: 3, sprite: 'woman3', dir: 'down',
+        dialog: ['We stayed indoors for three weeks.',
+                 'You get used to it. That is the frightening bit.'] }
+    ]
+  };
+
+  // The Fighting Dojo. Beat the master and he gives up one of his two prizes,
+  // and the one you leave is gone -- the second irreversible choice in the game
+  // after the fossils.
+  G.MAPS.fightingdojo = {
+    id: 'fightingdojo', name: 'Fighting Dojo', w: 14, h: 12,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIIIII',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IGGGGGGGGGGGGI',
+      'IIIIII..IIIIII'
+    ], 14, 12),
+    deco: blank(14, 12),
+    warps: [
+      { x: 6, y: 11, to: 'saffron', tx: 6, ty: 13, dir: 'down' },
+      { x: 7, y: 11, to: 'saffron', tx: 7, ty: 13, dir: 'down' }
+    ],
+    trainers: [
+      { x: 6, y: 1, sprite: 'blackbelt', dir: 'down', trainer: 'dojo_master', sight: 0 },
+      { x: 3, y: 5, sprite: 'blackbelt', dir: 'right', trainer: 'dojo_hideki', sight: 4 },
+      { x: 10, y: 8, sprite: 'blackbelt', dir: 'left', trainer: 'dojo_mike', sight: 4 }
+    ],
+    npcs: [
+      { x: 5, y: 3, sprite: 'orb_stand', obj: true, event: 'dojoHitmonlee' },
+      { x: 8, y: 3, sprite: 'orb_stand', obj: true, event: 'dojoHitmonchan' }
+    ]
+  };
+
+  function dojoPrize(key, other, blurb) {
+    return function* () {
+      if (!G.flags.dojo_master) {
+        yield { t: 'text', s: 'The two balls sit behind the master. He has not moved.' };
+        return;
+      }
+      if (G.flags.dojoPrize) {
+        yield { t: 'text', s: 'The other ball is gone. The master took it back the moment you chose.' };
+        return;
+      }
+      yield { t: 'text', s: blurb };
+      yield { t: 'text', s: 'Master: One. Not both. Choose.' };
+      yield {
+        t: 'fn',
+        fn: function () {
+          var mon = G.makeMon(key, 25);
+          G.flags.dojoPrize = key;
+          if (G.player.party.length < 6) G.player.party.push(mon);
+          else G.player.box.push(mon);
+          G.player.dexSeen[key] = 1;
+          G.player.dexCaught[key] = 1;
+        }
+      };
+      yield { t: 'sfx', id: 'catchClick' };
+      yield { t: 'text', s: 'You received ' + G.SPECIES[key].name + '!' };
+      yield { t: 'text', s: 'Master: Then the ' + G.SPECIES[other].name + ' stays with me. Train it well.' };
+    };
+  }
+  G.EVENTS.dojoHitmonlee = dojoPrize('hitmonlee', 'hitmonchan',
+    'A ball marked with a foot. Inside is HITMONLEE, all legs and reach.');
+  G.EVENTS.dojoHitmonchan = dojoPrize('hitmonchan', 'hitmonlee',
+    'A ball marked with a fist. Inside is HITMONCHAN, all guard and timing.');
+
+  // ---------------------------------------------------------- SABRINA'S GYM -
+  G.MAPS.saffrongym = {
+    id: 'saffrongym', name: 'Saffron Gym', w: 12, h: 14,
+    music: 'gym', battleBg: 'indoor', base: 'gfloor',
+    legend: G.LEG_INT,
+    ground: pad([
+      'IIIIIIIIIIII',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IGGUGGGGUGGI',
+      'IGGGGGGGGGGI',
+      'IGGGGGGGGGGI',
+      'IIIII..IIIII'
+    ], 12, 14),
+    deco: blank(12, 14),
+    warps: [
+      { x: 5, y: 13, to: 'saffron', tx: 5, ty: 18, dir: 'down' },
+      { x: 6, y: 13, to: 'saffron', tx: 6, ty: 18, dir: 'down' }
+    ],
+    npcs: [
+      { x: 8, y: 12, sprite: 'gymguy', dir: 'left', event: 'saffronGymGuide' }
+    ],
+    trainers: [
+      { x: 5, y: 1, sprite: 'sabrina', dir: 'down', trainer: 'sabrina', sight: 0 },
+      { x: 3, y: 5, sprite: 'psychicm', dir: 'right', trainer: 'sg_johan', sight: 4 },
+      { x: 8, y: 9, sprite: 'channeler', dir: 'left', trainer: 'sg_tyron', sight: 4 }
+    ]
+  };
+
+  G.EVENTS.saffronGymGuide = function* () {
+    if (G.flags.badge6) {
+      yield { t: 'text', s: 'Guide: The MARSHBADGE. Nothing you catch will ever disobey you now.' };
+      return;
+    }
+    yield { t: 'text', s: 'Guide: I will be honest with you. This one is unfair.' };
+    yield { t: 'text', s: 'Guide: PSYCHIC has almost no counters this generation. It resists FIGHTING, it is immune to nothing, and it hits like a truck.' };
+    yield { t: 'text', s: 'Guide: BUG moves are the answer, and the only good one is PIN MISSILE.' };
+    yield { t: 'text', s: 'Guide: Otherwise just out-level her. That is what everyone does.' };
+  };
+
+  // ------------------------------------------------------------- SILPH CO. --
+  // Eleven floors in the original. Three here, because what matters is the
+  // shape: a lobby nobody is manning, a floor of grunts, and the boardroom.
+  function silphFloor(n, opts) {
+    var id = 'silphco' + n + 'f';
+    G.MAPS[id] = {
+      id: id, name: 'Silph Co. ' + n + 'F', w: 22, h: 18,
+      music: 'cave', battleBg: 'indoor', base: 'metalfloor',
+      legend: { '.': 'metalfloor', '#': 'metalwall', '>': 'stairs' },
+      ground: pad([
+        '######################',
+        '#....................#',
+        '#..####..####..####..#',
+        '#..#........#.....#..#',
+        '#..#..####..#..##.#..#',
+        '#.....#..#.....#..#..#',
+        '#..####..####..#..#..#',
+        '#..............#..#..#',
+        '#..#####..#######..#.#',
+        '#......#..#..........#',
+        '#..###.#..#..#####..##',
+        '#....#.#..#..#.......#',
+        '#....#....#..#..######',
+        '#....######..#.......#',
+        '#............#....#..#',
+        '#..#########......#..#',
+        '#....................#',
+        '######################'
+      ], 22, 18),
+      deco: blank(22, 18),
+      warps: opts.warps,
+      signs: opts.signs || [],
+      npcs: opts.npcs || [],
+      trainers: opts.trainers || [],
+      items: opts.items || []
+    };
+  }
+
+  silphFloor(1, {
+    warps: [
+      { x: 10, y: 16, to: 'saffron', tx: 6, ty: 6, dir: 'down' },
+      { x: 11, y: 16, to: 'saffron', tx: 7, ty: 6, dir: 'down' },
+      { x: 20, y: 1, to: 'silphco2f', tx: 20, ty: 16, dir: 'up' }
+    ],
+    signs: [
+      { x: 5, y: 1, text: 'A reception desk. Nobody behind it. A half-drunk cup of tea, long cold.' }
+    ],
+    trainers: [
+      { x: 9, y: 9, sprite: 'rocket', dir: 'down', trainer: 'silph_g1', sight: 4 }
+    ],
+    npcs: [
+      { x: 4, y: 16, sprite: 'workerm', dir: 'up',
+        dialog: ['They came in through the front door at nine in the morning.',
+                 'Told us to keep working. Most of us did.'] }
+    ]
+  });
+
+  silphFloor(2, {
+    warps: [
+      { x: 20, y: 16, to: 'silphco1f', tx: 20, ty: 2, dir: 'down' },
+      { x: 1, y: 1, to: 'silphco3f', tx: 1, ty: 16, dir: 'up' }
+    ],
+    trainers: [
+      { x: 12, y: 5, sprite: 'rocket', dir: 'left', trainer: 'silph_g2', sight: 4 },
+      { x: 6, y: 12, sprite: 'rocket', dir: 'down', trainer: 'silph_g3', sight: 4 }
+    ],
+    items: [{ x: 19, y: 9, item: 'fullheal', once: 'silph_heal' }]
+  });
+
+  silphFloor(3, {
+    warps: [
+      { x: 1, y: 16, to: 'silphco2f', tx: 1, ty: 2, dir: 'down' }
+    ],
+    signs: [
+      { x: 5, y: 1, text: 'The boardroom. The long table has been pushed against a wall.' }
+    ],
+    trainers: [
+      { x: 8, y: 9, sprite: 'rocket', dir: 'down', trainer: 'silph_g4', sight: 4 },
+      { x: 15, y: 12, sprite: 'blue', dir: 'left', trainer: 'blue_silph', sight: 3 }
+    ],
+    npcs: [
+      { x: 11, y: 1, sprite: 'giovanni', dir: 'down', unlessFlag: 'silph_giovanni', event: 'silphBoss' },
+      { x: 5, y: 16, sprite: 'gentleman', dir: 'up', event: 'silphPresident' }
+    ]
+  });
+
+  G.EVENTS.silphBoss = function* () {
+    yield { t: 'text', s: 'Giovanni: Twice now. You are becoming a scheduling problem.' };
+    yield { t: 'text', s: 'Giovanni: SILPH makes a device that makes catching trivial. Do you understand what that is worth?' };
+    yield { t: 'text', s: 'Giovanni: Every trainer in the world, obsolete. And I would own the reason.' };
+    yield {
+      t: 'custom',
+      run: function (resume) { G.startTrainerBattle('giovanni_silph', { onDone: resume }); }
+    };
+    if (!G.flags.silph_giovanni) return;
+    yield { t: 'text', s: 'Giovanni: ...Enough. TEAM ROCKET withdraws. All of it. Everywhere.' };
+    yield { t: 'text', s: 'Giovanni: I will go and think about what I have been doing with my life.' };
+    yield { t: 'text', s: 'He leaves. The building exhales.' };
+    yield { t: 'fn', fn: function () { G.flags.saffronFreed = 1; } };
+  };
+
+  G.EVENTS.silphPresident = function* () {
+    if (!G.flags.silph_giovanni) {
+      yield { t: 'text', s: 'President: Not now. Please. Whatever it is, not now.' };
+      return;
+    }
+    if (G.flags.masterball) {
+      yield { t: 'text', s: 'President: Use it on something that matters.' };
+      return;
+    }
+    yield { t: 'text', s: 'President: They are gone? They are actually gone.' };
+    yield { t: 'text', s: 'President: We were building this when they arrived. It is the only one.' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.flags.masterball = 1;
+        G.player.bag.masterball = (G.player.bag.masterball || 0) + 1;
+      }
+    };
+    yield { t: 'sfx', id: 'catchClick' };
+    yield { t: 'text', s: 'You received the MASTER BALL!' };
+    yield { t: 'text', s: 'President: It cannot fail. Not once, not ever. So think carefully about what you spend it on.' };
+  };
+
+
+  // Saffron's gates. Rocket holds them until the Celadon hideout falls, at
+  // which point they have to pull everyone back to Silph and the roads open.
+  // The city is not unlocked by an errand -- it is unlocked because you cost
+  // them the manpower to keep it shut.
+  G.EVENTS.saffronGate = function* () {
+    yield { t: 'text', s: 'Rocket: SAFFRON is closed. Company orders.' };
+    yield { t: 'text', s: 'Rocket: Which company? Does not matter. Turn around.' };
   };
 
 })();

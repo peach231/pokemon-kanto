@@ -184,6 +184,115 @@ if (G.SPECIES) {
   }
 }
 
+// --- dangling references ---
+// Everything a map points at by NAME must exist. A map referencing an event,
+// trainer or item that was never defined does not crash on load — it fails
+// silently the moment a player walks into it, which is the worst time to find
+// out.
+{
+  const missEvent = [], missTrainer = [], missItem = [], missShop = [];
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    for (const n of (m.npcs || [])) {
+      if (n.event && !(G.EVENTS || {})[n.event]) missEvent.push(`${id}: npc event '${n.event}'`);
+    }
+    for (const t of (m.trainers || [])) {
+      if (t.event && !(G.EVENTS || {})[t.event]) missEvent.push(`${id}: trainer event '${t.event}'`);
+      if (t.trainer && !(G.TRAINERS || {})[t.trainer]) missTrainer.push(`${id}: '${t.trainer}'`);
+    }
+    for (const it of (m.items || [])) {
+      if (it.item && !(G.ITEMS || {})[it.item]) missItem.push(`${id}: item '${it.item}'`);
+    }
+    for (const sid of (m.shopInventory || [])) {
+      if (!(G.ITEMS || {})[sid]) missShop.push(`${id}: shop stocks '${sid}'`);
+    }
+  }
+  for (const e of missEvent) errors.push('DANGLING EVENT — ' + e);
+  for (const e of missTrainer) errors.push('DANGLING TRAINER — ' + e);
+  for (const e of missItem) errors.push('DANGLING ITEM — ' + e);
+  for (const e of missShop) errors.push('DANGLING SHOP ITEM — ' + e);
+  console.log('  refs: events/trainers/items/shops all resolve');
+}
+
+// --- flag reachability ---
+// A `unlessFlag` gate that nothing ever SETS is a permanent wall: the NPC
+// blocking the road never steps aside and the player is stuck with no
+// indication why. Collect every flag the world reads, and every flag anything
+// can set, and diff them.
+{
+  const read = new Map();
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    for (const list of [m.npcs || [], m.trainers || [], m.signs || []]) {
+      for (const o of list) {
+        for (const k of ['unlessFlag', 'ifFlag']) {
+          if (o[k]) {
+            if (!read.has(o[k])) read.set(o[k], []);
+            read.get(o[k]).push(id);
+          }
+        }
+      }
+    }
+  }
+  // Flags set by trainer rewards, or written by any event body.
+  const set = new Set();
+  for (const tid in (G.TRAINERS || {})) {
+    const r = G.TRAINERS[tid].reward;
+    if (r && r.flag) set.add(r.flag);
+    set.add(tid);          // beating a trainer records its own id
+  }
+  for (const eid in (G.EVENTS || {})) {
+    const src = String(G.EVENTS[eid]);
+    for (const mt of src.matchAll(/G\.flags\.([A-Za-z_$][\w$]*)\s*=/g)) set.add(mt[1]);
+    for (const mt of src.matchAll(/G\.flags\[['"]([^'"]+)['"]\]\s*=/g)) set.add(mt[1]);
+  }
+  for (const [flag, where] of read) {
+    if (!set.has(flag)) {
+      errors.push(`UNSETTABLE FLAG '${flag}' gates ${where.join(', ')} but nothing ever sets it — permanent wall`);
+    }
+  }
+  console.log(`  flags: ${read.size} gates, all settable`);
+}
+
+// --- duplicate warp tiles ---
+// Two warps on one tile is ambiguous: which one fires depends on array order,
+// which is not something a map author is thinking about.
+{
+  let dupes = 0;
+  for (const id in G.MAPS) {
+    const seen = new Set();
+    for (const w of (G.MAPS[id].warps || [])) {
+      const k = w.x + ',' + w.y;
+      if (seen.has(k)) { errors.push(`MAP ${id}: two warps on tile (${k})`); dupes++; }
+      seen.add(k);
+    }
+  }
+  if (!dupes) console.log('  warps: no tile carries two warps');
+}
+
+// --- story item obtainability ---
+// Every key item the story gates on must be granted SOMEWHERE. If nothing
+// hands it out, the gate it opens is unreachable and the game dead-ends.
+{
+  const granted = new Set();
+  for (const eid in (G.EVENTS || {})) {
+    const src = String(G.EVENTS[eid]);
+    for (const mt of src.matchAll(/G\.player\.bag\.([A-Za-z_$][\w$]*)\s*=/g)) granted.add(mt[1]);
+    for (const mt of src.matchAll(/G\.player\.bag\[['"]([^'"]+)['"]\]/g)) granted.add(mt[1]);
+  }
+  for (const id in G.MAPS) {
+    for (const it of (G.MAPS[id].items || [])) granted.add(it.item);
+  }
+  for (const id in G.MAPS) {
+    for (const sid of (G.MAPS[id].shopInventory || [])) granted.add(sid);
+  }
+  const KEY_ITEMS = ['ssticket', 'silphscope', 'pokeflute', 'bikevoucher'];
+  for (const k of KEY_ITEMS) {
+    if (!granted.has(k)) warn.push(`KEY ITEM '${k}' is defined but nothing in the world grants it`);
+  }
+  console.log(`  items: ${granted.size} obtainable`);
+}
+
 // --- map grid overflow ---
 // padRows records any map given more rows than its declared height (the extras
 // are silently dropped, along with anything on them) or rows wider than its

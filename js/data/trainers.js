@@ -423,6 +423,74 @@
     music: 'gymleader'
   });
 
+  // The Fighting Dojo.
+  tr('dojo_hideki', { name: 'Black Belt Hideki', sprite: 'trainer_blackbelt', ai: 'smart', money: 774,
+    party: [{ sp: 'mankey', level: 31 }, { sp: 'machop', level: 31 }],
+    intro: 'The DOJO does not hand out prizes to visitors.',
+    defeat: 'Hm. Perhaps to you.', music: 'battle' });
+  tr('dojo_mike', { name: 'Black Belt Mike', sprite: 'trainer_blackbelt', ai: 'smart', money: 800,
+    party: [{ sp: 'machoke', level: 32 }],
+    intro: 'Strength is not the same as force.',
+    defeat: 'You had both. Fine.', music: 'battle' });
+  tr('dojo_master', {
+    name: 'Karate Master', cls: 'Dojo', sprite: 'trainer_blackbelt', ai: 'smart', money: 1287,
+    party: [{ sp: 'hitmonlee', level: 37 }, { sp: 'hitmonchan', level: 37 }],
+    intro: 'I am the KARATE MASTER. This DOJO was a GYM once. It will be again.',
+    defeat: 'Then take one of them. One. Not both.',
+    reward: { flag: 'dojo_master', text: 'The MASTER steps aside.' },
+    music: 'gymleader'
+  });
+
+  // Sabrina's gym.
+  tr('sg_johan', { name: 'Psychic Johan', sprite: 'trainer_psychicm', ai: 'smart', money: 900,
+    party: [{ sp: 'kadabra', level: 31 }, { sp: 'slowpoke', level: 31 }],
+    intro: 'SABRINA already knows how this ends.',
+    defeat: 'She did not mention this part.', music: 'battle' });
+  tr('sg_tyron', { name: 'Channeler Tyra', sprite: 'trainer_channeler', ai: 'smart', money: 682,
+    party: [{ sp: 'haunter', level: 31 }, { sp: 'drowzee', level: 31 }],
+    intro: 'You should not have come up here.',
+    defeat: 'Go on. She is waiting.', music: 'battle' });
+
+  // Silph Co.
+  tr('silph_g1', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1518,
+    party: [{ sp: 'koffing', level: 33 }, { sp: 'zubat', level: 33 }],
+    intro: 'The lobby is closed. Permanently.',
+    defeat: 'Fine, fine! Go up!', music: 'battle' });
+  tr('silph_g2', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1564,
+    party: [{ sp: 'raticate', level: 34 }, { sp: 'grimer', level: 34 }],
+    intro: 'How did you even get past reception?',
+    defeat: 'There was nobody ON reception!', music: 'battle' });
+  tr('silph_g3', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1610,
+    party: [{ sp: 'golbat', level: 34 }, { sp: 'drowzee', level: 34 }],
+    intro: 'The BOSS is on the top floor and he is not to be disturbed.',
+    defeat: 'You are going to disturb him, are you not.', music: 'battle' });
+  tr('silph_g4', { name: 'Rocket Grunt', cls: 'Team Rocket', sprite: 'trainer_rocket', ai: 'smart', money: 1656,
+    party: [{ sp: 'weezing', level: 35 }, { sp: 'muk', level: 35 }, { sp: 'golbat', level: 35 }],
+    intro: 'This is the last door. I am the last man.',
+    defeat: 'Then it is over, is it.', music: 'battle' });
+  tr('blue_silph', {
+    name: 'Blue', cls: 'Rival', sprite: 'trainer_blue', ai: 'smart', money: 1800,
+    party: [
+      { sp: 'pidgeot', level: 37 }, { sp: 'growlithe', level: 35 },
+      { sp: 'alakazam', level: 35 }, { sp: 'exeggcute', level: 35 },
+      { sp: '_starter3', level: 38 }
+    ],
+    intro: 'You are chasing ROCKET too? Of course you are.',
+    defeat: 'Fine. He is upstairs. Try not to die.',
+    music: 'battle'
+  });
+  tr('giovanni_silph', {
+    name: 'Giovanni', cls: 'Team Rocket', sprite: 'trainer_giovanni', ai: 'smart', money: 5940,
+    party: [
+      { sp: 'nidorino', level: 37 }, { sp: 'kangaskhan', level: 35 },
+      { sp: 'rhyhorn', level: 37 }, { sp: 'nidoqueen', level: 41 }
+    ],
+    intro: 'Twice now. You are becoming a scheduling problem.',
+    defeat: 'Enough. TEAM ROCKET withdraws.',
+    reward: { flag: 'silph_giovanni', text: 'GIOVANNI disbands TEAM ROCKET.' },
+    music: 'gymleader'
+  });
+
   // ================================================ starter counter cycle ===
   // Blue always takes the starter that BEATS yours. The whole relationship, in
   // one line of data.
