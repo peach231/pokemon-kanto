@@ -66,6 +66,13 @@
   item('rarecandy',  'Rare Candy',    0, 'xp',     { amount: 0, levels: 1 },
     'Raises a POKéMON by exactly one level.');
 
+  // The rooftop vending machines. Worthless as healing and worth a TM each
+  // to the child standing next to them, which is the strangest exchange rate
+  // in Gen 1 and is kept exactly as it was.
+  item('freshwater', 'Fresh Water', 200, 'heal', { amount: 50 },  'Restores 50 HP. A rooftop vending machine drink.');
+  item('sodapop',    'Soda Pop',    300, 'heal', { amount: 60 },  'Restores 60 HP. Fizzy.');
+  item('lemonade',   'Lemonade',    350, 'heal', { amount: 80 },  'Restores 80 HP. Sharper than it looks.');
+
   // ------------------------------------------------------ evolution stones --
   // Fourteen species evolve by stone. Eevee's three branches are the reason
   // species carry an `evos` ARRAY rather than a single evolution target.

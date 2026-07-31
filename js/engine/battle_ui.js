@@ -995,11 +995,24 @@
               // middle of the League gauntlet, and popped a text box reading
               // "undefined".
               if (def.reward.flag) G.flags[def.reward.flag] = 1;
+              // Every Gen 1 leader hands over the TM their gym is built
+              // around, which is how a player first meets half the moves
+              // worth using.
+              if (def.reward.tm) {
+                G.player.bag[def.reward.tm] = (G.player.bag[def.reward.tm] || 0) + 1;
+              }
               if (def.reward.badge != null) {
                 G.player.badges[def.reward.badge] = true;
                 G.audio.playJingle('jingle_badge');
               }
-              if (def.reward.text) G.pushScene(G.Textbox(def.reward.text));
+              if (def.reward.text) {
+                var rtxt = def.reward.text;
+                if (def.reward.tm) {
+                  rtxt += ' And take ' + def.reward.tm.toUpperCase() + ' — ' +
+                    G.MOVES[G.TM_MOVES[def.reward.tm]].name.toUpperCase() + '.';
+                }
+                G.pushScene(G.Textbox(rtxt));
+              }
             }
           }
           G.afterBattle(result, battle);

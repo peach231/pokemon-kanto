@@ -512,6 +512,28 @@ if (G.SPECIES) {
     }
     break;
   }
+  // TMs are single-use and there are fifty of them. One a player can never
+  // find is a move that does not exist in this game.
+  {
+    const got = new Set();
+    for (const id in G.MAPS) {
+      for (const it of (G.MAPS[id].items || [])) got.add(it.item);
+      for (const sid of (G.MAPS[id].shopInventory || [])) got.add(sid);
+    }
+    for (const t in G.TRAINERS) if (G.TRAINERS[t].reward && G.TRAINERS[t].reward.tm) got.add(G.TRAINERS[t].reward.tm);
+    for (const eid in G.EVENTS) {
+      const es = String(G.EVENTS[eid]);
+      for (const m of es.matchAll(/'(tm\d{2})'/g)) got.add(m[1]);
+      for (const m of es.matchAll(/bag\.([a-z0-9]+)\s*=/g)) got.add(m[1]);
+    }
+    const tms = Object.keys(G.TM_MOVES).filter(t => t.indexOf('tm') === 0);
+    const missing = tms.filter(t => !got.has(t));
+    if (missing.length) {
+      warn.push(`TMs: ${missing.length}/${tms.length} can never be found — ${missing.join(', ')}`);
+    }
+    console.log(`  TMs: ${tms.length - missing.length}/${tms.length} findable`);
+  }
+
   console.log(`  items: ${seen.size} item kinds, all handled by the engine`);
 }
 

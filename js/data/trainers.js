@@ -67,7 +67,7 @@
     party: [{ sp: 'geodude', level: 12 }, { sp: 'onix', level: 14 }],
     intro: "I'm BROCK. My rock-hard willpower is evident even in my POKéMON.",
     defeat: "I took you for granted, and so I lost. Here — the BOULDERBADGE.",
-    reward: { badge: 0, flag: 'badge1', text: 'You received the BOULDERBADGE!' },
+    reward: { badge: 0, flag: 'badge1', text: 'You received the BOULDERBADGE!' , tm: 'tm34' },
     music: 'gymleader'
   });
   tr('misty', {
@@ -75,7 +75,7 @@
     party: [{ sp: 'staryu', level: 18 }, { sp: 'starmie', level: 21 }],
     intro: "I'm MISTY of CERULEAN GYM. My policy is an all-out offensive with WATER POKéMON!",
     defeat: 'You are too much! All right, take the CASCADEBADGE.',
-    reward: { badge: 1, flag: 'badge2', text: 'You received the CASCADEBADGE!' },
+    reward: { badge: 1, flag: 'badge2', text: 'You received the CASCADEBADGE!' , tm: 'tm11' },
     music: 'gymleader'
   });
   tr('surge', {
@@ -83,7 +83,7 @@
     party: [{ sp: 'voltorb', level: 21 }, { sp: 'pikachu', level: 18 }, { sp: 'raichu', level: 24 }],
     intro: 'Hey, kid! What do you think you are doing here? You will not live long in combat!',
     defeat: 'Whoa! You are the real deal, kid! Take the THUNDERBADGE!',
-    reward: { badge: 2, flag: 'badge3', text: 'You received the THUNDERBADGE!' },
+    reward: { badge: 2, flag: 'badge3', text: 'You received the THUNDERBADGE!' , tm: 'tm24' },
     music: 'gymleader'
   });
   tr('erika', {
@@ -91,7 +91,7 @@
     party: [{ sp: 'victreebel', level: 29 }, { sp: 'tangela', level: 24 }, { sp: 'vileplume', level: 29 }],
     intro: "Hello. Lovely weather, is it not? I am ERIKA, of GRASS POKéMON.",
     defeat: 'Oh! I concede defeat. Please, take the RAINBOWBADGE.',
-    reward: { badge: 3, flag: 'badge4', text: 'You received the RAINBOWBADGE!' },
+    reward: { badge: 3, flag: 'badge4', text: 'You received the RAINBOWBADGE!' , tm: 'tm21' },
     music: 'gymleader'
   });
   tr('koga', {
@@ -102,7 +102,7 @@
     ],
     intro: 'Fwahaha! A mere child dares challenge me? I shall show you true terror as a ninja master!',
     defeat: 'Humph! You have proven your worth. Take the SOULBADGE!',
-    reward: { badge: 4, flag: 'badge5', text: 'You received the SOULBADGE!' },
+    reward: { badge: 4, flag: 'badge5', text: 'You received the SOULBADGE!' , tm: 'tm06' },
     music: 'gymleader'
   });
   tr('sabrina', {
@@ -113,7 +113,7 @@
     ],
     intro: 'I had a vision of your arrival. I have had psychic powers since I was a child.',
     defeat: 'I am shocked. But a loss is a loss. Take the MARSHBADGE.',
-    reward: { badge: 5, flag: 'badge6', text: 'You received the MARSHBADGE!' },
+    reward: { badge: 5, flag: 'badge6', text: 'You received the MARSHBADGE!' , tm: 'tm46' },
     music: 'gymleader'
   });
   tr('blaine', {
@@ -124,7 +124,7 @@
     ],
     intro: 'Hah! I am BLAINE! My POKéMON are all FIRE type. Can you take the heat?',
     defeat: 'I have burnt out. You have earned the VOLCANOBADGE.',
-    reward: { badge: 6, flag: 'badge7', text: 'You received the VOLCANOBADGE!' },
+    reward: { badge: 6, flag: 'badge7', text: 'You received the VOLCANOBADGE!' , tm: 'tm38' },
     music: 'gymleader'
   });
   tr('giovanni', {
@@ -828,7 +828,7 @@
     ],
     intro: 'So. You again. Three times now — the tower, the hideout, and my own front room.',
     defeat: 'Again? And in my own GYM. ...Very well. Take the EARTHBADGE. It is the last one, and it is honestly earned.',
-    reward: { badge: 7, flag: 'badge8', text: 'You received the EARTHBADGE!' },
+    reward: { badge: 7, flag: 'badge8', text: 'You received the EARTHBADGE!' , tm: 'tm27' },
     music: 'gymleader'
   });
 

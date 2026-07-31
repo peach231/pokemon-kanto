@@ -1331,45 +1331,6 @@
 
   // The department store stands in for the Mart, with the deepest stock in the
   // game -- which is the reward for having come this far around the loop.
-  G.MAPS.celadonstore = {
-    id: 'celadonstore', name: 'Celadon Dept. Store', w: 14, h: 12,
-    music: 'center', battleBg: 'indoor', base: 'ifloor',
-    legend: G.LEG_INT,
-    ground: pad([
-      'IIIIIIIIIIIIII',
-      'I.BBB..BBB..PI',
-      'I............I',
-      'I............I',
-      'I.BBB..BBB...I',
-      'I............I',
-      'I............I',
-      'I.BBB..BBB...I',
-      'I............I',
-      'I............I',
-      'I............I',
-      'IIIIII..IIIIII'
-    ], 14, 12),
-    deco: blank(14, 12),
-    warps: [
-      { x: 6, y: 11, to: 'celadon', tx: 6, ty: 6, dir: 'down' },
-      { x: 7, y: 11, to: 'celadon', tx: 7, ty: 6, dir: 'down' }
-    ],
-    shopInventory: [
-      'potion', 'superpotion', 'hyperpotion', 'maxpotion', 'fullrestore',
-      'antidote', 'burnheal', 'iceheal', 'awakening', 'parlyzheal', 'fullheal',
-      'revive', 'pokeball', 'greatball', 'ultraball',
-      'repel', 'superrepel', 'maxrepel', 'escaperope',
-      'firestone', 'waterstone', 'thunderstone', 'leafstone'
-    ],
-    npcs: [
-      { x: 4, y: 3, sprite: 'clerk', dir: 'down', event: 'shopBuy' },
-      { x: 10, y: 6, sprite: 'woman2', dir: 'left',
-        dialog: ['Fourth floor sells EVOLUTION STONES. Real ones.',
-                 'A THUNDERSTONE on a PIKACHU, a WATER STONE on an EEVEE. Life-changing, for them.'] },
-      { x: 3, y: 9, sprite: 'richboy', dir: 'right',
-        dialog: ['Daddy buys me whatever I want here.', 'I mostly want the lift.'] }
-    ]
-  };
 
   G.MAPS.celadonhouse = {
     id: 'celadonhouse', name: 'Celadon House', w: 10, h: 9,
@@ -3496,4 +3457,207 @@
     yield { t: 'fn', fn: function () { G.player.bag.oldamber = 1; G.flags.got_oldamber = 1; } };
     yield { t: 'text', s: 'You received the OLD AMBER!' };
   };
+
+  // ================================================ CELADON DEPT. STORE =====
+  // Six floors, and the only shop in KANTO that sells anything you cannot buy
+  // in a town Mart. This is where the evolution stones live, and where the four
+  // TMs Red/Blue actually put on a shelf are sold — which makes it the one
+  // building a player crosses the region to reach for reasons other than a
+  // badge.
+  //
+  // Each floor is the same room with a different counter, because a department
+  // store IS that: you are not exploring, you are looking for the right floor.
+  // The lift is the stairwell at the west end and it goes both ways.
+  function storeFloor(n, name, inventory, opts) {
+    opts = opts || {};
+    var id = 'celadonstore' + n;
+    G.MAPS[id] = {
+      id: id, name: 'Celadon Dept. ' + n + 'F — ' + name, w: 14, h: 11,
+      music: 'center', battleBg: 'indoor', base: 'ifloor', indoors: true,
+      legend: G.LEG_INT,
+      ground: pad([
+        'IIIIIIIIIIIIII',
+        'I>...........I',
+        'I............I',
+        'I..CCCCCCCC..I',
+        'I............I',
+        'I............I',
+        'I.B.B.B.B.B..I',
+        'I............I',
+        'I............I',
+        'I............I',
+        'IIIIIIIIIIIIII'
+      ], 14, 11),
+      deco: blank(14, 11),
+      shopInventory: inventory,
+      warps: opts.warps,
+      npcs: (inventory && inventory.length
+        ? [{ x: 5, y: 2, sprite: 'clerk', dir: 'down', event: 'shopBuy' }]
+        : []).concat(opts.npcs || []),
+      signs: opts.signs || []
+    };
+  }
+
+  // 1F is the lobby: no counter, just the directory and the way back out.
+  storeFloor(1, 'Reception', null, {
+    warps: [
+      { x: 6, y: 10, to: 'celadon', tx: 6, ty: 6, dir: 'down' },
+      { x: 7, y: 10, to: 'celadon', tx: 7, ty: 6, dir: 'down' },
+      { x: 1, y: 1, to: 'celadonstore2', tx: 1, ty: 1, dir: 'up' }
+    ],
+    signs: [
+      { x: 8, y: 3, text: 'DIRECTORY — 2F: Trainer Market. 3F: Household. 4F: Wiseman Gifts. 5F: Drugstore. 6F: Rooftop Square.' }
+    ],
+    npcs: [
+      { x: 9, y: 5, sprite: 'clerk', dir: 'left',
+        dialog: ['Welcome to CELADON DEPARTMENT STORE.',
+                 'The lift is at the end. It only goes up one floor at a time, which everyone complains about.'] }
+    ]
+  });
+
+  storeFloor(2, 'Trainer Market',
+    ['greatball', 'superpotion', 'revive', 'superrepel', 'escaperope'], {
+    warps: [
+      { x: 1, y: 1, to: 'celadonstore1', tx: 1, ty: 1, dir: 'down' },
+      { x: 1, y: 2, to: 'celadonstore3', tx: 1, ty: 1, dir: 'up' }
+    ],
+    signs: [{ x: 8, y: 3, text: '2F — TRAINER MARKET. Everything a challenger needs and nothing they want.' }]
+  });
+
+  storeFloor(3, 'Household',
+    ['tm09', 'tm10', 'tm11', 'tm22'], {
+    warps: [
+      { x: 1, y: 1, to: 'celadonstore2', tx: 1, ty: 2, dir: 'down' },
+      { x: 1, y: 2, to: 'celadonstore4', tx: 1, ty: 1, dir: 'up' }
+    ],
+    signs: [{ x: 8, y: 3, text: '3F — TECHNICAL MACHINES. Single use. Read the label twice.' }],
+    npcs: [
+      { x: 10, y: 7, sprite: 'youngster', dir: 'left',
+        dialog: ['A TM is gone once you use it. Gone.',
+                 'I taught DIG to a MAGIKARP to see what would happen. Nothing happened. It cost me four thousand.'] }
+    ]
+  });
+
+  storeFloor(4, 'Wiseman Gifts',
+    ['firestone', 'waterstone', 'thunderstone', 'leafstone'], {
+    warps: [
+      { x: 1, y: 1, to: 'celadonstore3', tx: 1, ty: 2, dir: 'down' },
+      { x: 1, y: 2, to: 'celadonstore5', tx: 1, ty: 1, dir: 'up' }
+    ],
+    signs: [{ x: 8, y: 3, text: '4F — EVOLUTION STONES. All sales final. All evolutions final.' }],
+    npcs: [
+      { x: 10, y: 7, sprite: 'oldwoman', dir: 'left',
+        dialog: ['An EEVEE will become one of three things depending on which of these you hand it.',
+                 'It will never become the other two. People do not think about that enough before they buy.'] }
+    ]
+  });
+
+  storeFloor(5, 'Drugstore',
+    ['hyperpotion', 'fullheal', 'antidote', 'parlyzheal', 'burnheal', 'iceheal', 'awakening'], {
+    warps: [
+      { x: 1, y: 1, to: 'celadonstore4', tx: 1, ty: 2, dir: 'down' },
+      { x: 1, y: 2, to: 'celadonstore6', tx: 1, ty: 1, dir: 'up' }
+    ],
+    signs: [{ x: 8, y: 3, text: '5F — DRUGSTORE. Status cures, by the shelf-load.' }]
+  });
+
+  // 6F is the rooftop. In Red/Blue it is two vending machines and a child who
+  // will trade you drinks for the SAFARI ZONE's most valuable gift — which is
+  // the single strangest economy in the game and is kept exactly as it was.
+  storeFloor(6, 'Rooftop Square',
+    ['freshwater', 'sodapop', 'lemonade'], {
+    warps: [
+      { x: 1, y: 1, to: 'celadonstore5', tx: 1, ty: 2, dir: 'down' }
+    ],
+    signs: [{ x: 8, y: 3, text: '6F — ROOFTOP SQUARE. Vending machines. Mind the edge.' }],
+    npcs: [
+      { x: 10, y: 6, sprite: 'littlegirl', dir: 'left', event: 'rooftopDrinks' }
+    ]
+  });
+
+  // The rooftop child. Three drinks, three TMs, and she will not explain the
+  // exchange rate.
+  G.EVENTS.rooftopDrinks = function* () {
+    var SWAPS = [
+      { drink: 'freshwater', tm: 'tm13', flag: 'roof_water' },
+      { drink: 'sodapop',    tm: 'tm48', flag: 'roof_soda' },
+      { drink: 'lemonade',   tm: 'tm49', flag: 'roof_lemon' }
+    ];
+    var can = SWAPS.filter(function (s) { return G.player.bag[s.drink] && !G.flags[s.flag]; });
+    if (!can.length) {
+      var left = SWAPS.filter(function (s) { return !G.flags[s.flag]; });
+      if (!left.length) {
+        yield { t: 'text', s: 'GIRL: That is all of them. Thank you! I was so thirsty.' };
+        return;
+      }
+      yield { t: 'text', s: 'GIRL: I am thirsty. The machines are right there.' };
+      yield { t: 'text', s: 'GIRL: Bring me a drink and I will give you something. I have three somethings.' };
+      return;
+    }
+    var s0 = can[0];
+    yield { t: 'text', s: 'GIRL: Ooh, is that a ' + G.ITEMS[s0.drink].name.toUpperCase() + '? Can I have it?' };
+    yield { t: 'sfx', id: 'heal' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.player.bag[s0.drink]--;
+        if (!G.player.bag[s0.drink]) delete G.player.bag[s0.drink];
+        G.player.bag[s0.tm] = (G.player.bag[s0.tm] || 0) + 1;
+        G.flags[s0.flag] = 1;
+      }
+    };
+    yield { t: 'text', s: 'You gave away the ' + G.ITEMS[s0.drink].name.toUpperCase() +
+      ' and received ' + s0.tm.toUpperCase() + '!' };
+    yield { t: 'text', s: 'GIRL: My dad works downstairs. Do not tell him where I got these.' };
+  };
+
+  // ============================================================ TM DROPS ====
+  // The rest of the fifty. Gen 1 puts a TM in three places — on the floor of
+  // somewhere you had to work to reach, in the hand of a gym leader, and behind
+  // a shop counter — and all three are used. The leaders' TMs hang off their
+  // trainer reward; the shop's are on the third floor in CELADON; these are the
+  // floor drops.
+  //
+  // Every coordinate here was COMPUTED rather than typed: the deepest reachable
+  // tile of each map that is not already occupied by a warp, a sign or a
+  // person. A TM behind a wall is the same bug as a staircase behind a wall,
+  // and this project has shipped that once already.
+  [
+    ['viridianforest', 21, 2, 'tm35'],
+    ['mtmoonb1f', 19, 16, 'tm01'],
+    ['ssanne', 21, 1, 'tm08'],
+    ['rocktunnel1f', 7, 9, 'tm12'],
+    ['pokemontower1f', 1, 3, 'tm42'],
+    ['undergroundpath', 4, 11, 'tm18'],
+    ['undergroundpath2', 12, 2, 'tm31'],
+    ['silphco2f', 19, 5, 'tm36'],
+    ['silphco3f', 19, 2, 'tm09'],
+    ['rockethideout1', 18, 4, 'tm07'],
+    ['diglettscave', 5, 12, 'tm28'],
+    ['mansion2f', 16, 1, 'tm38'],
+    ['mansionb1f', 17, 1, 'tm22'],
+    ['powerplant', 9, 2, 'tm45'],
+    ['seafoam1f', 17, 11, 'tm37'],
+    ['seafoamb1f', 8, 1, 'tm44'],
+    ['victoryroad1f', 1, 1, 'tm17'],
+    ['victoryroad2f', 15, 2, 'tm43'],
+    ['victoryroad3f', 1, 2, 'tm26'],
+    ['ceruleancave1f', 17, 2, 'tm29'],
+    ['ceruleancave2f', 15, 1, 'tm41'],
+    ['safarizonewest', 2, 18, 'tm32'],
+    ['safarizoneeast', 23, 18, 'tm40'],
+    ['safarizonenorth', 2, 2, 'tm03'],
+    ['safarizonecenter', 8, 7, 'tm30'],
+    ['fightingdojo', 1, 1, 'tm19'],
+    ['route12', 17, 14, 'tm39'],
+    ['route13', 27, 11, 'tm20'],
+    ['route15', 16, 2, 'tm02'],
+    ['route17', 17, 17, 'tm04'],
+    ['route25', 13, 2, 'tm16'],
+    ['cinnabarlab', 7, 1, 'tm33']
+  ].forEach(function (e) {
+    var m = G.MAPS[e[0]];
+    if (!m) return;
+    (m.items = m.items || []).push({ x: e[1], y: e[2], item: e[3], flag: 'found_' + e[3] });
+  });
 })();
