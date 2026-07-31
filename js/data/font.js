@@ -87,6 +87,18 @@
       '%': ['##..#', '##..#', '...#.', '..#..', '.#...', '#..##', '#..##'],
       '$': ['..#..', '.###.', '#.#..', '.###.', '..#.#', '.###.', '..#..'],
       'é': ['..#.', '.#..', '.##.', '#..#', '####', '#...', '.###'],
+
+      // Punctuation and symbols the WRITING actually uses. Every one of these
+      // was already in shipped text and rendering as a hole: the em dash alone
+      // appeared in 144 signs and lines of dialogue, so a sentence would simply
+      // lose its pause. NIDORAN's two names were unreadable without the gender
+      // signs, which is worse — it is the only species in Gen 1 whose name IS a
+      // symbol.
+      '—': ['.....', '.....', '.....', '#####', '.....', '.....', '.....'],
+      '₽': ['####.', '#...#', '#...#', '####.', '#....', '#####', '#....'],
+      '"': ['#.#', '#.#'],
+      '♀': ['.###.', '#...#', '#...#', '.###.', '..#..', '.###.', '..#..'],
+      '♂': ['..###', '....#', '.##.#', '#..##', '#...#', '#...#', '.###.'],
       'É': ['..##.', '#####', '#....', '####.', '#....', '#....', '#####'],
       '×': ['....', '....', '#..#', '.##.', '.##.', '#..#'],
       '▼': ['.....', '.....', '.....', '#####', '.###.', '..#..'],

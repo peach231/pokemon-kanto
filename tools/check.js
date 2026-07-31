@@ -363,6 +363,52 @@ if (G.SPECIES) {
   console.log(`  fly: ${Object.keys(G.FLY_POINTS || {}).length} destinations, all landable`);
 }
 
+// --- font coverage ---
+// A character with no glyph does not throw. G.text simply skips it, so the
+// sentence loses a mark and nobody notices until they read a sign closely.
+// The em dash was missing and appeared in 144 signs and lines of dialogue;
+// NIDORAN's two names were unreadable, since they are the only species in
+// Gen 1 whose name IS a symbol.
+{
+  const glyphs = new Set(Object.keys(G.FONT.glyphs));
+  glyphs.add(' ');
+  const bad = new Map();
+  const chk = (str, where) => {
+    if (typeof str !== 'string') return;
+    for (const ch of str) {
+      if (glyphs.has(ch)) continue;
+      if (!bad.has(ch)) bad.set(ch, new Set());
+      bad.get(ch).add(where);
+    }
+  };
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    chk(m.name, 'map ' + id);
+    for (const s2 of (m.signs || [])) chk(s2.text, 'sign in ' + id);
+    for (const n of (m.npcs || [])) for (const d of (n.dialog || [])) chk(d, 'npc in ' + id);
+  }
+  for (const t in G.TRAINERS) {
+    const d = G.TRAINERS[t];
+    ['name', 'cls', 'intro', 'defeat'].forEach(k => chk(d[k], 'trainer ' + t));
+    if (d.reward) chk(d.reward.text, 'reward ' + t);
+  }
+  for (const k in G.SPECIES) { chk(G.SPECIES[k].name, 'species ' + k); chk(G.SPECIES[k].dex, 'dex blurb ' + k); }
+  for (const k in G.MOVES) chk(G.MOVES[k].name, 'move ' + k);
+  for (const k in G.ITEMS) { chk(G.ITEMS[k].name, 'item ' + k); chk(G.ITEMS[k].desc, 'item desc ' + k); }
+  // event dialogue: only the text yields, so code between strings is not
+  // mistaken for prose
+  for (const e in G.EVENTS) {
+    const src = String(G.EVENTS[e]);
+    for (const m of src.matchAll(/s: '((?:[^'\\]|\\.)*)'/g)) {
+      chk(m[1].replace(/\\'/g, "'"), 'event ' + e);
+    }
+  }
+  for (const [ch, where] of bad) {
+    errors.push(`MISSING GLYPH ${JSON.stringify(ch)} (U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}) — used in ${where.size} place(s), e.g. ${[...where][0]}`);
+  }
+  console.log(`  font: ${glyphs.size} glyphs, every displayable string renders`);
+}
+
 // --- duplicate globals ---
 // Everything in this project hangs off one `G` namespace and the files load in
 // sequence, so a second definition of the same name SILENTLY WINS. There is no
@@ -1201,6 +1247,19 @@ if (G.SPECIES && G.SPRITE_MANIFEST) {
   if (missing) warn.push(`SPRITES: ${missing}/${spCount} species have no confirmed sprite file yet (placeholder will render)`);
 }
 if (G.MOVES) for (const id in G.MOVES) mvCount++;
+
+// --- scene fuzz ---
+// Runs tools/fuzz_scenes.js in its own process: it replaces G.input, G.audio
+// and G.IMG with stubs, which would poison every audit above if it ran here.
+{
+  const r = require('child_process').spawnSync(process.execPath,
+    [path.join(__dirname, 'fuzz_scenes.js')], { encoding: 'utf8' });
+  if (r.status !== 0) {
+    for (const line of (r.stderr || '').trim().split(String.fromCharCode(10))) if (line) errors.push('FUZZ — ' + line);
+  } else {
+    console.log('  ' + (r.stdout || '').trim());
+  }
+}
 
 console.log(`loaded ${loaded} scripts | art: ${artCount} | glyphs: ${glyphs} | maps: ${mapCount} | species: ${spCount} | moves: ${mvCount}`);
 for (const w of warn) console.log('  warn:', w);

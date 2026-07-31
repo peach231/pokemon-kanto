@@ -30,6 +30,7 @@
   };
 
   G.drawScenes = function (ctx) {
+    if (!G.scenes.length) return;   // a scene may close itself on its last frame
     var start = G.scenes.length - 1;
     while (start > 0 && !G.scenes[start].opaque) start--;
     for (var i = start; i < G.scenes.length; i++) {

@@ -757,7 +757,7 @@
         var seen = 0, caught = 0;
         for (var k in G.player.dexSeen) seen++;
         for (var c in G.player.dexCaught) caught++;
-        G.text(ctx, 'CREATURE DEX', 10, 5, G.C.white, '#1a1c2c');
+        G.text(ctx, 'POKéDEX', 10, 5, G.C.white, '#1a1c2c');
         G.text(ctx, 'Seen ' + seen + '  Caught ' + caught, 130, 5, G.C.white, '#1a1c2c');
 
         var top = G.clamp(this.sel - 4, 0, Math.max(0, ORDER.length - 9));
@@ -767,7 +767,7 @@
           var y = 18 + (i - top) * 14;
           var isSeen = G.player.dexSeen[key], isCaught = G.player.dexCaught[key];
           var num = sp.id;
-          var label = (hno ? '#' : 'No.') + (num < 10 ? '00' : num < 100 ? '0' : '') + num + '  ' + (isSeen ? sp.name : '-----');
+          var label = 'No.' + (num < 10 ? '00' : num < 100 ? '0' : '') + num + '  ' + (isSeen ? sp.name : '-----');
           // caught = bright, seen-only = grayed, unseen = darkest
           var color = isCaught ? G.C.white : isSeen ? G.C.gry : '#3a3f4e';
           if (i === this.sel) color = isCaught ? '#f8e878' : G.C.lgry;
