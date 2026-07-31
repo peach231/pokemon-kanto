@@ -36,14 +36,22 @@
         { x: 5, y: 7, to: exit.map, tx: exit.x, ty: exit.y, dir: 'down' }
       ],
       respawnPoint: { mapId: id, x: 4, y: 6 },
+      // The PC is the machine on the back wall at (8,1). It was furniture: the
+      // only thing describing it was a paragraph of text pinned to the floor
+      // in the far corner by the pot plant, and a gentleman stood at (8,2) —
+      // directly in front of it — so the machine could not even be faced.
+      // Meanwhile G.PCScene had been written, in full, and nothing opened it,
+      // while anything caught on a full party went into a box with no door.
       signs: [
-        { x: 11, y: 2, text: 'A storage PC hums quietly. Deposit or withdraw POKéMON here.' }
+        { x: 8, y: 1, event: 'pcStorage',
+          text: 'A storage PC hums quietly. Deposit or withdraw POKéMON here.' }
       ],
       npcs: [
         { x: 3, y: 2, sprite: 'nurse', dir: 'down', event: 'nurseHeal' },
-        { x: 8, y: 2, sprite: 'gentleman', dir: 'down',
-          dialog: ['The PC in the corner is linked to BILL\'s storage system.',
-                   'He built it himself, apparently. Clever man.'] }
+        { x: 10, y: 2, sprite: 'gentleman', dir: 'left',
+          dialog: ['That PC is linked to BILL\'s storage system.',
+                   'Anything you catch with a full party ends up in it.',
+                   'He built the whole thing himself, apparently. Clever man.'] }
       ]
     };
   }
@@ -316,6 +324,14 @@
   // Buying. The clerk offers whatever the map's `shopInventory` lists, priced
   // from items.js, and the loop keeps running until you pick Done — so stocking
   // up does not mean re-opening the menu once per Potion.
+  // BILL's storage system, which every CENTRE's back wall is a terminal for.
+  G.EVENTS.pcStorage = function* () {
+    yield {
+      t: 'custom',
+      run: function (resume) { G.pushScene(G.PCScene(resume)); }
+    };
+  };
+
   G.EVENTS.shopBuy = function* () {
     var inv = (G.world.map.shopInventory || []).filter(function (id) { return G.ITEMS[id]; });
     if (!inv.length) {
@@ -334,8 +350,12 @@
             return G.ITEMS[id].name + '  $' + G.ITEMS[id].price;
           });
           labels.push('Done');
+          // One column, six lines, scrolling — a mart counter list. Two
+          // columns of "Full Restore  $3000" was a wall of text that grew
+          // sideways with the stock, and SAFFRON's fifteen lines were already
+          // within two rows of running off the bottom of the screen.
           G.pushScene(G.Chooser({
-            items: labels, cols: 2, x: 6, y: 8,
+            items: labels, cols: 1, maxRows: 6,
             cancelIndex: labels.length - 1,
             onPick: function (i) { choice.i = i; resume(); }
           }));

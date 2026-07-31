@@ -644,7 +644,7 @@
   // ------------------------------------------------- Bill's PC storage system --
   // Two columns: PARTY (left, max 6) and LAB box (right, scrollable). Z transfers
   // the highlighted creature across; the party can never drop below 1 or exceed 6.
-  G.PCScene = function () {
+  G.PCScene = function (onDone) {
     var VIS = 7; // visible box rows
     return {
       opaque: true,
@@ -656,7 +656,11 @@
       _setSel: function (v) { if (this.col === 0) this.pSel = v; else this.bSel = v; },
       update: function () {
         var party = G.player.party, box = G.player.box;
-        if (G.input.justPressed('B')) { G.audio.sfx('cancel'); G.popScene(); return; }
+        if (G.input.justPressed('B')) {
+          G.audio.sfx('cancel'); G.popScene();
+          if (onDone) onDone();          // let the event that opened it finish
+          return;
+        }
         if (G.input.justPressed('left') && this.col !== 0) { this.col = 0; G.audio.sfx('menuMove'); }
         if (G.input.justPressed('right') && box.length) { this.col = 1; this.bSel = Math.min(this.bSel, box.length - 1); G.audio.sfx('menuMove'); }
         var n = this._list().length;

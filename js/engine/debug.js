@@ -274,6 +274,44 @@
       G.player = realPlayer;
     })();
 
+    // BILL'S PC. G.PCScene was written in full — two columns, transfers both
+    // ways, party floor of one and ceiling of six — and nothing in Kanto ever
+    // opened it. Anything caught on a full party went into a box with no door.
+    // Driven here through the EVENT, so the sign, the event and the scene are
+    // all on the hook rather than just the scene.
+    (function () {
+      if (!G.PCScene || !G.EVENTS || !G.EVENTS.pcStorage) return;
+      var realPlayer = G.player, realScenes = G.scenes.slice(), realInput = G.input;
+      G.player = {
+        party: ['pidgeot', 'rattata', 'pikachu', 'geodude', 'oddish', 'abra']
+          .map(function (s) { return G.makeMon(s, 20); }),
+        box: [G.makeMon('clefairy', 12)],
+        bag: {}, dexSeen: {}, dexCaught: {}, money: 0, badges: []
+      };
+      G.input = { held: {}, justPressed: function () { return false; },
+                  repeat: function () { return false; }, heldDir: function () { return null; } };
+      G.runEvent('pcStorage');
+      G.topScene().update();                        // let the custom step run
+      var pc = G.topScene();
+      assert(typeof pc._list === 'function', "the PC sign did not open BILL's storage");
+
+      G.input = { held: {}, justPressed: function (b) { return b === 'A'; },
+                  repeat: function () { return false; }, heldDir: function () { return null; } };
+      pc.col = 1; pc.bSel = 0;
+      pc.update();
+      assert(G.player.party.length === 6 && G.player.box.length === 1,
+        'the PC let a seventh POKéMON into a full party');
+      G.player.party.pop();
+      pc.update();
+      assert(G.player.party.length === 6 && G.player.box.length === 0,
+        'withdrawing from the PC did not move anything');
+      pc.col = 0; pc.pSel = 0;
+      pc.update();
+      assert(G.player.box.length === 1, 'depositing into the PC did not move anything');
+
+      G.input = realInput; G.scenes = realScenes; G.player = realPlayer;
+    })();
+
     // THE SAFARI ZONE is a different game for one battle: no moves, no foe
     // turn, and two levers that pull the catch rate in opposite directions.
     // Driven end to end here because the menu that exposes it is the only

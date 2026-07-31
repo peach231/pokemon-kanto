@@ -1200,6 +1200,78 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
 }
 
+// --- written, but never wired to anything ---
+// The most expensive bugs in this project are not wrong code. They are correct
+// code nothing calls: G.stoneEvolution was written to make a THUNDERSTONE work
+// and no branch in the bag ever called it, so ten evolutions were unreachable.
+// G.PCScene was a complete two-column storage screen, and the only thing in
+// Kanto describing it was a paragraph of text pinned to the floor beside a pot
+// plant, while anything caught on a full party went into a box with no door.
+//
+// A scene or helper that nothing references is not necessarily a bug — but it
+// is always worth a second look, and both of those would have been caught the
+// day they were written.
+{
+  // main.js counts here: it is the entry point and the only caller of several
+  // scenes. It is left out of SOURCES because those audits read game DATA,
+  // which main.js has none of.
+  const src = SOURCES.concat(['main.js'])
+    .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
+  // Every G.SomethingScene / G.someHelper assigned a function, minus the ones
+  // reached through a table rather than by name.
+  const REACHED_BY_TABLE = new Set(['G.EVENTS', 'G.MAPS', 'G.TILES', 'G.ITEMS', 'G.SPECIES',
+                                    'G.MOVES', 'G.TRAINERS', 'G.ENCOUNTERS']);
+  const defined = new Map();
+  for (const m of src.matchAll(/^\s*(G\.([A-Za-z_]\w*))\s*=\s*function/gm)) {
+    if (REACHED_BY_TABLE.has(m[1])) continue;
+    defined.set(m[1], m[2]);
+  }
+  // Known-unused, on purpose. Kept short and reasoned: four permanent warnings
+  // would teach everyone to skip this audit, which is how the last one stopped
+  // working.
+  const ALLOWED = {
+    'G.deepClone': 'a general utility, kept for save migrations',
+    'G.teachableMoves': 'superseded by G.canLearnTm; harmless',
+    'G.clearFollower': 'updateFollower already clears before it re-attaches',
+    'G.clearSave': 'a delete-save utility; new game resets state without it'
+  };
+  const orphans = [];
+  for (const [full, name] of defined) {
+    if (ALLOWED[full]) continue;
+    // count references that are not the definition itself
+    const uses = [...src.matchAll(new RegExp('G\\.' + name + '\\b', 'g'))].length;
+    const defs = [...src.matchAll(new RegExp('G\\.' + name + '\\s*=\\s*function', 'g'))].length;
+    if (uses - defs <= 0) orphans.push(full);
+  }
+  for (const o of orphans) {
+    warn.push(`ORPHAN: ${o} is defined and never referenced anywhere — either it is dead, or something that should call it does not`);
+  }
+  if (!orphans.length) console.log(`  wiring: all ${defined.size} G.* functions are referenced by something`);
+}
+
+// --- shop menus fit the screen they are drawn on ---
+// Every shop list is built the same way and sized from its own contents, so
+// "does it fit" is a property of the stock, and the stock is edited by hand in
+// fourteen places. Saffron was two rows off the bottom edge. The list scrolls
+// now, but the WIDTH still cannot scroll — a long enough item name pushes the
+// prices off the right of a 240px screen — so that is what this measures.
+{
+  const wide = [];
+  for (const id in G.MAPS) {
+    const inv = (G.MAPS[id].shopInventory || []).filter(i => G.ITEMS[i]);
+    if (!inv.length) continue;
+    const labels = inv.map(i => G.ITEMS[i].name + '  $' + G.ITEMS[i].price).concat(['Done']);
+    let w = 0;
+    for (const l of labels) w = Math.max(w, G.textWidth(l));
+    const boxW = w + 18 + 12;                  // one column, as the shop asks for
+    if (boxW > 236) {
+      wide.push(`${id}'s list is ${boxW}px wide and the screen is 240 — the longest line is "${labels.find(l => G.textWidth(l) === w)}"`);
+    }
+  }
+  for (const s of wide) errors.push('SHOPFIT: ' + s);
+  if (!wide.length) console.log(`  shop fit: every shop list fits the screen width and scrolls past the bottom`);
+}
+
 // --- can you get out the other side? ---
 // The progression audit asks whether every MAP can be reached. That is a
 // weaker question than it looks, because a map has more than one door: Mt.
@@ -1550,6 +1622,32 @@ if (G.TYPE_ORDER) {
   if (G.typeEff('ice', ['fire']) !== 1) errors.push('TYPES: Ice is NEUTRAL against Fire in Gen 1');
   // Deliberately un-bugged: the ROM shipped this as 0x.
   if (G.typeEff('ghost', ['psychic']) !== 2) errors.push('TYPES: Ghost -> Psychic should be 2x (our fix)');
+}
+
+// --- every species' typing, against Red/Blue ---
+// The chart audit above proves the fifteen types behave like Gen 1. It says
+// nothing about which types each creature HAS, and that is where the era shows
+// up: Clefairy and Jigglypuff are plain Normal here, Mr. Mime is plain Psychic
+// and Magnemite plain Electric, because Fairy arrives in Gen 6 and Steel in
+// Gen 2. Those four look like mistakes to anyone who learned the series later.
+//
+// The reference table is written out by hand rather than re-derived from the
+// pipeline that generated js/data — a second opinion is only worth having if
+// it comes from somewhere else.
+{
+  const want = require('./gen1_types.js');
+  const byId = {};
+  for (const k in G.SPECIES) byId[G.SPECIES[k].id] = k;
+  const off = [];
+  for (let d = 1; d <= 151; d++) {
+    const k = byId[d];
+    if (!k) { off.push(`#${d} is missing from the roster`); continue; }
+    const got = (G.SPECIES[k].types || []).join(' ');
+    if (got !== want[d]) off.push(`#${d} ${k} is '${got}', Red/Blue says '${want[d]}'`);
+  }
+  for (const o of off.slice(0, 10)) errors.push('TYPING: ' + o);
+  if (off.length > 10) errors.push(`TYPING: …and ${off.length - 10} more`);
+  if (!off.length) console.log('  typings: all 151 species match their Red/Blue types exactly');
 }
 
 // --- trainer integrity (resolve _starter*; party species + moves valid) ---

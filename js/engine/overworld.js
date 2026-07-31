@@ -667,6 +667,24 @@
       if (G.updateFollower) G.updateFollower();
       if (G.refreshFollower) G.refreshFollower();
       if (G.showTownCard) G.showTownCard(map);
+
+      // FLASH is the one HM with nothing to walk into. CUT has a tree, SURF
+      // has water, STRENGTH has a boulder and FLY has the town map — so each
+      // of those is reachable by doing the obvious thing at the obstacle. A
+      // dark cave is not an obstacle you can face, and G.tryFlash was written
+      // and then never called by anything, which left ROCK TUNNEL, all three
+      // floors of VICTORY ROAD and CERULEAN CAVE pitch dark for good.
+      //
+      // The cave asks. Once you can answer yes, it stops asking.
+      if (map.dark && !G.flags.flashOn && G.tryFlash && G.fieldUser) {
+        var lamp = G.fieldUser('flash');
+        if (!lamp.blocked) {
+          G.ask('It is pitch dark in here. Use FLASH?', function () { G.tryFlash(); });
+        } else {
+          G.pushScene(G.Textbox('It is pitch dark — you can barely see a step ahead. ' +
+            'A POKéMON that knows FLASH would help.'));
+        }
+      }
     },
 
     tileNameAt: function (layer, x, y) {
@@ -1158,6 +1176,14 @@
       var sign = w.signAt(fx, fy);
       if (sign) {
         G.audio.sfx('confirm');
+        // A sign can be a thing you USE rather than a thing you read — the
+        // storage PC on the Centre's back wall is one. The dry-run audit has
+        // always looked for `event` on signs; nothing here ever dispatched it,
+        // so the PC was a paragraph of text about a PC.
+        if (sign.event && G.EVENTS && G.EVENTS[sign.event]) {
+          G.runEvent(sign.event, sign);
+          return;
+        }
         G.pushScene(G.Textbox(sign.text));
         return;
       }

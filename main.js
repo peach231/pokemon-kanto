@@ -108,6 +108,22 @@
         ts.update();
         G.input.justPressed = realJP;
       }
+    } else if (hashIs('shop')) {
+      // #shop=saffronmart — stand at the counter with the list already open.
+      // The shop list is the one menu whose size depends on data somebody
+      // edits by hand, so being able to look at the longest one without
+      // walking to Saffron is worth these few lines.
+      var shopId = (location.hash.match(/#shop=(\w+)/) || [])[1] || 'saffronmart';
+      G.world.loadMap(shopId, 5, 5, 'up');
+      G.pushScene(G.overworldScene);
+      G.runEvent('shopBuy');
+      // Hold A down for a moment so the clerk's greeting types out and
+      // dismisses itself and the list is what you are looking at.
+      var realJP2 = G.input.justPressed, holdFor = 90;
+      G.input.justPressed = function (b) {
+        if (holdFor-- <= 0) { G.input.justPressed = realJP2; return realJP2.call(G.input, b); }
+        return b === 'A';
+      };
     } else if (hashIs('charsel') && G.CharSelectScene) {
       G.pushScene(G.CharSelectScene(function () {}));
     } else if (G.TitleScene) {

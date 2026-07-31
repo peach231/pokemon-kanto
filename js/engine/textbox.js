@@ -81,7 +81,19 @@
     var w = 0;
     for (var i = 0; i < items.length; i++) w = Math.max(w, G.textWidth(items[i]));
     var colW = w + 18;
-    var boxW = colW * cols + 12, boxH = rows * 14 + 12;
+
+    // A list longer than the screen used to be drawn anyway, straight off the
+    // bottom edge: the box was sized to the full contents and then clamped
+    // back on-screen, so the overflow was hidden rather than handled. Nothing
+    // has outgrown it yet — SAFFRON's fifteen lines is the worst of them, and
+    // it fits — but "fits by two rows" is not a property anybody can keep
+    // remembering while adding stock.
+    //
+    // So the list scrolls. Only as many rows as there is room for are drawn,
+    // the window follows the cursor, and arrows say which way there is more.
+    var VIS = opts.maxRows || Math.floor((160 - 16 - 12) / 14);
+    var visRows = Math.min(rows, VIS);
+    var boxW = colW * cols + 12, boxH = visRows * 14 + 12;
     var x = (opts.x !== undefined) ? opts.x : 240 - boxW - 4;
     var y = (opts.y !== undefined) ? opts.y : 114 - boxH - 2;
     x = Math.max(2, Math.min(x, 240 - boxW - 2));  // stay on-screen when wide/tall
@@ -89,11 +101,20 @@
     return {
       opaque: false,
       sel: opts.initial || 0,
+      top: 0,                                  // first visible ROW
+      // Keep the cursor inside the window, whichever way it just moved.
+      _follow: function () {
+        var r = Math.floor(this.sel / cols);
+        if (r < this.top) this.top = r;
+        if (r >= this.top + visRows) this.top = r - visRows + 1;
+        this.top = Math.max(0, Math.min(this.top, rows - visRows));
+      },
       update: function () {
         if (G.input.repeat('left')) { this.sel = (this.sel + n - 1) % n; G.audio.sfx('menuMove'); }
         if (G.input.repeat('right')) { this.sel = (this.sel + 1) % n; G.audio.sfx('menuMove'); }
         if (G.input.repeat('up')) { if (this.sel - cols >= 0) { this.sel -= cols; G.audio.sfx('menuMove'); } }
         if (G.input.repeat('down')) { if (this.sel + cols < n) { this.sel += cols; G.audio.sfx('menuMove'); } }
+        this._follow();
         if (G.input.justPressed('A')) {
           G.audio.sfx('confirm');
           var pick = this.sel;
@@ -111,9 +132,27 @@
         G.nineSlice(ctx, G.IMG.ui_box, x, y, boxW, boxH, 4);
         for (var i = 0; i < items.length; i++) {
           var col = i % cols, row = Math.floor(i / cols);
-          var ix = x + 16 + col * colW, iy = y + 7 + row * 14;
+          if (row < this.top || row >= this.top + visRows) continue;
+          var ix = x + 16 + col * colW, iy = y + 7 + (row - this.top) * 14;
           G.text(ctx, items[i], ix, iy, G.UI.text, G.UI.textShadow);
           if (i === this.sel) ctx.drawImage(G.IMG.ui_cursor, ix - 10, iy + 1);
+        }
+        // More above, more below. Without these a scrolling list looks exactly
+        // like a short one that happens to be missing things.
+        if (rows > visRows) {
+          var ax = x + boxW - 8;
+          ctx.fillStyle = G.UI.text;
+          if (this.top > 0) {
+            ctx.fillRect(ax, y + 4, 5, 1);
+            ctx.fillRect(ax + 1, y + 3, 3, 1);
+            ctx.fillRect(ax + 2, y + 2, 1, 1);
+          }
+          if (this.top + visRows < rows) {
+            var by = y + boxH - 6;
+            ctx.fillRect(ax, by, 5, 1);
+            ctx.fillRect(ax + 1, by + 1, 3, 1);
+            ctx.fillRect(ax + 2, by + 2, 1, 1);
+          }
         }
       }
     };
