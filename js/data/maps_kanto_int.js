@@ -3660,4 +3660,31 @@
     if (!m) return;
     (m.items = m.items || []).push({ x: e[1], y: e[2], item: e[3], flag: 'found_' + e[3] });
   });
+
+
+  // ======================================== TRAINERS ON THE QUIET ROADS ====
+  // Positions are COMPUTED. A trainer is a SOLID tile, so dropping one into a
+  // one-wide cave corridor seals the route behind it — the first attempt at
+  // this put a cooltrainer across the only path through VICTORY ROAD 3F and
+  // made the League unreachable, which the progression audit caught on the
+  // very next run. Placement is therefore restricted to tiles with three or
+  // more open neighbours: a junction or open ground, never a corridor.
+  [
+    ['route23', 12, 31, 'r23_naoko', 'cooltrainerf'],
+    ['route23', 7, 2, 'r23_fidel', 'cooltrainerm'],
+    ['route23', 12, 2, 'r23_yuji', 'cooltrainerm'],
+    ['route23', 5, 31, 'r23_warren', 'birdkeeper'],
+    ['route23', 6, 28, 'r23_mary', 'cooltrainerf'],
+    ['route10', 8, 2, 'r10_nob', 'hiker'],
+    ['route10', 13, 2, 'r10_dana', 'picnicker'],
+    ['victoryroad3f', 7, 15, 'vr_edgar', 'cooltrainerm'],
+    ['victoryroad3f', 3, 17, 'vr_tanya', 'cooltrainerf'],
+    ['mansionb1f', 6, 17, 'mn_stella', 'scientist']
+  ].forEach(function (e) {
+    var m = G.MAPS[e[0]];
+    if (!m) return;
+    (m.trainers = m.trainers || []).push({
+      x: e[1], y: e[2], sprite: e[4], dir: 'down', trainer: e[3], sight: 3
+    });
+  });
 })();

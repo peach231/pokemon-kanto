@@ -993,4 +993,71 @@
     reward: { flag: 'champ_red' },
     music: 'gymleader'
   });
+
+  // ============================== THE ROADS THAT WERE TOO QUIET ============
+  // ROUTE 23 is the badge road — Red/Blue lines it with the hardest trainers
+  // outside the League itself — and it had none at all. These fill it, plus
+  // the approach to ROCK TUNNEL and the two late floors that were running on
+  // one trainer each.
+  tr('r23_naoko', {
+    name: 'Naoko', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 2640,
+    party: [{ sp: 'nidorina', level: 45 }, { sp: 'exeggcute', level: 45 }, { sp: 'nidoqueen', level: 47 }],
+    intro: "Seven gates behind you. One to go.",
+    defeat: "Then go."
+  });
+  tr('r23_fidel', {
+    name: 'Fidel', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 2688,
+    party: [{ sp: 'kingler', level: 46 }, { sp: 'tentacruel', level: 46 }, { sp: 'blastoise', level: 48 }],
+    intro: "Nobody walks this road twice by choice.",
+    defeat: "You will, though."
+  });
+  tr('r23_yuji', {
+    name: 'Yuji', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 2736,
+    party: [{ sp: 'sandslash', level: 46 }, { sp: 'dugtrio', level: 46 }, { sp: 'rhydon', level: 48 }],
+    intro: "The gates only check your badges. I check everything else.",
+    defeat: "Cleared."
+  });
+  tr('r23_warren', {
+    name: 'Warren', cls: 'Bird Keeper', sprite: 'trainer_birdkeeper', ai: 'smart', money: 1080,
+    party: [{ sp: 'pidgeot', level: 46 }, { sp: 'fearow', level: 46 }, { sp: 'dodrio', level: 47 }],
+    intro: "My birds see the PLATEAU from here. I never have.",
+    defeat: "Go and look at it for me."
+  });
+  tr('r23_mary', {
+    name: 'Mary', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 2784,
+    party: [{ sp: 'arcanine', level: 47 }, { sp: 'ninetales', level: 47 }, { sp: 'rapidash', level: 49 }],
+    intro: "Last one before the caves. Make it count.",
+    defeat: "It counted."
+  });
+  tr('r10_nob', {
+    name: 'Nob', cls: 'Hiker', sprite: 'trainer_hiker', ai: 'basic', money: 792,
+    party: [{ sp: 'geodude', level: 22 }, { sp: 'machop', level: 22 }, { sp: 'graveler', level: 24 }],
+    intro: "ROCK TUNNEL is pitch black. Have you got FLASH?",
+    defeat: "You will need it more than you needed me."
+  });
+  tr('r10_dana', {
+    name: 'Dana', cls: 'Picnicker', sprite: 'trainer_picnicker', ai: 'basic', money: 748,
+    party: [{ sp: 'nidorina', level: 23 }, { sp: 'clefairy', level: 23 }],
+    intro: "I camp here because the tunnel frightens me.",
+    defeat: "It still frightens me."
+  });
+  tr('vr_edgar', {
+    name: 'Edgar', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerm', ai: 'smart', money: 2544,
+    party: [{ sp: 'gengar', level: 46 }, { sp: 'golbat', level: 46 }, { sp: 'alakazam', level: 48 }],
+    intro: "The exit is up there. So is something with wings.",
+    defeat: "You will hear it before you see it."
+  });
+  tr('vr_tanya', {
+    name: 'Tanya', cls: 'Cooltrainer', sprite: 'trainer_cooltrainerf', ai: 'smart', money: 2592,
+    party: [{ sp: 'dewgong', level: 47 }, { sp: 'cloyster', level: 47 }, { sp: 'lapras', level: 48 }],
+    intro: "I have been beaten on this floor eleven times.",
+    defeat: "Twelve."
+  });
+  tr('mn_stella', {
+    name: 'Stella', cls: 'Scientist', sprite: 'trainer_scientist', ai: 'smart', money: 1440,
+    party: [{ sp: 'koffing', level: 37 }, { sp: 'weezing', level: 39 }, { sp: 'muk', level: 39 }],
+    intro: "The air down here is not good. You can taste it.",
+    defeat: "Take the key and go."
+  });
+
 })();
