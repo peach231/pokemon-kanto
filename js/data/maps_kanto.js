@@ -2153,7 +2153,7 @@
   // ==========================================================================
   G.MAPS.route17 = {
     id: 'route17', name: 'Cycling Road', w: 20, h: 36,
-    music: 'route', battleBg: 'meadow', base: 'grass',
+    music: 'route', battleBg: 'meadow', base: 'grass', weather: 'wind',
     legend: G.LEG_EXT,
     ground: pad([
       'tutututupppptutututu',
@@ -2262,7 +2262,7 @@
   // ==========================================================================
   G.MAPS.route19 = {
     id: 'route19', name: 'Route 19', w: 16, h: 22,
-    music: 'route', battleBg: 'water', base: 'water',
+    music: 'route', battleBg: 'water', base: 'water', weather: 'spray',
     legend: G.LEG_EXT,
     ground: pad([
       '%%%%%%%%%%%%%%%%',
@@ -2308,7 +2308,7 @@
 
   G.MAPS.route20 = {
     id: 'route20', name: 'Route 20', w: 34, h: 14,
-    music: 'route', battleBg: 'water', base: 'water',
+    music: 'route', battleBg: 'water', base: 'water', weather: 'spray',
     legend: G.LEG_EXT,
     ground: pad([
       '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
@@ -2348,7 +2348,7 @@
 
   G.MAPS.route21 = {
     id: 'route21', name: 'Route 21', w: 16, h: 24,
-    music: 'route', battleBg: 'water', base: 'water',
+    music: 'route', battleBg: 'water', base: 'water', weather: 'spray',
     legend: G.LEG_EXT,
     ground: pad([
       '~~~~~~~~~~~~~~~~',
@@ -2401,7 +2401,7 @@
   // ==========================================================================
   G.MAPS.cinnabar = {
     id: 'cinnabar', name: 'Cinnabar Island', w: 22, h: 18,
-    music: 'town', battleBg: 'meadow', base: 'sand',
+    music: 'town', battleBg: 'meadow', base: 'sand', weather: 'ash',
     // Its own legend, so '.' is SAND rather than grass. CINNABAR is a volcano
     // with a laboratory on it; grass lawns and scattered wildflowers are the
     // wrong island entirely, and the shared exterior legend was giving it both.

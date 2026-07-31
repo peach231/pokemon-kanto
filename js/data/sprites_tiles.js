@@ -114,6 +114,29 @@
     'bbbbbbbbbbbbbbbb'
   ]);
 
+
+  // Frame two: the whole clump leaning. Water already animated and grass did
+  // not, which made every route feel like a photograph with a river running
+  // through it.
+  T('t_tallgrass2', TG, [
+    'bbbbbbbbbbbbbbbb',
+    'bbbbcbbbbbbbcbbb',
+    'bbbcacbbbbbcacbb',
+    'bbbacabbbbbacabb',
+    'bbacacabbbacacab',
+    'bbaabaabbbaabaab',
+    'bbbaaabbbbbaaabb',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbbcbbbbbbc',
+    'bbbbbbbcacbbbbca',
+    'bbbbbbbacabbbbac',
+    'babbbbacacabbaca',
+    'babbbbaabaabbbab',
+    'bbbbbbbaaabbbbba',
+    'bbbbbbbbbbbbbbbb',
+    'bbbbbbbbbbbbbbbb'
+  ]);
+
   // Wildflowers — two frames, gently alternating.
   var FL = { a: C.leaf0, b: C.leaf1, y: C.yel2, w: C.white, r: C.red3 };
   T('t_flower1', FL, [
@@ -991,6 +1014,116 @@
     'oooooooooooooooo'
   ]);
 
+
+  // ================================================ BUILDING TRIMMINGS =====
+  // Every shopfront in Kanto was a flat wall with a door in it, so a Centre, a
+  // house and a gym differed only by roof colour. These are the pieces that
+  // make a building look like it belongs to somebody: a striped awning over a
+  // shop window, a box of flowers on a sill, a swinging sign, and a mat at the
+  // door. They are DECO tiles, so they sit on top of whatever wall is already
+  // there and no map has to be rebuilt to use them.
+  var AWN = { o: C.ink, a: C.red3, b: C.pale, c: C.mrt1, w: C.white };
+  T('t_awning', AWN, [
+    'oooooooooooooooo',
+    'aaaaaaaaaaaaaaaa',
+    'abbbaaaabbbbaaaa'.replace(/x/g, 'a'),
+    'abbbaaaabbbbaaaa',
+    'aabbbaaaabbbbaaa',
+    'aabbbaaaabbbbaaa',
+    'aaabbbaaaabbbbaa',
+    'ooooooooooooooooo'.slice(0, 16),
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ]);
+
+  var BOX = { o: C.ink, w: C.wud0, u: C.wud1, g: C.leaf1, y: C.yel2, r: C.red3, p: C.pale };
+  T('t_windowbox', BOX, [
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '.....ygr.gy.....',
+    '....gygrgyrg....',
+    '...ggggggggg....',
+    '..oooooooooooo..',
+    '..ouuuuuuuuuo..o'.slice(0, 16),
+    '..owwwwwwwwwo...',
+    '..ouuuuuuuuuo...',
+    '..oooooooooooo..',
+    '................',
+    '................',
+    '................'
+  ]);
+
+  var SGN = { o: C.ink, w: C.wud1, u: C.wud0, p: C.pale, y: C.yel1 };
+  T('t_hangsign', SGN, [
+    '.......oo.......',
+    '.......ou.......',
+    '..oooooooooo....',
+    '..opppppppo.....',
+    '..opyyyyypo.....',
+    '..opyppppyo.....',
+    '..opyyyyypo.....',
+    '..opppppppo.....',
+    '..oooooooooo....',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ]);
+
+  var MAT = { o: C.ink, a: C.brn0, b: C.brn1, c: C.brn2 };
+  T('t_doormat', MAT, [
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '...oooooooooo...',
+    '...obcbcbcbo....',
+    '...ocbcbcbco....',
+    '...obcbcbcbo....',
+    '...oooooooooo...',
+    '................'
+  ]);
+
+  // A lamp bracket beside a door. Kanto's towns have no street lighting at
+  // all, which is fine at noon and looks abandoned anywhere else.
+  var LMP = { o: C.ink, m: C.mtl2, y: C.yel2, w: C.white, g: C.yel1 };
+  T('t_lamp', LMP, [
+    '.......oo.......',
+    '.......om.......',
+    '.....oooooo.....',
+    '....ogwwwwgo....',
+    '....oywwwwyo....',
+    '....oygwwgyo....',
+    '.....oyyyyo.....',
+    '......oooo......',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ]);
+
   // ==================================================== SPECIAL INTERIORS ===
   // Pokemon Tower — cold violet stone. Lavender's tower should feel wrong.
   var TW = { o: C.twr0, a: C.twr1, b: C.twr2, c: C.pur3, w: C.pale };
@@ -1061,7 +1194,9 @@
     // ---- ground ----
     grass:     { img: 't_grass' },
     grass2:    { img: 't_grass2' },
-    tallgrass: { img: 't_tallgrass', grass: true },
+    // Two frames at a slow cadence: a field that breathes, not a field that
+    // flickers. 40 frames is about 0.66s a side at 60fps.
+    tallgrass: { anim: ['t_tallgrass', 't_tallgrass2'], animSpeed: 40, grass: true },
     flower:    { anim: ['t_flower1', 't_flower2'], animSpeed: 32 },
     path:      { img: 't_path' },
     path_n:    { img: 't_path_n' },
@@ -1100,6 +1235,11 @@
     fence:     { img: 't_fence', solid: true },
     sign:      { img: 't_sign', solid: true },
     wall:      { img: 't_wall', solid: true },
+    awning:    { img: 't_awning', solid: true },
+    windowbox: { img: 't_windowbox', solid: true },
+    hangsign:  { img: 't_hangsign', solid: true },
+    doormat:   { img: 't_doormat' },
+    lamp:      { img: 't_lamp', solid: true },
     window:    { img: 't_window', solid: true },
     door:      { img: 't_door', door: true },
     gdoor:     { img: 't_gdoor', door: true },

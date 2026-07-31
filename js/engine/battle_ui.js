@@ -1169,9 +1169,20 @@
     optsExtra = optsExtra || {};
     var battle = new G.Battle(battleOpts);
     G.audio.playMusic(optsExtra.music || 'battle');
+    // Grade the transition by the encounter. A LEGENDARY is identified by its
+    // music rather than by a list, because the events that start those fights
+    // already ask for the leader theme and nothing else in the game does.
+    var style = 'spiral';
+    if (battleOpts.trainer) {
+      style = (battleOpts.trainer.cls === 'Leader' || battleOpts.trainer.cls === 'Elite Four' ||
+               battleOpts.trainer.cls === 'Champion' || /^Champion/.test(battleOpts.trainer.cls || ''))
+        ? 'shutter' : 'wipe';
+    } else if (optsExtra.music === 'gymleader') {
+      style = 'burst';
+    }
     G.pushScene(G.BattleSwirlScene(function () {
       G.pushScene(G.BattleScene(battle, optsExtra));
-    }));
+    }, style));
     return battle;
   };
 

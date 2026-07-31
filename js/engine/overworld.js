@@ -56,10 +56,80 @@
   function strHash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
   function mulberry32(a) { return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
+
+  // ------------------------------------------------------ dressing shops --
+  // Every shopfront in Kanto was a flat wall with a door in it, so a Centre, a
+  // Mart and a house differed only by the colour of the roof. This walks the
+  // grid AFTER the scatter and hangs the right trimmings on each frontage,
+  // reading the ROOF above a window to decide what kind of building it is:
+  //
+  //   Mart / Centre  -> a striped awning, and a lamp beside the door
+  //   house          -> a window box
+  //   gym / civic    -> a hanging sign
+  //
+  // Doing it here rather than in the map data means 20 towns get it without a
+  // single grid being re-typed, and a new town gets it for free.
+  function dressBuildings(map, deco) {
+    var nameAt = function (x, y) {
+      if (x < 0 || y < 0 || x >= map.w || y >= map.h) return null;
+      return map.legend[map.ground[y][x]] || null;
+    };
+    var free = function (x, y) {
+      return y >= 0 && y < map.h && x >= 0 && x < map.w && (deco[y][x] || '.') === '.';
+    };
+    // deco is a char grid over the SAME legend, so the trimmings need letters
+    // in it. These are added to the map's own legend rather than the shared
+    // one, so they cannot collide with a character a route already uses.
+    var SLOTS = { awning: '\u00E1', windowbox: '\u00E2', hangsign: '\u00E3', doormat: '\u00E4', lamp: '\u00E5' };
+    for (var k in SLOTS) map.legend[SLOTS[k]] = k;
+
+    for (var y = 0; y < map.h; y++) {
+      for (var x = 0; x < map.w; x++) {
+        var here = nameAt(x, y);
+
+        // a window -> trim by whatever building it belongs to. The roof is not
+        // always DIRECTLY above: a Centre carries its cross and a Mart its
+        // sign on the row between, so walk up past those.
+        if (here === 'window') {
+          var above = '';
+          for (var up = 1; up <= 3; up++) {
+            var n2 = nameAt(x, y - up) || '';
+            if (/roof/.test(n2)) { above = n2; break; }
+            if (!/sign|wall|window/.test(n2)) break;
+          }
+          var kind = /^sroof|^hroof/.test(above) ? 'awning'
+                   : /^roof/.test(above) ? 'windowbox'
+                   : /^groof|^lroof/.test(above) ? 'hangsign' : null;
+          if (kind && free(x, y)) deco[y][x] = SLOTS[kind];
+          continue;
+        }
+
+        // a door -> a mat on the ground in front of it, and for the shops a
+        // lamp on the wall beside it
+        if (here === 'door' || here === 'gdoor') {
+          if (free(x, y + 1) && !/roof/.test(nameAt(x, y + 1) || '')) deco[y + 1][x] = SLOTS.doormat;
+          var roofAbove = '';
+          for (var u2 = 1; u2 <= 3; u2++) {
+            var n3 = nameAt(x, y - u2) || '';
+            if (/roof/.test(n3)) { roofAbove = n3; break; }
+            if (!/sign|wall|window/.test(n3)) break;
+          }
+          if (/^sroof|^hroof/.test(roofAbove)) {
+            if (nameAt(x - 1, y) === 'wall' && free(x - 1, y)) deco[y][x - 1] = SLOTS.lamp;
+            else if (nameAt(x + 1, y) === 'wall' && free(x + 1, y)) deco[y][x + 1] = SLOTS.lamp;
+          }
+        }
+      }
+    }
+  }
+
   G.decorateMap = function (map) {
     if (!map || map._decorated) return;
     map._decorated = true;
-    if (map.legend !== G.LEG_EXT || !map.deco || !map.ground) return; // outdoor only
+    if (!map.deco || !map.ground || map.indoors) return;
+    var isOutdoor = map.legend === G.LEG_EXT ||
+      Object.keys(map.legend).some(function (c) { return map.legend[c] === 'door'; });
+    if (!isOutdoor) return;
     var avoid = {};
     function mark(a) { (a || []).forEach(function (o) { avoid[o.x + ',' + o.y] = 1; }); }
     mark(map.warps); mark(map.signs); mark(map.items); mark(map.npcs); mark(map.trainers);
@@ -83,6 +153,7 @@
         if (ch) deco[y][x] = ch;
       }
     }
+    dressBuildings(map, deco);
     map.deco = deco.map(function (r) { return r.join(''); });
   };
 
@@ -104,6 +175,148 @@
 
   // Overworld weather overlay — understated, drawn over the world but under HUD.
   // Maps opt in with a `weather` field; the default (no field) is plain sunny.
+
+  // --------------------------------------------------------- weather -------
+  // Three more, for the three places in Kanto with a climate of their own.
+  function drawExtraWeather(ctx, kind) {
+    var f = G.frame, W = G.SCREEN_W, H = G.SCREEN_H, i;
+    if (kind === 'wind') {
+      // CYCLING ROAD. Horizontal streaks, fast, low opacity — the road is a
+      // hill you cannot stop on and it should feel like it.
+      ctx.fillStyle = 'rgba(236,244,255,0.30)';
+      for (i = 0; i < 26; i++) {
+        var wx = (i * 71 + f * 11) % (W + 60) - 30;
+        var wy = (i * 43 + (i & 1) * 7) % H;
+        ctx.fillRect(wx, wy, 10 + (i % 3) * 6, 1);
+      }
+    } else if (kind === 'spray') {
+      // OPEN SEA. Slow motes drifting up off the swell, and a faint blue cast.
+      ctx.fillStyle = 'rgba(140,196,240,0.10)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      for (i = 0; i < 22; i++) {
+        var sx2 = (i * 97 + f * 2) % (W + 20) - 10;
+        var sy2 = H - ((i * 61 + f * 3) % (H + 30));
+        ctx.fillRect(sx2, sy2, 1, 1);
+      }
+    } else if (kind === 'ash') {
+      // CINNABAR. The volcano has not gone off in living memory. It smokes
+      // every single day, and the town has stopped mentioning it.
+      ctx.fillStyle = 'rgba(60,48,44,0.12)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(210,200,192,0.55)';
+      for (i = 0; i < 30; i++) {
+        var ax = (i * 83 + f) % (W + 16) - 8 + Math.sin((f + i * 17) * 0.03) * 3;
+        var ay = (i * 47 + f * 2) % (H + 16) - 8;
+        ctx.fillRect(ax | 0, ay | 0, 1 + (i % 3 === 0 ? 1 : 0), 1);
+      }
+    }
+  }
+
+  // ---------------------------------------------------- interior light -----
+  // Every interior was lit flat, which is why a Pokémon Centre and a Rocket
+  // hideout felt like the same room in different wallpaper. This lays a tinted
+  // vignette over indoor maps and pools warm light under the fittings that
+  // would actually emit it — the heal machine, a lamp — so a Centre reads as
+  // somewhere you are safe before a single line of dialogue says so.
+  var LIGHT = {
+    center:  { tint: 'rgba(255,206,128,0.13)', edge: 'rgba(60,34,10,0.30)' },
+    town:    { tint: 'rgba(255,224,170,0.08)', edge: 'rgba(40,30,20,0.26)' },
+    cave:    { tint: 'rgba(120,150,200,0.10)', edge: 'rgba(6,10,22,0.46)' },
+    gym:     { tint: 'rgba(255,255,255,0.04)', edge: 'rgba(16,16,28,0.34)' }
+  };
+  function drawInteriorLight(ctx, map, cam) {
+    if (!map.indoors) return;
+    var L = LIGHT[map.music] || LIGHT.town;
+    ctx.fillStyle = L.tint;
+    ctx.fillRect(0, 0, G.SCREEN_W, G.SCREEN_H);
+    // a blocky vignette: four bands, darkest at the frame
+    var W2 = G.SCREEN_W, H2 = G.SCREEN_H;
+    for (var b = 0; b < 3; b++) {
+      ctx.fillStyle = L.edge;
+      var t = 6 + b * 5;
+      ctx.fillRect(0, b * 5, W2, 5);
+      ctx.fillRect(0, H2 - (b + 1) * 5, W2, 5);
+      ctx.fillRect(b * 5, 0, 5, H2);
+      ctx.fillRect(W2 - (b + 1) * 5, 0, 5, H2);
+    }
+    // pools of light under things that glow
+    var rows = map.ground;
+    if (!rows) return;
+    var x0 = Math.max(0, Math.floor(cam.x / 16) - 1), y0 = Math.max(0, Math.floor(cam.y / 16) - 1);
+    var x1 = Math.min(map.w - 1, x0 + 17), y1 = Math.min(map.h - 1, y0 + 12);
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        var nm = map.legend[rows[y][x]];
+        if (nm !== 'ihealm' && nm !== 'lamp' && nm !== 'imach') continue;
+        var px = x * 16 - cam.x + 8, py = y * 16 - cam.y + 12;
+        for (var r = 3; r >= 1; r--) {
+          ctx.fillStyle = 'rgba(255,220,150,' + (0.05 * r).toFixed(2) + ')';
+          ctx.fillRect(px - r * 8, py - r * 6, r * 16, r * 12);
+        }
+      }
+    }
+  }
+
+
+  // ------------------------------------------------------- town cards ------
+  // The plaque that slides in when you walk into a town. It is pure
+  // atmosphere and it is the cheapest atmosphere in the medium: arriving
+  // somewhere should be an event, and until now Pallet and Saffron announced
+  // themselves identically, which is to say not at all.
+  //
+  // It shows once per town per visit, never on a route, never indoors, and
+  // never twice in a row — walking in and out of a Centre should not re-announce
+  // the town you are standing in.
+  var townCard = null;
+  var lastCardMap = null;
+
+  G.SLOGANS = {
+    pallet: 'A quiet place with clean air',
+    viridian: 'The eternally green paradise',
+    pewter: 'A stone grey city',
+    cerulean: 'A mysterious blue aura surrounds it',
+    vermilion: 'The port of exquisite sunsets',
+    lavender: 'The noble purple town',
+    celadon: 'The city of rainbow dreams',
+    saffron: 'Shining, golden land of commerce',
+    fuchsia: 'Behold! It is passion and pride',
+    cinnabar: 'The fiery town of burning desire',
+    indigo: 'The final stop'
+  };
+
+  G.showTownCard = function (map) {
+    if (!map || map.indoors || map.music !== 'town') { return; }
+    if (lastCardMap === map.id) return;
+    lastCardMap = map.id;
+    townCard = { t: 0, name: map.name, sub: G.SLOGANS[map.id] || '' };
+  };
+
+  function drawTownCard(ctx) {
+    if (!townCard) return;
+    var IN = 16, HOLD = 96, OUT = 20;
+    var t = townCard.t++;
+    if (t > IN + HOLD + OUT) { townCard = null; return; }
+    // slide in from the left, hold, slide out — eased so it settles rather
+    // than snapping
+    var k = t < IN ? t / IN : t < IN + HOLD ? 1 : 1 - (t - IN - HOLD) / OUT;
+    var ease = 1 - Math.pow(1 - Math.max(0, Math.min(1, k)), 3);
+    var w = 4 + G.textWidth(townCard.name) + 14;
+    var sub = townCard.sub;
+    if (sub) w = Math.max(w, G.textWidth(sub) + 18);
+    var h = sub ? 30 : 20;
+    var x = Math.round(-w + (w + 8) * ease), y = 12;
+
+    ctx.fillStyle = 'rgba(20,22,38,0.86)';
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = '#f8e878';
+    ctx.fillRect(x, y, w, 1);
+    ctx.fillRect(x, y + h - 1, w, 1);
+    ctx.fillRect(x + w - 1, y, 1, h);
+    G.text(ctx, townCard.name.toUpperCase(), x + 8, y + 5, G.C.white, '#1a1c2c');
+    if (sub) G.text(ctx, sub, x + 8, y + 17, '#c2c2d6', '#1a1c2c');
+  }
+
   function drawMapWeather(ctx, kind) {
     var f = G.frame, W = G.SCREEN_W, H = G.SCREEN_H, i;
     if (kind === 'sun') {
@@ -263,6 +476,7 @@
       if (map.music) G.audio.playMusic(map.music);
       if (G.updateFollower) G.updateFollower();
       if (G.refreshFollower) G.refreshFollower();
+      if (G.showTownCard) G.showTownCard(map);
     },
 
     tileNameAt: function (layer, x, y) {
@@ -531,6 +745,19 @@
         if (left === 0) {
           G.runEvent('safariTimeUp');
           return;
+        }
+      }
+
+      // Stepping into tall grass rustles it. The encounter roll happens on
+      // this same step, so the rustle is also the tell: something moved before
+      // the screen did.
+      var gdef = w.tileDefAt(p.x, p.y);
+      if (gdef && gdef.grass && !w.map.indoors) {
+        for (var gr = 0; gr < 5; gr++) {
+          G.dust.push({
+            x: p.x * 16 + 3 + gr * 3, y: p.y * 16 + 12 - (gr % 2) * 3,
+            vy: -0.32 - (gr % 3) * 0.06, life: 12 + gr, max: 12 + gr, leaf: true
+          });
         }
       }
 
@@ -807,7 +1034,9 @@
         dp.y += dp.vy; dp.life--;
         if (dp.life <= 0) { G.dust.splice(dz, 1); continue; }
         var da = dp.life / dp.max;
-        ctx.fillStyle = 'rgba(226,214,186,' + (da * 0.7).toFixed(2) + ')';
+        ctx.fillStyle = dp.leaf
+          ? 'rgba(96,168,72,' + (da * 0.85).toFixed(2) + ')'
+          : 'rgba(226,214,186,' + (da * 0.7).toFixed(2) + ')';
         var dsz = 1 + Math.round(da * 2);
         ctx.fillRect(Math.round(dp.x - cam.x), Math.round(dp.y - cam.y), dsz, dsz);
       }
@@ -829,8 +1058,9 @@
       if (map.dark && !G.flags.flashOn) drawDarkness(ctx, cam, 1);
       else if (map.dark) drawDarkness(ctx, cam, 3);
 
-      // weather overlay (rain / sandstorm / harsh sun) — over the world, under HUD
-      if (map.weather) drawMapWeather(ctx, map.weather);
+      // interior lighting, then weather — both over the world, under the HUD
+      drawInteriorLight(ctx, map, cam);
+      if (map.weather) { drawMapWeather(ctx, map.weather); drawExtraWeather(ctx, map.weather); }
 
       // exit arrows over map-edge warps (route/town entrances), so the way
       // onward is obvious. Building doors are interior, so they're skipped.
@@ -868,6 +1098,8 @@
           G.text(ctx, label, lx + 3, ly + 2, '#7fdfff');
         }
       }
+
+      drawTownCard(ctx);
 
       // controls hint — small + discreet, two tucked lines in the corner
       var hl1 = 'Z/Space talk  Shift run', hl2 = 'Del back  Enter menu';
