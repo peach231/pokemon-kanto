@@ -975,7 +975,7 @@
     var wild = G.makeMon(pick.sp, level);
     G.player.dexSeen[pick.sp] = 1;
     G.startBattle(
-      { party: G.player.party, foes: [wild], wild: true, weather: map.weather || null },
+      { party: G.player.party, foes: [wild], wild: true, safari: !!map.safari },
       { bg: map.battleBg || 'meadow', onEnd: G.afterBattle }
     );
     return true;

@@ -44,9 +44,8 @@ Strength**) → the sea → **Cinnabar (Blaine)** → Pokémon Mansion (Secret K
 - **Koga's gym is a real maze**, not invisible walls — a spanning tree with
   exactly one route to him, so it is a puzzle of geometry rather than of bad
   information.
-- **The Safari Zone has no separate battle mode.** Bait and rocks are not
-  implemented; the step counter and the Safari Balls are. This is the one
-  meaningful mechanical omission and it is listed here rather than hidden.
+- *(closed)* The Safari Zone now has its own battle mode: no moves, no foe
+  turn, and BAIT and ROCK pulling the catch rate in opposite directions.
 - **The Hall of Champions does not exist in Red/Blue.** It is the ending this
   project wanted: the Elite Four end the challenge, and this ends the game.
 
@@ -63,6 +62,13 @@ The pattern is always the same — **the failure is silent**:
    `step.fn()`. Every one stopped halfway through, silently. Two HMs became
    unobtainable and half the region was cut off — with all checks passing,
    because it was correct data calling one wrong field name.
+6. `items.js` said `kind: 'ball'`; the battle bag filtered for `kind: 'orb'`.
+   No ball ever reached the menu, so **nothing in the game could be caught**
+   — and the catch-rate unit test passed the whole time, because the formula
+   was right and nobody called it.
+7. Eleven dungeon interiors had their staircase, item or legendary sealed
+   inside a room with no door. A 20x20 grid typed by hand looks connected
+   and is not.
 4. Nine trainer classes had no overworld sheet and rendered as *nothing*:
    solid, talkable, invisible.
 5. Roof tiles baked a grass background, so every building on sand or marble

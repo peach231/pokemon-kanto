@@ -39,6 +39,10 @@
     this.party = opts.party;
     this.foes = opts.foes;
     this.wild = !!opts.wild;
+    this.safari = !!opts.safari;   // SAFARI ZONE: no moves, no foe turn
+    this.safariCatchMod = 1;
+    this.safariEat = 0;
+    this.safariAngry = 0;
     this.trainer = opts.trainer || null;
     this.activeP = firstAlive(this.party);
     this.activeF = 0;
@@ -201,6 +205,16 @@
   // pAction: {type:'move', slot} | {type:'switch', index} | {type:'item', id, target}
   //        | {type:'ball', id} | {type:'run'}
   G.Battle.prototype.turn = function* (pAction) {
+    // A SAFARI turn has no opposing half. The creature never attacks; it only
+    // decides whether to stay, and that decision is the entire fight.
+    if (this.safari) {
+      yield* this.doAction('p', pAction);
+      if (this.over) return;
+      if (yield* this.safariFlee()) return;
+      this.turnsOut.p++;
+      this.turnsOut.f++;
+      return;
+    }
     var fAction = this.chooseFoeAction();
     var order = this.orderActions(pAction, fAction);
     // bind each action to the creature that chose it: if it faints (or is
@@ -238,6 +252,7 @@
 
   function actionPriority(action, battle, side) {
     if (action.type === 'switch') return 100;
+    if (action.type === 'bait' || action.type === 'rock') return 95;
     if (action.type === 'item' || action.type === 'ball') return 90;
     if (action.type === 'run') return 80;
     var mon = battle.active(side);
@@ -245,7 +260,59 @@
     return move.priority;
   }
 
+  // ------------------------------------------------------------- SAFARI ----
+  // The SAFARI ZONE is a different game for the length of one battle. You have
+  // no moves, the POKéMON never attacks, and the only two levers are BAIT and a
+  // ROCK — one makes it stay and gets harder to catch, the other makes it
+  // easier to catch and much more likely to bolt. That trade IS the minigame,
+  // and without it the preserve is just a field with a step counter.
+  G.Battle.prototype.doBait = function* () {
+    var mon = this.active('f');
+    this.safariEat = (this.safariEat || 0) + G.irandIn(2, 6);
+    this.safariAngry = 0;
+    this.safariCatchMod = 0.5;      // fed and content: much harder to catch
+    yield { t: 'text', s: 'You threw some BAIT.' };
+    yield { t: 'text', s: G.monName(mon) + ' is eating!' };
+  };
+
+  G.Battle.prototype.doRock = function* () {
+    var mon = this.active('f');
+    this.safariAngry = (this.safariAngry || 0) + G.irandIn(2, 6);
+    this.safariEat = 0;
+    this.safariCatchMod = 2;        // rattled and careless: far easier to catch
+    yield { t: 'text', s: 'You threw a ROCK.' };
+    yield { t: 'text', s: G.monName(mon) + ' is angry!' };
+  };
+
+  // Every Safari turn ends with the creature deciding whether to stay. Eating
+  // makes it stay; being pelted makes it run. Neither is free.
+  G.Battle.prototype.safariFlee = function* () {
+    var mon = this.active('f');
+    var sp = G.SPECIES[mon.sp];
+    var base = (255 - (sp.catchRate || 45)) / 900;   // rarer things are flightier
+    if (this.safariEat > 0) { this.safariEat--; base /= 4; }
+    if (this.safariAngry > 0) { this.safariAngry--; base *= 2; }
+    if (G.chance(Math.min(0.9, base))) {
+      yield { t: 'text', s: G.monName(mon) + ' fled!' };
+      // The engine's convention is over + result; setting `over` to the string
+      // would have ended the battle with an undefined result, and afterBattle
+      // would have fallen through every branch and done nothing at all.
+      this.over = true;
+      this.result = 'fled';
+      return true;
+    }
+    return false;
+  };
+
   G.Battle.prototype.doAction = function* (side, action) {
+    if (action.type === 'bait') {
+      yield* this.doBait();
+      return;
+    }
+    if (action.type === 'rock') {
+      yield* this.doRock();
+      return;
+    }
     if (action.type === 'switch') {
       yield* this.doSwitch(side, action.index);
     } else if (action.type === 'item') {
@@ -328,7 +395,9 @@
     }
   };
 
-  // Gen-3-style catch math, 4 shake checks.
+  // Gen-3-style catch math, 4 shake checks. In the SAFARI ZONE the odds are
+  // additionally swung by BAIT (harder) and ROCKs (easier), which is the
+  // trade the whole preserve is built around.
   G.Battle.prototype.doOrb = function* (orbId) {
     var orb = G.ITEMS[orbId];
     var mon = this.active('f');
@@ -355,7 +424,8 @@
       mod = Math.min(4, 1 + this.turnsOut.p / 5); // grows as the battle drags on
     }
     var statusMod = mon.status === 'slp' ? 2 : (mon.status ? 1.5 : 1);
-    var a = Math.floor((3 * stats.hp - 2 * mon.curHp) * sp.catchRate * mod / (3 * stats.hp)) * statusMod;
+    var safariMod = this.safari ? (this.safariCatchMod || 1) : 1;
+    var a = Math.floor((3 * stats.hp - 2 * mon.curHp) * sp.catchRate * mod / (3 * stats.hp)) * statusMod * safariMod;
 
     var shakes = 0;
     if (a >= 255) {

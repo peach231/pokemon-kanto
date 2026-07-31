@@ -448,13 +448,30 @@
     }
 
     // ---- menus ---------------------------------------------------------------
-    var MENU = ['FIGHT', 'BAG', 'PARTY', 'RUN'];
+    // The SAFARI ZONE replaces the whole action menu. You have no moves and
+    // no party swap — one ball, two ways to change the odds, and the door.
+    var MENU = battle.safari
+      ? ['BALL', 'BAIT', 'ROCK', 'RUN']
+      : ['FIGHT', 'BAG', 'PARTY', 'RUN'];
 
     function menuInput() {
       if (G.input.repeat('left') || G.input.repeat('right')) { menuSel ^= 1; G.audio.sfx('menuMove'); }
       if (G.input.repeat('up') || G.input.repeat('down')) { menuSel ^= 2; G.audio.sfx('menuMove'); }
       if (G.input.justPressed('A')) {
         G.audio.sfx('confirm');
+        if (battle.safari) {
+          if (menuSel === 0) {
+            if (!(G.player.bag.safariball > 0)) {
+              G.pushScene(G.Textbox('You are out of SAFARI BALLs!'));
+              return;
+            }
+            G.player.bag.safariball--;
+            startGen(battle.turn({ type: 'ball', id: 'safariball' }));
+          } else if (menuSel === 1) startGen(battle.turn({ type: 'bait' }));
+          else if (menuSel === 2) startGen(battle.turn({ type: 'rock' }));
+          else startGen(battle.turn({ type: 'run' }));
+          return;
+        }
         if (menuSel === 0) {
           phase = 'moves';
           // the cursor may point at a slot this creature doesn't have

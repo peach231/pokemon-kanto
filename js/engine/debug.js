@@ -217,6 +217,45 @@
       assert(G.ITEMS.pokeball.kind === 'ball', 'pokeball is not kind ball');
     })();
 
+    // THE SAFARI ZONE is a different game for one battle: no moves, no foe
+    // turn, and two levers that pull the catch rate in opposite directions.
+    // Driven end to end here because the menu that exposes it is the only
+    // place those actions are ever constructed.
+    (function () {
+      var realPlayer = G.player;
+      G.player = { party: [G.makeMon('pidgeot', 40)], box: [], bag: { safariball: 99 },
+                   dexSeen: {}, dexCaught: {}, money: 0, badges: [] };
+      function drive(action, seed) {
+        G.seedRng(seed);
+        var wild = G.makeMon('nidoran-m' in G.SPECIES ? 'nidoran-m' : 'kangaskhan', 25);
+        var b = new G.Battle({ party: G.player.party, foes: [wild], wild: true, safari: true });
+        var hpBefore = G.player.party[0].curHp;
+        var gen = b.turn(action), st = gen.next();
+        while (!st.done) st = gen.next();
+        return { b: b, hurt: G.player.party[0].curHp < hpBefore };
+      }
+      var r1 = drive({ type: 'bait' }, 11);
+      assert(!r1.hurt, 'a SAFARI creature attacked the player');
+      assert(r1.b.safariCatchMod < 1, 'BAIT did not make the catch harder');
+      var r2 = drive({ type: 'rock' }, 12);
+      assert(!r2.hurt, 'a SAFARI creature attacked the player after a ROCK');
+      assert(r2.b.safariCatchMod > 1, 'a ROCK did not make the catch easier');
+
+      // and a ball still resolves to a real capture inside a safari battle
+      var caught = 0;
+      for (var si = 0; si < 120; si++) {
+        G.seedRng(500 + si);
+        var wild2 = G.makeMon('kangaskhan', 5);
+        var b2 = new G.Battle({ party: G.player.party, foes: [wild2], wild: true, safari: true });
+        b2.safariCatchMod = 2;
+        var g2 = b2.turn({ type: 'ball', id: 'safariball' }), s2 = g2.next();
+        while (!s2.done) s2 = g2.next();
+        if (b2.caughtMon) caught++;
+      }
+      G.player = realPlayer;
+      assert(caught > 0, 'no SAFARI BALL ever caught anything in 120 throws');
+    })();
+
     // determinism: same seed -> same battle log
     var log1 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
     var log2 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
