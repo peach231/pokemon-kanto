@@ -171,13 +171,21 @@
       },
       draw: function (ctx) {
         if (this.t <= FLASH_FRAMES) {
-          var on = style === 'burst'
-            ? (this.t >> 1) % 2 === 0          // a legendary strobes hard
-            : (this.t >> 2) % 2 === 0;
-          if (on) {
-            ctx.fillStyle = style === 'burst' ? 'rgba(255,255,255,0.95)' : 'rgba(244,244,244,0.85)';
-            ctx.fillRect(0, 0, G.SCREEN_W, G.SCREEN_H);
+          // No strobing. The legendary variant used to alternate full white
+          // every second frame — 30Hz across the whole screen — which is a
+          // photosensitivity hazard rather than a stylistic choice. It is now
+          // one flash that rises and falls, and the others pulse at a rate a
+          // reduced-motion setting can flatten entirely.
+          var k = this.t / FLASH_FRAMES;
+          var a;
+          if (style === 'burst') {
+            a = k < 0.4 ? (k / 0.4) * 0.9 : (1 - (k - 0.4) / 0.6) * 0.9;
+          } else {
+            a = (G.motionScale && G.motionScale() === 0) ? 0.35
+              : ((this.t >> 3) % 2 === 0 ? 0.55 : 0.30);
           }
+          ctx.fillStyle = 'rgba(248,248,248,' + Math.max(0, a).toFixed(2) + ')';
+          ctx.fillRect(0, 0, G.SCREEN_W, G.SCREEN_H);
           return;
         }
         ctx.fillStyle = '#08080c';

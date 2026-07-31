@@ -45,7 +45,11 @@
 
   // slowly scrolling horizontal strip along the horizon — GBA-style parallax band
   function scrollBand(ctx, y, color) {
-    var off = (G.frame >> 1) % 14;
+    // This slides under a static scene for the whole battle, so it is the
+    // one piece of motion a player looks at longest. Quarter speed, and it
+    // stops dead on Still.
+    var ms = G.motionSpeed();
+    var off = ms ? ((G.frame * ms) >> 3) % 14 : 0;
     ctx.fillStyle = color;
     for (var x = -14 + off; x < W; x += 14) ctx.fillRect(x, y, 7, 2);
   }
@@ -148,7 +152,7 @@
       scrollBand(ctx, 88, G.C.blu1);
       ctx.fillStyle = 'rgba(255,255,255,0.30)';
       for (var i = 0; i < 16; i++) {
-        var wx = (Math.round(seeded(41, i) * W) + (G.frame >> 2)) % (W + 20) - 10;
+        var wx = (Math.round(seeded(41, i) * W) + ((G.frame * G.motionSpeed()) >> 3)) % (W + 20) - 10;
         var wy = 60 + Math.round(seeded(43, i) * (H - 66));
         ctx.fillRect(wx, wy, 4 + (i % 3), 1);
       }

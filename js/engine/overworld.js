@@ -183,7 +183,10 @@
   // --------------------------------------------------------- weather -------
   // Three more, for the three places in Kanto with a climate of their own.
   function drawExtraWeather(ctx, kind) {
-    var f = G.frame, W = G.SCREEN_W, H = G.SCREEN_H, i;
+    // Wind was 11 pixels a frame, which is 660 a second across the whole
+    // screen. Halved at source and then scaled by the motion dial.
+    var ms = G.motionSpeed();
+    var f = G.frame * ms * 0.5, W = G.SCREEN_W, H = G.SCREEN_H, i;
     if (kind === 'wind') {
       // CYCLING ROAD. Horizontal streaks, fast, low opacity — the road is a
       // hill you cannot stop on and it should feel like it.
@@ -321,8 +324,45 @@
     if (sub) G.text(ctx, sub, x + 8, y + 17, '#c2c2d6', '#1a1c2c');
   }
 
+
+  // How much ambient motion the world is allowed. Everything that moves on its
+  // own — grass, water, weather, parallax, foam — multiplies its rate by this,
+  // so one setting calms the whole game rather than the player hunting through
+  // a list of toggles.
+  //
+  //   Full     1.0   as authored
+  //   Calm     0.45  everything at roughly half speed
+  //   Still    0     nothing ambient animates at all; the world holds a pose
+  //
+  // The default is taken from the operating system's own reduced-motion
+  // preference the first time the game runs, because somebody who has already
+  // told their computer they get motion sick should not have to tell us too.
+  var MOTION_RATE = { Full: 1, Calm: 0.45, Still: 0 };
+
+  G.motionSetting = function () {
+    var o = (G.player && G.player.options) || {};
+    if (o.motion) return o.motion;
+    var reduced = false;
+    try {
+      reduced = typeof window !== 'undefined' && window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) { reduced = false; }
+    return reduced ? 'Calm' : 'Full';
+  };
+
+  // Multiplier for anything measured in FRAMES PER STEP: bigger is slower, so
+  // a rate of 0 means "never advance".
+  G.motionScale = function () {
+    var r = MOTION_RATE[G.motionSetting()];
+    return r === 0 ? 0 : 1 / r;
+  };
+
+  // Multiplier for anything measured in PIXELS PER FRAME: smaller is slower.
+  G.motionSpeed = function () { return MOTION_RATE[G.motionSetting()]; };
+
   function drawMapWeather(ctx, kind) {
-    var f = G.frame, W = G.SCREEN_W, H = G.SCREEN_H, i;
+    var ms = G.motionSpeed();
+    var f = G.frame * ms * 0.55, W = G.SCREEN_W, H = G.SCREEN_H, i;
     if (kind === 'sun') {
       ctx.fillStyle = 'rgba(255,224,140,0.10)';
       ctx.fillRect(0, 0, W, H);
@@ -449,7 +489,8 @@
       var t = G.TILES[map.legend[map.ground[y][x]]];
       return !!t && !t.water;
     };
-    var phase = (G.frame >> 3) % 4;
+    var ms = G.motionSpeed();
+    var phase = ms ? ((G.frame * ms) >> 4) % 4 : 0;
     for (var y = y0; y <= y1; y++) {
       for (var x = x0; x <= x1; x++) {
         if (!isWater(x, y)) continue;
@@ -890,9 +931,11 @@
       // Stepping into tall grass rustles it. The encounter roll happens on
       // this same step, so the rustle is also the tell: something moved before
       // the screen did.
+      // Five motes on EVERY step through a field is a continuous spray while
+      // you cross it. Three, and only when the motion dial allows any.
       var gdef = w.tileDefAt(p.x, p.y);
-      if (gdef && gdef.grass && !w.map.indoors) {
-        for (var gr = 0; gr < 5; gr++) {
+      if (gdef && gdef.grass && !w.map.indoors && G.motionSpeed() > 0) {
+        for (var gr = 0; gr < 3; gr++) {
           G.dust.push({
             x: p.x * 16 + 3 + gr * 3, y: p.y * 16 + 12 - (gr % 2) * 3,
             vy: -0.32 - (gr % 3) * 0.06, life: 12 + gr, max: 12 + gr, leaf: true
@@ -1268,9 +1311,22 @@
           // base tile under everything so art with transparency sits on
           // grass/floor instead of the void
           if (baseImg && name !== map.base) ctx.drawImage(baseImg, x * TILE - cam.x, y * TILE - cam.y);
-          var img = def.anim
-            ? G.IMG[def.anim[(G.frame / def.animSpeed | 0) % def.anim.length]]
-            : G.IMG[def.img];
+          // Per-tile phase. Offsetting each tile by a hash of its position
+          // turns a field that PULSES into a field that SHIMMERS: the same
+          // number of pixels change per second, but they stop changing all at
+          // once, and the eye reads it as texture instead of as a heartbeat.
+          var img;
+          if (def.anim) {
+            var sp = def.animSpeed * (G.motionScale ? G.motionScale() : 1);
+            if (sp <= 0) {
+              img = G.IMG[def.anim[0]];                 // motion off: frame 0
+            } else {
+              var phase = ((x * 5 + y * 11) % def.anim.length) * (sp / def.anim.length);
+              img = G.IMG[def.anim[(((G.frame + phase) / sp) | 0) % def.anim.length]];
+            }
+          } else {
+            img = G.IMG[def.img];
+          }
           ctx.drawImage(img, x * TILE - cam.x, y * TILE - cam.y);
         }
       }

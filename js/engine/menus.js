@@ -1251,6 +1251,10 @@
         vals: null,   // filled from the party
         get: function () { var i = opts().followIdx || 0; var m = G.player.party[i]; return m ? G.monName(m) : '—'; },
         set: null, only: 'Choose' },
+      { key: 'motion', label: 'MOTION',
+        vals: ['Full', 'Calm', 'Still'],
+        get: function () { return G.motionSetting(); },
+        set: function (v) { opts().motion = v; } },
       { key: 'textSpeed', label: 'TEXT SPEED',
         vals: ['Slow', 'Normal', 'Fast'],
         get: function () { return opts().textSpeed || 'Normal'; },

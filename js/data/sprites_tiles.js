@@ -1211,8 +1211,10 @@
     grass2:    { img: 't_grass2' },
     // Two frames at a slow cadence: a field that breathes, not a field that
     // flickers. 40 frames is about 0.66s a side at 60fps.
-    tallgrass: { anim: ['t_tallgrass', 't_tallgrass2'], animSpeed: 40, grass: true },
-    flower:    { anim: ['t_flower1', 't_flower2'], animSpeed: 32 },
+    // 40 was a lean every two thirds of a second, across a whole field, in
+    // unison. 96 is a slow sway you notice only when you stop walking.
+    tallgrass: { anim: ['t_tallgrass', 't_tallgrass2'], animSpeed: 96, grass: true },
+    flower:    { anim: ['t_flower1', 't_flower2'], animSpeed: 80 },
     path:      { img: 't_path' },
     path_n:    { img: 't_path_n' },
     path_s:    { img: 't_path_s' },
@@ -1228,8 +1230,8 @@
     deco_fern:    { img: 't_deco_fern' },
 
     // ---- water ----
-    water:     { anim: ['t_water1', 't_water2', 't_water3', 't_water4'], animSpeed: 24, solid: true, water: true },
-    deepwater: { anim: ['t_deepwater1', 't_deepwater2', 't_deepwater3', 't_deepwater4'], animSpeed: 24, solid: true, water: true },
+    water:     { anim: ['t_water1', 't_water2', 't_water3', 't_water4'], animSpeed: 40, solid: true, water: true },
+    deepwater: { anim: ['t_deepwater1', 't_deepwater2', 't_deepwater3', 't_deepwater4'], animSpeed: 40, solid: true, water: true },
     shore_n:   { img: 't_shore_n' },
     shore_s:   { img: 't_shore_s' },
     shore_w:   { img: 't_shore_w' },
