@@ -271,11 +271,16 @@
     ],
     gymTint: '#b08040',
     signs: [
-      { x: 5, y: 4, text: 'A notice, taped up and curling at the corners: GYM CLOSED UNTIL FURTHER NOTICE. Somebody has torn it half off.' }
+      // An empty gym is the one piece of this game that can look like a bug
+      // rather than a plot, so the notice says the quiet part out loud: this
+      // is the EIGHTH badge, it is meant to be last, and it is meant to be
+      // shut when you first push the door open.
+      { x: 5, y: 4, text: 'A notice, taped up and curling at the corners: VIRIDIAN GYM — CLOSED UNTIL FURTHER NOTICE. Underneath, in smaller print: EIGHTH BADGE. LEADER ABSENT. Somebody has torn the rest of it half off.' }
     ],
     npcs: [
       { x: 8, y: 6, sprite: 'gymguy', dir: 'left', unlessFlag: 'rh_giovanni',
         dialog: ['Empty, see? Has been for months.',
+                 'This is the EIGHTH GYM — the last one. Nobody was ever meant to start here.',
                  "Whoever the LEADER is, he's got business elsewhere.",
                  "...I've said too much."] },
       { x: 9, y: 8, sprite: 'gymguy', dir: 'left', ifFlag: 'badge7', event: 'viridianGymGuide' },
@@ -565,7 +570,7 @@
   // Boulders on the floor, because the room should tell you the type before
   // anyone says a word.
   G.MAPS.pewtergym = {
-    id: 'pewtergym', name: 'Pewter Gym', w: 12, h: 14,
+    id: 'pewtergym', name: 'Pewter Gym', w: 12, h: 12,
     music: 'gym', battleBg: 'indoor', base: 'gfloor',
     legend: G.LEG_INT,
     ground: pad([
@@ -580,20 +585,18 @@
       'IGGUGGGGUGGI',
       'IGGGGGGGGGGI',
       'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
       'IIIII..IIIII'
-    ], 12, 14),
-    deco: blank(12, 14),
+    ], 12, 12),
+    deco: blank(12, 12),
     warps: [
-      { x: 5, y: 13, to: 'pewter', tx: 5, ty: 11, dir: 'down' },
-      { x: 6, y: 13, to: 'pewter', tx: 6, ty: 11, dir: 'down' }
+      { x: 5, y: 11, to: 'pewter', tx: 5, ty: 11, dir: 'down' },
+      { x: 6, y: 11, to: 'pewter', tx: 6, ty: 11, dir: 'down' }
     ],
     npcs: [
-      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'pewterGymGuide' }
+      { x: 8, y: 10, sprite: 'gymguy', dir: 'left', event: 'pewterGymGuide' }
     ],
     trainers: [
-      { x: 5, y: 2, sprite: 'brock', dir: 'down', trainer: 'brock', sight: 0 },
+      { x: 5, y: 3, sprite: 'brock', dir: 'down', trainer: 'brock', sight: 0 },
       { x: 3, y: 7, sprite: 'youngster', dir: 'right', trainer: 'pg_liam', sight: 4 }
     ]
   };
@@ -639,7 +642,7 @@
       { x: 6, y: 3, sprite: 'woman3', dir: 'down',
         dialog: ['MISTY is the youngest of four sisters and the only one who battles.',
                  'The other three do a water ballet. She finds this excruciating.'] },
-      { x: 2, y: 3, sprite: 'beauty', dir: 'down', event: 'tradeJynx' }
+      { x: 2, y: 4, sprite: 'beauty', dir: 'down', event: 'tradeJynx' }
     ]
   };
 
@@ -676,7 +679,7 @@
   // Pools rather than a plain floor: the room should say WATER before Misty
   // opens her mouth.
   G.MAPS.ceruleangym = {
-    id: 'ceruleangym', name: 'Cerulean Gym', w: 12, h: 14,
+    id: 'ceruleangym', name: 'Cerulean Gym', w: 12, h: 12,
     music: 'gym', battleBg: 'indoor', base: 'gfloor',
     legend: G.LEG_INT,
     ground: pad([
@@ -691,20 +694,18 @@
       'IGGGGGGGGGGI',
       'IGGUGGGGUGGI',
       'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
       'IIIII..IIIII'
-    ], 12, 14),
-    deco: blank(12, 14),
+    ], 12, 12),
+    deco: blank(12, 12),
     warps: [
-      { x: 5, y: 13, to: 'cerulean', tx: 5, ty: 12, dir: 'down' },
-      { x: 6, y: 13, to: 'cerulean', tx: 6, ty: 12, dir: 'down' }
+      { x: 5, y: 11, to: 'cerulean', tx: 5, ty: 12, dir: 'down' },
+      { x: 6, y: 11, to: 'cerulean', tx: 6, ty: 12, dir: 'down' }
     ],
     npcs: [
-      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'ceruleanGymGuide' }
+      { x: 8, y: 10, sprite: 'gymguy', dir: 'left', event: 'ceruleanGymGuide' }
     ],
     trainers: [
-      { x: 5, y: 2, sprite: 'misty', dir: 'down', trainer: 'misty', sight: 0 },
+      { x: 5, y: 3, sprite: 'misty', dir: 'down', trainer: 'misty', sight: 0 },
       { x: 3, y: 6, sprite: 'swimmerf', dir: 'right', trainer: 'cg_diana', sight: 4 },
       { x: 8, y: 8, sprite: 'swimmer', dir: 'left', trainer: 'cg_luis', sight: 4 }
     ]
@@ -889,7 +890,7 @@
         dialog: ['My MAGIKARP is useless. Utterly useless.',
                  'They keep telling me it evolves. Twenty levels, they say.',
                  'I have had it eleven years.'] },
-      { x: 2, y: 3, sprite: 'gentleman', dir: 'down', event: 'tradeFarfetchd' }
+      { x: 2, y: 4, sprite: 'gentleman', dir: 'down', event: 'tradeFarfetchd' }
     ]
   };
 
@@ -948,7 +949,7 @@
 
   // ----------------------------------------------------------- SURGE'S GYM --
   G.MAPS.vermiliongym = {
-    id: 'vermiliongym', name: 'Vermilion Gym', w: 12, h: 14,
+    id: 'vermiliongym', name: 'Vermilion Gym', w: 12, h: 12,
     music: 'gym', battleBg: 'indoor', base: 'gfloor',
     legend: G.LEG_INT,
     ground: pad([
@@ -963,20 +964,18 @@
       'IGGGGGGGGGGI',
       'IGGUGGGGUGGI',
       'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
       'IIIII..IIIII'
-    ], 12, 14),
-    deco: blank(12, 14),
+    ], 12, 12),
+    deco: blank(12, 12),
     warps: [
-      { x: 5, y: 13, to: 'vermilion', tx: 5, ty: 18, dir: 'down' },
-      { x: 6, y: 13, to: 'vermilion', tx: 6, ty: 18, dir: 'down' }
+      { x: 5, y: 11, to: 'vermilion', tx: 5, ty: 18, dir: 'down' },
+      { x: 6, y: 11, to: 'vermilion', tx: 6, ty: 18, dir: 'down' }
     ],
     npcs: [
-      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'vermilionGymGuide' }
+      { x: 8, y: 10, sprite: 'gymguy', dir: 'left', event: 'vermilionGymGuide' }
     ],
     trainers: [
-      { x: 5, y: 2, sprite: 'surge', dir: 'down', trainer: 'surge', sight: 0 },
+      { x: 5, y: 3, sprite: 'surge', dir: 'down', trainer: 'surge', sight: 0 },
       { x: 3, y: 6, sprite: 'sailor', dir: 'right', trainer: 'vg_dwayne', sight: 4 },
       { x: 8, y: 8, sprite: 'rocker', dir: 'left', trainer: 'vg_luca', sight: 4 }
     ]
@@ -1072,7 +1071,7 @@
       { x: 6, y: 3, sprite: 'oldman', dir: 'down',
         dialog: ['My CUBONE will not stop crying.',
                  'Its mother is up in that tower. TEAM ROCKET put her there.'] },
-      { x: 2, y: 3, sprite: 'littleboy', dir: 'down', event: 'tradeLickitung' }
+      { x: 2, y: 4, sprite: 'littleboy', dir: 'down', event: 'tradeLickitung' }
     ]
   };
 
@@ -1389,7 +1388,7 @@
 
   // ------------------------------------------------------------ ERIKA'S GYM -
   G.MAPS.celadongym = {
-    id: 'celadongym', name: 'Celadon Gym', w: 12, h: 14,
+    id: 'celadongym', name: 'Celadon Gym', w: 12, h: 12,
     music: 'gym', battleBg: 'indoor', base: 'gfloor',
     legend: G.LEG_INT,
     ground: pad([
@@ -1404,20 +1403,18 @@
       'IGGPGGGGPGGI',
       'IGGGGGGGGGGI',
       'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
       'IIIII..IIIII'
-    ], 12, 14),
-    deco: blank(12, 14),
+    ], 12, 12),
+    deco: blank(12, 12),
     warps: [
-      { x: 5, y: 13, to: 'celadon', tx: 6, ty: 18, dir: 'down' },
-      { x: 6, y: 13, to: 'celadon', tx: 6, ty: 18, dir: 'down' }
+      { x: 5, y: 11, to: 'celadon', tx: 6, ty: 18, dir: 'down' },
+      { x: 6, y: 11, to: 'celadon', tx: 6, ty: 18, dir: 'down' }
     ],
     npcs: [
-      { x: 8, y: 11, sprite: 'gymguy', dir: 'left', event: 'celadonGymGuide' }
+      { x: 8, y: 10, sprite: 'gymguy', dir: 'left', event: 'celadonGymGuide' }
     ],
     trainers: [
-      { x: 5, y: 1, sprite: 'erika', dir: 'down', trainer: 'erika', sight: 0 },
+      { x: 5, y: 3, sprite: 'erika', dir: 'down', trainer: 'erika', sight: 0 },
       { x: 3, y: 6, sprite: 'beauty', dir: 'right', trainer: 'cg_tamia', sight: 4 },
       { x: 8, y: 9, sprite: 'picnicker', dir: 'left', trainer: 'cg_lynn', sight: 4 }
     ]
@@ -1661,7 +1658,7 @@
       { x: 6, y: 3, sprite: 'woman3', dir: 'down',
         dialog: ['We stayed indoors for three weeks.',
                  'You get used to it. That is the frightening bit.'] },
-      { x: 2, y: 3, sprite: 'gentleman', dir: 'down', event: 'tradeMrMime' }
+      { x: 2, y: 4, sprite: 'gentleman', dir: 'down', event: 'tradeMrMime' }
     ]
   };
 
@@ -1737,7 +1734,7 @@
 
   // ---------------------------------------------------------- SABRINA'S GYM -
   G.MAPS.saffrongym = {
-    id: 'saffrongym', name: 'Saffron Gym', w: 12, h: 14,
+    id: 'saffrongym', name: 'Saffron Gym', w: 12, h: 12,
     music: 'gym', battleBg: 'indoor', base: 'gfloor',
     legend: G.LEG_INT,
     ground: pad([
@@ -1749,23 +1746,21 @@
       'IGGGGGGGGGGI',
       'IGGUGGGGUGGI',
       'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
-      'IGGGGGGGGGGI',
       'IGGUGGGGUGGI',
       'IGGGGGGGGGGI',
       'IGGGGGGGGGGI',
       'IIIII..IIIII'
-    ], 12, 14),
-    deco: blank(12, 14),
+    ], 12, 12),
+    deco: blank(12, 12),
     warps: [
-      { x: 5, y: 13, to: 'saffron', tx: 5, ty: 18, dir: 'down' },
-      { x: 6, y: 13, to: 'saffron', tx: 6, ty: 18, dir: 'down' }
+      { x: 5, y: 11, to: 'saffron', tx: 5, ty: 18, dir: 'down' },
+      { x: 6, y: 11, to: 'saffron', tx: 6, ty: 18, dir: 'down' }
     ],
     npcs: [
-      { x: 8, y: 12, sprite: 'gymguy', dir: 'left', event: 'saffronGymGuide' }
+      { x: 8, y: 10, sprite: 'gymguy', dir: 'left', event: 'saffronGymGuide' }
     ],
     trainers: [
-      { x: 5, y: 1, sprite: 'sabrina', dir: 'down', trainer: 'sabrina', sight: 0 },
+      { x: 5, y: 3, sprite: 'sabrina', dir: 'down', trainer: 'sabrina', sight: 0 },
       { x: 3, y: 5, sprite: 'psychicm', dir: 'right', trainer: 'sg_johan', sight: 4 },
       { x: 8, y: 9, sprite: 'channeler', dir: 'left', trainer: 'sg_tyron', sight: 4 }
     ]
@@ -3597,7 +3592,7 @@
     ],
     signs: [{ x: 8, y: 3, text: '6F — ROOFTOP SQUARE. Vending machines. Mind the edge.' }],
     npcs: [
-      { x: 10, y: 6, sprite: 'littlegirl', dir: 'left', event: 'rooftopDrinks' }
+      { x: 10, y: 7, sprite: 'littlegirl', dir: 'left', event: 'rooftopDrinks' }
     ]
   });
 
@@ -3850,16 +3845,20 @@
   // ROUTE 23's checkpoints. Seven of them, one badge more at each, and they
   // turn you back rather than merely comment — a guard you can walk past is
   // scenery, not a gate.
-  G.EVENTS.badgeGate = function* () {
+  G.EVENTS.badgeGate = function* (ctx) {
     // Seven checkpoints, but ROUTE 23 is the LEAGUE ROAD: every trainer on it
     // is level 47 or higher, because it exists to be the last stretch before
     // VICTORY ROAD. Gating the first one at a single badge — which is what
     // Red/Blue does, on a route whose trainers are twenty levels lower — meant
     // a player who turned left out of VIRIDIAN on day one met a level 47
     // ARCANINE. The gate has to match what is behind it.
-    var NEED = { 29: 7, 25: 7, 21: 8, 17: 8, 13: 8, 9: 8, 5: 8 };
+    //
+    // The number lives on the script tile itself rather than in a table in
+    // here, so the map data, this guard and the difficulty audit cannot
+    // disagree about where the road opens. They did disagree once, and the
+    // result was the ARCANINE.
     var p = G.world.player;
-    var need = NEED[p.y] || 1;
+    var need = (ctx && ctx.needBadges) || 8;
     var have = (G.player.badges || []).filter(Boolean).length;
     if (have >= need) return;                       // walk on through
     yield { t: 'fn', fn: function () {

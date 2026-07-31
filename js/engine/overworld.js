@@ -996,7 +996,11 @@
         if (p.x >= xs[0] && p.x <= xs[1] && p.y === s.y) {
           if (s.once && G.flags[s.once]) continue;
           if (s.ifFlag && !G.flags[s.ifFlag]) continue;
-          if (G.EVENTS && G.EVENTS[s.run]) { G.runEvent(s.run); return; }
+          // The trigger object goes with it. A script tile can then carry its
+          // own parameters — ROUTE 23's checkpoints each hold the badge count
+          // they enforce — instead of the event keeping a private table of
+          // coordinates that has to be kept in step with the map by hand.
+          if (G.EVENTS && G.EVENTS[s.run]) { G.runEvent(s.run, s); return; }
         }
       }
 
@@ -1742,11 +1746,11 @@
   // build (Phase 6) extends the descriptor set; this base handles text,
   // movement-free beats and battles wired in later.
   G.EVENTS = G.EVENTS || {};
-  G.runEvent = function (id) {
-    G.runEventGen(G.EVENTS[id]);
+  G.runEvent = function (id, ctx) {
+    G.runEventGen(G.EVENTS[id], ctx);
   };
-  G.runEventGen = function (genFn) {
-    G.pushScene(G.EventScene(genFn()));
+  G.runEventGen = function (genFn, ctx) {
+    G.pushScene(G.EventScene(genFn(ctx)));
   };
 
   G.EventScene = function (gen) {

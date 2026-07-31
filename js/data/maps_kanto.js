@@ -367,7 +367,7 @@
       { x: 13, y: 25, sprite: 'oldman', dir: 'left',
         dialog: ['The forest is the only road north, and it is full of BUG POKéMON.',
                  'A FLYING or FIRE type makes short work of them.'] },
-      { x: 6, y: 7, sprite: 'scientist', dir: 'down', event: 'oaksAideFlash' }
+      { x: 6, y: 8, sprite: 'scientist', dir: 'down', event: 'oaksAideFlash' }
     ]
   };
 
@@ -478,8 +478,8 @@
       { x: 23, y: 6, to: 'route3', tx: 1, ty: 5, dir: 'right' },
       { x: 8, y: 4, to: 'pewtermuseum', tx: 6, ty: 10, dir: 'up' },
       { x: 9, y: 4, to: 'pewtermuseum', tx: 7, ty: 10, dir: 'up' },
-      { x: 5, y: 10, to: 'pewtergym', tx: 5, ty: 12, dir: 'up' },
-      { x: 6, y: 10, to: 'pewtergym', tx: 6, ty: 12, dir: 'up' },
+      { x: 5, y: 10, to: 'pewtergym', tx: 5, ty: 10, dir: 'up' },
+      { x: 6, y: 10, to: 'pewtergym', tx: 6, ty: 10, dir: 'up' },
       { x: 16, y: 10, to: 'pewtercentre', tx: 4, ty: 6, dir: 'up' },
       { x: 7, y: 16, to: 'pewterhouse', tx: 4, ty: 7, dir: 'up' },
       { x: 16, y: 16, to: 'pewtermart', tx: 4, ty: 6, dir: 'up' }
@@ -749,8 +749,8 @@
       { x: 0, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
       { x: 25, y: 13, to: 'route9', tx: 1, ty: 5, dir: 'right' },
       { x: 1, y: 13, to: 'route4', tx: 30, ty: 6, dir: 'left' },
-      { x: 5, y: 11, to: 'ceruleangym', tx: 5, ty: 12, dir: 'up' },
-      { x: 6, y: 11, to: 'ceruleangym', tx: 6, ty: 12, dir: 'up' },
+      { x: 5, y: 11, to: 'ceruleangym', tx: 5, ty: 10, dir: 'up' },
+      { x: 6, y: 11, to: 'ceruleangym', tx: 6, ty: 10, dir: 'up' },
       { x: 20, y: 5, to: 'ceruleancentre', tx: 4, ty: 6, dir: 'up' },
       { x: 20, y: 17, to: 'ceruleanmart', tx: 4, ty: 6, dir: 'up' },
 
@@ -772,7 +772,7 @@
       { x: 9, y: 18, sprite: 'policeman', dir: 'down',
         dialog: ['A house was broken into last night. Went straight through the back wall.',
                  'Black uniforms, red R on the chest. Nobody will say the name out loud.'] },
-      { x: 17, y: 20, sprite: 'oldman', dir: 'left',
+      { x: 17, y: 19, sprite: 'oldman', dir: 'left',
         dialog: ['BILL lives north of here, up ROUTE 25.',
                  'Brilliant man. Bit odd. Ask him about the storage system.'] }
     ]
@@ -1010,8 +1010,8 @@
       { x: 13, y: 20, to: 'ssanne', tx: 13, ty: 14, dir: 'down' },
       { x: 12, y: 0, to: 'route6', tx: 10, ty: 16, dir: 'up' },
       { x: 13, y: 0, to: 'route6', tx: 11, ty: 16, dir: 'up' },
-      { x: 5, y: 17, to: 'vermiliongym', tx: 5, ty: 12, dir: 'up' },
-      { x: 6, y: 17, to: 'vermiliongym', tx: 6, ty: 12, dir: 'up' },
+      { x: 5, y: 17, to: 'vermiliongym', tx: 5, ty: 10, dir: 'up' },
+      { x: 6, y: 17, to: 'vermiliongym', tx: 6, ty: 10, dir: 'up' },
       { x: 6, y: 5, to: 'vermilioncentre', tx: 4, ty: 6, dir: 'up' },
       { x: 20, y: 5, to: 'vermilionmart', tx: 4, ty: 6, dir: 'up' },
       { x: 7, y: 11, to: 'vermilionhouse', tx: 4, ty: 7, dir: 'up' },
@@ -1520,8 +1520,8 @@
       { x: 6, y: 11, to: 'gamecorner', tx: 8, ty: 12, dir: 'up' },
       { x: 7, y: 11, to: 'gamecorner', tx: 9, ty: 12, dir: 'up' },
       { x: 18, y: 11, to: 'celadonhouse', tx: 4, ty: 7, dir: 'up' },
-      { x: 5, y: 17, to: 'celadongym', tx: 5, ty: 12, dir: 'up' },
-      { x: 6, y: 17, to: 'celadongym', tx: 6, ty: 12, dir: 'up' }
+      { x: 5, y: 17, to: 'celadongym', tx: 5, ty: 10, dir: 'up' },
+      { x: 6, y: 17, to: 'celadongym', tx: 6, ty: 10, dir: 'up' }
     ],
     signs: [
       { x: 4, y: 20, text: 'CELADON CITY — The City of Rainbow Dreams.' },
@@ -1594,8 +1594,8 @@
       { x: 18, y: 11, to: 'saffronmart', tx: 4, ty: 6, dir: 'up' },
       { x: 6, y: 12, to: 'fightingdojo', tx: 6, ty: 11, dir: 'up' },
       { x: 7, y: 12, to: 'fightingdojo', tx: 7, ty: 11, dir: 'up' },
-      { x: 5, y: 17, to: 'saffrongym', tx: 5, ty: 12, dir: 'up' },
-      { x: 6, y: 17, to: 'saffrongym', tx: 6, ty: 12, dir: 'up' },
+      { x: 5, y: 17, to: 'saffrongym', tx: 5, ty: 10, dir: 'up' },
+      { x: 6, y: 17, to: 'saffrongym', tx: 6, ty: 10, dir: 'up' },
       { x: 17, y: 17, to: 'saffronhouse', tx: 4, ty: 7, dir: 'up' }
     ],
     signs: [
@@ -2630,13 +2630,13 @@
     // with no badges at all and the first thing you met was a level 47
     // ARCANINE.
     scripts: [
-      { x: [3, 16], y: 29, run: 'badgeGate' },
-      { x: [3, 16], y: 25, run: 'badgeGate' },
-      { x: [3, 16], y: 21, run: 'badgeGate' },
-      { x: [3, 16], y: 17, run: 'badgeGate' },
-      { x: [3, 16], y: 13, run: 'badgeGate' },
-      { x: [3, 16], y: 9, run: 'badgeGate' },
-      { x: [3, 16], y: 5, run: 'badgeGate' }
+      { x: [3, 16], y: 29, run: 'badgeGate', needBadges: 7 },
+      { x: [3, 16], y: 25, run: 'badgeGate', needBadges: 7 },
+      { x: [3, 16], y: 21, run: 'badgeGate', needBadges: 8 },
+      { x: [3, 16], y: 17, run: 'badgeGate', needBadges: 8 },
+      { x: [3, 16], y: 13, run: 'badgeGate', needBadges: 8 },
+      { x: [3, 16], y: 9, run: 'badgeGate', needBadges: 8 },
+      { x: [3, 16], y: 5, run: 'badgeGate', needBadges: 8 }
     ]
   };
 
@@ -2915,7 +2915,7 @@
       { x: 2, y: 11, sprite: 'nurse', dir: 'right', event: 'nurseHeal' },
       { x: 17, y: 11, sprite: 'clerk', dir: 'left', event: 'shopBuy' },
       { x: 8, y: 17, sprite: 'gymguy', dir: 'right', event: 'leagueWarning' },
-      { x: 13, y: 8, sprite: 'gentleman', dir: 'left',
+      { x: 12, y: 8, sprite: 'gentleman', dir: 'left',
         dialog: ['Heal here. Buy here. Think here.',
                  'Past the carpet there is none of the three.'] },
       { x: 6, y: 4, sprite: 'oak', dir: 'down', ifFlag: 'champion', event: 'hallOfChampionsDoor' }

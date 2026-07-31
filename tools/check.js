@@ -977,8 +977,16 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   // Flood fill a map from the tiles we arrive on. Ledges are treated as
   // passable because you can always hop DOWN one — generous, and generous is
   // the right direction for an audit that must never cry wolf.
-  function reachIn(m, entries, have) {
+  function reachIn(m, entries, have, gates) {
     const npcs = blockers(m, have);
+    // Tiles a guard turns you back from. The player can step on them, but the
+    // script bounces them off again, so for the purpose of "where can this
+    // player get to" the row is closed.
+    const shut = new Set();
+    for (const g of (gates || [])) {
+      const xs = Array.isArray(g.x) ? g.x : [g.x, g.x];
+      for (let x = xs[0]; x <= xs[1]; x++) shut.add(x + ',' + g.y);
+    }
     const seen = new Set();
     const q = entries.filter(e => e.x >= 0 && e.y >= 0 && e.x < m.w && e.y < m.h);
     for (const e of q) seen.add(e.x + ',' + e.y);
@@ -987,6 +995,7 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const nx = c.x + dx, ny = c.y + dy, k = nx + ',' + ny;
         if (seen.has(k)) continue;
+        if (shut.has(k)) continue;
         if (!walkable(m, nx, ny, have, npcs)) continue;
         seen.add(k);
         q.push({ x: nx, y: ny });
@@ -1003,6 +1012,8 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   // strong for where it stands: Kanto is gated by geography and HMs far more
   // than by badges, so counting badge-gates alone flags half the region.
   const badgesAt = { playerhome: 0 };
+  // and the same figure per TRAINER, which is the one difficulty cares about
+  const trainerAt = {};
   const badgeCount = () => ['badge1','badge2','badge3','badge4','badge5','badge6','badge7','badge8']
     .filter(b => have.has(b)).length;
   let grew = true, rounds = 0;
@@ -1015,7 +1026,13 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     for (const id of [...seenMaps]) {
       const m = G.MAPS[id];
       if (!m) continue;
-      const stand = reachIn(m, entriesOf[id] || [], have);
+      // A badge checkpoint is a wall until you are carrying the badges, so the
+      // walker has to see it as one. Without this the audit believed ROUTE 23
+      // was open from VIRIDIAN on day one and graded every trainer up there
+      // against a nought-badge player — five loud warnings about a road the
+      // game already refuses to let you walk.
+      const gates = (m.scripts || []).filter(s => s.needBadges > badgeCount());
+      const stand = reachIn(m, entriesOf[id] || [], have, gates);
 
       // Anything you can walk up to, you can have.
       for (const it of (m.items || [])) {
@@ -1029,6 +1046,12 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
         if (!nearStand(stand, t)) continue;
         const def = (G.TRAINERS || {})[t.trainer];
         if (!def) continue;
+        // How many badges you hold the first time you can actually walk up to
+        // THIS trainer — not this map. Route 23 is entered from Viridian with
+        // nothing, but its trainers stand behind seven badge checkpoints, and
+        // grading them by the map they live on is what let a level 47 Arcanine
+        // sit on a road the audit called a nought-badge road.
+        if (!(t.trainer in trainerAt)) trainerAt[t.trainer] = badgeCount();
         if (!have.has(t.trainer)) { have.add(t.trainer); grew = true; }
         if (def.reward && def.reward.flag && !have.has(def.reward.flag)) {
           have.add(def.reward.flag); grew = true;
@@ -1088,6 +1111,42 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     return false;
   }
 
+  // Nobody stands inside the scenery. A person on a solid tile is invisible to
+  // the player, unreachable, and — when it is a gym guide or a leader — reads
+  // as the room being empty. Shortening the five gym rooms moved a door row up
+  // underneath a guide, which is exactly this, and nothing else here would
+  // have noticed: reachability audits ask what you can GET to, never whether
+  // the cast is standing somewhere that exists.
+  {
+    // Only entries that DRAW A PERSON count. A sprite-less entry sitting on
+    // solid scenery is an interaction point rather than somebody standing in a
+    // wall — the SNORLAX asleep across Route 12 is exactly a boulder tile you
+    // can talk to, and OAK'S AIDE with FLASH is a signpost. Water and stools
+    // are fine underfoot too: swimmers swim, and people sit down.
+    const OK_UNDERFOOT = new Set(['water', 'istool']);
+    const stuck = [];
+    for (const id in G.MAPS) {
+      const m = G.MAPS[id];
+      for (const kind of ['npcs', 'trainers']) {
+        for (const o of (m[kind] || [])) {
+          // obj:true is scenery wearing a sprite — the SNORLAX asleep across
+          // the road, the fossils on their stands. Those belong on solid tiles.
+          if (Array.isArray(o.x) || o.x == null || !o.sprite || o.obj) continue;
+          const who = o.trainer || o.event || o.sprite;
+          const t = tileAt(m, o.x, o.y);
+          if (!t) { stuck.push(`${id} '${who}' stands at (${o.x},${o.y}), off the map`); continue; }
+          if (!t.solid || t.story) continue;
+          const d = m.deco && m.deco[o.y] && m.deco[o.y][o.x];
+          const name = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[o.y][o.x]];
+          if (OK_UNDERFOOT.has(name)) continue;
+          stuck.push(`${id} '${who}' stands at (${o.x},${o.y}), inside ${name}`);
+        }
+      }
+    }
+    for (const s of stuck) errors.push('PLACEMENT: ' + s);
+    if (!stuck.length) console.log('  placement: every drawn person stands on a tile a person could stand on');
+  }
+
   const dark = Object.keys(G.MAPS).filter(id => !seenMaps.has(id));
   if (dark.length) {
     errors.push(`PROGRESSION: ${dark.length} map(s) can never be reached on an honest playthrough — ${dark.slice(0, 10).join(', ')}${dark.length > 10 ? ' …' : ''}`);
@@ -1109,17 +1168,26 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   // owned. That is the shape of bug this catches.
   {
     const BAND = [14, 22, 26, 32, 42, 47, 50, 54, 66];
+    // Where a flag is actually earned, in badges.
+    const FLAG_GATE = { champion: 8, badge7: 7, badge8: 8, rh_giovanni: 6 };
     const loud = [];
     for (const id in G.MAPS) {
       if (!(id in badgesAt)) continue;
       const gate = badgesAt[id];
-      const ceiling = BAND[Math.min(BAND.length - 1, gate)] + 10;
       for (const t of (G.MAPS[id].trainers || [])) {
         const def = (G.TRAINERS || {})[t.trainer];
         if (!def || !def.party) continue;
+        // A trainer standing behind a flag is not reachable just because the
+        // ROOM is. Every post-game rematch shares a tile with the leader it
+        // replaces, and Giovanni's gym stays shut until the seventh badge —
+        // graded against the room, all of them shout, and that shouting is
+        // exactly what would hide the next real Arcanine.
+        var eff = t.trainer in trainerAt ? trainerAt[t.trainer] : gate;
+        if (t.ifFlag && FLAG_GATE[t.ifFlag] != null) eff = Math.max(eff, FLAG_GATE[t.ifFlag]);
+        const ceiling = BAND[Math.min(BAND.length - 1, eff)] + 10;
         const top = Math.max(...def.party.map(p => p.level));
         if (top > ceiling) {
-          loud.push(`${id} '${t.trainer}' fields Lv${top}, but that map is first reachable on ${gate} badge(s) — expect no more than Lv${ceiling}`);
+          loud.push(`${id} '${t.trainer}' fields Lv${top}, but that is first reachable on ${eff} badge(s) — expect no more than Lv${ceiling}`);
         }
       }
     }
