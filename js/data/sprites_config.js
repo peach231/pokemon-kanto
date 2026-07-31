@@ -313,6 +313,32 @@
     mewtwo: 'mewtwo', mew: 'mew'
   };
 
+
+  // ------------------------------------------------- follower sprites -----
+  // Every one of the 151, walking, facing four ways.
+  //
+  // pokefirered only ever drew overworld art for the 33 species that stand
+  // around in its own maps — no starter among them, which made the follower
+  // useless for the POKéMON almost everybody walks out of Pallet with.
+  // pokeemerald-expansion carries the HGSS-style follower set: one sheet per
+  // species at 192x32, which is SIX 32x32 frames — down, down-step, up,
+  // up-step, side, side-step. That is a real walk cycle and a real facing for
+  // every species in the game.
+  G.FOLLOWER_CFG = {
+    base: 'https://cdn.jsdelivr.net/gh/rh-hideout/pokeemerald-expansion@master/graphics/pokemon/',
+    file: '{name}/overworld.png',
+    frame: 32,
+    crossOrigin: 'anonymous',
+    // The three species whose folder name is not just the species key.
+    rename: { nidoranf: 'nidoran_f', nidoranm: 'nidoran_m', mrmime: 'mr_mime' }
+  };
+
+  G.followerSheetUrl = function (speciesKey) {
+    var c = G.FOLLOWER_CFG;
+    var name = (c.rename && c.rename[speciesKey]) || speciesKey;
+    return c.base + c.file.replace('{name}', name);
+  };
+
   // ----------------------------------------------------------------------
   // Playable characters. Gen 1 shipped one protagonist; FireRed added Leaf.
   // Both are the real FireRed designs — no recolours, so each is its own

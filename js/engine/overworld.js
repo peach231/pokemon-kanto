@@ -618,11 +618,9 @@
     if (!w.follower || w.follower.monKey !== mon.sp) {
       w.follower = makeActor('mon_' + mon.sp, p.x, p.y, p.dir);
       w.follower.monKey = mon.sp;
-      // Pull the real walking sprite if FireRed ever drew one for this
-      // species — thirty-three of the 151 have one.
-      var owSheet = (G.MON_OVERWORLD || {})[mon.sp];
-      if (owSheet && !G.IMG['ch_mon_' + mon.sp + '_d0'] && G.gfx.loadMonWalkSheet) {
-        G.gfx.loadMonWalkSheet(mon.sp, owSheet);
+      // Every species has a follower sheet, so this is unconditional.
+      if (!G.IMG['ch_mon_' + mon.sp + '_d0'] && G.gfx.loadFollowerSheet) {
+        G.gfx.loadFollowerSheet(mon.sp);
       }
       w.follower.isMon = true;
       w.follower.obj = false;
@@ -1369,14 +1367,19 @@
         // resolution, facing the way it walks.
         var mbase = 'ch_mon_' + a.monKey + '_';
         if (G.IMG[mbase + 'd0']) {
-          var key = a.dir === 'up' ? 'u0' : a.dir === 'down' ? 'd0' : 's0';
+          // Two frames per facing, alternating on the stride — the same walk
+          // logic a person uses, so the creature steps rather than slides.
+          var striding = a.moving && a.step < 8;
+          var row = a.dir === 'up' ? 'u' : a.dir === 'down' ? 'd' : 's';
+          var key = row + (striding && a.stride ? '1' : '0');
           var mimg = (a.dir === 'right' && G.IMG[mbase + key + '_flip'])
-            ? G.IMG[mbase + key + '_flip'] : G.IMG[mbase + key];
-          var hop = (a.moving && (a.step >> 2) % 2) ? 1 : 0;
+            ? G.IMG[mbase + key + '_flip'] : (G.IMG[mbase + key] || G.IMG[mbase + row + '0']);
           ctx.fillStyle = 'rgba(24,28,44,0.24)';
           ctx.fillRect(sx + 3, sy + 13, 10, 3);
+          // 32px frames sit half a tile out on each side and stand on the
+          // tile's floor rather than its top edge.
           ctx.drawImage(mimg, sx + Math.round((16 - mimg.width) / 2),
-                        sy + (16 - mimg.height) - hop);
+                        sy + 16 - mimg.height);
           return;
         }
         // No sheet ever drawn for this species: the battler, but half again as

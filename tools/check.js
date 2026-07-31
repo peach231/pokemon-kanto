@@ -675,6 +675,21 @@ if (G.SPECIES) {
   // The PLAYER is not in the sheets table — they come from G.CHARACTERS — so
   // the sprite audit missed them entirely, and the one character on screen at
   // all times was the only one that could break unnoticed.
+  // Every species needs a follower sheet URL, because the follower can be set
+  // to any party member. Three species have a folder name that is not their
+  // key (nidoran_f, nidoran_m, mr_mime) and a missing rename would 404 into an
+  // invisible follower.
+  {
+    const bad = [];
+    for (const k of (G.DEX_ORDER || [])) {
+      const url = G.followerSheetUrl ? G.followerSheetUrl(k) : '';
+      if (!url || /undefined/.test(url)) bad.push(k);
+      if (/[^a-z0-9_/:.\-@]/.test(url.split('/graphics/')[1] || '')) bad.push(k + ' (bad chars)');
+    }
+    if (bad.length) errors.push(`FOLLOWER SHEET: no usable URL for ${bad.slice(0, 6).join(', ')}`);
+    else console.log(`  followers: ${(G.DEX_ORDER || []).length} species resolve to a follower sheet`);
+  }
+
   for (const c of (G.CHARACTERS || [])) {
     // A Kanto player has three overworld states and FireRed ships a sheet for
     // each. Missing one does not crash — it silently falls back to the walk
