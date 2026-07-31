@@ -952,6 +952,18 @@
           });
         }
       }
+      // The same tell everywhere else that can ambush you: cave floors, the
+      // TOWER, the POWER PLANT, the MANSION. Ground that rolls an encounter
+      // should say so underfoot, but in what it is actually made of — grit
+      // scuffed loose, low and grey and settling, not leaves springing back.
+      if (gdef && gdef.wild && !gdef.grass && G.motionSpeed() > 0) {
+        for (var cg = 0; cg < 3; cg++) {
+          G.dust.push({
+            x: p.x * 16 + 4 + cg * 4, y: p.y * 16 + 14 - (cg % 2),
+            vy: -0.12 - (cg % 3) * 0.04, life: 9 + cg, max: 9 + cg, grit: true
+          });
+        }
+      }
 
       // Dust. Walking leaves none; running kicks up a little, the bicycle a
       // lot. It is the cheapest possible way to make speed READ rather than
@@ -1008,7 +1020,12 @@
 
       var def = w.tileDefAt(p.x, p.y);
       // tall grass rustles AND cave floors both roll wild encounters
-      if (def && (def.grass || def.cave) && G.hooks.grassStep) {
+      // `cavecalm` is the reason this reads `wild` and not the material. It
+      // exists to be the one cave tile that does NOT ambush you — entrance
+      // chambers, junctions, the tile you stand on to read a sign — and while
+      // this asked whether the ground was cave-shaped, it ambushed you there
+      // too, which is the exact opposite of what it was added for.
+      if (def && def.wild && G.hooks.grassStep) {
         if (G.hooks.grassStep(w.map)) return;
       }
       // swimming through deep water can turn up water-types
@@ -1234,8 +1251,13 @@
         var da = dp.life / dp.max;
         ctx.fillStyle = dp.leaf
           ? 'rgba(96,168,72,' + (da * 0.85).toFixed(2) + ')'
-          : 'rgba(226,214,186,' + (da * 0.7).toFixed(2) + ')';
-        var dsz = 1 + Math.round(da * 2);
+          // Cave grit: the colour of the rock it came off, and dimmer than
+          // road dust, because underground there is nothing lighting it.
+          : dp.grit
+            ? 'rgba(150,142,158,' + (da * 0.6).toFixed(2) + ')'
+            : 'rgba(226,214,186,' + (da * 0.7).toFixed(2) + ')';
+        // Grit is chipped stone — it stays small instead of blooming.
+        var dsz = dp.grit ? 1 : 1 + Math.round(da * 2);
         ctx.fillRect(Math.round(dp.x - cam.x), Math.round(dp.y - cam.y), dsz, dsz);
       }
 

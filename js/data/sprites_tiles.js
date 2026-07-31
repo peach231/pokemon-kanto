@@ -1235,7 +1235,13 @@
     // flickers. 40 frames is about 0.66s a side at 60fps.
     // 40 was a lean every two thirds of a second, across a whole field, in
     // unison. 96 is a slow sway you notice only when you stop walking.
-    tallgrass: { anim: ['t_tallgrass', 't_tallgrass2'], animSpeed: 96, grass: true },
+    // `wild` means this ground rolls an encounter; `grass`/`cave` say what
+    // it is made of, and drive the step effect. Keeping the two apart is
+    // the whole point: the encounter hook used to read the MATERIAL, so
+    // cave floors had to lie about being grass to spawn anything, and
+    // POKéMON TOWER, the POWER PLANT and the MANSION — which are made of
+    // none of the above — quietly spawned nothing at all.
+    tallgrass: { anim: ['t_tallgrass', 't_tallgrass2'], animSpeed: 96, grass: true, wild: true },
     flower:    { anim: ['t_flower1', 't_flower2'], animSpeed: 80 },
     path:      { img: 't_path' },
     path_n:    { img: 't_path_n' },
@@ -1308,23 +1314,28 @@
     // ---- caves ----
     // Cave floors carry `grass: true` because in Gen 1 a cave has encounters on
     // EVERY tile, not in marked patches — walking through Mt. Moon is supposed
-    // to be a running battle. The flag drives the encounter hook; the art is
-    // still plain rock.
-    cavefloor: { img: 't_cavefloor', cave: true, grass: true },
+    // to be a running battle. `cave` drives the encounter hook on its own.
+    //
+    // These used to carry `grass: true` as well, to reach the same hook by a
+    // second route. It worked, and it also meant the field effects believed
+    // the cave floor WAS grass: crossing Mt. Moon threw up green leaf motes
+    // and drew a tuft of long grass under the player, on bare rock, three
+    // storeys underground. Rock kicks up grit instead — see the step handler.
+    cavefloor: { img: 't_cavefloor', cave: true, wild: true },
     cavewall:  { img: 't_cavewall', solid: true },
-    darkfloor: { img: 't_darkfloor', cave: true, grass: true },
+    darkfloor: { img: 't_darkfloor', cave: true, wild: true },
     darkwall:  { img: 't_darkwall', solid: true },
-    icefloor:  { img: 't_icefloor', cave: true, grass: true },
+    icefloor:  { img: 't_icefloor', cave: true, wild: true },
     icewall:   { img: 't_icewall', solid: true },
     // A quiet cave tile for entrance chambers and junctions, where a battle
     // every other step would just be irritating.
     cavecalm:  { img: 't_cavefloor', cave: true },
 
     // ---- special interiors ----
-    towerfloor: { img: 't_towerfloor' },
+    towerfloor: { img: 't_towerfloor', wild: true },
     towerwall:  { img: 't_towerwall', solid: true },
     grave:      { img: 't_grave', solid: true },
-    metalfloor: { img: 't_metalfloor' },
+    metalfloor: { img: 't_metalfloor', wild: true },
     metalwall:  { img: 't_metalwall', solid: true },
     // BLAINE's shutters. Solid until the question on them is answered, at
     // which point field.js edits the tile away.
@@ -1339,7 +1350,7 @@
     // tells you why. A wall would be a level-design decision; a door that
     // will not open is a statement about you.
     leaguedoor: { img: 't_leaguedoor' },
-    burntfloor: { img: 't_burntfloor' },
+    burntfloor: { img: 't_burntfloor', wild: true },
     burntwall:  { img: 't_burntwall', solid: true },
     marble:     { img: 't_marble' },
     marblewall: { img: 't_marblewall', solid: true }

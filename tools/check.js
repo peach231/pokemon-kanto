@@ -1196,6 +1196,42 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
 }
 
+// --- encounter surfaces ---
+// A map carrying an encounter table needs ground a player can step on that
+// actually rolls one, and each tile has to claim ONE material.
+//
+// Cave floors used to be flagged `grass` as a second way of reaching the
+// encounter hook. It worked, and it also told every field effect that bare
+// rock was a meadow: Mt. Moon threw up green leaf motes and drew a tuft of
+// long grass under the player, underground. Removing that flag is only safe
+// while something checks the wilds did not go quiet with it.
+{
+  const surface = t => t && (t.wild || t.water);
+  const dead = [], confused = [];
+  for (const name in G.TILES) {
+    const t = G.TILES[name];
+    if (t.grass && t.cave) confused.push(`'${name}' claims to be both tall grass and cave floor`);
+    if (t.solid && t.wild) confused.push(`'${name}' rolls wild encounters but cannot be stood on`);
+  }
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    if (!m.encounters || !m.encounters.table || !m.encounters.table.length) continue;
+    let found = false;
+    for (let y = 0; y < m.h && !found; y++) {
+      for (let x = 0; x < m.w; x++) {
+        const d = m.deco && m.deco[y] && m.deco[y][x];
+        const n = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[y][x]];
+        if (n && surface(G.TILES[n])) { found = true; break; }
+      }
+    }
+    if (!found) dead.push(`${id} has an encounter table but no tile that can trigger it`);
+  }
+  for (const s of dead.concat(confused)) errors.push('ENCOUNTERS: ' + s);
+  if (!dead.length && !confused.length) {
+    console.log('  encounters: every wild table has ground that rolls it, and no tile claims two materials');
+  }
+}
+
 // --- dex completability ---
 // Can the POKéDEX actually be filled? Not "are there 151 entries" — every fan
 // project has 151 entries — but is each one reachable by a player.
