@@ -358,6 +358,38 @@ if (G.SPECIES) {
   console.log(`  fly: ${Object.keys(G.FLY_POINTS || {}).length} destinations, all landable`);
 }
 
+// --- item kinds ---
+// One string mismatch across two files disabled the entire catching mechanic
+// for the length of this project. `kind` is the only contract between the item
+// table and the code that interprets it, so it gets checked.
+{
+  const known = new Set(G.ITEM_KINDS || []);
+  const seen = new Map();
+  for (const id in G.ITEMS) {
+    const k = G.ITEMS[id].kind;
+    if (!seen.has(k)) seen.set(k, []);
+    seen.get(k).push(id);
+  }
+  for (const [k, ids] of seen) {
+    if (!known.has(k)) errors.push(`ITEM KIND '${k}' is not in G.ITEM_KINDS — the engine will ignore ${ids.length} item(s) including '${ids[0]}'`);
+  }
+  // and the reverse: a kind the engine claims to handle that nothing uses is a
+  // rename that only got applied on one side.
+  for (const k of known) {
+    if (!seen.has(k)) warn.push(`ITEM KIND '${k}' is declared but no item uses it`);
+  }
+  // capture devices must actually reach the battle bag
+  const battleSrc = String(G.BattleScene);
+  for (const id in G.ITEMS) {
+    if (G.ITEMS[id].kind !== 'ball') continue;
+    if (battleSrc.indexOf("'ball'") === -1) {
+      errors.push('BALLS are not reachable from the battle bag — nothing in the game can be caught');
+    }
+    break;
+  }
+  console.log(`  items: ${seen.size} item kinds, all handled by the engine`);
+}
+
 // --- overworld sprite coverage ---
 // An NPC whose sprite has no sheet renders as NOTHING. It is still solid, it
 // still talks, and it is invisible — which is the single most confusing bug

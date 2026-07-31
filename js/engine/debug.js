@@ -188,6 +188,35 @@
       assert(!lastSpecies.caterpie, 'Route 1 must not spawn Viridian Forest species');
     })();
 
+    // END-TO-END CAPTURE. The catch-rate maths above was correct for the whole
+    // life of this project while the mechanic itself was dead: items.js said
+    // `kind: 'ball'` and the battle bag filtered for `kind: 'orb'`, so no ball
+    // ever reached the menu. A formula test cannot see that. This drives a
+    // real battle turn with a real ball id and asserts a capture comes out.
+    (function () {
+      var realPlayer = G.player;
+      var caught = 0, tries = 200;
+      for (var ci = 0; ci < tries; ci++) {
+        G.player = {
+          party: [G.makeMon('pidgeot', 50)], box: [], bag: { pokeball: 99 },
+          dexSeen: {}, dexCaught: {}, money: 0, badges: []
+        };
+        var wild = G.makeMon('rattata', 3);
+        wild.curHp = 1;
+        var b = new G.Battle({ party: G.player.party, foes: [wild], wild: true });
+        var gen = b.turn({ type: 'ball', id: 'pokeball' });
+        var step = gen.next();
+        while (!step.done) step = gen.next();
+        if (b.caughtMon) caught++;
+      }
+      G.player = realPlayer;
+      assert(caught > tries * 0.5,
+        'ball throws captured ' + caught + '/' + tries + ' — the capture path is broken');
+      // and the item id the battle bag filters on must be a kind items.js uses
+      assert((G.ITEM_KINDS || []).indexOf('ball') !== -1, 'ITEM_KINDS is missing ball');
+      assert(G.ITEMS.pokeball.kind === 'ball', 'pokeball is not kind ball');
+    })();
+
     // determinism: same seed -> same battle log
     var log1 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
     var log2 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');

@@ -199,7 +199,7 @@
 
   // ------------------------------------------------------------------- turn
   // pAction: {type:'move', slot} | {type:'switch', index} | {type:'item', id, target}
-  //        | {type:'orb', id} | {type:'run'}
+  //        | {type:'ball', id} | {type:'run'}
   G.Battle.prototype.turn = function* (pAction) {
     var fAction = this.chooseFoeAction();
     var order = this.orderActions(pAction, fAction);
@@ -238,7 +238,7 @@
 
   function actionPriority(action, battle, side) {
     if (action.type === 'switch') return 100;
-    if (action.type === 'item' || action.type === 'orb') return 90;
+    if (action.type === 'item' || action.type === 'ball') return 90;
     if (action.type === 'run') return 80;
     var mon = battle.active(side);
     var move = action.slot === -1 ? G.MOVES.struggle : G.MOVES[mon.moves[action.slot].id];
@@ -250,7 +250,7 @@
       yield* this.doSwitch(side, action.index);
     } else if (action.type === 'item') {
       yield* this.doItem(action);
-    } else if (action.type === 'orb') {
+    } else if (action.type === 'ball') {
       yield* this.doOrb(action.id);
     } else if (action.type === 'run') {
       yield* this.doRun();

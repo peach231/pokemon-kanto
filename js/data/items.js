@@ -14,6 +14,14 @@
 // badges, which is why that section is by far the longest.
 
 (function () {
+  // The kinds the ENGINE knows how to interpret. This list exists because the
+  // engine once looked for 'orb' while this file said 'ball': every Poke Ball
+  // was silently filtered out of the battle bag, nothing crashed, nothing
+  // logged, and the game had no catching mechanic at all. tools/check.js now
+  // fails if an item declares a kind that is not in here.
+  G.ITEM_KINDS = ['heal', 'cure', 'revive', 'ball', 'repel', 'escape',
+                  'stone', 'tm', 'key', 'xp'];
+
   var I = G.ITEMS = {};
   function item(id, name, price, kind, props, desc) {
     I[id] = Object.assign({ id: id, name: name, price: price, kind: kind, desc: desc }, props);

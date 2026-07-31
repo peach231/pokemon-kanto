@@ -490,8 +490,8 @@
             G.teachMachine(id);
           } else if (item.kind === 'key') {
             G.pushScene(G.Textbox(useKeyItem(id) || item.desc));
-          } else if (item.kind === 'orb') {
-            G.pushScene(G.Textbox('Better saved for a wild battle!'));
+          } else if (item.kind === 'ball') {
+            G.pushScene(G.Textbox('Better saved for a wild POKéMON.'));
           } else if (item.kind === 'repel') {
             G.player.bag[id]--;
             G.player.repelSteps = item.steps;

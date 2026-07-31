@@ -495,7 +495,7 @@
       for (var id in G.player.bag) {
         if (G.player.bag[id] <= 0) continue;
         var it = G.ITEMS[id];
-        if (['heal', 'cure', 'revive', 'orb'].indexOf(it.kind) === -1) continue;
+        if (['heal', 'cure', 'revive', 'ball'].indexOf(it.kind) === -1) continue;
         ids.push(id);
         items.push(it.name + ' x' + G.player.bag[id]);
       }
@@ -507,12 +507,12 @@
         onPick: function (i) {
           var id = ids[i];
           var it = G.ITEMS[id];
-          if (it.kind === 'orb') {
+          if (it.kind === 'ball') {
             if (!battle.wild) { G.pushScene(G.Textbox("You can't catch another trainer's creature!")); return; }
             // A full party no longer blocks a catch — after the catch you choose
             // whether it joins the party (swapping one out) or goes to the Lab.
             G.player.bag[id]--;
-            startGen(battle.turn({ type: 'orb', id: id }));
+            startGen(battle.turn({ type: 'ball', id: id }));
           } else {
             // pick which creature to use it on, like the real games
             var tItems = [], tMap = [];
