@@ -193,7 +193,9 @@
   // On-screen keyboard (arrows + Z), so it works without raw text input. B
   // deletes, Enter/OK submits. Blank submit falls back to `defaultName`.
   G.NameEntryScene = function (defaultName, onDone) {
-    var MAX = 8, name = '';
+    // Seven, which is Gen 1's own limit and the reason every nickname
+    // anyone gave anything for twenty years was seven characters long.
+    var MAX = 7, name = '';
     var LET = ['ABCDEFGHIJ', 'KLMNOPQRST', 'UVWXYZ', 'abcdefghij', 'klmnopqrst', 'uvwxyz'];
     var ACT = ['SPACE', 'DEL', 'OK'], ACTX = [14, 96, 168];
     var r = 0, c = 0, nrows = LET.length + 1;

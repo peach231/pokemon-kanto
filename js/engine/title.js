@@ -235,18 +235,14 @@
                 '(Arrows to move, Z to talk and confirm, X to cancel, Enter for the menu. M mutes.)'
               ]));
             };
-            var toName = function () {
-              if (G.NameEntryScene) G.replaceScene(G.NameEntryScene(startGame));
+            var toChar = function () {
+              if (G.CharSelectScene) G.replaceScene(G.CharSelectScene(startGame));
               else startGame();
             };
-            var toChar = function () {
-              if (G.CharSelectScene) G.replaceScene(G.CharSelectScene(toName));
-              else toName();
-            };
             // OAK's welcome — a scrolling cinematic, one animated scene per
-            // line — then you pick a trainer, then you are asked your name.
-            // Name LAST, because being asked it once you can see who you are
-            // lands differently to being asked it into an empty screen.
+            // line — then the trainer select, which asks your name itself
+            // before handing back. Name LAST, because being asked it once you
+            // can see who you are lands differently to an empty screen.
             G.replaceScene(G.IntroCinematic(toChar));
           }
         }
@@ -397,103 +393,4 @@
     };
   };
 
-  // ==========================================================================
-  // NAME ENTRY. Gen 1's keyboard: a grid of letters, a cursor, and a hard
-  // seven-character limit that shaped every nickname anyone gave anything for
-  // twenty years. Kept at seven for exactly that reason.
-  //
-  // The preset names are offered the way the cartridge offered them — not as a
-  // shortcut, but because being handed a list of names for yourself is a
-  // strange and specific thing that this series has always done.
-  // ==========================================================================
-  G.NameEntryScene = function (onDone) {
-    var MAX = 7;
-    var ROWS = [
-      'ABCDEFGHI',
-      'JKLMNOPQR',
-      'STUVWXYZ ',
-      'abcdefghi',
-      'jklmnopqr',
-      'stuvwxyz.'
-    ];
-    var PRESETS = ['RED', 'ASH', 'JACK', 'BLUE', 'SATOSHI'];
-    var name = '';
-    var cx = 0, cy = 0;
-    var mode = 'grid';   // grid | presets
-    var psel = 0;
-
-    function commit() {
-      var final = name.trim() || PRESETS[0];
-      G.player.name = final;
-      G.audio.sfx('confirm');
-      G.popScene();
-      if (onDone) onDone();
-    }
-
-    return {
-      opaque: true,
-      enter: function () { G.audio.playMusic('title'); },
-      update: function () {
-        if (mode === 'presets') {
-          if (G.input.repeat('up')) { psel = (psel + PRESETS.length - 1) % PRESETS.length; G.audio.sfx('menuMove'); }
-          if (G.input.repeat('down')) { psel = (psel + 1) % PRESETS.length; G.audio.sfx('menuMove'); }
-          if (G.input.justPressed('A')) { name = PRESETS[psel]; commit(); return; }
-          if (G.input.justPressed('B')) { mode = 'grid'; G.audio.sfx('cancel'); }
-          return;
-        }
-        if (G.input.repeat('left')) { cx = (cx + 8) % 9; G.audio.sfx('menuMove'); }
-        if (G.input.repeat('right')) { cx = (cx + 1) % 9; G.audio.sfx('menuMove'); }
-        if (G.input.repeat('up')) { cy = (cy + ROWS.length - 1) % ROWS.length; G.audio.sfx('menuMove'); }
-        if (G.input.repeat('down')) { cy = (cy + 1) % ROWS.length; G.audio.sfx('menuMove'); }
-        if (G.input.justPressed('A')) {
-          var ch = ROWS[cy][cx];
-          if (name.length < MAX) { name += ch; G.audio.sfx('menuMove'); }
-          else G.audio.sfx('cancel');
-        }
-        if (G.input.justPressed('B')) {
-          if (name.length) { name = name.slice(0, -1); G.audio.sfx('cancel'); }
-          else { mode = 'presets'; G.audio.sfx('menuMove'); }
-        }
-        if (G.input.justPressed('start')) commit();
-      },
-      draw: function (ctx) {
-        ctx.fillStyle = '#1a1c2c'; ctx.fillRect(0, 0, W, H);
-        ctx.fillStyle = '#2a3050'; ctx.fillRect(0, 0, W, 30);
-        G.text(ctx, 'YOUR NAME?', 10, 8, G.C.white, '#101018');
-
-        // the name so far, on a row of underscores
-        var bx = 96;
-        for (var s = 0; s < MAX; s++) {
-          ctx.fillStyle = '#4a5480';
-          ctx.fillRect(bx + s * 16, 22, 12, 1);
-          if (s < name.length) G.text(ctx, name[s], bx + s * 16 + 3, 11, '#f8e878', '#101018');
-        }
-
-        if (mode === 'presets') {
-          G.nineSlice(ctx, G.IMG.ui_box, 70, 40, 100, PRESETS.length * 15 + 12, 4);
-          for (var p = 0; p < PRESETS.length; p++) {
-            G.text(ctx, PRESETS[p], 92, 47 + p * 15, G.UI.text, G.UI.textShadow);
-            if (p === psel) ctx.drawImage(G.IMG.ui_cursor, 80, 48 + p * 15);
-          }
-          G.text(ctx, 'Z: choose   X: back to the keyboard', 22, H - 12, G.C.lgry);
-          return;
-        }
-
-        // the keyboard
-        var ox = 40, oy = 42;
-        for (var r = 0; r < ROWS.length; r++) {
-          for (var c = 0; c < 9; c++) {
-            var here = (r === cy && c === cx);
-            var gx = ox + c * 18, gy = oy + r * 15;
-            if (here) {
-              ctx.fillStyle = '#f8e878';
-              ctx.fillRect(gx - 3, gy - 3, 15, 14);
-            }
-            G.text(ctx, ROWS[r][c], gx, gy, here ? '#1a1c2c' : G.C.white, here ? null : '#101018');
-          }
-        }
-        G.text(ctx, 'Z: type   X: delete   Enter: done', 30, H - 12, G.C.lgry);
-      }
-    };
-  };
 })();

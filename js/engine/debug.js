@@ -256,6 +256,49 @@
       assert(caught > 0, 'no SAFARI BALL ever caught anything in 120 throws');
     })();
 
+    // THE OPENING. Every other test in this file exercises a battle, which is
+    // the part of the game a player reaches SECOND. The first screens — pick a
+    // trainer, type a name — had never been driven at all, and shipped with a
+    // crash that froze the game before anyone could take a step.
+    //
+    // This drives that chain the way a player does: choose, type, submit.
+    (function () {
+      var realInput = G.input, realAudio = G.audio, realScenes = G.scenes.slice();
+      var realPlayer = G.player;
+      var pressed = null;
+      G.input = { held: {}, justPressed: function (b) { return b === pressed; },
+                  repeat: function () { return false; }, step: function () {} };
+      G.audio = { sfx: function () {}, playMusic: function () {}, playJingle: function () {},
+                  toggleMute: function () {} };
+      var realLoadPrev = G.gfx.loadCharacterPreview, realLoadChar = G.gfx.loadCharacter;
+      G.gfx.loadCharacterPreview = function () {}; G.gfx.loadCharacter = function () {};
+
+      G.newGame('TEST');
+      G.scenes.length = 0;
+      var chosen = null;
+      G.pushScene(G.CharSelectScene(function (c) { chosen = c; }));
+      function press(b) { pressed = b; G.updateScenes(); pressed = null; }
+
+      var err = null;
+      try {
+        press('A');                                   // pick the trainer
+        assert(G.scenes.length === 2, 'choosing a trainer did not open name entry');
+        press('A'); press('A'); press('A');           // type
+        press('start');                               // submit
+      } catch (e) { err = e; }
+
+      G.input = realInput; G.audio = realAudio;
+      G.gfx.loadCharacterPreview = realLoadPrev; G.gfx.loadCharacter = realLoadChar;
+      G.scenes.length = 0;
+      for (var si = 0; si < realScenes.length; si++) G.scenes.push(realScenes[si]);
+      var gotName = G.player && G.player.name;
+      G.player = realPlayer;
+
+      assert(!err, 'the opening threw: ' + (err && err.message));
+      assert(chosen, 'the trainer select never handed back');
+      assert(gotName && gotName.length, 'name entry produced no name');
+    })();
+
     // determinism: same seed -> same battle log
     var log1 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');
     var log2 = G.debug.simBattle('charmander', 'bulbasaur', { n: 1, seed: 42, level: 10, verbose: true }).log.join('|');

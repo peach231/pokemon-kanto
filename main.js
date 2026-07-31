@@ -119,6 +119,25 @@
 
     var last = performance.now();
     var acc = 0;
+    // A throw inside a scene used to escape this loop, which stops
+    // requestAnimationFrame being called again — the game freezes solid with
+    // no input and no error visible to the player. That happened on the name
+    // entry screen and made the game unstartable.
+    //
+    // Now a scene that throws is REPORTED and popped: the exception is logged
+    // with the scene's name, the broken scene is removed so the one underneath
+    // resumes, and the loop keeps running. A visible glitch beats a dead tab.
+    var crashed = 0;
+    function guard(what, fn) {
+      try { fn(); return true; }
+      catch (e) {
+        crashed++;
+        console.error('[scene error] ' + what + ': ' + (e && e.message), e);
+        if (crashed < 8 && G.scenes.length > 1) G.popScene();
+        return false;
+      }
+    }
+
     function frame(now) {
       var dt = Math.min(100, now - last); // clamp: survive tab switches
       last = now;
@@ -129,7 +148,7 @@
           G.audio.toggleMute();
           if (G.syncMuteBtn) G.syncMuteBtn();
         }
-        G.updateScenes();
+        guard('update', G.updateScenes);
         G.frame++;
         acc -= STEP_MS;
       }
@@ -138,7 +157,7 @@
       if (G.gfx.tickLive) G.gfx.tickLive();
       G.ctx.fillStyle = '#08080c';
       G.ctx.fillRect(0, 0, G.SCREEN_W, G.SCREEN_H);
-      G.drawScenes(G.ctx);
+      guard('draw', function () { G.drawScenes(G.ctx); });
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);

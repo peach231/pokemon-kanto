@@ -363,6 +363,42 @@ if (G.SPECIES) {
   console.log(`  fly: ${Object.keys(G.FLY_POINTS || {}).length} destinations, all landable`);
 }
 
+// --- duplicate globals ---
+// Everything in this project hangs off one `G` namespace and the files load in
+// sequence, so a second definition of the same name SILENTLY WINS. There is no
+// error, no warning, and no way to notice by reading either file.
+//
+// This shipped: title.js defined G.NameEntryScene(onDone), overriding
+// menus.js's G.NameEntryScene(defaultName, onDone). CharSelectScene called the
+// original signature, so `onDone` arrived holding the string 'Red', calling it
+// threw, the exception escaped the frame loop, and the entire game froze on the
+// name-entry screen with no input working. Eric hit it on his first launch.
+{
+  const defs = new Map();          // name -> [file, …]
+  for (const f of SOURCES) {
+    const text = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    // TOP-LEVEL definitions only: every file in this project is one IIFE, so a
+    // real definition sits at two spaces. Deeper indentation means an
+    // assignment inside a function — debug.js swaps G.startBattle for a stub
+    // mid-test and puts it back, which is legitimate and must not be flagged.
+    for (const m of text.matchAll(/^ {0,2}G\.([A-Za-z_$][\w$]*)\s*=\s*(?:function|\{)/gm)) {
+      if (!defs.has(m[1])) defs.set(m[1], []);
+      if (defs.get(m[1]).indexOf(f) === -1) defs.get(m[1]).push(f);
+    }
+  }
+  // Namespaces that are deliberately extended across files build themselves up
+  // with `G.X = G.X || {}` and are not assignments of a fresh value.
+  const EXTENDED = new Set(['MAPS', 'EVENTS', 'TILES', 'ART', 'IMG', 'SPECIES',
+                            'TRAINERS', 'ITEMS', 'MOVES', 'SONGS', 'ENCOUNTERS',
+                            'hooks', 'flags', 'DEX_ORDER', 'MAP_WARN', 'ART_WARN',
+                            'TILE_EVENTS', 'DYNAMIC_FLAGS', 'C', 'UI']);
+  for (const [name, files] of defs) {
+    if (files.length < 2 || EXTENDED.has(name)) continue;
+    errors.push(`DUPLICATE GLOBAL G.${name} defined in ${files.join(' and ')} — the later file wins silently`);
+  }
+  console.log(`  globals: ${defs.size} G.* definitions, none shadowed`);
+}
+
 // --- name contracts between data and engine ---
 // This game is an inherited ENGINE plus a rewritten DATA layer, and every bug
 // that has cost real time in this project lives on the seam between them: the
