@@ -846,7 +846,21 @@
       img = this._actorImage(a);
 
       // SWIMMING: body submerged — only head shows, arms stroke, legs kick.
-      if (a === w.player && a.vehicle === 'swim') { this._drawSwimmer(ctx, img, sx, sy); return; }
+      if (a === w.player && a.vehicle === 'swim') {
+        // FireRed's surf sheet draws the rider AND the mount together in a
+        // 32px frame, so it is offset half a tile left and up to sit centred
+        // on the tile the player occupies.
+        if (G.IMG.ch_playersurf_d0 && img) {
+          ctx.drawImage(img, sx - 8, sy - 8);
+          return;
+        }
+        this._drawSwimmer(ctx, img, sx, sy);
+        return;
+      }
+      if (a === w.player && G.player && G.player.onBike && G.IMG.ch_playerbike_d0 && img) {
+        ctx.drawImage(img, sx - 8, sy - 8);
+        return;
+      }
 
       var yoff = -8; // 8px head overhang
       if (a === w.player && a.vehicle === 'boat') {
@@ -917,6 +931,14 @@
 
     _actorImage: function (a) {
       var base = 'ch_' + a.sprite + '_';
+      // The player has three sheets. Fall back to the walk sheet if a vehicle
+      // sheet has not finished streaming, so a slow connection shows the
+      // character walking on water rather than showing nothing at all.
+      if (a === G.world.player) {
+        if (a.vehicle === 'swim' && G.IMG.ch_playersurf_d0) base = 'ch_playersurf_';
+        else if (G.player && G.player.onBike && G.player.bag && G.player.bag.bicycle
+                 && G.IMG.ch_playerbike_d0) base = 'ch_playerbike_';
+      }
       var striding = (a.moving && a.step < 8) || (a.hop > 0 && a.hop > a.hopTotal / 2);
       // Animation is LOCKED to the facing direction — front/back are never mirrored
       // (mirroring an asymmetric sprite makes it look like it turns each step).

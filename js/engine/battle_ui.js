@@ -151,6 +151,7 @@
     var orb = { visible: false, x: 0, y: 0, t: 0, mode: null }; // throw/shake/rest
     var sendBall = { visible: false, side: null, t: 0 };       // send-out ball toss
     var throwLean = 0, throwSide = null;                       // thrower wind-up offset
+    var throwT = 0;                                            // 0..1 through the throw, for the back-sprite frames
     var particles = [];                  // {x,y,vx,vy,life,col?,size?,delay?,grav?}
     var weatherFx = battle.weather || null;  // 'rain' | 'sun' | 'sand' | null
 
@@ -396,13 +397,14 @@
             sendBall.t = task.t;
             // thrower winds up and leans toward the field as the ball flies
             throwSide = task.side;
-            throwLean = Math.sin(Math.min(1, task.t / 16) * Math.PI) * 7;
+            throwT = Math.min(1, task.t / 16);
+            throwLean = Math.sin(throwT * Math.PI) * 7;
             if (task.t >= 16) {
               // the ball lands and bursts open — thrower steps off, mon rises
               if (task.side === 'f') trainerShown = false;
               if (task.side === 'p') playerShown = false;
               sendBall.visible = false;
-              throwLean = 0; throwSide = null;
+              throwLean = 0; throwSide = null; throwT = 0;
               ss.visible = true;
               var anc = task.side === 'p' ? PLY : FOE;
               releaseBurst(anc.x, anc.y - 10);
@@ -914,7 +916,13 @@
         }
         // player's back sprite stands ready until they send out their lead
         if (playerShown) {
-          var pImg = G.IMG.trainer_player_back;
+          // Step through the real throw frames while throwing; stand on
+          // frame 0 the rest of the time.
+          var nFrames = G.IMG.trainer_player_back_frames || 1;
+          var fi = (throwSide === 'p' && nFrames > 1)
+            ? Math.min(nFrames - 1, Math.floor(throwT * nFrames))
+            : 0;
+          var pImg = G.IMG['trainer_player_back_' + fi] || G.IMG.trainer_player_back;
           var plean = throwSide === 'p' ? throwLean : 0;   // player leans toward the field as they throw
           if (pImg) ctx.drawImage(pImg, PLY.x - pImg.width / 2 + plean, PLY.y - pImg.height + 6);
         }

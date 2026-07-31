@@ -534,6 +534,14 @@ if (G.SPECIES) {
   // the sprite audit missed them entirely, and the one character on screen at
   // all times was the only one that could break unnoticed.
   for (const c of (G.CHARACTERS || [])) {
+    // A Kanto player has three overworld states and FireRed ships a sheet for
+    // each. Missing one does not crash — it silently falls back to the walk
+    // cycle, so the bicycle looks exactly like walking and surfing looks like
+    // standing on the sea.
+    for (const state of ['surf', 'bike']) {
+      if (!c[state]) errors.push(`CHARACTER '${c.key}' has no ${state} sheet — that state will render as the walk cycle`);
+      else if (c[state].indexOf('/') === -1) errors.push(`CHARACTER '${c.key}' ${state} sheet '${c[state]}' has no folder prefix`);
+    }
     if (!c.sheet || c.sheet.indexOf('/') === -1) {
       errors.push(`CHARACTER '${c.key}' sheet '${c.sheet}' has no folder prefix — OVERWORLD_CFG.remoteBase points at pics/, so this resolves to a 404 and falls back to hand-drawn art`);
     }

@@ -387,9 +387,15 @@
     // Slice a 9-frame (144x32) walk sheet into ch_<sprName>_{d0,d1,u0,u1,s0,s1,
     // d2,u2,s2} (+ _flip variants). Optional recolor LUT remaps exact palette
     // colors (e.g. skin/outfit) so one sheet yields several distinct characters.
-    _sliceWalkSheet: function (img, sprName, lut) {
+    _sliceWalkSheet: function (img, sprName, lut, size) {
       var cfg = G.OVERWORLD_CFG || {};
-      var fw = cfg.frameW || 16, bw = cfg.boxW || 16, bh = cfg.boxH || 24;
+      // Most sheets are 16px frames in a 16x24 slot. The SURF and BIKE
+      // sheets are 32px wide — the mount and the bicycle are drawn wider
+      // than the tile the player stands on — so those pass their own size.
+      size = size || {};
+      var fw = size.frameW || cfg.frameW || 16;
+      var bw = size.boxW || cfg.boxW || 16;
+      var bh = size.boxH || cfg.boxH || 24;
       // Sheet frame order: idle [S,N,W] then walk PAIRS per direction —
       // South=3,4  North=5,6  West=7,8. Map to engine keys so each direction's
       // frames all face that direction (no apparent turning while moving).
@@ -449,13 +455,13 @@
 
     // Load + slice a walk sheet (by path under OVERWORLD_CFG.remoteBase) into
     // ch_<sprName>_*, with an optional recolor map. Baked art stays the fallback.
-    loadWalkSheet: function (sheetPath, sprName, recolor, cb) {
+    loadWalkSheet: function (sheetPath, sprName, recolor, cb, size) {
       var cfg = G.OVERWORLD_CFG;
       if (!cfg || !cfg.remoteBase) { if (cb) cb(); return; }
       var lut = this._recolorLUT(recolor), self = this;
       var img = new Image();
       if (cfg.crossOrigin) img.crossOrigin = cfg.crossOrigin;
-      img.onload = function () { self._sliceWalkSheet(img, sprName, lut); if (cb) cb(); };
+      img.onload = function () { self._sliceWalkSheet(img, sprName, lut, size); if (cb) cb(); };
       img.onerror = function () { if (cb) cb(); };
       img.src = cfg.remoteBase + sheetPath + '.png';
     },
@@ -471,9 +477,10 @@
     },
 
     // Extract frame 0 of a battle back-pic sheet, color-keyed + optionally recolored.
-    _extractBackFrame: function (img, lut) {
+    _extractBackFrame: function (img, lut, frame) {
       var cfg = G.PLAYER_BACK_CFG || {};
       var fw = cfg.frameW || 64, fh = cfg.frameH || 64;
+      var fy = (frame || 0) * fh;
       var sw = img.width;
       var off = makeCanvas(sw, img.height), octx = off.getContext('2d');
       octx.drawImage(img, 0, 0);
@@ -489,7 +496,7 @@
       var id = cx.createImageData(fw, fh);
       for (var y = 0; y < fh; y++) {
         for (var x = 0; x < fw; x++) {
-          var si = (y * sw + x) * 4, di = (y * fw + x) * 4;
+          var si = ((fy + y) * sw + x) * 4, di = (y * fw + x) * 4;
           if (isBg(si)) { id.data[di + 3] = 0; continue; }
           var r = data[si], g = data[si + 1], b = data[si + 2];
           if (lut) { var m = lut[(r << 16) | (g << 8) | b]; if (m) { r = m[0]; g = m[1]; b = m[2]; } }
@@ -508,16 +515,37 @@
       var lut = this._recolorLUT(recolor), self = this;
       var img = new Image();
       if (cfg.crossOrigin) img.crossOrigin = cfg.crossOrigin;
-      img.onload = function () { var c = self._extractBackFrame(img, lut); if (c) G.IMG.trainer_player_back = c; };
+      img.onload = function () {
+        // FireRed's back pic is 64x320: FIVE 64x64 frames of an actual throw,
+        // wind-up to release. Only the first was ever extracted, and the throw
+        // was faked by nudging that one frame sideways — so the player did the
+        // same shrug for every ball, every battle.
+        var fh = (G.PLAYER_BACK_CFG || {}).frameH || 64;
+        var n = Math.max(1, Math.floor(img.height / fh));
+        for (var i = 0; i < n; i++) {
+          var c = self._extractBackFrame(img, lut, i);
+          if (!c) continue;
+          G.IMG['trainer_player_back_' + i] = c;
+          if (i === 0) G.IMG.trainer_player_back = c;
+        }
+        G.IMG.trainer_player_back_frames = n;
+      };
       img.onerror = function () {};
       img.src = cfg.backBase + backName + '.png';
     },
 
     // Apply a chosen character: overworld walker (ch_player_*) + battle back sprite.
+    // A Kanto player has THREE overworld states and FireRed ships a sheet for
+    // each: on foot, on the bicycle, and on the water. Loading only the first
+    // is why surfing was a hand-drawn blue ellipse with the walking sprite
+    // clipped on top of it, and why the bicycle looked exactly like walking.
     loadCharacter: function (charDef) {
       if (!charDef) return;
       this.loadWalkSheet(charDef.sheet, 'player', charDef.recolor);
       this.loadBackPic(charDef.back, charDef.recolor);
+      var wide = { frameW: 32, boxW: 32, boxH: 32 };
+      if (charDef.surf) this.loadWalkSheet(charDef.surf, 'playersurf', charDef.recolor, null, wide);
+      if (charDef.bike) this.loadWalkSheet(charDef.bike, 'playerbike', charDef.recolor, null, wide);
     },
 
     // Load a character's walker under a preview key (ch_csel_<key>_*) for the

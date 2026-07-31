@@ -300,9 +300,11 @@
   // at all times was the only one NOT using real art.
   G.CHARACTERS = [
     { key: 'red',  name: 'Red',  kind: 'Boy',  blurb: 'The cap, the jacket, and a very long walk ahead.',
-      sheet: 'people/red_normal',   back: 'red_back_pic',  recolor: null },
+      sheet: 'people/red_normal',   surf: 'people/red_surf',   bike: 'people/red_bike',
+      back: 'red_back_pic',  recolor: null },
     { key: 'leaf', name: 'Leaf', kind: 'Girl', blurb: 'Sun hat on, and already halfway out the door.',
-      sheet: 'people/green_normal', back: 'leaf_back_pic', recolor: null }
+      sheet: 'people/green_normal', surf: 'people/green_surf', bike: 'people/green_bike',
+      back: 'leaf_back_pic', recolor: null }
   ];
 
   G.applyCharacter = function (key) {
