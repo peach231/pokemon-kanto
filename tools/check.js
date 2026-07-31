@@ -554,6 +554,117 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   if (!broken.length) console.log(`  events: ${evIds.length} events dry-run on a blank and a finished save`);
 }
 
+// --- progression ---
+// Connectivity says every map is reachable IF you can already do everything.
+// This asks the harder question: starting from nothing, walking out of your
+// own bedroom with no badges and no HMs, does the world open up in an order
+// that actually works?
+//
+// It is a fixpoint. Reachable maps grant items, badges and flags; those grant
+// capabilities; capabilities open more warps. Iterate until nothing new
+// appears, then check what is still dark. A cycle — SURF locked behind a door
+// that needs SURF — shows up here as a set of maps that never become
+// reachable, which is exactly the bug that is impossible to see by reading the
+// map files and catastrophic to ship.
+{
+  // What each map hands out. Ground items are explicit; event grants are read
+  // out of the event body and attributed to the map whose NPC runs it.
+  const grants = {};
+  const add = (mid, thing) => { (grants[mid] = grants[mid] || new Set()).add(thing); };
+
+  const eventHome = {};
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    for (const o of (m.npcs || []).concat(m.trainers || [], m.signs || [], m.scripts || [])) {
+      const ev = o.event || o.run;
+      if (ev && !eventHome[ev]) eventHome[ev] = id;
+    }
+    for (const it of (m.items || [])) { add(id, it.item); if (it.flag) add(id, it.flag); }
+    for (const t of (m.trainers || [])) {
+      const def = (G.TRAINERS || {})[t.trainer];
+      if (def) { add(id, t.trainer); if (def.reward && def.reward.flag) add(id, def.reward.flag); }
+    }
+  }
+  for (const eid in (G.EVENTS || {})) {
+    const home = eventHome[eid];
+    if (!home) continue;
+    const src = String(G.EVENTS[eid]);
+    for (const mt of src.matchAll(/bag\.([A-Za-z_$][\w$]*)\s*=/g)) add(home, mt[1]);
+    for (const mt of src.matchAll(/G\.flags\.([A-Za-z_$][\w$]*)\s*=\s*1/g)) add(home, mt[1]);
+  }
+
+  // Capabilities, in terms of what you are holding. These are the real gates:
+  // Kanto is a region where three quarters of the exits are terrain.
+  const CAPS = {
+    surf:     s => s.has('hm03') && s.has('badge5'),
+    strength: s => s.has('hm04') && s.has('badge4'),
+    cut:      s => s.has('hm01') && s.has('badge2')
+  };
+
+  // What a warp costs to walk through. `needFlag` is explicit; arriving on
+  // water costs SURF, because you are arriving on it by surfing.
+  function warpCost(from, w) {
+    const need = [];
+    if (w.needFlag) need.push.apply(need, Array.isArray(w.needFlag) ? w.needFlag : [w.needFlag]);
+    const t = G.MAPS[w.to];
+    if (t) {
+      const row = t.ground[w.ty];
+      const ch = row && row[w.tx];
+      const tile = ch != null ? G.TILES[t.legend[ch]] : null;
+      if (tile && tile.water) need.push('@surf');
+    }
+    return need;
+  }
+
+  const have = new Set();
+  const seen = new Set(['playerhome']);
+  let grew = true, rounds = 0;
+  while (grew && rounds++ < 60) {
+    grew = false;
+    // bank everything the currently-reachable world offers
+    for (const id of seen) {
+      for (const thing of (grants[id] || [])) {
+        if (!have.has(thing)) { have.add(thing); grew = true; }
+      }
+    }
+    // derived capabilities
+    for (const cap in CAPS) {
+      if (!have.has('@' + cap) && CAPS[cap](have)) { have.add('@' + cap); grew = true; }
+    }
+    // walk every warp we can now afford
+    for (const id of [...seen]) {
+      const m = G.MAPS[id];
+      if (!m) continue;
+      for (const w of (m.warps || [])) {
+        if (!G.MAPS[w.to] || seen.has(w.to)) continue;
+        if (warpCost(id, w).every(n => have.has(n))) { seen.add(w.to); grew = true; }
+      }
+      // and any map an event in this map teleports us to
+      for (const o of (m.npcs || []).concat(m.trainers || [], m.scripts || [])) {
+        const ev = o.event || o.run;
+        if (!ev || !G.EVENTS[ev]) continue;
+        for (const mt of String(G.EVENTS[ev]).matchAll(/loadMap\(\s*['"]([a-z0-9_]+)['"]/g)) {
+          if (G.MAPS[mt[1]] && !seen.has(mt[1])) { seen.add(mt[1]); grew = true; }
+        }
+      }
+    }
+  }
+
+  const dark = Object.keys(G.MAPS).filter(id => !seen.has(id));
+  if (dark.length) {
+    errors.push(`PROGRESSION: ${dark.length} map(s) can never be reached by an honest playthrough — ${dark.slice(0, 8).join(', ')}${dark.length > 8 ? ' …' : ''}`);
+  }
+  const MUST = ['badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8',
+                'hm01', 'hm02', 'hm03', 'hm04', 'hm05', 'e4_champion'];
+  const unreachable = MUST.filter(f => !have.has(f));
+  if (unreachable.length) {
+    errors.push(`PROGRESSION: unobtainable on an honest playthrough — ${unreachable.join(', ')}`);
+  }
+  if (!dark.length && !unreachable.length) {
+    console.log(`  progression: all 8 badges, all 5 HMs and the CHAMPION title reachable from an empty save in ${rounds} rounds`);
+  }
+}
+
 // --- world connectivity ---
 // Walk the warp graph out from the start map. Two failure modes matter and
 // neither is visible by reading a map file: a warp whose LANDING tile is solid

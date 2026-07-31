@@ -15,6 +15,9 @@
       dexSeen: {}, dexCaught: {},
       visited: {},        // mapId -> 1 once entered (region map shading)
       repelSteps: 0,
+      onBike: false,
+      safariSteps: 0,
+      tileEdits: {},      // felled trees and shoved boulders (see field.js)
       playSeconds: 0,
       respawn: { mapId: 'playerhome', x: 4, y: 7 }
     };
@@ -53,6 +56,7 @@
     G.player = data.player;
     if (!G.player.box) G.player.box = [];          // back-compat for older saves
     if (!G.player.visited) G.player.visited = {};  // explored-map tracking
+    if (!G.player.tileEdits) G.player.tileEdits = {}; // HM edits to the world
     G.flags = data.flags || {};
     if (G.applyCharacter) G.applyCharacter(G.player.charKey || 'red'); // restore chosen sprite
     if (data.muted && !G.audio.muted) G.audio.toggleMute();

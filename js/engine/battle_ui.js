@@ -959,10 +959,18 @@
             G.player.money += def.money || 0;
             G.flags[trainerId] = 1;
             if (def.reward) {
-              G.player.badges[def.reward.badge] = true;
-              G.flags[def.reward.flag] = 1;
-              G.audio.playJingle('jingle_badge');
-              G.pushScene(G.Textbox(def.reward.text));
+              // A reward is not always a badge. The ELITE FOUR and the HALL OF
+              // CHAMPIONS set a progress flag and nothing else — no badge
+              // index, no fanfare, no announcement. Treating every reward as a
+              // badge wrote `badges[undefined]`, played the badge jingle in the
+              // middle of the League gauntlet, and popped a text box reading
+              // "undefined".
+              if (def.reward.flag) G.flags[def.reward.flag] = 1;
+              if (def.reward.badge != null) {
+                G.player.badges[def.reward.badge] = true;
+                G.audio.playJingle('jingle_badge');
+              }
+              if (def.reward.text) G.pushScene(G.Textbox(def.reward.text));
             }
           }
           G.afterBattle(result, battle);

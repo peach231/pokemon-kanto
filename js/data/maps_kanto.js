@@ -2599,8 +2599,12 @@
     warps: [
       { x: 9, y: 33, to: 'route22', tx: 1, ty: 5, dir: 'down' },
       { x: 10, y: 33, to: 'route22', tx: 1, ty: 6, dir: 'down' },
-      { x: 9, y: 0, to: 'victoryroad1f', tx: 9, ty: 17, dir: 'up' },
-      { x: 10, y: 0, to: 'victoryroad1f', tx: 10, ty: 17, dir: 'up' }
+      { x: 9, y: 0, to: 'victoryroad1f', tx: 9, ty: 17, dir: 'up',
+        needFlag: ['badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8'],
+        deniedText: 'The final gate reads your BADGE CASE, finds a gap in it, and does not open. VICTORY ROAD takes all eight or none.' },
+      { x: 10, y: 0, to: 'victoryroad1f', tx: 10, ty: 17, dir: 'up',
+        needFlag: ['badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8'],
+        deniedText: 'The final gate reads your BADGE CASE, finds a gap in it, and does not open. VICTORY ROAD takes all eight or none.' }
     ],
     signs: [
       { x: 8, y: 30, text: 'BADGE CHECK GATE 1 — VICTORY ROAD lies beyond. Present all eight BADGES.' }

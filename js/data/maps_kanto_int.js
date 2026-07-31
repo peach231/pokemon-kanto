@@ -278,17 +278,21 @@
         dialog: ['Empty, see? Has been for months.',
                  "Whoever the LEADER is, he's got business elsewhere.",
                  "...I've said too much."] },
-      { x: 9, y: 8, sprite: 'gymguy', dir: 'left', ifFlag: 'silph_giovanni', event: 'viridianGymGuide' }
+      { x: 9, y: 8, sprite: 'gymguy', dir: 'left', ifFlag: 'badge7', event: 'viridianGymGuide' },
+      { x: 3, y: 6, sprite: 'oldman', dir: 'right', ifFlag: 'rh_giovanni', unlessFlag: 'badge7',
+        dialog: ['The GYM has a light on for the first time in years.',
+                 'The door is still locked. Whoever is in there is waiting for something.',
+                 'Or someone with seven BADGES, I would guess.'] }
     ],
     trainers: [
       { x: 5, y: 1, sprite: 'giovanni', dir: 'down', trainer: 'giovanni_viridian', sight: 0,
-        ifFlag: 'silph_giovanni' },
+        ifFlag: 'badge7' },
       { x: 2, y: 4, sprite: 'cooltrainerm', dir: 'right', trainer: 'vg_arthur', sight: 3,
-        ifFlag: 'silph_giovanni' },
+        ifFlag: 'badge7' },
       { x: 9, y: 4, sprite: 'blackbelt', dir: 'left', trainer: 'vg_atsushi', sight: 3,
-        ifFlag: 'silph_giovanni' },
+        ifFlag: 'badge7' },
       { x: 5, y: 6, sprite: 'cooltrainerf', dir: 'down', trainer: 'vg_samantha', sight: 3,
-        ifFlag: 'silph_giovanni' }
+        ifFlag: 'badge7' }
     ]
   };
 
@@ -2802,8 +2806,10 @@
     var right = (said.v === quiz.a);
     var open = function () {
       // Both shutter tiles on this row, so the corridor is actually passable.
-      G.setTileEdit(w.mapId, 5, fy, 'gfloor');
-      G.setTileEdit(w.mapId, 6, fy, 'gfloor');
+      // The room is marble, not gym floor. Opening a shutter onto the wrong
+      // tile leaves a visible seam down the middle of the corridor.
+      G.setTileEdit(w.mapId, 5, fy, 'marble');
+      G.setTileEdit(w.mapId, 6, fy, 'marble');
       w.refreshTiles();
     };
     if (right) {
@@ -2982,10 +2988,6 @@
 
   // The five chambers, in order. Beating one opens the door at the far end;
   // losing anywhere puts you back in the lobby with all four to do again.
-  G.EVENTS.leagueSealed = function* () {
-    yield { t: 'text', s: 'The door will not open. Whoever is in this room is still standing.' };
-  };
-
   // ------------------------------------------------------- HALL OF FAME ----
   G.EVENTS.hallOfFameCeremony = function* () {
     yield { t: 'fn', fn: function () { G.audio.playMusic('title'); } };

@@ -170,6 +170,18 @@
     }
   }
 
+  // Walking is 1, running is 2, and the BICYCLE is 3 — which is the whole
+  // reason the CYCLING ROAD questline exists and the reason a Kanto player
+  // will cross the entire region to redeem one voucher. The inherited code
+  // checked `bag.skates`, which is Hoenn's Mach Bike and which nothing in this
+  // game ever grants, so the bicycle did nothing at all.
+  G.moveSpeed = function () {
+    if (!G.player) return 1;
+    var onFoot = !(G.player.onBike && G.player.bag && G.player.bag.bicycle);
+    if (!onFoot) return 3;
+    return 1 + (G.input.held.run ? 1 : 0);
+  };
+
   G.world = {
     mapId: null, map: null,
     player: makeActor('player', 0, 0, 'down'),
@@ -291,7 +303,10 @@
     // put your hand on the door, and it simply does not open. A wall would be
     // a level-design decision; a door that will not open is a statement.
     warpBlocked: function (w) {
-      if (!w.needFlag || G.flags[w.needFlag]) return false;
+      if (!w.needFlag) return false;
+      var need = Array.isArray(w.needFlag) ? w.needFlag : [w.needFlag];
+      var missing = need.filter(function (f) { return !G.flags[f]; });
+      if (!missing.length) return false;
       G.audio.sfx('bump');
       G.pushScene(G.Textbox(w.deniedText ||
         'The door will not open. Whoever is in this room is still standing.'));
@@ -359,7 +374,7 @@
 
       if (p.moving) {
         // base 1; +1 holding Shift (run); +1 if carrying Skates (auto-fast)
-        var spd = 1 + (G.input.held.run ? 1 : 0) + ((G.player && G.player.bag && G.player.bag.skates) ? 1 : 0);
+        var spd = G.moveSpeed();
         p.step += spd;
         if (p.step >= 16) {
           p.moving = false;
@@ -437,7 +452,7 @@
     _advanceFollower: function () {
       var f = G.world.follower;
       if (!f || !f.moving) return;
-      var spd = 1 + (G.input.held.run ? 1 : 0) + ((G.player && G.player.bag && G.player.bag.skates) ? 1 : 0);
+      var spd = G.moveSpeed();
       f.step += spd;
       if (f.step >= 16) { f.moving = false; f.step = 0; }
     },
