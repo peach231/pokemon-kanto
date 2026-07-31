@@ -292,11 +292,17 @@
   // Playable characters. Gen 1 shipped one protagonist; FireRed added Leaf.
   // Both are the real FireRed designs — no recolours, so each is its own
   // artwork rather than a palette swap of the other.
+  // NOTE the `people/` prefix. OVERWORLD_CFG.remoteBase points at the pics/
+  // FOLDER rather than pics/people/, so that the POKéMON sheets in the sibling
+  // pokemon/ folder can be addressed too — and when that changed, these two
+  // paths were left behind. They 404'd, and the player silently fell back to
+  // the six hand-drawn frames in sprites_chars.js: the one character on screen
+  // at all times was the only one NOT using real art.
   G.CHARACTERS = [
     { key: 'red',  name: 'Red',  kind: 'Boy',  blurb: 'The cap, the jacket, and a very long walk ahead.',
-      sheet: 'red_normal',   back: 'red_back_pic',  recolor: null },
+      sheet: 'people/red_normal',   back: 'red_back_pic',  recolor: null },
     { key: 'leaf', name: 'Leaf', kind: 'Girl', blurb: 'Sun hat on, and already halfway out the door.',
-      sheet: 'green_normal', back: 'leaf_back_pic', recolor: null }
+      sheet: 'people/green_normal', back: 'leaf_back_pic', recolor: null }
   ];
 
   G.applyCharacter = function (key) {

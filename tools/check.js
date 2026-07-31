@@ -530,6 +530,20 @@ if (G.SPECIES) {
       used.get(n.sprite).push(id);
     }
   }
+  // The PLAYER is not in the sheets table — they come from G.CHARACTERS — so
+  // the sprite audit missed them entirely, and the one character on screen at
+  // all times was the only one that could break unnoticed.
+  for (const c of (G.CHARACTERS || [])) {
+    if (!c.sheet || c.sheet.indexOf('/') === -1) {
+      errors.push(`CHARACTER '${c.key}' sheet '${c.sheet}' has no folder prefix — OVERWORLD_CFG.remoteBase points at pics/, so this resolves to a 404 and falls back to hand-drawn art`);
+    }
+    if (!c.back) errors.push(`CHARACTER '${c.key}' has no battle back sprite`);
+  }
+  for (const k in (G.OVERWORLD_CFG || {}).sheets || {}) {
+    const v = G.OVERWORLD_CFG.sheets[k];
+    if (v.indexOf('/') === -1) errors.push(`SHEET '${k}' -> '${v}' has no folder prefix`);
+  }
+
   for (const [spr, where] of used) {
     // Baked UI art (the Poke Ball on Oak's table, the Mt. Moon fossils) is a
     // still image rather than a walk sheet, and is legitimately not in here.
@@ -910,6 +924,110 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   if (!dark.length && !missing.length) {
     console.log(`  progression: every map, badge and HM reachable from an empty save (${rounds} rounds, walking each map tile by tile)`);
   }
+}
+
+// --- dex completability ---
+// Can the POKéDEX actually be filled? Not "are there 151 entries" — every fan
+// project has 151 entries — but is each one reachable by a player.
+//
+// A regex over the event source cannot answer this, because half the gift
+// species arrive through factory functions where the species is a PARAMETER:
+// starterEvent(key), legendary(key), dojoPrize(key). So this instruments
+// G.makeMon during the event dry-run and records what actually gets built,
+// then closes the set under evolution.
+{
+  const obtainable = new Set();
+
+  // 1. everything in a wild table on a real map
+  for (const id in G.MAPS) {
+    const e = G.MAPS[id].encounters;
+    if (!e) continue;
+    for (const t of (e.table || [])) obtainable.add(t.sp);
+    if (e.water) for (const t of (e.water.table || [])) obtainable.add(t.sp);
+  }
+
+  // 2. everything the rods can pull up (the pools live in overworld.js)
+  {
+    const ow = fs.readFileSync(path.join(ROOT, 'js/engine/overworld.js'), 'utf8');
+    const pools = ow.match(/ROD_POOLS[\s\S]*?SEA_MAPS/);
+    if (pools) for (const m of pools[0].matchAll(/'([a-z0-9]+)'/g)) {
+      if (G.SPECIES[m[1]]) obtainable.add(m[1]);
+    }
+  }
+
+  // 3. everything any event actually constructs, observed rather than parsed
+  {
+    const realMake = G.makeMon;
+    const realPush = G.pushScene, realPop = G.popScene;
+    const realRun = G.runEvent, realRunGen = G.runEventGen;
+    const noop = function () {};
+    const stub = function () { return { update: noop, draw: noop }; };
+    G.makeMon = function (key, lvl) { obtainable.add(key); return realMake(key, lvl); };
+    G.pushScene = noop; G.popScene = noop; G.replaceScene = noop;
+    G.runEvent = noop; G.runEventGen = noop;
+    // Stubs that ANSWER. A scene stub that never fires its callback means the
+    // dry run never takes the branch behind it — which is exactly where the
+    // starters, the DOJO prize and the fossils are built, so they looked
+    // unobtainable when they are not.
+    const say = function (opts) { if (opts && opts.onPick) opts.onPick(0); return stub(); };
+    G.Textbox = function (t, o) { if (o && o.onDone) o.onDone(); return stub(); };
+    G.Chooser = say;
+    G.FadeScene = function (f) { if (f) f(); return stub(); };
+    G.PartyScene = function (o) { if (o && o.onPick) o.onPick(0); return stub(); };
+    G.BattleScene = stub; G.HallOfFameScene = stub;
+    G.StarterPreviewScene = function (k, cb) { if (cb) cb(true); return stub(); };
+    G.ask = function (q, yes) { if (yes) yes(); };
+    G.startBattle = function () { return {}; };
+    G.startTrainerBattle = function () { return {}; };
+
+    const savedP = JSON.stringify(G.player), savedF = JSON.stringify(G.flags);
+    for (const eid in G.EVENTS) {
+      for (const finished of [false, true]) {
+        G.newGame('DEX');
+        G.player.party = [realMake('bulbasaur', 30)];
+        G.player.money = 999999;
+        if (finished) {
+          for (const it in G.ITEMS) G.player.bag[it] = 1;
+          for (let b = 1; b <= 8; b++) G.flags['badge' + b] = 1;
+          G.flags.strengthOn = 1;   // MEW is under a lorry that needs shifting
+        }
+        G.world.mapId = 'pallet'; G.world.map = G.MAPS.pallet;
+        G.world.player = { x: 5, y: 5, dir: 'down' };
+        G.world.refreshTiles = noop; G.world.npcs = [];
+        try {
+          const it = G.EVENTS[eid]();
+          let st = it.next(), guard = 0;
+          while (!st.done && guard++ < 400) {
+            const v = st.value || {};
+            if (v.t === 'fn') { try { v.fn(); } catch (e) {} }
+            if (v.t === 'custom' && typeof v.run === 'function') { try { v.run(noop); } catch (e) {} }
+            st = it.next();
+          }
+        } catch (e) { /* branch not taken in this state */ }
+      }
+    }
+    G.makeMon = realMake;
+    G.pushScene = realPush; G.popScene = realPop;
+    G.runEvent = realRun; G.runEventGen = realRunGen;
+    G.player = JSON.parse(savedP); G.flags = JSON.parse(savedF);
+  }
+
+  // 4. and everything those evolve into
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const k of [...obtainable]) {
+      for (const e of ((G.SPECIES[k] || {}).evos || [])) {
+        if (!obtainable.has(e.into)) { obtainable.add(e.into); grew = true; }
+      }
+    }
+  }
+
+  const missing = G.DEX_ORDER.filter(k => !obtainable.has(k));
+  if (missing.length) {
+    warn.push(`DEX: ${missing.length}/151 unobtainable — ${missing.map(k => G.SPECIES[k].name).join(', ')}`);
+  }
+  console.log(`  dex: ${151 - missing.length}/151 species obtainable by a player`);
 }
 
 // --- world connectivity ---
