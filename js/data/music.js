@@ -182,4 +182,38 @@
   S.jingle_level = { bpm: 150, pulse1: 'C5:2 E5:2 G5:2 C6:8' };
   S.jingle_badge = { bpm: 140, pulse1: 'C5:2 E5:2 G5:2 C6:4 G5:2 C6:4 E6:10' };
   S.jingle_heal = { bpm: 150, pulse1: 'C6:2 G5:2 E5:2 G5:2 C6:8' };
+
+  // ----------------------------------------------------------- gymleader --
+  // Every gym leader, the Elite Four and the Hall of Champions asked for this
+  // track by name for the length of the project, and it did not exist — so the
+  // eight most important battles in the game played nothing at all. A minor,
+  // and considerably faster than `battle`, because a leader should announce
+  // itself before the first turn.
+  S.gymleader = {
+    bpm: 150, loopBar: 0,
+    pulse1: 'A4:2 A4:2 C5:2 E5:2 A5:4 G5:4 E5:2 D5:2 C5:2 B4:2 A4:8 ' +
+            'F5:2 F5:2 E5:2 D5:2 C5:4 D5:4 E5:2 F5:2 G5:2 A5:2 G5:8 ' +
+            'A4:2 A4:2 C5:2 E5:2 A5:4 B5:4 C6:2 B5:2 A5:2 G5:2 E5:8 ' +
+            'D5:4 E5:4 F5:4 E5:4 D5:4 C5:4 B4:4 A4:4',
+    pulse2: 'A3:8 C4:8 E4:8 A4:8 F3:8 A3:8 C4:8 E4:8 ' +
+            'A3:8 C4:8 E4:8 G4:8 D4:8 C4:8 B3:8 A3:8',
+    bass: 'A2:4 A2:4 A2:4 A2:4 A2:4 A2:4 G2:4 G2:4 F2:4 F2:4 F2:4 F2:4 E2:4 E2:4 E2:4 E2:4 ' +
+          'A2:4 A2:4 A2:4 A2:4 C3:4 C3:4 C3:4 C3:4 D3:4 D3:4 D3:4 D3:4 E3:4 E3:4 E2:4 E2:4',
+    perc: 'k:4 h:4 s:4 h:4 k:4 h:4 s:4 h:4 k:4 h:4 s:4 h:4 k:4 h:4 s:4 h:4 ' +
+          'k:4 h:4 s:4 h:4 k:4 h:4 s:4 h:4 k:4 h:4 s:4 h:4 k:4 h:4 s:4 h:4'
+  };
+
+  // -------------------------------------------------------------- center --
+  // POKéMON CENTRES, MARTS and gates. Warm, slow, and resolving — the one
+  // place in the region where nothing is going to happen to you.
+  S.center = {
+    bpm: 96, loopBar: 0,
+    pulse1: 'G4:4 A4:4 C5:8 B4:4 A4:4 G4:8 E4:4 G4:4 A4:8 G4:16 ' +
+            'C5:4 B4:4 A4:8 G4:4 E4:4 D4:8 E4:4 G4:4 C5:8 C5:16',
+    pulse2: 'C4:8 E4:8 G4:8 E4:8 C4:8 F4:8 E4:8 D4:8 ' +
+            'C4:8 E4:8 A3:8 C4:8 G3:8 B3:8 C4:8 C4:8',
+    bass: 'C3:8 C3:8 G2:8 G2:8 A2:8 A2:8 F2:8 F2:8 ' +
+          'C3:8 C3:8 A2:8 A2:8 G2:8 G2:8 C3:8 C3:8',
+    perc: 'k:8 s:8 k:8 s:8 k:8 s:8 k:8 s:8 k:8 s:8 k:8 s:8 k:8 s:8 k:8 s:8'
+  };
 })();

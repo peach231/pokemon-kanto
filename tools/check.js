@@ -40,6 +40,11 @@ for (const src of srcs) {
   }
 }
 
+// The scripts the game loads, for audits that read the SOURCE rather than
+// the loaded objects — a name the engine resolves in a switch statement
+// exists only in its text.
+const SOURCES = srcs.filter(s => s !== 'main.js');
+
 const G = global.G;
 const errors = [];
 const warn = [];
@@ -356,6 +361,126 @@ if (G.SPECIES) {
     if (!def || def.solid && !def.water) errors.push(`FLY POINT ${id}: lands on '${name}', which is solid`);
   }
   console.log(`  fly: ${Object.keys(G.FLY_POINTS || {}).length} destinations, all landable`);
+}
+
+// --- name contracts between data and engine ---
+// This game is an inherited ENGINE plus a rewritten DATA layer, and every bug
+// that has cost real time in this project lives on the seam between them: the
+// data names something by a string, and the engine looks that string up.
+// Rename one side and nothing crashes, nothing logs, and a whole mechanic
+// quietly stops existing.
+//
+// It has happened three times already:
+//   * items said `kind: 'ball'`, the battle bag looked for `'orb'` — nothing
+//     in the game could be caught, and the catch-rate unit test passed
+//     throughout, because the formula was right and nobody called it.
+//   * events yielded `{t:'fn', f: …}`, the runner calls `step.fn()` — twenty
+//     one events stopped halfway through.
+//   * maps and trainers asked for the songs `gymleader` and `center`, and
+//     music.js defined neither — every gym leader battle and every Pokémon
+//     Centre played silence.
+//
+// So every such name is now checked here, in one place, by asking the DATA
+// what it references and the ENGINE what it can resolve.
+{
+  const src = SOURCES.map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
+
+  function report(label, wanted, have, howToFix) {
+    const missing = [...wanted].filter(k => !have.has(k));
+    if (missing.length) {
+      errors.push(`CONTRACT ${label}: ${missing.join(', ')} — referenced by the data, unknown to the engine (${howToFix})`);
+    }
+    return missing.length === 0;
+  }
+
+  // 1. SONGS. Maps and trainers name a track; music.js has to define it.
+  {
+    const wanted = new Set();
+    for (const id in G.MAPS) if (G.MAPS[id].music) wanted.add(G.MAPS[id].music);
+    for (const t in G.TRAINERS) if (G.TRAINERS[t].music) wanted.add(G.TRAINERS[t].music);
+    for (const m of src.matchAll(/playMusic\(\s*'([A-Za-z0-9_]+)'/g)) wanted.add(m[1]);
+    for (const m of src.matchAll(/playJingle\(\s*'([A-Za-z0-9_]+)'/g)) wanted.add(m[1]);
+    report('SONG', wanted, new Set(Object.keys(G.SONGS || {})), 'add it to js/data/music.js');
+  }
+
+  // 2. SOUND EFFECTS. audio.js resolves these in a switch, so the switch IS
+  //    the list of what exists.
+  {
+    const audio = fs.readFileSync(path.join(ROOT, 'js/core/audio.js'), 'utf8');
+    const have = new Set([...audio.matchAll(/case '([A-Za-z0-9_]+)':/g)].map(m => m[1]));
+    const wanted = new Set();
+    for (const m of src.matchAll(/sfx\(\s*'([A-Za-z0-9_]+)'/g)) wanted.add(m[1]);
+    for (const m of src.matchAll(/t: 'sfx', id: '([A-Za-z0-9_]+)'/g)) wanted.add(m[1]);
+    report('SFX', wanted, have, 'add a case to audio.js sfx()');
+  }
+
+  // 3. BATTLE BACKGROUNDS. Every map declares one; G.BATTLE_BG has to have it.
+  {
+    const wanted = new Set();
+    for (const id in G.MAPS) if (G.MAPS[id].battleBg) wanted.add(G.MAPS[id].battleBg);
+    // Only battle contexts. `bg:` is also the intro cinematic's slide key,
+    // and its scenes ('space', 'dawn') are backdrops for narration rather
+    // than arenas — catching those was a false positive, and an audit that
+    // cries wolf gets switched off.
+    for (const m of src.matchAll(/\{ bg: '([a-z]+)',\s*(?:music|onEnd|autoPlay)/g)) wanted.add(m[1]);
+    report('BATTLE BG', wanted, new Set(Object.keys(G.BATTLE_BG || {})), 'add it to G.BATTLE_BG');
+  }
+
+  // 4. EVOLUTION METHODS. species files emit `how`; mon.js interprets it.
+  {
+    const wanted = new Set();
+    for (const k in G.SPECIES) for (const e of (G.SPECIES[k].evos || [])) wanted.add(e.how);
+    const mon = fs.readFileSync(path.join(ROOT, 'js/engine/mon.js'), 'utf8');
+    const have = new Set([...mon.matchAll(/how === '([a-z]+)'/g)].map(m => m[1]));
+    report('EVOLUTION', wanted, have, 'handle it in mon.js');
+  }
+
+  // 5. BATTLE ACTIONS. The UI constructs these; Battle.doAction dispatches.
+  {
+    const ui = fs.readFileSync(path.join(ROOT, 'js/engine/battle_ui.js'), 'utf8');
+    const core = fs.readFileSync(path.join(ROOT, 'js/engine/battle.js'), 'utf8');
+    const wanted = new Set([...ui.matchAll(/turn\(\{\s*type: '([a-z]+)'/g)].map(m => m[1]));
+    const have = new Set([...core.matchAll(/action\.type === '([a-z]+)'/g)].map(m => m[1]));
+    have.add('move'); // the fall-through branch
+    report('BATTLE ACTION', wanted, have, 'dispatch it in Battle.doAction');
+  }
+
+  // 6. STONES. Items of kind `stone` must be ones an evolution actually asks
+  //    for, or the player is carrying a rock that does nothing.
+  {
+    const asked = new Set();
+    for (const k in G.SPECIES) {
+      for (const e of (G.SPECIES[k].evos || [])) if (e.item) asked.add(e.item);
+    }
+    for (const id in G.ITEMS) {
+      if (G.ITEMS[id].kind !== 'stone') continue;
+      if (!asked.has(id)) warn.push(`STONE '${id}' evolves nothing`);
+    }
+    for (const it of asked) {
+      if (!G.ITEMS[it]) errors.push(`CONTRACT EVOLUTION ITEM: '${it}' is required by an evolution but is not an item`);
+    }
+  }
+
+  // 7. RARITY. Species declare one; the encounter weighter looks it up, and an
+  //    unknown rarity silently falls back to a default weight.
+  {
+    const wanted = new Set();
+    for (const k in G.SPECIES) if (G.SPECIES[k].rarity) wanted.add(G.SPECIES[k].rarity);
+    const ow = fs.readFileSync(path.join(ROOT, 'js/engine/overworld.js'), 'utf8');
+    const m = ow.match(/RARITY_W\s*=\s*\{([^}]*)\}/);
+    const have = new Set(m ? [...m[1].matchAll(/([A-Za-z]+)\s*:/g)].map(x => x[1]) : []);
+    report('RARITY', wanted, have, 'add a weight to RARITY_W in overworld.js');
+  }
+
+  // 8. GROWTH GROUPS. Generated from the ROM; mon.js has to have a curve for
+  //    each, or that species levels on the wrong table entirely.
+  {
+    const wanted = new Set();
+    for (const k in G.SPECIES) if (G.SPECIES[k].growth) wanted.add(G.SPECIES[k].growth);
+    report('GROWTH GROUP', wanted, new Set(Object.keys(G.EXP_GROUPS || {})), 'add the curve to G.EXP_GROUPS');
+  }
+
+  console.log('  contracts: songs, sfx, backgrounds, evolutions, actions, stones, rarities and growth curves all resolve');
 }
 
 // --- item kinds ---

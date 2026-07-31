@@ -49,6 +49,37 @@ Strength**) → the sea → **Cinnabar (Blaine)** → Pokémon Mansion (Secret K
 - **The Hall of Champions does not exist in Red/Blue.** It is the ending this
   project wanted: the Elite Four end the challenge, and this ends the game.
 
+## The seam (read this before changing any data file)
+
+This project is an **inherited engine** plus a **rewritten data layer**. The
+engine came from `pokemon-gen3` and was largely left alone; `items.js`,
+`music.js`, the maps and the species tables were all written fresh for Gen 1.
+
+**Every expensive bug in this project has lived on the seam between those two
+halves**, and every one has the same shape: the data names something with a
+string, the engine looks that string up, and the two names do not match.
+Nothing crashes. Nothing logs. A whole mechanic simply stops existing.
+
+  * `pokemon-gen3` called capture devices "orbs" — `kind: 'orb'`, Tame Orb,
+    Great Orb. Rewriting `items.js` for Gen 1 gave them their real names and
+    `kind: 'ball'`, and left the four places in the engine that read `'orb'`
+    untouched. **Nothing in the game could be caught**, and the catch-rate
+    unit test passed the entire time, because the formula was right and
+    nobody called it.
+  * The event runner calls `step.fn()`. Twenty-one events written in one
+    session yielded `{t:'fn', f: …}`. Each stopped silently halfway through;
+    two HMs became unobtainable.
+  * Maps and trainers asked for the songs `gymleader` and `center`.
+    `music.js` defined neither, so the eight most important battles in the
+    game and every Pokémon Centre played silence.
+
+So the rule is: **when you rename or rewrite a data file, the contract is the
+strings, not the file.** `tools/check.js` now audits every one of them in a
+single pass — songs, sound effects, battle backgrounds, item kinds, evolution
+methods, battle action types, species rarities and growth curves — by asking
+the data what it references and the engine what it can resolve. Adding a new
+kind of name to the data means adding it to that audit in the same commit.
+
 ## Lessons this codebase has actually paid for
 
 Every audit in `check.js` was added the day a bug of that kind cost real time.
