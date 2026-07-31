@@ -539,6 +539,57 @@
     // each: on foot, on the bicycle, and on the water. Loading only the first
     // is why surfing was a hand-drawn blue ellipse with the walking sprite
     // clipped on top of it, and why the bicycle looked exactly like walking.
+
+    // A POKéMON walk sheet. Square frames, count read from the image itself:
+    // three (down / up / side) for most, one for the big ones. Written under
+    // ch_mon_<species>_* so the normal actor draw picks them up, with the side
+    // frame flipped for facing right.
+    loadMonWalkSheet: function (speciesKey, sheetName, cb) {
+      var cfg = G.OVERWORLD_CFG;
+      if (!cfg || !cfg.remoteBase) { if (cb) cb(); return; }
+      var base = 'ch_mon_' + speciesKey + '_', self = this;
+      var img = new Image();
+      if (cfg.crossOrigin) img.crossOrigin = cfg.crossOrigin;
+      img.onerror = function () { if (cb) cb(); };
+      img.onload = function () {
+        var fh = img.height, fw = fh;
+        var n = Math.max(1, Math.floor(img.width / fw));
+        var off = makeCanvas(img.width, img.height), octx = off.getContext('2d');
+        octx.drawImage(img, 0, 0);
+        var data;
+        try { data = octx.getImageData(0, 0, img.width, img.height).data; }
+        catch (e) { if (cb) cb(); return; }
+        var bgKeyed = data[3] >= 8, bR = data[0], bG = data[1], bB = data[2];
+        function isBg(i) {
+          if (data[i + 3] < 8) return true;
+          return bgKeyed && Math.abs(data[i] - bR) < 10 &&
+                 Math.abs(data[i + 1] - bG) < 10 && Math.abs(data[i + 2] - bB) < 10;
+        }
+        var KEYS = ['d0', 'u0', 's0'];
+        for (var f = 0; f < n && f < 3; f++) {
+          var c = makeCanvas(fw, fh), cx2 = c.getContext('2d');
+          var id = cx2.createImageData(fw, fh);
+          for (var y = 0; y < fh; y++) {
+            for (var x = 0; x < fw; x++) {
+              var si = (y * img.width + f * fw + x) * 4, di = (y * fw + x) * 4;
+              if (isBg(si)) { id.data[di + 3] = 0; continue; }
+              id.data[di] = data[si]; id.data[di + 1] = data[si + 1];
+              id.data[di + 2] = data[si + 2]; id.data[di + 3] = 255;
+            }
+          }
+          cx2.putImageData(id, 0, 0);
+          G.IMG[base + KEYS[f]] = c;
+        }
+        if (!G.IMG[base + 'u0']) G.IMG[base + 'u0'] = G.IMG[base + 'd0'];
+        if (!G.IMG[base + 's0']) G.IMG[base + 's0'] = G.IMG[base + 'd0'];
+        ['d0', 'u0', 's0'].forEach(function (k) {
+          if (G.IMG[base + k]) G.IMG[base + k + '_flip'] = self._flipCanvas(G.IMG[base + k]);
+        });
+        if (cb) cb();
+      };
+      img.src = cfg.remoteBase + 'pokemon/' + sheetName + '.png';
+    },
+
     loadCharacter: function (charDef) {
       if (!charDef) return;
       this.loadWalkSheet(charDef.sheet, 'player', charDef.recolor);

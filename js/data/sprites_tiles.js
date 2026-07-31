@@ -791,19 +791,41 @@
   ]);
 
   // Roof-mounted signage — the big red P and the blue MART board.
-  T('t_healsign', { o: C.ink, r: C.ctr1, w: C.white, a: C.ctr0 }, [
-    fill('a'), 'aoooooooooooooaa'.slice(0, 16), 'aowwwwwwwwwwwoaa',
-    'aowwrrrrrrwwwoaa', 'aowwrwwwwrwwwoaa', 'aowwrwwwwrwwwoaa',
-    'aowwrrrrrrwwwoaa', 'aowwrwwwwwwwwoaa', 'aowwrwwwwwwwwoaa',
-    'aowwrwwwwwwwwoaa', 'aowwrwwwwwwwwoaa', 'aowwwwwwwwwwwoaa',
-    'aoooooooooooooaa'.slice(0, 16), fill('a'), fill('a'), fill('a')
+  T('t_healsign', { o: C.ink, r: C.ctr1, w: C.white, a: C.ctr0, d: C.ctr2 }, [
+    'aaaaaaaaaaaaaaaa',
+    'aoooooooooooooaa',
+    'aowwwwwwwwwwwoaa',
+    'aowwwoooooowwoaa',
+    'aowwoodddoowwoaa',
+    'aowoddddddoowoaa',
+    'aowodddddddowoaa',
+    'aoooooooooooooaa',
+    'aowoowwwwwoowoaa',
+    'aowoowwowwoowoaa',
+    'aowwoowwwoowwoaa',
+    'aowwwoooooowwoaa',
+    'aowwwwwwwwwwwoaa',
+    'aoooooooooooooaa',
+    'aaaaaaaaaaaaaaaa',
+    'aaaaaaaaaaaaaaaa'
   ]);
-  T('t_shopsign', { o: C.ink, b: C.mrt1, w: C.white, a: C.mrt0 }, [
-    fill('a'), 'aoooooooooooooaa'.slice(0, 16), 'aowwwwwwwwwwwoaa',
-    'aowbwbwbbbwbwoaa', 'aowbwbwbwbwbwoaa', 'aowbbbwbbbwbwoaa',
-    'aowbwbwbwwwbwoaa', 'aowbwbwbwwwbwoaa', 'aowwwwwwwwwwwoaa',
-    'aoooooooooooooaa'.slice(0, 16), fill('a'), fill('a'),
-    fill('a'), fill('a'), fill('a'), fill('a')
+  T('t_shopsign', { o: C.ink, b: C.mrt1, w: C.white, a: C.mrt0, d: C.mrt2 }, [
+    'aaaaaaaaaaaaaaaa',
+    'aoooooooooooooaa',
+    'aowwwwwwwwwwwoaa',
+    'aowwwoowwoowwoaa',
+    'aowwoowwoowwwoaa',
+    'aowoooooooooowoaa'.replace('oaa', 'aa'),
+    'aowodddddddowoaa',
+    'aowoddddddd owoa'.replace(' ', 'd'),
+    'aowodddddddowoaa',
+    'aowodddddddowoaa',
+    'aowoddddddd owoa'.replace(' ', 'd'),
+    'aowoooooooooowaa',
+    'aowwwwwwwwwwwoaa',
+    'aoooooooooooooaa',
+    'aaaaaaaaaaaaaaaa',
+    'aaaaaaaaaaaaaaaa'
   ]);
 
   // ========================================================== INTERIORS =====

@@ -357,6 +357,20 @@
     yield { t: 'text', s: 'Clerk: Please come again!' };
   };
 
+  // Which gym belongs to which town, and the badge flag it sets. The nurse
+  // uses this to mention the gym while it is still unbeaten — every player
+  // heals in every town, so it is the one line nobody can walk past.
+  var TOWN_GYM = {
+    pewtercentre:    ['badge1', 'BROCK',    'ROCK'],
+    ceruleancentre:  ['badge2', 'MISTY',    'WATER'],
+    vermilioncentre: ['badge3', 'LT. SURGE', 'ELECTRIC'],
+    celadoncentre:   ['badge4', 'ERIKA',    'GRASS'],
+    fuchsiacentre:   ['badge5', 'KOGA',     'POISON'],
+    saffroncentre:   ['badge6', 'SABRINA',  'PSYCHIC'],
+    cinnabarcentre:  ['badge7', 'BLAINE',   'FIRE'],
+    viridiancentre:  ['badge8', 'GIOVANNI', 'GROUND']
+  };
+
   G.EVENTS.nurseHeal = function* () {
     yield { t: 'text', s: 'Nurse: Welcome to our POKéMON CENTER! Shall I heal your POKéMON?' };
     yield {
@@ -369,6 +383,16 @@
     };
     yield { t: 'wait', frames: 30 };
     yield { t: 'text', s: 'Nurse: Your POKéMON are fighting fit. We hope to see you again!' };
+    // and, while the town's gym is still standing, say so
+    var gym = TOWN_GYM[G.world.mapId];
+    if (gym && !G.flags[gym[0]]) {
+      var have = (G.player.badges || []).filter(Boolean).length;
+      yield { t: 'text', s: 'Nurse: ' + gym[1] + ' is still at the GYM, if you are looking for a badge. ' +
+        gym[2] + ' POKéMON.' };
+      if (have === 0) {
+        yield { t: 'text', s: 'Nurse: You will want that badge before you go much further — the roads out of town do not get any gentler.' };
+      }
+    }
   };
 
   G.EVENTS.momTalk = function* () {
@@ -3745,5 +3769,81 @@
       });
       break;
     }
+  });
+
+  // ------------------------------------------------- route level signs ----
+  // Generated from each route's own encounter table, so a sign cannot lie
+  // about the route it is standing on. Added at load, after the maps exist.
+  (function () {
+    var BADGE_FOR_LEVEL = function (lv) {
+      // Roughly what the gyms expect: Brock around 12, Misty 20, Surge 24,
+      // Erika 30, Koga 40, Sabrina 45, Blaine 47, Giovanni 50.
+      var bands = [12, 20, 24, 30, 40, 45, 47, 50];
+      var n = 0;
+      for (var i = 0; i < bands.length; i++) if (lv >= bands[i] - 4) n = i + 1;
+      return n;
+    };
+    for (var id in G.MAPS) {
+      if (!/^route\d+$/.test(id)) continue;
+      var m = G.MAPS[id];
+      var enc = m.encounters;
+      if (!enc || !enc.table || !enc.table.length) continue;
+      var lo = Math.min.apply(null, enc.table.map(function (e) { return e.min; }));
+      var hi = Math.max.apply(null, enc.table.map(function (e) { return e.max; }));
+      // find a free tile beside the route's first warp to stand the post on
+      var w0 = (m.warps || [])[0];
+      if (!w0) continue;
+      var busy = {};
+      (m.warps || []).concat(m.signs || [], m.npcs || [], m.trainers || [], m.items || [])
+        .forEach(function (o) { busy[o.x + ',' + o.y] = 1; });
+      var spot = null;
+      for (var d = 1; d <= 3 && !spot; d++) {
+        var cands = [[w0.x + d, w0.y], [w0.x - d, w0.y], [w0.x, w0.y + d], [w0.x, w0.y - d]];
+        for (var ci = 0; ci < cands.length; ci++) {
+          var cx = cands[ci][0], cy = cands[ci][1];
+          if (cx < 1 || cy < 1 || cx >= m.w - 1 || cy >= m.h - 1) continue;
+          if (busy[cx + ',' + cy]) continue;
+          var t = G.TILES[m.legend[m.ground[cy][cx]]];
+          if (!t || t.solid) continue;
+          spot = [cx, cy]; break;
+        }
+      }
+      if (!spot) continue;
+      var need = BADGE_FOR_LEVEL(hi);
+      var advice = need <= 1 ? 'Anyone may pass.'
+        : 'Trainers here are about ' + need + ' BADGES along.';
+      (m.signs = m.signs || []).push({
+        x: spot[0], y: spot[1],
+        text: m.name.toUpperCase() + ' — wild POKéMON Lv' + lo + '-' + hi + '. ' + advice
+      });
+    }
+  })();
+
+  // ===================================== TRAINERS ON THE MIDDLE ROUTES ====
+  // Same computed placement as the others: shallowest reachable tile, four
+  // steps clear of anything else, and never in a one-wide corridor.
+  [
+    ['route6', 7, 16, 'r6_keigo', 'camper'],
+    ['route6', 9, 14, 'r6_yasu', 'picnicker'],
+    ['route6', 14, 16, 'r6_dirk', 'bugcatcher'],
+    ['route8', 27, 6, 'r8_lao', 'gambler'],
+    ['route8', 29, 8, 'r8_tamia', 'lass'],
+    ['route8', 8, 7, 'r8_shane', 'supernerd'],
+    ['route9', 27, 5, 'r9_frank', 'hiker'],
+    ['route9', 29, 3, 'r9_marla', 'picnicker'],
+    ['route9', 5, 5, 'r9_yuki', 'bugcatcher'],
+    ['route11', 4, 6, 'r11_cale', 'gambler'],
+    ['route11', 2, 8, 'r11_zac', 'youngster'],
+    ['route11', 27, 5, 'r11_odette', 'engineer'],
+    ['route25', 4, 6, 'r25_kent', 'hiker'],
+    ['route25', 2, 8, 'r25_nob', 'lass'],
+    ['route25', 27, 7, 'r25_flint', 'camper'],
+    ['route25', 25, 9, 'r25_ann', 'picnicker']
+  ].forEach(function (e) {
+    var m = G.MAPS[e[0]];
+    if (!m) return;
+    (m.trainers = m.trainers || []).push({
+      x: e[1], y: e[2], sprite: e[4], dir: 'down', trainer: e[3], sight: 3
+    });
   });
 })();

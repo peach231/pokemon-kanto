@@ -154,10 +154,16 @@
       if (cb.result === 'caught') caught++;
     }
     var stats = G.monStats(wild);
-    var a = Math.floor((3 * stats.hp - 2 * 1) * G.SPECIES.pidgey.catchRate * 1.0 / (3 * stats.hp));
-    var p = a >= 255 ? 1 : Math.pow(Math.floor(65536 / Math.pow(255 / a, 0.25)) / 65536, 4);
+    // The analytic expectation has to include G.CATCH_EASE, or this test
+    // silently pins the formula to Red/Blue's exact rate and fails the moment
+    // that deliberate deviation is tuned. It is read from the constant rather
+    // than hard-coded so the two can never disagree.
+    var a = Math.floor((3 * stats.hp - 2 * 1) * G.SPECIES.pidgey.catchRate * 1.0 / (3 * stats.hp)) * G.CATCH_EASE;
+    var p = a >= 255 ? 1 : Math.pow(Math.min(1, Math.floor(65536 / Math.pow(255 / a, 0.25)) / 65536), 4);
     var observed = caught / N;
     assert(Math.abs(observed - p) < 0.03, 'catch rate ' + observed.toFixed(3) + ' vs analytic ' + p.toFixed(3));
+    assert(G.CATCH_EASE >= 1 && G.CATCH_EASE <= 2,
+      'CATCH_EASE ' + G.CATCH_EASE + ' is outside the range this game was balanced in');
 
     // wild grass encounters: stepping in tall grass must start battles at
     // roughly the map's encounter rate, picking species from its table

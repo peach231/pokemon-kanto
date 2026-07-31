@@ -257,6 +257,7 @@
       psychicf:   'people/channeler',   // robed, which is the whole read
       burglar:    'people/biker',       // a thug going through an empty house
       supernerd:  'people/scientist',   // Blaine's gym staff, and it shows
+      engineer:   'people/worker_m',    // hard hat, high-vis, tunnel lights
 
       // --- the player, as an NPC ---
       // Used exactly once, on the fifth plinth.
@@ -286,6 +287,30 @@
     backBase: 'https://cdn.jsdelivr.net/gh/pret/pokefirered@master/graphics/trainers/back_pics/',
     frameW: 64, frameH: 64,
     crossOrigin: 'anonymous'
+  };
+
+
+  // POKéMON that FireRed drew for the OVERWORLD. Thirty-three of Kanto's 151
+  // have a real walking sprite in pokefirered; the rest have never had one in
+  // any game, so they fall back to their battler.
+  //
+  // These sheets are NOT the nine-frame people layout — they are SQUARE frames,
+  // usually three (down, up, side) and sometimes only one for the very big
+  // ones. The loader reads the frame size off the image rather than assuming,
+  // because PIKACHU is 48x16 and SNORLAX is 32x32.
+  G.MON_OVERWORLD = {
+    pikachu: 'pikachu', clefairy: 'clefairy', jigglypuff: 'jigglypuff',
+    wigglytuff: 'wigglytuff', meowth: 'meowth', psyduck: 'psyduck',
+    slowpoke: 'slowpoke', slowbro: 'slowbro', machop: 'machop',
+    machoke: 'machoke', poliwrath: 'poliwrath', doduo: 'doduo',
+    seel: 'seel', voltorb: 'voltorb', cubone: 'cubone',
+    chansey: 'chansey', kangaskhan: 'kangaskhan', lapras: 'lapras',
+    snorlax: 'snorlax', pidgey: 'pidgey', pidgeot: 'pidgeot',
+    spearow: 'spearow', fearow: 'fearow', nidorino: 'nidorino',
+    nidoranf: 'nidoran_f', nidoranm: 'nidoran_m',
+    omanyte: 'omanyte', kabuto: 'kabuto',
+    articuno: 'articuno', zapdos: 'zapdos', moltres: 'moltres',
+    mewtwo: 'mewtwo', mew: 'mew'
   };
 
   // ----------------------------------------------------------------------

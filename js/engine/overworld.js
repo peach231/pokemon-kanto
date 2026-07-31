@@ -436,17 +436,23 @@
     var px = function (x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
 
     if (!big) {
-      // 22x14 board hanging above a door, centred on the tile
-      var bw = 22, bh = 14, bx = cx - bw / 2, by = cy - bh / 2 - 3;
+      // Wider, and it says GYM. A coloured board with a symbol on it asks the
+      // player to learn a code; a board with the word on it does not. The type
+      // mark stays, to the left of the text, so the colour and the glyph both
+      // still say WHICH gym — but nobody has to work out that the board means
+      // "gym" in the first place.
+      var lbl = 'GYM';
+      var tw = G.textWidth(lbl);
+      var bw = tw + 20, bh = 15, bx = cx - bw / 2, by = cy - bh / 2 - 4;
       px(bx + 6, by - 3, 2, 3, ink);            // brackets
       px(bx + bw - 8, by - 3, 2, 3, ink);
       px(bx - 1, by - 1, bw + 2, bh + 2, ink);  // outline
       px(bx, by, bw, bh, col);                  // the type is the colour
       px(bx, by, bw, 2, 'rgba(255,255,255,0.34)');       // lit top edge
       px(bx, by + bh - 2, bw, 2, 'rgba(0,0,0,0.28)');    // shaded lower edge
-      px(bx + 3, by + 4, bw - 6, 6, G.C.pale || '#e8e8f0');  // name plate
-      px(bx + 3, by + 4, bw - 6, 1, 'rgba(0,0,0,0.20)');
-      drawTypeGlyph(ctx, bx + bw / 2 - 3, by + 4, type, ink);
+      px(bx + 2, by + 4, bw - 4, 8, 'rgba(20,22,38,0.62)');  // dark plate
+      drawTypeGlyph(ctx, bx + 4, by + 5, type, G.C.white || '#f4f4f4');
+      G.text(ctx, lbl, Math.round(bx + 12), Math.round(by + 4), G.C.white, ink);
       // four bolts
       px(bx + 1, by + 1, 1, 1, ink); px(bx + bw - 2, by + 1, 1, 1, ink);
       px(bx + 1, by + bh - 2, 1, 1, ink); px(bx + bw - 2, by + bh - 2, 1, 1, ink);
@@ -612,6 +618,12 @@
     if (!w.follower || w.follower.monKey !== mon.sp) {
       w.follower = makeActor('mon_' + mon.sp, p.x, p.y, p.dir);
       w.follower.monKey = mon.sp;
+      // Pull the real walking sprite if FireRed ever drew one for this
+      // species — thirty-three of the 151 have one.
+      var owSheet = (G.MON_OVERWORLD || {})[mon.sp];
+      if (owSheet && !G.IMG['ch_mon_' + mon.sp + '_d0'] && G.gfx.loadMonWalkSheet) {
+        G.gfx.loadMonWalkSheet(mon.sp, owSheet);
+      }
       w.follower.isMon = true;
       w.follower.obj = false;
       w.follower.onTalkEvent = 'followerTalk';
@@ -1348,11 +1360,43 @@
       // shrunk to the tile and bobbing as it walks, which reads correctly at
       // this size and costs nothing extra to stream.
       if (a.isMon) {
+        // The three complaints about the old follower were all the same bug:
+        // it squashed a 96px battler into 18px (so no species was
+        // recognisable), never flipped (so it always faced the same way), and
+        // had no shadow or step (so it hovered).
+        //
+        // A real overworld sheet fixes all three at once, at native
+        // resolution, facing the way it walks.
+        var mbase = 'ch_mon_' + a.monKey + '_';
+        if (G.IMG[mbase + 'd0']) {
+          var key = a.dir === 'up' ? 'u0' : a.dir === 'down' ? 'd0' : 's0';
+          var mimg = (a.dir === 'right' && G.IMG[mbase + key + '_flip'])
+            ? G.IMG[mbase + key + '_flip'] : G.IMG[mbase + key];
+          var hop = (a.moving && (a.step >> 2) % 2) ? 1 : 0;
+          ctx.fillStyle = 'rgba(24,28,44,0.24)';
+          ctx.fillRect(sx + 3, sy + 13, 10, 3);
+          ctx.drawImage(mimg, sx + Math.round((16 - mimg.width) / 2),
+                        sy + (16 - mimg.height) - hop);
+          return;
+        }
+        // No sheet ever drawn for this species: the battler, but half again as
+        // big so its silhouette reads, flipped to face its direction of
+        // travel, and standing on a shadow so it has weight.
         var mi = G.IMG['mon_' + a.monKey];
         if (mi) {
           var mb = (a.moving && (a.step >> 2) % 2) ? 1 : 0;
-          var mw = 18, mh = 18;
-          ctx.drawImage(mi, sx - 1, sy + 4 - mb, mw, mh);
+          var S = 24;
+          ctx.fillStyle = 'rgba(24,28,44,0.24)';
+          ctx.fillRect(sx + 2, sy + 13, 12, 3);
+          if (a.dir === 'right') {
+            ctx.save();
+            ctx.translate(sx * 2 + S - 8, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(mi, sx - 4, sy - 5 - mb, S, S);
+            ctx.restore();
+          } else {
+            ctx.drawImage(mi, sx - 4, sy - 5 - mb, S, S);
+          }
           return;
         }
       }

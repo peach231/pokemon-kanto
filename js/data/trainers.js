@@ -1131,4 +1131,104 @@
     reward: { flag: 'rematch_giovanni' },
     music: 'gymleader'
   });
+
+  // ============================== FILLING OUT THE MIDDLE ==================
+  // Red/Blue puts six to nine trainers on each of these routes; ours had two.
+  // The mid-game was the thinnest stretch in the region.
+  tr('r6_keigo', {
+    name: 'Keigo', cls: 'Camper', sprite: 'trainer_camper', ai: 'basic', money: 420,
+    party: [{ sp: 'nidoranm', level: 18 }, { sp: 'nidorino', level: 20 }],
+    intro: "The tunnel under SAFFRON comes out just here.",
+    defeat: "Mind the guards."
+  });
+  tr('r6_yasu', {
+    name: 'Yasu', cls: 'Picnicker', sprite: 'trainer_picnicker', ai: 'basic', money: 440,
+    party: [{ sp: 'oddish', level: 19 }, { sp: 'bellsprout', level: 19 }],
+    intro: "VERMILION is south. So is a very loud American.",
+    defeat: "He is very loud."
+  });
+  tr('r6_dirk', {
+    name: 'Dirk', cls: 'Bug Catcher', sprite: 'trainer_bugcatcher', ai: 'basic', money: 360,
+    party: [{ sp: 'caterpie', level: 17 }, { sp: 'metapod', level: 18 }, { sp: 'butterfree', level: 20 }],
+    intro: "Three stages! Watch.",
+    defeat: "Three stages, one loss."
+  });
+  tr('r8_lao', {
+    name: 'Lao', cls: 'Gambler', sprite: 'trainer_gambler', ai: 'basic', money: 880,
+    party: [{ sp: 'growlithe', level: 24 }, { sp: 'vulpix', level: 24 }],
+    intro: "Double or nothing on this one.",
+    defeat: "Nothing, then."
+  });
+  tr('r8_tamia', {
+    name: 'Tamia', cls: 'Lass', sprite: 'trainer_lass', ai: 'basic', money: 560,
+    party: [{ sp: 'meowth', level: 23 }, { sp: 'persian', level: 25 }],
+    intro: "SAFFRON is shut. Everyone is cross about it.",
+    defeat: "Still shut."
+  });
+  tr('r8_shane', {
+    name: 'Shane', cls: 'Super Nerd', sprite: 'trainer_supernerd', ai: 'smart', money: 700,
+    party: [{ sp: 'grimer', level: 24 }, { sp: 'muk', level: 26 }],
+    intro: "The gates have been closed for three weeks.",
+    defeat: "Somebody should do something."
+  });
+  tr('r9_frank', {
+    name: 'Frank', cls: 'Hiker', sprite: 'trainer_hiker', ai: 'basic', money: 600,
+    party: [{ sp: 'geodude', level: 21 }, { sp: 'onix', level: 23 }],
+    intro: "ROCK TUNNEL is ahead and it is dark.",
+    defeat: "Get FLASH."
+  });
+  tr('r9_marla', {
+    name: 'Marla', cls: 'Picnicker', sprite: 'trainer_picnicker', ai: 'basic', money: 560,
+    party: [{ sp: 'nidorina', level: 22 }, { sp: 'oddish', level: 22 }],
+    intro: "I am not going in that tunnel.",
+    defeat: "I am still not going in."
+  });
+  tr('r9_yuki', {
+    name: 'Yuki', cls: 'Bug Catcher', sprite: 'trainer_bugcatcher', ai: 'basic', money: 420,
+    party: [{ sp: 'venonat', level: 21 }, { sp: 'paras', level: 21 }, { sp: 'venomoth', level: 23 }],
+    intro: "Bugs everywhere out here.",
+    defeat: "Everywhere."
+  });
+  tr('r11_cale', {
+    name: 'Cale', cls: 'Gambler', sprite: 'trainer_gambler', ai: 'basic', money: 920,
+    party: [{ sp: 'poliwag', level: 24 }, { sp: 'poliwhirl', level: 26 }],
+    intro: "Fancy a wager?",
+    defeat: "I never learn."
+  });
+  tr('r11_zac', {
+    name: 'Zac', cls: 'Youngster', sprite: 'trainer_youngster', ai: 'basic', money: 480,
+    party: [{ sp: 'sandshrew', level: 23 }, { sp: 'ekans', level: 23 }],
+    intro: "DIGLETT are under this whole road.",
+    defeat: "Under us right now."
+  });
+  tr('r11_odette', {
+    name: 'Odette', cls: 'Engineer', sprite: 'trainer_engineer', ai: 'smart', money: 900,
+    party: [{ sp: 'magnemite', level: 24 }, { sp: 'magneton', level: 26 }],
+    intro: "I keep the tunnel lights working. Badly.",
+    defeat: "They flicker. I know."
+  });
+  tr('r25_kent', {
+    name: 'Kent', cls: 'Hiker', sprite: 'trainer_hiker', ai: 'basic', money: 540,
+    party: [{ sp: 'machop', level: 19 }, { sp: 'geodude', level: 20 }],
+    intro: "BILL lives up at the end of this path.",
+    defeat: "Odd fellow. Brilliant."
+  });
+  tr('r25_nob', {
+    name: 'Nob', cls: 'Lass', sprite: 'trainer_lass', ai: 'basic', money: 500,
+    party: [{ sp: 'pidgey', level: 19 }, { sp: 'rattata', level: 20 }],
+    intro: "This whole cape is trainers.",
+    defeat: "And one more."
+  });
+  tr('r25_flint', {
+    name: 'Flint', cls: 'Camper', sprite: 'trainer_camper', ai: 'basic', money: 520,
+    party: [{ sp: 'sandshrew', level: 20 }, { sp: 'nidoranm', level: 20 }],
+    intro: "Everyone walks up here for BILL.",
+    defeat: "Nobody walks back quickly."
+  });
+  tr('r25_ann', {
+    name: 'Ann', cls: 'Picnicker', sprite: 'trainer_picnicker', ai: 'basic', money: 520,
+    party: [{ sp: 'clefairy', level: 20 }, { sp: 'jigglypuff', level: 20 }],
+    intro: "I camp at the end of the cape.",
+    defeat: "Best view in KANTO."
+  });
 })();

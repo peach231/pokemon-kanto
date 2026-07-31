@@ -19,6 +19,10 @@
 // Side: 'p' (player) or 'f' (foe).
 
 (function () {
+  // How much kinder than Red/Blue the catch rate is. 1.0 is exact
+  // Red/Blue; see doOrb for why this is not 1.0.
+  G.CATCH_EASE = 1.3;
+
   function stageMul(s) { return s >= 0 ? (2 + s) / 2 : 2 / (2 - s); }
   function accMul(s) { return s >= 0 ? (3 + s) / 3 : 3 / (3 - s); }
 
@@ -425,7 +429,25 @@
     }
     var statusMod = mon.status === 'slp' ? 2 : (mon.status ? 1.5 : 1);
     var safariMod = this.safari ? (this.safariCatchMod || 1) : 1;
-    var a = Math.floor((3 * stats.hp - 2 * mon.curHp) * sp.catchRate * mod / (3 * stats.hp)) * statusMod * safariMod;
+
+    // CATCH_EASE is a deliberate deviation, and the only one in this formula.
+    //
+    // The maths below reproduces Red/Blue closely: a full-health Pidgey is a
+    // 1-in-3 throw, exactly as it was in 1996, because Gen 1 expects you to
+    // weaken and sleep things first. That is authentic and it is also the
+    // single most common reason a modern player bounces off an old game — you
+    // spend your first hour throwing balls at full-health Rattata and watching
+    // them break.
+    //
+    // 1.0 restores Red/Blue exactly. 1.3 takes a full-health common Pokemon
+    // from a 1-in-3 to a bit better than 2-in-5, and — this is the part that
+    // matters — leaves a HALVED one at 87% rather than 100%. Push it higher
+    // and chipping a Pokemon's health becomes an automatic catch, which
+    // removes the shake entirely; the tension of the three wobbles is worth
+    // more than the convenience. Rare species barely move, because the factor
+    // scales the whole curve instead of flattening it.
+    var a = Math.floor((3 * stats.hp - 2 * mon.curHp) * sp.catchRate * mod / (3 * stats.hp)) *
+      statusMod * safariMod * G.CATCH_EASE;
 
     var shakes = 0;
     if (a >= 255) {
