@@ -1486,11 +1486,11 @@
     ground: pad([
       'tutututututututututututututu',
       'vxvxvxvxvxvxvxvxvxvxvxvxvxvx',
-      'tu......................pptu',
-      'vx..GHHHI.......7889....ppvx',
-      'tu..KLLLM.......d+mh....pptu',
-      'vx..WNEEW.......WNEW....ppvx',
-      'tu......................pptu',
+      'tu..GHHHI...............pptu',   // the DEPARTMENT STORE — six floors,
+      'vx..KLLLM.......7889....ppvx',   // and it should look like six floors
+      'tu..WNNNW.......d+mh....pptu',   // from the street
+      'vx..WNNNW.......WNEW....ppvx',
+      'tu..WNEEW...............pptu',
       'vxppppppppppppppppppppppppvx',
       'tu......................pptu',
       'vx..GHHHI.......1223....ppvx',
@@ -1514,8 +1514,8 @@
       { x: 25, y: 13, to: 'route7', tx: 1, ty: 5, dir: 'right' },
       { x: 0, y: 13, to: 'route16', tx: 24, ty: 6, dir: 'left' },
       { x: 1, y: 13, to: 'route16', tx: 24, ty: 7, dir: 'left' },
-      { x: 6, y: 5, to: 'celadonstore1', tx: 6, ty: 9, dir: 'up' },
-      { x: 7, y: 5, to: 'celadonstore1', tx: 7, ty: 9, dir: 'up' },
+      { x: 6, y: 6, to: 'celadonstore1', tx: 6, ty: 9, dir: 'up' },
+      { x: 7, y: 6, to: 'celadonstore1', tx: 7, ty: 9, dir: 'up' },
       { x: 18, y: 5, to: 'celadoncentre', tx: 4, ty: 6, dir: 'up' },
       { x: 6, y: 11, to: 'gamecorner', tx: 8, ty: 12, dir: 'up' },
       { x: 7, y: 11, to: 'gamecorner', tx: 9, ty: 12, dir: 'up' },
@@ -1558,12 +1558,12 @@
     gymEmblem: { x: 6, y: 16, type: 'psychic' },
     ground: pad([
       'tutututututututututututututu',
-      'vxvxvxvxvxvxvxvxvxvxvxvxvxvx',
-      'tu......................pptu',
-      'vx..GHHHI.......7889....ppvx',
-      'tu..KLLLM.......d+mh....pptu',
-      'vx..WNEEW.......WNEW....ppvx',
-      'tu......................pptu',
+      'vx..GHHHI...vxvxvxvxvxvxvxvx',   // SILPH CO. — the tallest building in
+      'tu..KLLLM..............pptu.'.slice(0, 28),   // KANTO, and it should
+      'vx..WNNNW.......7889....ppvx',   // block the skyline from the street
+      'tu..WNNNW.......d+mh....pptu',
+      'vx..WNNNW.......WNEW....ppvx',
+      'tu..WNEEW...............pptu',
       'pppppppppppppppppppppppppppp',
       'tu......................pptu',
       'vx..............qrrz....ppvx',
@@ -1588,8 +1588,8 @@
       { x: 1, y: 7, to: 'route7', tx: 18, ty: 5, dir: 'left' },
       { x: 27, y: 7, to: 'route8', tx: 1, ty: 5, dir: 'right' },
       { x: 26, y: 7, to: 'route8', tx: 1, ty: 5, dir: 'right' },
-      { x: 6, y: 5, to: 'silphco1f', tx: 10, ty: 16, dir: 'up' },
-      { x: 7, y: 5, to: 'silphco1f', tx: 11, ty: 16, dir: 'up' },
+      { x: 6, y: 6, to: 'silphco1f', tx: 10, ty: 16, dir: 'up' },
+      { x: 7, y: 6, to: 'silphco1f', tx: 11, ty: 16, dir: 'up' },
       { x: 18, y: 5, to: 'saffroncentre', tx: 4, ty: 6, dir: 'up' },
       { x: 18, y: 11, to: 'saffronmart', tx: 4, ty: 6, dir: 'up' },
       { x: 6, y: 12, to: 'fightingdojo', tx: 6, ty: 11, dir: 'up' },

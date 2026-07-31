@@ -91,6 +91,10 @@
         // always DIRECTLY above: a Centre carries its cross and a Mart its
         // sign on the row between, so walk up past those.
         if (here === 'window') {
+          // GROUND FLOOR ONLY. A four-storey Silph Co. with a hanging sign on
+          // every window of every floor reads as bunting, not as signage.
+          var under = nameAt(x, y + 1) || '';
+          if (/^wall$|^window$|door/.test(under)) continue;
           var above = '';
           for (var up = 1; up <= 3; up++) {
             var n2 = nameAt(x, y - up) || '';
@@ -426,6 +430,58 @@
   // town is a flat pattern of coloured rectangles; with it the walls read as
   // standing UP off the ground, which is most of what makes a Game Boy town
   // look like a place rather than a floor plan.
+
+  // Where the sea meets anything solid, it breaks. Without this a coast is a
+  // hard edge between a blue region and a green one — the single clearest tell
+  // that a map is a grid of tiles rather than a place. The foam is drawn per
+  // EDGE rather than per tile, so a diagonal coastline gets a ragged line
+  // instead of a staircase of identical sprites, and it advances on a slow
+  // cycle so the sea looks like it is working.
+  function drawShoreFoam(ctx, map, x0, y0, x1, y1, cam) {
+    if (!map.ground) return;
+    var isWater = function (x, y) {
+      if (x < 0 || y < 0 || x >= map.w || y >= map.h) return false;
+      var t = G.TILES[map.legend[map.ground[y][x]]];
+      return !!(t && t.water);
+    };
+    var solidLand = function (x, y) {
+      if (x < 0 || y < 0 || x >= map.w || y >= map.h) return false;
+      var t = G.TILES[map.legend[map.ground[y][x]]];
+      return !!t && !t.water;
+    };
+    var phase = (G.frame >> 3) % 4;
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        if (!isWater(x, y)) continue;
+        var sx = x * 16 - cam.x, sy = y * 16 - cam.y;
+        var seed = (x * 7 + y * 13) & 3;
+        var lit = ((seed + phase) & 3) < 2;
+        // Solid white and two pixels thick. The water tile is already heavily
+        // speckled, so a thin translucent line vanished into its own texture —
+        // the foam has to be the brightest thing on the tile to read as a
+        // breaking edge rather than as more sparkle.
+        var pale = lit ? '#ffffff' : '#d8eeff';
+        var dim = lit ? '#bcdcf4' : '#a8cbe8';
+        if (solidLand(x, y - 1)) {
+          ctx.fillStyle = pale; ctx.fillRect(sx, sy, 16, 2);
+          ctx.fillStyle = dim;  ctx.fillRect(sx + 2, sy + 2, 5, 1); ctx.fillRect(sx + 10, sy + 2, 4, 1);
+        }
+        if (solidLand(x, y + 1)) {
+          ctx.fillStyle = pale; ctx.fillRect(sx, sy + 14, 16, 2);
+          ctx.fillStyle = dim;  ctx.fillRect(sx + 3, sy + 13, 4, 1); ctx.fillRect(sx + 9, sy + 13, 5, 1);
+        }
+        if (solidLand(x - 1, y)) {
+          ctx.fillStyle = pale; ctx.fillRect(sx, sy, 2, 16);
+          ctx.fillStyle = dim;  ctx.fillRect(sx + 2, sy + 3, 1, 4); ctx.fillRect(sx + 2, sy + 10, 1, 4);
+        }
+        if (solidLand(x + 1, y)) {
+          ctx.fillStyle = pale; ctx.fillRect(sx + 14, sy, 2, 16);
+          ctx.fillStyle = dim;  ctx.fillRect(sx + 13, sy + 2, 1, 5); ctx.fillRect(sx + 13, sy + 9, 1, 4);
+        }
+      }
+    }
+  }
+
   function drawBuildingShadows(ctx, map, x0, y0, x1, y1, cam) {
     if (map.indoors || !map.ground) return;
     for (var y = y0; y <= y1; y++) {
@@ -1094,6 +1150,7 @@
       var y1 = Math.min(map.h - 1, Math.ceil((cam.y + G.SCREEN_H) / TILE));
 
       this._drawLayer(ctx, 'ground', x0, y0, x1, y1, cam);
+      drawShoreFoam(ctx, map, x0, y0, x1, y1, cam);
       drawBuildingShadows(ctx, map, x0, y0, x1, y1, cam);
       this._drawLayer(ctx, 'deco', x0, y0, x1, y1, cam);
 

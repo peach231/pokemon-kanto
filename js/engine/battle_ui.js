@@ -50,14 +50,61 @@
     for (var x = -14 + off; x < W; x += 14) ctx.fillRect(x, y, 7, 2);
   }
 
+  // Deterministic scatter: the same arena looks the same every time you fight
+  // in it. Math.random() here would make the scenery crawl between frames.
+  function seeded(n, i) { var x = Math.sin(n * 127.1 + i * 311.7) * 43758.5453; return x - Math.floor(x); }
+
+  // A distant tree line, drawn as flat silhouettes on the horizon. Gen 1's
+  // arenas are two-tone with a hard horizon and nothing else, so this stays
+  // restrained: shape only, one colour, no shading. Enough to say "outdoors"
+  // and not so much that it competes with the creature standing in front of it.
+  function treeLine(ctx, y, color, count, scale) {
+    ctx.fillStyle = color;
+    for (var i = 0; i < count; i++) {
+      var tx = Math.round(seeded(7, i) * (W + 40)) - 20;
+      var h = Math.round((6 + seeded(11, i) * 7) * (scale || 1));
+      var w2 = Math.round(5 + seeded(13, i) * 4);
+      ctx.fillRect(tx, y - h, w2, h);
+      ctx.fillRect(tx - 1, y - h + 2, w2 + 2, h - 3);
+      ctx.fillRect(tx + 1, y - h - 2, w2 - 2, 3);
+    }
+  }
+
+  // Ground speckle — tufts, pebbles, whatever the floor is made of. Sits
+  // BEHIND the platforms so the discs read as raised above it.
+  function groundTexture(ctx, y0, y1, color, count, tall) {
+    ctx.fillStyle = color;
+    for (var i = 0; i < count; i++) {
+      var gx = Math.round(seeded(23, i) * W);
+      var gy = Math.round(y0 + seeded(29, i) * (y1 - y0));
+      if (tall) { ctx.fillRect(gx, gy, 1, 2); ctx.fillRect(gx + 1, gy - 1, 1, 3); }
+      else ctx.fillRect(gx, gy, 1 + (i % 3 === 0 ? 1 : 0), 1);
+    }
+  }
+
+  // Stalactites, for the caves.
+  function stalactites(ctx, color, count) {
+    ctx.fillStyle = color;
+    for (var i = 0; i < count; i++) {
+      var sx = Math.round(seeded(31, i) * W);
+      var h = 5 + Math.round(seeded(37, i) * 12);
+      for (var k = 0; k < h; k++) {
+        var wgt = Math.max(1, Math.round((h - k) / 3));
+        ctx.fillRect(sx - (wgt >> 1), k, wgt, 1);
+      }
+    }
+  }
+
   G.BATTLE_BG = {
     meadow: function (ctx) {
       ctx.fillStyle = G.C.sky1; ctx.fillRect(0, 0, W, 56);
       ctx.fillStyle = G.C.sky0; ctx.fillRect(0, 56, W, 18);
       dither(ctx, 0, 50, W, 6, G.C.sky0);
+      treeLine(ctx, 74, G.C.grn0, 14, 1);
       ctx.fillStyle = G.C.leaf3; ctx.fillRect(0, 74, W, H - 74);
       dither(ctx, 0, 74, W, 5, G.C.sky0);
       scrollBand(ctx, 72, G.C.grn0);
+      groundTexture(ctx, 80, H - 6, G.C.grn0, 46, true);
       dither(ctx, 0, 96, W, 8, G.C.leaf2);
       platform(ctx, FOE.x, FOE.y + 4, 44, 11, G.C.grn1, G.C.grn0, G.C.grn2);
       platform(ctx, PLY.x, PLY.y + 2, 52, 13, G.C.grn1, G.C.grn0, G.C.grn2);
@@ -65,18 +112,23 @@
     forest: function (ctx) {
       ctx.fillStyle = G.C.grn1; ctx.fillRect(0, 0, W, 64);
       dither(ctx, 0, 56, W, 8, G.C.grn0);
+      // trunks receding into the canopy, then the floor
+      treeLine(ctx, 64, G.C.grn0, 18, 1.5);
       ctx.fillStyle = G.C.grn2; ctx.fillRect(0, 64, W, H - 64);
       dither(ctx, 0, 64, W, 6, G.C.grn0);
       scrollBand(ctx, 62, G.C.grn0);
+      groundTexture(ctx, 72, H - 6, G.C.grn0, 54, true);
       dither(ctx, 0, 100, W, 8, G.C.grn1);
       platform(ctx, FOE.x, FOE.y + 4, 44, 11, G.C.grn1, G.C.grn0, G.C.grn2);
       platform(ctx, PLY.x, PLY.y + 2, 52, 13, G.C.grn1, G.C.grn0, G.C.grn2);
     },
     cave: function (ctx) {
       ctx.fillStyle = G.C.stn0; ctx.fillRect(0, 0, W, 70);
+      stalactites(ctx, G.C.stn1, 16);
       ctx.fillStyle = G.C.stn1; ctx.fillRect(0, 70, W, H - 70);
       dither(ctx, 0, 64, W, 8, G.C.stn0);
       scrollBand(ctx, 68, G.C.stn0);
+      groundTexture(ctx, 78, H - 6, G.C.stn0, 40, false);
       dither(ctx, 0, 100, W, 10, G.C.stn0);
       platform(ctx, FOE.x, FOE.y + 4, 44, 11, G.C.stn2, G.C.stn1, G.C.stn3);
       platform(ctx, PLY.x, PLY.y + 2, 52, 13, G.C.stn2, G.C.stn1, G.C.stn3);
@@ -84,19 +136,41 @@
     water: function (ctx) {
       ctx.fillStyle = G.C.sky1; ctx.fillRect(0, 0, W, 52);
       dither(ctx, 0, 46, W, 6, G.C.sky0);
+      // a far headland, so the sea has somewhere to be far away FROM
+      ctx.fillStyle = G.C.grn0;
+      ctx.fillRect(0, 44, 46, 8); ctx.fillRect(4, 40, 30, 5); ctx.fillRect(12, 37, 14, 4);
+      ctx.fillRect(196, 45, 44, 7); ctx.fillRect(206, 41, 26, 5);
       ctx.fillStyle = G.C.blu2; ctx.fillRect(0, 52, W, H - 52);
       dither(ctx, 0, 52, W, 6, G.C.sky0);
+      // swell: three scrolling crests at different speeds
       scrollBand(ctx, 66, G.C.blu1);
+      scrollBand(ctx, 78, G.C.blu1);
       scrollBand(ctx, 88, G.C.blu1);
+      ctx.fillStyle = 'rgba(255,255,255,0.30)';
+      for (var i = 0; i < 16; i++) {
+        var wx = (Math.round(seeded(41, i) * W) + (G.frame >> 2)) % (W + 20) - 10;
+        var wy = 60 + Math.round(seeded(43, i) * (H - 66));
+        ctx.fillRect(wx, wy, 4 + (i % 3), 1);
+      }
       dither(ctx, 0, 88, W, 8, G.C.blu1);
       platform(ctx, FOE.x, FOE.y + 4, 44, 11, G.C.tan0, G.C.brn3, G.C.tan1);
       platform(ctx, PLY.x, PLY.y + 2, 52, 13, G.C.tan0, G.C.brn3, G.C.tan1);
     },
     indoor: function (ctx) {
       ctx.fillStyle = G.C.pale; ctx.fillRect(0, 0, W, 64);
+      // strip lights on the ceiling, and the panel seams of a real room
+      ctx.fillStyle = G.C.lgry;
+      for (var v = 0; v < 5; v++) ctx.fillRect(v * 52 + 10, 0, 2, 58);
+      ctx.fillStyle = '#fff8d8';
+      ctx.fillRect(30, 6, 42, 4); ctx.fillRect(168, 6, 42, 4);
+      ctx.fillStyle = 'rgba(255,248,216,0.16)';
+      ctx.fillRect(24, 10, 54, 22); ctx.fillRect(162, 10, 54, 22);
       dither(ctx, 0, 58, W, 6, G.C.lgry);
       scrollBand(ctx, 62, G.C.lgry);
       ctx.fillStyle = G.C.tan1; ctx.fillRect(0, 64, W, H - 64);
+      // floorboards
+      ctx.fillStyle = G.C.tan0;
+      for (var fb = 70; fb < H; fb += 9) ctx.fillRect(0, fb, W, 1);
       dither(ctx, 0, 96, W, 8, G.C.tan0);
       platform(ctx, FOE.x, FOE.y + 4, 44, 11, G.C.stn3, G.C.stn2, G.C.pale);
       platform(ctx, PLY.x, PLY.y + 2, 52, 13, G.C.stn3, G.C.stn2, G.C.pale);
