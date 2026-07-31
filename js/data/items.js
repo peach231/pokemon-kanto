@@ -86,6 +86,7 @@
   item('parcel',      "Oak's Parcel", 0, 'key', {}, 'A parcel from the VIRIDIAN MART, addressed to PROF. OAK.');
   item('pokedex',     'Pokédex',      0, 'key', {}, "PROF. OAK's encyclopaedia. It fills itself in as you go.");
   item('townmap',     'Town Map',     0, 'key', {}, 'A map of the whole KANTO region.');
+  item('runningshoes','Running Shoes', 0, 'key', {}, 'Hold Shift to run. Mum will want them back eventually.');
   item('bicycle',     'Bicycle',      0, 'key', {}, 'A folding bicycle. Far faster than walking.');
   item('bikevoucher', 'Bike Voucher', 0, 'key', {}, 'Redeemable for one BICYCLE at the CERULEAN shop.');
   item('ssticket',    'S.S. Ticket',  0, 'key', {}, 'A boarding pass for the S.S. ANNE.');

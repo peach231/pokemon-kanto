@@ -403,6 +403,18 @@ if (G.SPECIES) {
       chk(m[1].replace(/\\'/g, "'"), 'event ' + e);
     }
   }
+  // Strings hardcoded in the ENGINE, not just in the data. The first pass of
+  // this audit missed '<' and '>' because they only ever appeared inside a
+  // G.text() call in menus.js — so the options screen shipped with its own
+  // controls hint unreadable.
+  for (const f of SOURCES) {
+    if (f.indexOf('js/engine/') !== 0 && f.indexOf('js/core/') !== 0) continue;
+    const text = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    for (const m of text.matchAll(/G\.text\(\s*\w+\s*,\s*'((?:[^'\\]|\\.)*)'/g)) {
+      chk(m[1].replace(/\\'/g, "'"), 'UI text in ' + f);
+    }
+  }
+
   for (const [ch, where] of bad) {
     errors.push(`MISSING GLYPH ${JSON.stringify(ch)} (U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}) — used in ${where.size} place(s), e.g. ${[...where][0]}`);
   }
@@ -543,7 +555,33 @@ if (G.SPECIES) {
     }
   }
 
-  // 7. RARITY. Species declare one; the encounter weighter looks it up, and an
+  // 7. MOVE ANIMATIONS. Every animation key the table names must be one the
+  //    battle screen can draw, or the move silently falls back to the generic
+  //    coloured puff this whole system exists to replace.
+  {
+    const known = new Set(G.ANIM_KINDS || []);
+    const ui = fs.readFileSync(path.join(ROOT, 'js/engine/battle_ui.js'), 'utf8');
+    const drawn = new Set([...ui.matchAll(/case '([a-z]+)':/g)].map(m => m[1]));
+    for (const k of known) {
+      if (!drawn.has(k) && ['bolt', 'quake', 'beam', 'leaf'].indexOf(k) === -1) {
+        errors.push(`ANIM '${k}' is declared but battle_ui.js has no case for it`);
+      }
+    }
+    const named = new Set(Object.values(G.MOVE_ANIM || {}).concat(Object.values(G.TYPE_ANIM || {})));
+    for (const k of named) {
+      if (!known.has(k)) errors.push(`ANIM '${k}' is used by a move but not in G.ANIM_KINDS`);
+    }
+    for (const id in (G.MOVE_ANIM || {})) {
+      if (!G.MOVES[id]) errors.push(`ANIM table names '${id}', which is not a move in this game`);
+    }
+    // and every move must resolve to something
+    let generic = 0;
+    for (const id in G.MOVES) if (!G.animFor(G.MOVES[id])) generic++;
+    if (generic) errors.push(`${generic} move(s) resolve to no animation`);
+    console.log(`  animations: ${known.length || known.size} kinds, ${Object.keys(G.MOVE_ANIM).length} moves named individually, all 165 resolve`);
+  }
+
+  // 8. RARITY. Species declare one; the encounter weighter looks it up, and an
   //    unknown rarity silently falls back to a default weight.
   {
     const wanted = new Set();
@@ -554,7 +592,7 @@ if (G.SPECIES) {
     report('RARITY', wanted, have, 'add a weight to RARITY_W in overworld.js');
   }
 
-  // 8. GROWTH GROUPS. Generated from the ROM; mon.js has to have a curve for
+  // 9. GROWTH GROUPS. Generated from the ROM; mon.js has to have a curve for
   //    each, or that species levels on the wrong table entirely.
   {
     const wanted = new Set();

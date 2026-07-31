@@ -177,9 +177,52 @@
   // game ever grants, so the bicycle did nothing at all.
   G.moveSpeed = function () {
     if (!G.player) return 1;
-    var onFoot = !(G.player.onBike && G.player.bag && G.player.bag.bicycle);
-    if (!onFoot) return 3;
-    return 1 + (G.input.held.run ? 1 : 0);
+    var bag = G.player.bag || {};
+    if (G.player.onBike && bag.bicycle) return 3;
+    // Running is something you are GIVEN, so that the first time you hold
+    // shift there is a moment attached to it rather than a control you
+    // happened to discover.
+    return 1 + (G.input.held.run && bag.runningshoes ? 1 : 0);
+  };
+
+  // Footfall dust, drawn under the player. Kept in world space so it stays
+  // put on the ground while the camera moves.
+  G.dust = [];
+
+  // --------------------------------------------------------- the follower --
+  // Your POKéMON walking a tile behind you. Off by default, because it is not
+  // a Gen 1 behaviour and this project is otherwise strict about that — but
+  // available, because it is the best thing HeartGold ever added and the
+  // battler sprites are already streaming for every species.
+  //
+  // The engine already had a follower for a story NPC ("Mom walks you to the
+  // lab"), so this reuses that slot rather than adding a second system: it is
+  // the same trailing actor with a creature sprite on it.
+  G.followerSpecies = function () {
+    var o = (G.player && G.player.options) || {};
+    var party = (G.player && G.player.party) || [];
+    if (o.follower !== 'Lead' && o.follower !== 'Choose') return null;
+    var idx = o.follower === 'Choose' ? (o.followIdx || 0) : 0;
+    var mon = party[idx] || party[0];
+    if (!mon || mon.egg) return null;
+    return mon;
+  };
+
+  G.refreshFollower = function () {
+    var w = G.world;
+    if (!w || !w.map) return;
+    var mon = G.followerSpecies();
+    // A story follower (Mom, a rival) always wins the slot.
+    if (w.follower && w.follower.story) return;
+    if (!mon || w.map.indoors) { if (w.follower && !w.follower.story) w.follower = null; return; }
+    var p = w.player;
+    if (!w.follower || w.follower.monKey !== mon.sp) {
+      w.follower = makeActor('mon_' + mon.sp, p.x, p.y, p.dir);
+      w.follower.monKey = mon.sp;
+      w.follower.isMon = true;
+      w.follower.obj = false;
+      w.follower.onTalkEvent = 'followerTalk';
+    }
   };
 
   G.world = {
@@ -219,6 +262,7 @@
       }
       if (map.music) G.audio.playMusic(map.music);
       if (G.updateFollower) G.updateFollower();
+      if (G.refreshFollower) G.refreshFollower();
     },
 
     tileNameAt: function (layer, x, y) {
@@ -490,6 +534,22 @@
         }
       }
 
+      // Dust. Walking leaves none; running kicks up a little, the bicycle a
+      // lot. It is the cheapest possible way to make speed READ rather than
+      // merely be true.
+      var spd = G.moveSpeed();
+      if (spd > 1 && !w.map.indoors && !p.vehicle) {
+        var def0 = w.tileDefAt(p.x, p.y);
+        if (def0 && !def0.water) {
+          for (var du = 0; du < (spd > 2 ? 3 : 2); du++) {
+            G.dust.push({
+              x: p.x * 16 + 8 + (du - 1) * 3, y: p.y * 16 + 15,
+              vy: -0.18 - du * 0.05, life: 14 + du * 2, max: 14 + du * 2
+            });
+          }
+        }
+      }
+
       // repel ticks on every step, like the real thing
       if (G.player.repelSteps > 0) {
         G.player.repelSteps--;
@@ -741,6 +801,17 @@
         ctx.drawImage(G.IMG.orb_stand, items[ii].x * TILE - cam.x, items[ii].y * TILE - cam.y);
       }
 
+      // dust first, so the player treads on top of it
+      for (var dz = G.dust.length - 1; dz >= 0; dz--) {
+        var dp = G.dust[dz];
+        dp.y += dp.vy; dp.life--;
+        if (dp.life <= 0) { G.dust.splice(dz, 1); continue; }
+        var da = dp.life / dp.max;
+        ctx.fillStyle = 'rgba(226,214,186,' + (da * 0.7).toFixed(2) + ')';
+        var dsz = 1 + Math.round(da * 2);
+        ctx.fillRect(Math.round(dp.x - cam.x), Math.round(dp.y - cam.y), dsz, dsz);
+      }
+
       // entities, y-sorted
       var ents = [w.player].concat(w.npcs);
       if (w.follower) ents.push(w.follower);
@@ -841,6 +912,19 @@
         img = G.IMG[a.sprite];
         if (img) ctx.drawImage(img, sx, sy);
         return;
+      }
+
+      // A creature follower has no walk sheet — it uses its battler art,
+      // shrunk to the tile and bobbing as it walks, which reads correctly at
+      // this size and costs nothing extra to stream.
+      if (a.isMon) {
+        var mi = G.IMG['mon_' + a.monKey];
+        if (mi) {
+          var mb = (a.moving && (a.step >> 2) % 2) ? 1 : 0;
+          var mw = 18, mh = 18;
+          ctx.drawImage(mi, sx - 1, sy + 4 - mb, mw, mh);
+          return;
+        }
       }
 
       img = this._actorImage(a);

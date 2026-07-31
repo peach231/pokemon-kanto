@@ -689,13 +689,216 @@
         particles.push({ x: x, y: y, vx: Math.cos(a) * 1.8, vy: Math.sin(a) * 1.8 - 0.3, life: 16, maxLife: 16, grav: false, col: i % 2 ? G.C.white : G.C.red3, size: 3 });
       }
     }
+
+    // ---- animation primitives -------------------------------------------
+    // Small named helpers so each move's signature reads as a sentence rather
+    // than as forty lines of particle maths. `p` pushes one particle; `arc`
+    // throws a spread of them from A to B; `ring` expands a circle.
+    function p(x, y, vx, vy, life, col, size, delay, grav) {
+      particles.push({ x: x, y: y, vx: vx, vy: vy, life: life, maxLife: life,
+                       grav: !!grav, col: col, size: size || 2, delay: delay || 0 });
+    }
+    function stream(sx, sy, tx, ty, n, col, opts) {
+      opts = opts || {};
+      var dx = tx - sx, dy = ty - sy, d = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      var ux = dx / d, uy = dy / d, sp = d / (opts.frames || 20);
+      for (var i = 0; i < n; i++) {
+        var off = (i % 5 - 2) * (opts.spread || 3);
+        p(sx - uy * off, sy + ux * off, ux * sp, uy * sp,
+          opts.life || 22, typeof col === 'function' ? col(i) : col,
+          opts.size || 3, i * (opts.stagger || 1.1));
+      }
+    }
+    function ringAt(x, y, n, col, spd, life, delay) {
+      for (var i = 0; i < n; i++) {
+        var a = (i / n) * Math.PI * 2;
+        p(x, y, Math.cos(a) * spd, Math.sin(a) * spd, life, col, 2, delay || 0);
+      }
+    }
+    function rain(tx, ty, n, col, opts) {
+      opts = opts || {};
+      for (var i = 0; i < n; i++) {
+        p(tx + (i % 7 - 3) * (opts.spread || 7), ty - (opts.high || 40),
+          (i % 3 - 1) * 0.2, opts.speed || 2.2, opts.life || 22, col,
+          opts.size || 3, (i % 5) * 2.5);
+      }
+    }
+
     // a type-themed effect from attacker -> target (projectile / impact / aura)
     function spawnMoveFx(side, type, category, anim) {
       var self = side === 'p' ? PLY : FOE;
       var foe = side === 'p' ? FOE : PLY;
       var col = (G.TYPE_COLORS && G.TYPE_COLORS[type]) || G.C.white;
       var sx = self.x, sy = self.y - 20, tx = foe.x, ty = foe.y - 20;
-      // ---- per-move signature animations (override the type/category FX) ----
+
+      // ---- the vocabulary --------------------------------------------------
+      // Each of these is a distinct READ at a glance: a player should know
+      // which move landed without the text box telling them.
+      switch (anim) {
+        case 'spark':
+          for (var s1 = 0; s1 < 10; s1++) p(tx + (s1 % 5 - 2) * 5, ty + (s1 % 3 - 1) * 6, 0, 0, 9, s1 % 2 ? G.C.yel2 : G.C.white, 2, s1 * 1.1);
+          ringAt(tx, ty, 8, G.C.yel1, 1.6, 12);
+          return;
+        case 'ember':
+          stream(sx, sy, tx, ty, 12, function (i) { return i % 2 ? G.C.org2 : G.C.yel2; }, { size: 3, frames: 18 });
+          for (var e1 = 0; e1 < 9; e1++) p(tx + (e1 % 5 - 2) * 5, ty + 6, (e1 % 3 - 1) * 0.2, -1.1 - (e1 % 3) * 0.3, 20, e1 % 2 ? G.C.org1 : G.C.red3, 3, 18 + e1);
+          return;
+        case 'flame':
+          for (var f1 = 0; f1 < 30; f1++) {
+            var ff = f1 / 30, fw = (f1 % 5 - 2) * ff * 6;
+            p(sx + (tx - sx) * ff - fw * 0.2, sy + (ty - sy) * ff + fw, 0, 0, 14,
+              f1 % 3 === 0 ? G.C.yel2 : f1 % 3 === 1 ? G.C.org2 : G.C.red3, 3, f1 * 0.6);
+          }
+          ringAt(tx, ty, 12, G.C.org1, 2.2, 16, 20);
+          return;
+        case 'vortex':
+          for (var v1 = 0; v1 < 26; v1++) {
+            var va = v1 * 0.6, vr = 4 + v1 * 0.7;
+            p(tx + Math.cos(va) * vr, ty + Math.sin(va) * vr * 0.5, 0, -0.5, 18, v1 % 2 ? G.C.org2 : G.C.red3, 3, v1 * 0.8);
+          }
+          return;
+        case 'jet':
+          stream(sx, sy, tx, ty, 24, col, { size: 3, spread: 2, frames: 16, stagger: 0.8 });
+          ringAt(tx, ty, 14, col, 2, 18, 18);
+          return;
+        case 'bubble':
+          for (var b1 = 0; b1 < 14; b1++) {
+            var bf = b1 / 14;
+            p(sx + (tx - sx) * bf, sy + (ty - sy) * bf - Math.sin(bf * Math.PI) * 12, 0, -0.15, 20, b1 % 3 ? col : G.C.white, 2 + (b1 % 3), b1 * 1.5);
+          }
+          return;
+        case 'wave':
+          for (var w1 = 0; w1 < 34; w1++) {
+            var wy = ty - 16 + (w1 % 6) * 7;
+            p(sx, wy, (tx - sx) / 22, 0, 24, w1 % 4 ? col : G.C.white, 3, (w1 % 6) * 1.4);
+          }
+          return;
+        case 'blizzard':
+          for (var z1 = 0; z1 < 34; z1++) p(sx - 20 + (z1 % 4) * 8, sy - 30 + (z1 % 9) * 8, (tx - sx) / 18, 0.7, 26, z1 % 3 ? G.C.ice2 : G.C.white, 2, z1 * 0.6);
+          return;
+        case 'fog':
+          for (var g1 = 0; g1 < 20; g1++) p(tx + (g1 % 7 - 3) * 8, ty + (g1 % 4 - 2) * 7, (g1 % 3 - 1) * 0.12, -0.08, 34, col, 3, g1 * 1.4);
+          return;
+        case 'lash':
+          for (var l1 = 0; l1 < 12; l1++) { var lf = l1 / 12; p(sx + (tx - sx) * lf, sy + (ty - sy) * lf + Math.sin(lf * Math.PI * 2) * 8, 0, 0, 10, col, 3, l1 * 0.7); }
+          ringAt(tx, ty, 8, col, 1.6, 12, 9);
+          return;
+        case 'drain':
+          for (var d1 = 0; d1 < 14; d1++) { var df = d1 / 14; p(tx + (sx - tx) * df, ty + (sy - ty) * df - Math.sin(df * Math.PI) * 10, 0, 0, 16, d1 % 2 ? G.C.grn2 : G.C.white, 3, d1 * 1.3); }
+          return;
+        case 'seed':
+          p(sx, sy, (tx - sx) / 18, (ty - sy) / 18 - 0.4, 20, G.C.grn3, 3, 0, true);
+          for (var s2 = 0; s2 < 10; s2++) p(tx + (s2 % 5 - 2) * 5, ty + 8, 0, -0.5, 24, G.C.grn2, 2, 18 + s2);
+          return;
+        case 'powder':
+          for (var pw = 0; pw < 22; pw++) p(tx + (pw % 9 - 4) * 6, ty - 22 + (pw % 3) * 5, (pw % 3 - 1) * 0.15, 0.55, 30, col, 2, pw * 1.2);
+          return;
+        case 'dig':
+          for (var dg = 0; dg < 14; dg++) p(sx + (dg % 7 - 3) * 4, sy + 12, (dg % 5 - 2) * 0.5, -1.2, 18, G.C.brn2, 3, dg * 0.8);
+          ringAt(tx, ty + 8, 12, G.C.brn1, 1.8, 16, 22);
+          return;
+        case 'toss': case 'lob':
+          p(sx, sy, (tx - sx) / 24, (ty - sy) / 24 - 1.1, 26, col, 4, 0, true);
+          ringAt(tx, ty, 12, col, 2, 16, 24);
+          return;
+        case 'rocks':
+          for (var r1 = 0; r1 < 8; r1++) p(sx, sy, (tx - sx) / 22 + (r1 % 3 - 1) * 0.2, (ty - sy) / 22 - 0.9, 26, r1 % 2 ? G.C.brn1 : G.C.brn2, 4, r1 * 2.2, true);
+          ringAt(tx, ty, 10, G.C.brn2, 1.8, 16, 24);
+          return;
+        case 'sand':
+          for (var sa = 0; sa < 18; sa++) p(sx, sy + (sa % 5 - 2) * 4, (tx - sx) / 16, (sa % 3 - 1) * 0.2, 20, G.C.brn2, 2, sa * 0.7);
+          return;
+        case 'wind':
+          for (var wd = 0; wd < 16; wd++) p(sx, sy - 18 + (wd % 6) * 7, (tx - sx) / 12, 0, 18, wd % 2 ? G.C.white : col, 2, wd * 0.9);
+          return;
+        case 'fly':
+          for (var fl = 0; fl < 10; fl++) p(sx, sy - fl * 5, 0, -1.4, 14, G.C.white, 2, fl * 0.8);
+          ringAt(tx, ty, 12, col, 2.2, 16, 22);
+          return;
+        case 'dive':
+          for (var dv = 0; dv < 12; dv++) { var vf = dv / 12; p(sx + (tx - sx) * vf, sy - 30 + (ty + 30 - sy) * vf, 0, 0, 12, dv % 2 ? G.C.white : G.C.yel2, 3, dv * 0.9); }
+          ringAt(tx, ty, 16, G.C.white, 2.6, 18, 12);
+          return;
+        case 'jab': case 'drill':
+          for (var j1 = 0; j1 < (anim === 'drill' ? 14 : 6); j1++) { var jf = j1 / 8; p(sx + (tx - sx) * Math.min(1, jf), sy + (ty - sy) * Math.min(1, jf), 0, 0, 8, G.C.white, 3, j1 * 1.2); }
+          ringAt(tx, ty, 9, col, 1.8, 12, 8);
+          return;
+        case 'chop': case 'slash':
+          for (var c1 = 0; c1 < 3; c1++) for (var c2 = 0; c2 < 8; c2++) p(tx - 14 + c2 * 4, ty - 12 + c2 * 3 + c1 * 9, 0, 0, 11, c1 === 1 ? G.C.white : col, 2, c1 * 3 + c2 * 0.4);
+          return;
+        case 'bite':
+          for (var bt = 0; bt < 7; bt++) { p(tx - 14 + bt * 2, ty - 12 + bt * 2, 0, 0, 10, G.C.white, 3, bt * 0.7); p(tx + 14 - bt * 2, ty + 12 - bt * 2, 0, 0, 10, G.C.white, 3, bt * 0.7); }
+          ringAt(tx, ty, 8, col, 1.6, 12, 8);
+          return;
+        case 'kick': case 'punch': case 'slap': case 'slam':
+          ringAt(tx, ty, anim === 'slam' ? 14 : 10, col, anim === 'slam' ? 2.4 : 1.8, 14);
+          for (var k1 = 0; k1 < 4; k1++) p(tx, ty, 0, 0, 9, G.C.white, 4 - k1, k1 * 1.5);
+          return;
+        case 'coil':
+          for (var co = 0; co < 20; co++) { var ca = co * 0.9; p(tx + Math.cos(ca) * 14, ty + Math.sin(ca) * 9, 0, 0, 16, col, 2, co * 0.8); }
+          return;
+        case 'guard':
+          for (var gu = 0; gu < 16; gu++) p(self.x - 22 + (gu % 4) * 15, self.y - 34 + Math.floor(gu / 4) * 11, 0, 0, 26, gu % 2 ? col : G.C.white, 3, gu * 0.7);
+          return;
+        case 'sting':
+          for (var st = 0; st < 10; st++) p(sx, sy + (st % 5 - 2) * 4, (tx - sx) / 12, (ty - sy) / 12, 14, st % 2 ? G.C.white : col, 2, st * 1.6);
+          return;
+        case 'splash': case 'drip':
+          for (var sp2 = 0; sp2 < 12; sp2++) p(tx + (sp2 % 6 - 3) * 6, ty - 14, (sp2 % 3 - 1) * 0.2, 1.2, 22, col, 3, sp2 * 1.4, true);
+          ringAt(tx, ty + 8, 10, col, 1.4, 16, 14);
+          return;
+        case 'psy':
+          for (var ps = 0; ps < 4; ps++) ringAt(tx, ty, 14, ps % 2 ? col : G.C.white, 1.2 + ps * 0.5, 20, ps * 5);
+          return;
+        case 'blink':
+          for (var bl = 0; bl < 3; bl++) ringAt(self.x, self.y - 20, 10, G.C.white, 2.2, 12, bl * 6);
+          return;
+        case 'streak':
+          for (var sr = 0; sr < 14; sr++) p(sx + (tx - sx) * (sr / 14), sy + (ty - sy) * (sr / 14), 0, 0, 7, G.C.white, 3, sr * 0.5);
+          return;
+        case 'aura':
+          for (var au = 0; au < 14; au++) p(self.x + (au % 7 - 3) * 6, self.y - 4, 0, -0.9 - (au % 3) * 0.2, 26, au % 2 ? col : G.C.white, 2, au * 1.3);
+          return;
+        case 'sleep': case 'note':
+          for (var nt = 0; nt < 8; nt++) p(self.x + 8 + nt * 3, self.y - 26 - nt * 3, 0.25, -0.35, 26, nt % 2 ? G.C.pur3 : G.C.white, 3, nt * 3);
+          return;
+        case 'wisp':
+          for (var wi = 0; wi < 18; wi++) { var wa = wi * 0.5, wr = 16 - wi * 0.7; p(tx + Math.cos(wa) * wr, ty + Math.sin(wa) * wr, 0, 0, 18, wi % 2 ? G.C.pur3 : G.C.ink, 3, wi * 1.1); }
+          return;
+        case 'web':
+          for (var we = 0; we < 16; we++) { var wf = we / 16; p(sx + (tx - sx) * wf, sy + (ty - sy) * wf, 0, 0, 24, G.C.white, 2, we * 0.9); }
+          for (var w2 = 0; w2 < 8; w2++) p(tx + (w2 % 4 - 2) * 7, ty + (w2 % 3 - 1) * 7, 0, 0, 24, G.C.white, 2, 16 + w2);
+          return;
+        case 'star':
+          for (var s3 = 0; s3 < 10; s3++) { var sf = s3 / 10; p(sx + (tx - sx) * sf, sy + (ty - sy) * sf - Math.sin(sf * Math.PI) * 14, 0, 0, 14, G.C.yel2, 3, s3 * 1.4); }
+          ringAt(tx, ty, 10, G.C.yel1, 1.8, 14, 14);
+          return;
+        case 'coin':
+          for (var cn = 0; cn < 12; cn++) p(tx + (cn % 6 - 3) * 5, ty, (cn % 3 - 1) * 0.4, -1.3, 26, G.C.yel1, 3, cn * 1.2, true);
+          return;
+        case 'ring': case 'glare':
+          ringAt(tx, ty, 12, col, 1.5, 20);
+          ringAt(tx, ty, 12, G.C.white, 2.4, 16, 6);
+          return;
+        case 'heal':
+          for (var he = 0; he < 14; he++) p(self.x + (he % 7 - 3) * 6, self.y - 2, 0, -1.0, 26, he % 2 ? G.C.grn2 : G.C.white, 3, he * 1.5);
+          return;
+        case 'flop':
+          for (var fp = 0; fp < 6; fp++) p(self.x + (fp % 3 - 1) * 6, self.y - 14, (fp % 3 - 1) * 0.3, -0.5, 18, col, 2, fp * 2);
+          return;
+        case 'hyper':
+          for (var hb = 0; hb < 34; hb++) {
+            var hf = hb / 34;
+            for (var hw = -2; hw <= 2; hw++) p(sx + (tx - sx) * hf, sy + (ty - sy) * hf + hw * 3, 0, 0, 18, Math.abs(hw) < 2 ? G.C.white : col, 3, hb * 0.4);
+          }
+          ringAt(tx, ty, 22, col, 3, 22, 16);
+          return;
+        case 'explode':
+          for (var ex = 0; ex < 40; ex++) { var ea = (ex / 40) * Math.PI * 2, es = 1.5 + (ex % 4); p(self.x, self.y - 20, Math.cos(ea) * es, Math.sin(ea) * es, 26, ex % 3 ? G.C.org2 : G.C.white, 3); }
+          return;
+      }
+
+      // ---- the four original signatures, kept as-is ----
       if (anim === 'bolt') {                          // lightning strikes down
         for (var li = 0; li <= 7; li++) {
           var lf = li / 7;

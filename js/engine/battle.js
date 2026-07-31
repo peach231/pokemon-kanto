@@ -541,14 +541,17 @@
       // a type-themed aura for the status/buff move, then apply it
       var fxCat = (move.effect && move.effect.kind === 'stages' && move.effect.target === 'self') ? 'buff'
         : (move.effect && move.effect.kind === 'weather') ? 'buff' : 'debuff';
-      yield { t: 'anim', kind: 'moveFx', side: side, type: move.type, category: fxCat };
+      yield { t: 'anim', kind: 'moveFx', side: side, type: move.type, category: fxCat,
+              anim: (G.animFor ? G.animFor(move) : null) };
       yield* this.applyEffect(side, other, move.effect, true);
       return;
     }
 
     // damaging move — a type-themed projectile (special) or impact (physical),
     // or a per-move signature animation when the move defines `anim`.
-    yield { t: 'anim', kind: 'moveFx', side: side, type: move.type, category: physical ? 'phys' : 'spec', anim: move.anim };
+    yield { t: 'anim', kind: 'moveFx', side: side, type: move.type,
+            category: physical ? 'phys' : 'spec',
+            anim: (G.animFor ? G.animFor(move) : move.anim) };
     var foe = this.active(other);
     var hits = 1;
     if (move.effect && move.effect.kind === 'multiHit') {

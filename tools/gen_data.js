@@ -483,6 +483,50 @@ ${compat}
 `;
 }
 
+// ======================================================= dex metadata ======
+
+// Genus, height and weight, from data/pokemon/dex_entries.asm. The ROM stores
+// height as (feet, inches) and weight in TENTHS of a pound, which is why the
+// numbers look odd until you divide: Rhydon is 6'3" and 265.0 lb.
+//
+// These exist so the Pokedex can be a PAGE rather than a list. 151 original
+// dex blurbs were written for this project and until now nothing displayed
+// them properly.
+async function emitDexMeta(dexOrder) {
+  const text = await pokered.raw('data/pokemon/dex_entries.asm');
+  const ls = pokered.lines(text);
+  const byName = {};
+  for (let i = 0; i < ls.length; i++) {
+    const m = ls[i].match(/^([A-Za-z0-9]+)DexEntry:$/);
+    if (!m) continue;
+    const genus = (ls[i + 1].match(/^db "([^"@]*)@?"/) || [])[1];
+    const hw = (ls[i + 2].match(/^db\s+(\d+)\s*,\s*(\d+)$/) || []);
+    const wt = (ls[i + 3].match(/^dw\s+(\d+)$/) || []);
+    if (!genus || !hw[1] || !wt[1]) continue;
+    byName[pokered.monKey(m[1])] = {
+      genus: genus.charAt(0) + genus.slice(1).toLowerCase(),
+      ft: +hw[1], inch: +hw[2], lb: +wt[1] / 10
+    };
+  }
+  const rows = dexOrder.map(k => {
+    const d = byName[k];
+    if (!d) throw new Error(`no dex entry data for ${k}`);
+    return `    ${k}: { genus: ${q(d.genus)}, ft: ${d.ft}, inch: ${d.inch}, lb: ${d.lb} }`;
+  }).join(',\n');
+
+  return HEAD + `// pokemon-kanto — dex_meta.js
+// The species line, height and weight the POKéDEX shows on an entry page.
+// Straight from the ROM: heights are feet and inches, weights are pounds,
+// exactly as the English Red/Blue printed them.
+
+(function () {
+  G.DEX_META = {
+${rows}
+  };
+})();
+`;
+}
+
 // ================================================================= main ====
 
 async function main() {
@@ -502,6 +546,7 @@ async function main() {
   write('species_101_151.js', emitSpeciesChunk(d.dexOrder.slice(100, 151), d.species, 101, 151));
   write('kanto_dex.js', emitDex(d.dexOrder));
   write('tms.js', emitTms(d.species, d.dexOrder));
+  write('dex_meta.js', await emitDexMeta(d.dexOrder));
 
   const wild = await pokered.loadWild([...new Set(Object.values(WILD_MAPS))]);
   write('encounters.js', emitEncounters(wild));

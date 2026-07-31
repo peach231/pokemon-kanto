@@ -387,6 +387,7 @@
     };
     yield { t: 'wait', frames: 30 };
     yield { t: 'text', s: 'Mum: There, all better. Now go on — and do call sometimes.' };
+    yield* G.giveRunningShoes('Mum');
   };
 
   // Oak physically stops you leaving Pallet unarmed. In Gen 1 this is the
@@ -411,6 +412,7 @@
       ? 'OAK: How is your ' + yours.name + '? Treat it well and it will surprise you.'
       : 'OAK: How is the little one getting on? Treat it well and it will surprise you.' };
     yield { t: 'text', s: 'OAK: Take the POKéDEX north and fill it. That is the real work.' };
+    yield* G.giveRunningShoes('OAK');
   };
 
   // Picking a starter. The preview scene lets you look before committing, so a
@@ -3686,5 +3688,62 @@
     (m.trainers = m.trainers || []).push({
       x: e[1], y: e[2], sprite: e[4], dir: 'down', trainer: e[3], sight: 3
     });
+  });
+
+  // RUNNING SHOES. Handed over by Mum on the way out of the door, and again by
+  // OAK with the POKéDEX if you somehow left without talking to her — a
+  // quality-of-life control should never be permanently missable.
+  G.giveRunningShoes = function* (who) {
+    if (G.player.bag.runningshoes) return;
+    yield { t: 'text', s: who + ': Wait — take these.' };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.runningshoes = 1; } };
+    yield { t: 'text', s: 'You received the RUNNING SHOES!' };
+    yield { t: 'text', s: '(Hold SHIFT to run.)' };
+  };
+
+  // Talking to the POKéMON walking behind you. It has nothing to say, which is
+  // the point — it reacts, and the reaction depends on how healthy it is.
+  G.EVENTS.followerTalk = function* () {
+    var mon = G.followerSpecies && G.followerSpecies();
+    if (!mon) return;
+    var nm = G.monName(mon);
+    var stats = G.monStats(mon);
+    var frac = mon.curHp / stats.hp;
+    yield { t: 'sfx', id: 'confirm' };
+    if (mon.status === 'slp') { yield { t: 'text', s: nm + ' is fast asleep and walking anyway.' }; return; }
+    if (frac <= 0.25) { yield { t: 'text', s: nm + ' is hurt, and leaning on you a little.' }; return; }
+    if (frac < 1) { yield { t: 'text', s: nm + ' shakes itself off and carries on.' }; return; }
+    yield { t: 'text', s: nm + ' looks up at you, then at the road ahead.' };
+  };
+
+  // ======================================== THE LEADERS COME BACK ==========
+  // A CHAMPION flag on each gym's leader turns them into their rematch self.
+  // Rather than duplicating eight NPC entries, the existing leader trainer is
+  // swapped at load: same tile, same sprite, a different fight.
+  [
+    ['pewtergym', 'brock'],
+    ['ceruleangym', 'misty'],
+    ['vermiliongym', 'surge'],
+    ['celadongym', 'erika'],
+    ['fuchsiagym', 'koga'],
+    ['saffrongym', 'sabrina'],
+    ['cinnabargym', 'blaine'],
+    ['viridiangym', 'giovanni']
+  ].forEach(function (e) {
+    var m = G.MAPS[e[0]];
+    if (!m || !m.trainers) return;
+    for (var i = 0; i < m.trainers.length; i++) {
+      var t = m.trainers[i];
+      if (t.trainer !== e[1]) continue;
+      // the original, for anyone who has not finished the game
+      t.unlessFlag = 'champion';
+      // and the rematch, standing on the same tile once they have
+      m.trainers.push({
+        x: t.x, y: t.y, sprite: t.sprite, dir: t.dir,
+        trainer: e[1] + '_rematch', sight: 0, ifFlag: 'champion'
+      });
+      break;
+    }
   });
 })();

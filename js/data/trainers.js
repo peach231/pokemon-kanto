@@ -1060,4 +1060,75 @@
     defeat: "Take the key and go."
   });
 
+
+  // ================================================ POST-GAME REMATCHES =====
+  // Once you are CHAMPION the eight leaders come back at level 58-66 with the
+  // fully-evolved lines they never had the budget for the first time. Each
+  // keeps their type and their character — Surge is delighted, Sabrina is
+  // unsettled, Giovanni is unsurprised — because a rematch that is only a
+  // bigger number is not a rematch, it is a chore.
+  tr('brock_rematch', {
+    name: 'Brock', cls: 'Leader', sprite: 'trainer_brock', ai: 'smart', money: 9000,
+    party: [{ sp: 'graveler', level: 58 }, { sp: 'rhyhorn', level: 58 }, { sp: 'omastar', level: 60 }, { sp: 'kabutops', level: 60 }, { sp: 'onix', level: 62 }, { sp: 'rhydon', level: 64 }],
+    intro: "You have the badge. That was never the same as beating me at my best.",
+    defeat: "It is. It really is. Come back whenever you want the rematch again.",
+    reward: { flag: 'rematch_brock' },
+    music: 'gymleader'
+  });
+  tr('misty_rematch', {
+    name: 'Misty', cls: 'Leader', sprite: 'trainer_misty', ai: 'smart', money: 9000,
+    party: [{ sp: 'golduck', level: 58 }, { sp: 'lapras', level: 60 }, { sp: 'cloyster', level: 60 }, { sp: 'dewgong', level: 60 }, { sp: 'gyarados', level: 62 }, { sp: 'starmie', level: 64 }],
+    intro: "CERULEAN is quiet in the winter. I have had time to train.",
+    defeat: "Still fast. Still not fast enough, apparently.",
+    reward: { flag: 'rematch_misty' },
+    music: 'gymleader'
+  });
+  tr('surge_rematch', {
+    name: 'Lt. Surge', cls: 'Leader', sprite: 'trainer_surge', ai: 'smart', money: 9000,
+    party: [{ sp: 'electrode', level: 58 }, { sp: 'magneton', level: 60 }, { sp: 'electabuzz', level: 62 }, { sp: 'jolteon', level: 62 }, { sp: 'pikachu', level: 60 }, { sp: 'raichu', level: 64 }],
+    intro: "CHAMPION, huh? Good. I have been holding back on everybody else.",
+    defeat: "Now THAT was a battle, kid.",
+    reward: { flag: 'rematch_surge' },
+    music: 'gymleader'
+  });
+  tr('erika_rematch', {
+    name: 'Erika', cls: 'Leader', sprite: 'trainer_erika', ai: 'smart', money: 9000,
+    party: [{ sp: 'tangela', level: 58 }, { sp: 'victreebel', level: 60 }, { sp: 'exeggutor', level: 62 }, { sp: 'vileplume', level: 62 }, { sp: 'parasect', level: 58 }, { sp: 'venusaur', level: 64 }],
+    intro: "I hope you did not think the flowers were the whole garden.",
+    defeat: "A good loss. I sleep better after those.",
+    reward: { flag: 'rematch_erika' },
+    music: 'gymleader'
+  });
+  tr('koga_rematch', {
+    name: 'Koga', cls: 'Leader', sprite: 'trainer_koga', ai: 'smart', money: 9000,
+    party: [{ sp: 'venomoth', level: 60 }, { sp: 'muk', level: 60 }, { sp: 'golbat', level: 60 }, { sp: 'arbok', level: 60 }, { sp: 'tentacruel', level: 62 }, { sp: 'weezing', level: 64 }],
+    intro: "You beat a gym. You have not beaten a ninja.",
+    defeat: "Now you have. Do not let it go to your head.",
+    reward: { flag: 'rematch_koga' },
+    music: 'gymleader'
+  });
+  tr('sabrina_rematch', {
+    name: 'Sabrina', cls: 'Leader', sprite: 'trainer_sabrina', ai: 'smart', money: 9000,
+    party: [{ sp: 'mrmime', level: 60 }, { sp: 'hypno', level: 60 }, { sp: 'slowbro', level: 62 }, { sp: 'exeggutor', level: 62 }, { sp: 'jynx', level: 60 }, { sp: 'alakazam', level: 65 }],
+    intro: "I saw this rematch a long time ago. I did not see the result.",
+    defeat: "And now I have. It is a strange feeling, being surprised.",
+    reward: { flag: 'rematch_sabrina' },
+    music: 'gymleader'
+  });
+  tr('blaine_rematch', {
+    name: 'Blaine', cls: 'Leader', sprite: 'trainer_blaine', ai: 'smart', money: 9000,
+    party: [{ sp: 'ninetales', level: 60 }, { sp: 'magmar', level: 60 }, { sp: 'rapidash', level: 62 }, { sp: 'charizard', level: 62 }, { sp: 'flareon', level: 60 }, { sp: 'arcanine', level: 65 }],
+    intro: "No quiz this time. You have earned the right to skip to the fire.",
+    defeat: "HOO! My POK\u00e9MON are ash. Worth it.",
+    reward: { flag: 'rematch_blaine' },
+    music: 'gymleader'
+  });
+  tr('giovanni_rematch', {
+    name: 'Giovanni', cls: 'Leader', sprite: 'trainer_giovanni', ai: 'smart', money: 9000,
+    party: [{ sp: 'dugtrio', level: 62 }, { sp: 'nidoqueen', level: 62 }, { sp: 'nidoking', level: 62 }, { sp: 'golem', level: 62 }, { sp: 'marowak', level: 60 }, { sp: 'rhydon', level: 66 }],
+    intro: "I disbanded them. I did not stop training. Those are different things.",
+    defeat: "Twice a leader, twice beaten. I am beginning to think it is not luck.",
+    reward: { flag: 'rematch_giovanni' },
+    music: 'gymleader'
+  });
 })();

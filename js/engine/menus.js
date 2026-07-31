@@ -247,7 +247,7 @@
   };
 
   G.StartMenu = function () {
-    var items = ['DEX', 'MAP', 'PARTY', 'BAG', 'SAVE', 'EXIT'];
+    var items = ['DEX', 'MAP', 'PARTY', 'BAG', 'OPTION', 'SAVE', 'EXIT'];
     return {
       opaque: false,
       sel: 0,
@@ -263,6 +263,7 @@
           if (pick === 'MAP') G.pushScene(G.RegionMapScene());
           if (pick === 'PARTY') G.pushScene(G.PartyScene());
           if (pick === 'BAG') G.pushScene(G.BagScene());
+          if (pick === 'OPTION') G.pushScene(G.OptionsScene());
           if (pick === 'SAVE') {
             G.ask('Save your progress?', function () {
               var ok = G.saveGame();
@@ -749,7 +750,13 @@
         if (G.input.repeat('down')) { this.sel = (this.sel + 1) % n; G.audio.sfx('menuMove'); }
         if (G.input.repeat('left')) { this.sel = Math.max(0, this.sel - 10); G.audio.sfx('menuMove'); }
         if (G.input.repeat('right')) { this.sel = Math.min(n - 1, this.sel + 10); G.audio.sfx('menuMove'); }
-        if (G.input.justPressed('B')) { G.audio.sfx('cancel'); G.popScene(); }
+        if (G.input.justPressed('B')) { G.audio.sfx('cancel'); G.popScene(); return; }
+        // A dex you cannot open is just a list of names. Z opens the page.
+        if (G.input.justPressed('A')) {
+          var k = ORDER[this.sel];
+          if (G.player.dexSeen[k]) { G.audio.sfx('confirm'); G.pushScene(G.DexEntryScene(k)); }
+          else G.audio.sfx('cancel');
+        }
       },
       draw: function (ctx) {
         ctx.fillStyle = '#222838';
@@ -1151,6 +1158,152 @@
         }
         G.text(ctx, 'COINS ' + coins(), 8, 92, '#f8e878', '#1a1c2c');
         G.text(ctx, 'Z: spin/stop   X: leave', 118, 92, G.C.lgry);
+      }
+    };
+  };
+
+  // ---------------------------------------------------------- dex entry ----
+  // A PAGE, not a row in a list. 151 original dex blurbs were written for this
+  // project and until now the only place any of them appeared was a tooltip.
+  // Height, weight and the species line come straight from the ROM.
+  G.DexEntryScene = function (key) {
+    var sp = G.SPECIES[key];
+    var meta = (G.DEX_META || {})[key] || { genus: '???', ft: 0, inch: 0, lb: 0 };
+    var caught = !!G.player.dexCaught[key];
+    var cried = false;
+    return {
+      opaque: true,
+      enter: function () {
+        if (caught && G.audio.cry) { G.audio.cry(key); cried = true; }
+      },
+      update: function () {
+        if (G.input.justPressed('B') || G.input.justPressed('start')) { G.audio.sfx('cancel'); G.popScene(); return; }
+        if (G.input.justPressed('A') && caught && G.audio.cry) G.audio.cry(key);
+      },
+      draw: function (ctx) {
+        ctx.fillStyle = '#e8e4d8'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#c03028'; ctx.fillRect(0, 0, W, 14);
+        ctx.fillStyle = '#8a201a'; ctx.fillRect(0, 14, W, 2);
+        var num = 'No.' + (sp.id < 10 ? '00' : sp.id < 100 ? '0' : '') + sp.id;
+        G.text(ctx, num + '  ' + sp.name.toUpperCase(), 6, 4, G.C.white, '#5a1410');
+
+        // the creature, on a plate
+        ctx.fillStyle = '#f8f8f4'; ctx.fillRect(6, 20, 74, 80);
+        ctx.fillStyle = '#b8b4a8'; ctx.fillRect(6, 20, 74, 1); ctx.fillRect(6, 99, 74, 1);
+        var img = G.IMG['mon_' + key];
+        if (img) {
+          var s = Math.min(66 / img.width, 74 / img.height, 1.6);
+          ctx.drawImage(img, Math.round(43 - img.width * s / 2), Math.round(97 - img.height * s),
+                        Math.round(img.width * s), Math.round(img.height * s));
+        }
+
+        // the stat block
+        var bx = 88, by = 20;
+        G.text(ctx, meta.genus.toUpperCase() + ' POKéMON', bx, by, '#2a2a34');
+        G.text(ctx, 'HT  ' + meta.ft + "'" + (meta.inch < 10 ? '0' : '') + meta.inch + '"', bx, by + 12, '#2a2a34');
+        G.text(ctx, 'WT  ' + meta.lb.toFixed(1) + ' lb', bx, by + 22, '#2a2a34');
+        // types, as coloured chips
+        var tx2 = bx;
+        for (var t = 0; t < sp.types.length; t++) {
+          var tn = sp.types[t].toUpperCase();
+          var tw = G.textWidth(tn) + 8;
+          ctx.fillStyle = (G.TYPE_COLORS && G.TYPE_COLORS[sp.types[t]]) || '#888';
+          ctx.fillRect(tx2, by + 33, tw, 11);
+          ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(tx2, by + 42, tw, 2);
+          G.text(ctx, tn, tx2 + 4, by + 35, G.C.white, '#1a1c2c');
+          tx2 += tw + 4;
+        }
+        // base stat bars — the shape of a creature at a glance
+        var STATS = [['HP', 'hp'], ['ATK', 'atk'], ['DEF', 'def'], ['SPC', 'spa'], ['SPE', 'spe']];
+        for (var s2 = 0; s2 < STATS.length; s2++) {
+          var v = sp.base[STATS[s2][1]] || 0, yy = by + 46 + s2 * 8;
+          G.text(ctx, STATS[s2][0], bx, yy - 1, '#5a5a68');
+          ctx.fillStyle = '#c8c4b8'; ctx.fillRect(bx + 24, yy + 1, 60, 4);
+          ctx.fillStyle = v > 100 ? '#3fa757' : v > 65 ? '#d8a838' : '#c05038';
+          ctx.fillRect(bx + 24, yy + 1, Math.round(60 * Math.min(1, v / 140)), 4);
+        }
+
+        // the blurb
+        ctx.fillStyle = '#f8f8f4'; ctx.fillRect(4, 106, W - 8, 40);
+        ctx.fillStyle = '#b8b4a8'; ctx.fillRect(4, 106, W - 8, 1);
+        var lines = G.textWrap(sp.dex || '', W - 20);
+        for (var l = 0; l < Math.min(3, lines.length); l++) {
+          G.text(ctx, lines[l], 10, 111 + l * 11, '#2a2a34');
+        }
+        G.text(ctx, caught ? 'Z: cry   X: back' : 'Not yet caught.   X: back', 8, H - 10, '#5a5a68');
+      }
+    };
+  };
+
+  // ------------------------------------------------------------- options ----
+  // One screen, three settings, and the only one that matters is the first:
+  // whether your lead POKéMON walks behind you. It is off by default because
+  // it is not a Gen 1 behaviour, and on for anyone who wants it because it is
+  // the best thing HeartGold ever added.
+  G.OptionsScene = function () {
+    function opts() { return (G.player.options = G.player.options || {}); }
+    var ITEMS = [
+      { key: 'follower', label: 'FOLLOWER',
+        vals: ['Off', 'Lead', 'Choose'],
+        get: function () { return opts().follower || 'Off'; },
+        set: function (v) { opts().follower = v; G.refreshFollower && G.refreshFollower(); } },
+      { key: 'followPick', label: '  which one',
+        vals: null,   // filled from the party
+        get: function () { var i = opts().followIdx || 0; var m = G.player.party[i]; return m ? G.monName(m) : '—'; },
+        set: null, only: 'Choose' },
+      { key: 'textSpeed', label: 'TEXT SPEED',
+        vals: ['Slow', 'Normal', 'Fast'],
+        get: function () { return opts().textSpeed || 'Normal'; },
+        set: function (v) { opts().textSpeed = v; } },
+      { key: 'battleFx', label: 'BATTLE FX',
+        vals: ['Full', 'Reduced'],
+        get: function () { return opts().battleFx || 'Full'; },
+        set: function (v) { opts().battleFx = v; } }
+    ];
+    function visible() {
+      return ITEMS.filter(function (it) { return !it.only || opts().follower === it.only; });
+    }
+    return {
+      opaque: true,
+      sel: 0,
+      update: function () {
+        var list = visible();
+        this.sel = G.clamp(this.sel, 0, list.length - 1);
+        if (G.input.justPressed('B') || G.input.justPressed('start')) { G.audio.sfx('cancel'); G.popScene(); return; }
+        if (G.input.repeat('up')) { this.sel = (this.sel + list.length - 1) % list.length; G.audio.sfx('menuMove'); }
+        if (G.input.repeat('down')) { this.sel = (this.sel + 1) % list.length; G.audio.sfx('menuMove'); }
+        var it = list[this.sel];
+        var step = G.input.repeat('right') ? 1 : G.input.repeat('left') ? -1 : 0;
+        if (!step) return;
+        G.audio.sfx('menuMove');
+        if (it.key === 'followPick') {
+          var n = Math.max(1, G.player.party.length);
+          opts().followIdx = ((opts().followIdx || 0) + step + n) % n;
+          G.refreshFollower && G.refreshFollower();
+          return;
+        }
+        var cur = it.vals.indexOf(it.get());
+        it.set(it.vals[(cur + step + it.vals.length) % it.vals.length]);
+      },
+      draw: function (ctx) {
+        ctx.fillStyle = '#2a3040'; ctx.fillRect(0, 0, W, H);
+        G.text(ctx, 'OPTIONS', 10, 6, G.C.white, '#1a1c2c');
+        var list = visible();
+        for (var i = 0; i < list.length; i++) {
+          var y = 28 + i * 20, on = i === this.sel;
+          panel(ctx, 10, y - 4, W - 20, 18);
+          G.text(ctx, list[i].label, 20, y + 1, on ? '#f8e878' : G.UI.text, G.UI.textShadow);
+          var v = list[i].get();
+          G.text(ctx, '< ' + v + ' >', W - 26 - G.textWidth('< ' + v + ' >'), y + 1,
+                 on ? '#f8e878' : G.UI.text, G.UI.textShadow);
+        }
+        var hint = list[this.sel] && list[this.sel].key === 'follower'
+          ? 'Your POKéMON walks behind you.'
+          : list[this.sel] && list[this.sel].key === 'battleFx'
+            ? 'Reduced trims move animations.'
+            : '';
+        G.text(ctx, hint, 12, H - 24, G.C.lgry);
+        G.text(ctx, '<> change   X: back', 12, H - 12, G.C.lgry);
       }
     };
   };
