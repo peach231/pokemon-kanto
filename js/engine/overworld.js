@@ -346,19 +346,102 @@
   // A type-colored gym badge: a colored disc (with a highlight + dark rim) that
   // marks a gym by its specialty type. Small floating ones sit over town gym
   // doors; a big one with the type name sits on the gym's battle floor.
+  // A gym announces itself with a SIGNBOARD, not with a floating bubble.
+  //
+  // The old marker was an anti-aliased circle with a specular highlight,
+  // hovering in the air over the door. Two things were wrong with it: circles
+  // drawn with arc() are the only smooth edges in a game made entirely of
+  // 16x16 pixel tiles, so it read as a cursor from a different program; and a
+  // marker that floats is a HUD element, while a gym should be a building you
+  // can see is a gym.
+  //
+  // This is a board on two brackets, bolted to the wall above the door: ink
+  // outline, the specialty type as the field colour, a pale plate across the
+  // middle for the lettering, and a bolt at each corner. Every edge is a
+  // fillRect on a whole pixel.
+  // A six-pixel mark per specialty, so a gym sign says WHICH gym from across
+  // the street. Eight gyms, eight marks: a letter would collide (Fire and
+  // Fighting, Grass and Ground, Poison and Psychic all share an initial) and a
+  // colour alone is not enough for anyone who cannot separate the greens.
+  var TYPE_GLYPH = {
+    rock:     ['..xx..', '.xxxx.', 'xxxxxx', 'xxxxxx', '.xxxx.', '......'],
+    water:    ['..xx..', '..xx..', '.xxxx.', 'xxxxxx', 'xxxxxx', '.xxxx.'],
+    electric: ['...xx.', '..xx..', '.xxxx.', '..xx..', '.xx...', 'xx....'],
+    grass:    ['....xx', '..xxxx', '.xxxx.', 'xxxx..', '.xx...', '.x....'],
+    poison:   ['.xxxx.', 'xxxxxx', 'xx..xx', 'xxxxxx', '.xxxx.', '..xx..'],
+    psychic:  ['.xxxx.', 'xx..xx', 'x.xx.x', 'x.xx.x', 'xx..xx', '.xxxx.'],
+    fire:     ['...x..', '..xx..', '.xxxx.', 'xxxxxx', 'xxxxxx', '.xxxx.'],
+    ground:   ['......', 'xxxxxx', 'xxxxxx', '..xx..', '.xxxx.', 'xxxxxx'],
+    fighting: ['xxxxx.', 'xxxxxx', 'xxxxxx', '.xxxx.', '..xx..', '..xx..'],
+    ice:      ['x.xx.x', '.xxxx.', 'xxxxxx', 'xxxxxx', '.xxxx.', 'x.xx.x']
+  };
+  function drawTypeGlyph(ctx, gx, gy, type, ink) {
+    var rows = TYPE_GLYPH[type];
+    if (!rows) return;
+    ctx.fillStyle = ink;
+    for (var r = 0; r < rows.length; r++) {
+      for (var c = 0; c < rows[r].length; c++) {
+        if (rows[r][c] === 'x') ctx.fillRect(Math.round(gx) + c, Math.round(gy) + r, 1, 1);
+      }
+    }
+  }
+
   function drawTypeBadge(ctx, cx, cy, type, big) {
     var col = (G.TYPE_COLORS && G.TYPE_COLORS[type]) || '#cccccc';
-    var r = big ? 15 : 7;
-    ctx.fillStyle = G.C.ink || '#1a1c2c';
-    ctx.beginPath(); ctx.arc(cx, cy, r + 2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = col;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.beginPath(); ctx.arc(cx - r * 0.32, cy - r * 0.32, r * 0.42, 0, Math.PI * 2); ctx.fill();
-    if (big) {
-      var lbl = type.toUpperCase();
-      var lw = G.textWidth(lbl);
-      G.text(ctx, lbl, Math.round(cx - lw / 2), Math.round(cy + r + 4), G.C.white, G.C.ink);
+    var ink = G.C.ink || '#1a1c2c';
+    var px = function (x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
+
+    if (!big) {
+      // 22x14 board hanging above a door, centred on the tile
+      var bw = 22, bh = 14, bx = cx - bw / 2, by = cy - bh / 2 - 3;
+      px(bx + 6, by - 3, 2, 3, ink);            // brackets
+      px(bx + bw - 8, by - 3, 2, 3, ink);
+      px(bx - 1, by - 1, bw + 2, bh + 2, ink);  // outline
+      px(bx, by, bw, bh, col);                  // the type is the colour
+      px(bx, by, bw, 2, 'rgba(255,255,255,0.34)');       // lit top edge
+      px(bx, by + bh - 2, bw, 2, 'rgba(0,0,0,0.28)');    // shaded lower edge
+      px(bx + 3, by + 4, bw - 6, 6, G.C.pale || '#e8e8f0');  // name plate
+      px(bx + 3, by + 4, bw - 6, 1, 'rgba(0,0,0,0.20)');
+      drawTypeGlyph(ctx, bx + bw / 2 - 3, by + 4, type, ink);
+      // four bolts
+      px(bx + 1, by + 1, 1, 1, ink); px(bx + bw - 2, by + 1, 1, 1, ink);
+      px(bx + 1, by + bh - 2, 1, 1, ink); px(bx + bw - 2, by + bh - 2, 1, 1, ink);
+      return;
+    }
+
+    // The gym battle floor gets the same board, larger, with the type named.
+    var lbl = type.toUpperCase();
+    var lw = G.textWidth(lbl);
+    var w2 = Math.max(46, lw + 14), h2 = 22;
+    var x2 = cx - w2 / 2, y2 = cy - h2 / 2;
+    px(x2 - 1, y2 - 1, w2 + 2, h2 + 2, ink);
+    px(x2, y2, w2, h2, col);
+    px(x2, y2, w2, 3, 'rgba(255,255,255,0.30)');
+    px(x2, y2 + h2 - 3, w2, 3, 'rgba(0,0,0,0.26)');
+    px(x2 + 3, y2 + 3, w2 - 6, h2 - 6, 'rgba(20,22,38,0.55)');
+    G.text(ctx, lbl, Math.round(cx - lw / 2), Math.round(cy - 4), G.C.white, ink);
+  }
+
+  // Buildings cast a shadow onto the tile below their footing. Without it a
+  // town is a flat pattern of coloured rectangles; with it the walls read as
+  // standing UP off the ground, which is most of what makes a Game Boy town
+  // look like a place rather than a floor plan.
+  function drawBuildingShadows(ctx, map, x0, y0, x1, y1, cam) {
+    if (map.indoors || !map.ground) return;
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        var nm = map.legend[map.ground[y][x]];
+        if (nm !== 'wall' && nm !== 'window' && nm !== 'door' && nm !== 'gdoor' && nm !== 'gymdoor') continue;
+        if (y + 1 >= map.h) continue;
+        var below = map.legend[map.ground[y + 1][x]];
+        var bt = G.TILES[below];
+        if (!bt || bt.solid) continue;          // only onto open ground
+        var sx = x * 16 - cam.x, sy = (y + 1) * 16 - cam.y;
+        ctx.fillStyle = 'rgba(24,28,44,0.26)';
+        ctx.fillRect(sx, sy, 16, 4);
+        ctx.fillStyle = 'rgba(24,28,44,0.13)';
+        ctx.fillRect(sx, sy + 4, 16, 3);
+      }
     }
   }
 
@@ -1011,6 +1094,7 @@
       var y1 = Math.min(map.h - 1, Math.ceil((cam.y + G.SCREEN_H) / TILE));
 
       this._drawLayer(ctx, 'ground', x0, y0, x1, y1, cam);
+      drawBuildingShadows(ctx, map, x0, y0, x1, y1, cam);
       this._drawLayer(ctx, 'deco', x0, y0, x1, y1, cam);
 
       // gym interiors are tinted their specialty type's color
@@ -1078,8 +1162,9 @@
       // gym type badge (over a town gym door, or big on the gym battle floor)
       if (map.gymEmblem) {
         var ge = map.gymEmblem;
-        var gbob = ge.big ? 0 : Math.round(Math.sin(G.frame * 0.14) * 1);
-        drawTypeBadge(ctx, ge.x * TILE - cam.x + 8, ge.y * TILE - cam.y + 8 + gbob, ge.type, ge.big);
+        // No bob. A sign bolted to a wall does not bounce, and the bobbing
+        // was what made the old marker read as a collectable.
+        drawTypeBadge(ctx, ge.x * TILE - cam.x + 8, ge.y * TILE - cam.y + 8, ge.type, ge.big);
       }
 
       // swim hint: standing on land, facing deep water

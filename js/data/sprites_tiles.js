@@ -766,13 +766,28 @@
     fill('w')
   ]);
 
-  T('t_gymdoor', { o: C.ink, a: C.gym0, b: C.gym1, c: C.gym2, y: C.yel1, w: C.pale }, [
-    fill('w'), 'wwwoooooooooowww', 'wwwocccccccccwww',
-    'wwwocbbbbbbbcwww', 'wwwocbbbyybbcwww', 'wwwocbbyyyybcwww',
-    'wwwocbbyaayybcww', 'wwwocbyaaaaybcww', 'wwwocbyaaaaybcww',
-    'wwwocbbyaayybcww', 'wwwocbbyyyybcwww', 'wwwocbbbyybbcwww',
-    'wwwocbbbbbbbcwww', 'wwwocbbbbbbbcwww', 'wwwoaaaaaaaaawww',
-    'wwwoooooooooowww'
+  // A gym's double doors. The previous version put a big yellow ring in the
+  // middle of each leaf, which at 16px read as a porthole — two of them side
+  // by side looked like a pair of washing machines set into the wall. This is
+  // what it should have been: two tall leaves, a seam down the centre, long
+  // vertical push-bars, and a glazed panel in each.
+  T('t_gymdoor', { o: C.ink, a: C.gym0, b: C.gym1, c: C.gym2, y: C.yel1, w: C.pale, g: C.blu2 }, [
+    'wwoooooooooooowW'.replace('W', 'w'),
+    'wwoaaaaaaaaaaoww',
+    'wwoabbbbooobbaow'.replace('W', 'w'),
+    'wwoabggboobggaow',
+    'wwoabggboobggaow',
+    'wwoabggboobggaow',
+    'wwoabbbbooobbaow',
+    'wwoabbbboobbbaow',
+    'wwoabybboobybaow',
+    'wwoabybboobybaow',
+    'wwoabybboobybaow',
+    'wwoabbbboobbbaow',
+    'wwoabbbboobbbaow',
+    'wwoaaaaaaaaaaoww',
+    'wwoooooooooooeww'.replace('e', 'o'),
+    'wwwwwwwwwwwwwwww'
   ]);
 
   // Roof-mounted signage — the big red P and the blue MART board.
