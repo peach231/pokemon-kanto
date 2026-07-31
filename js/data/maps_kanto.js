@@ -415,7 +415,7 @@
     deco: blank(24, 28),
     encounters: (G.ENCOUNTERS || {}).viridianforest,
     warps: [
-      { x: 11, y: 0, to: 'route2', tx: 10, ty: 10, dir: 'up' },
+      { x: 13, y: 0, to: 'route2', tx: 10, ty: 10, dir: 'up' },
       { x: 12, y: 0, to: 'route2', tx: 11, ty: 10, dir: 'up' },
       { x: 11, y: 27, to: 'route2', tx: 10, ty: 24, dir: 'down' },
       { x: 12, y: 27, to: 'route2', tx: 10, ty: 24, dir: 'down' }
@@ -628,7 +628,7 @@
       '#...*....#..........#......#',
       '#........#....O.....#......#',
       '#........####.......####.###',
-      '#...................#......#',
+      '#..........................#',
       '#####.####..........#..,,..#',
       '#........#.....*....#..,,..#',
       '#........#..........#.,,,,.#',
@@ -1236,18 +1236,18 @@
     ground: pad([
       '############################',
       '#,,........#...............#',
-      '#,,...*....#....O......*...#',
-      '#####.######.####.#########',
+      '#,,...*.........O......*...#',
+      '#####.######.####.##########',
       '#.....#......#....#........#',
       '#..O..#..*...#....#...O....#',
       '#.....#......#....#........#',
       '#.#####......#....#####.####',
-      '#.....#......#.........#...#',
+      '#.....#......#.............#',
       '#..*..#......#...*.....#...#',
       '#.....########.........#...#',
       '#.....#........#########...#',
       '#######...O....#.......#...#',
-      '#..............#...*...#...#',
+      '#..................*...#...#',
       '#....*.........#.......#...#',
       '#..............#########,,,#',
       '#..........................#',
@@ -1809,11 +1809,11 @@
     ground: pad([
       'tutututututututututututututututu',
       'vxvxvxvxvxvxvxvxvxvxvxvxvxvxvxvx',
-      'tu........ggggg...............tu',
-      'vx........ggggg...............vx',
-      'tuGHI.........................tu',
-      'ppKLMppppppppppppppppppppppppppp',
-      'ppWEWppppppppppppppppppppppppppp',
+      'tuGHI.....ggggg...............tu',
+      'vxKLM.....ggggg...............vx',
+      'tuWEW.........................tu',
+      'pppppppppppppppppppppppppppppppp',
+      'pppppppppppppppppppppppppppppppp',
       'vx.......lllllll..............vx',
       'tu...................ggggg....tu',
       'vx...................ggggg....vx',
@@ -1827,7 +1827,7 @@
       { x: 31, y: 6, to: 'route14', tx: 1, ty: 13, dir: 'right' },
       { x: 0, y: 5, to: 'fuchsia', tx: 28, ty: 9, dir: 'left' },
       { x: 0, y: 6, to: 'fuchsia', tx: 28, ty: 9, dir: 'left' },
-      { x: 3, y: 6, to: 'superrodhut', tx: 4, ty: 7, dir: 'up' }
+      { x: 3, y: 4, to: 'superrodhut', tx: 4, ty: 7, dir: 'up' }
     ],
     signs: [
       { x: 6, y: 4, text: 'ROUTE 15 — FUCHSIA CITY, west. LAVENDER TOWN, a very long way north.' }
@@ -2010,7 +2010,7 @@
       { x: 25, y: 10, to: 'safarizonecenter', tx: 1, ty: 10, dir: 'right' },
       { x: 24, y: 10, to: 'safarizonecenter', tx: 1, ty: 10, dir: 'right' },
       { x: 8, y: 5, to: 'secrethouse', tx: 5, ty: 7, dir: 'up' },
-      { x: 9, y: 5, to: 'secrethouse', tx: 6, ty: 7, dir: 'up' }
+      { x: 7, y: 5, to: 'secrethouse', tx: 6, ty: 7, dir: 'up' }
     ],
     signs: [
       { x: 12, y: 3, text: 'A hut. No path leads to it and nobody will say who built it.' }

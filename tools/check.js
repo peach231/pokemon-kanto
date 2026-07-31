@@ -1200,6 +1200,74 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
 }
 
+// --- can you get out the other side? ---
+// The progression audit asks whether every MAP can be reached. That is a
+// weaker question than it looks, because a map has more than one door: Mt.
+// Moon B1F shipped with its ROUTE 4 stairs behind a solid column, so a player
+// coming down from 1F could wander the whole floor and never leave by the far
+// side. The region still counted as connected, because Diglett's Cave offers a
+// long way round to Cerulean — so the cave on the signposted path from PEWTER
+// to CERULEAN was a dead end and every audit said the world was fine.
+//
+// The invariant is per DOOR, not per map: arrive by any entrance, and every
+// exit must be reachable from where you are standing. Flooding from all the
+// entrances at once is what hides this — the far exit is reachable from the
+// far entrance, which tells you nothing about the near one.
+{
+  const arrivalsOf = {};
+  for (const id in G.MAPS) {
+    for (const w of (G.MAPS[id].warps || [])) {
+      if (!G.MAPS[w.to]) continue;
+      (arrivalsOf[w.to] = arrivalsOf[w.to] || []).push({ x: w.tx, y: w.ty, from: id });
+    }
+  }
+  // Deliberately generous: every HM granted, story shutters open, ledges
+  // passable. Anything this still cannot reach is a wall, not a gate.
+  const pass = (m, x, y) => {
+    if (x < 0 || y < 0 || x >= m.w || y >= m.h) return false;
+    const d = m.deco && m.deco[y] && m.deco[y][x];
+    const n = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[y][x]];
+    const t = n && G.TILES[n];
+    if (!t) return false;
+    if (t.water || t.cut || t.strength || t.story) return true;
+    return !t.solid;
+  };
+  const sealed = [];
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    const outs = (m.warps || []).filter(w => G.MAPS[w.to]);
+    if (outs.length < 2) continue;                 // a dead-end room is fine
+    for (const a of (arrivalsOf[id] || [])) {
+      if (!pass(m, a.x, a.y)) continue;            // bad landing is another audit
+      const seen = new Set([a.x + ',' + a.y]), q = [[a.x, a.y]];
+      while (q.length) {
+        const [x, y] = q.shift();
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+          if (seen.has(k) || !pass(m, nx, ny)) continue;
+          seen.add(k); q.push([nx, ny]);
+        }
+      }
+      // Requiring EVERY exit is too strict, and wrongly: Route 2 is two halves
+      // joined through Viridian Forest, exactly as it is in Red and Blue, so
+      // its north doors are unreachable from its south end by design. What is
+      // never by design is arriving somewhere and being able to reach no way
+      // onward at all — that is a dead end, and the only thing to do is turn
+      // round and go back out the door you came in by.
+      const onward = outs.filter(w => w.to !== a.from);
+      if (!onward.length) continue;              // a house, a shop, a dead-end room
+      if (onward.some(w => seen.has(w.x + ',' + w.y))) continue;
+      sealed.push(`${id}: arriving from ${a.from} at (${a.x},${a.y}) you can reach no way onward — ` +
+        `${onward.map(w => w.to + ' at (' + w.x + ',' + w.y + ')').join(', ')} all walled off, ` +
+        `so the only way out is back to ${a.from}`);
+    }
+  }
+  const uniq = [...new Set(sealed)];
+  for (const s of uniq.slice(0, 10)) errors.push('CROSSING: ' + s);
+  if (uniq.length > 10) errors.push(`CROSSING: …and ${uniq.length - 10} more`);
+  if (!uniq.length) console.log('  crossing: from every entrance, every exit of that map can be reached');
+}
+
 // --- every item kind is actually handled by the bag ---
 // G.ITEM_KINDS already stopped an item from declaring a kind nobody had heard
 // of. It could not stop the reverse: a kind everybody had heard of that the

@@ -3489,6 +3489,17 @@
   // Each floor is the same room with a different counter, because a department
   // store IS that: you are not exploring, you are looking for the right floor.
   // The lift is the stairwell at the west end and it goes both ways.
+  // The south wall of the ground floor needs its front doors cut into it.
+  // Every upper floor stays sealed on purpose — you leave a department store
+  // by the lift you came up in. 1F was sealed too, and that made the whole
+  // shop a one-way trap: both doors existed in the warp table and neither
+  // existed in the wall, so there was no tile you could stand on to use them.
+  function doorRow(doors) {
+    var row = 'IIIIIIIIIIIIII'.split('');
+    (doors || []).forEach(function (x) { row[x] = '.'; });
+    return row.join('');
+  }
+
   function storeFloor(n, name, inventory, opts) {
     opts = opts || {};
     var id = 'celadonstore' + n;
@@ -3507,7 +3518,7 @@
         'I............I',
         'I............I',
         'I............I',
-        'IIIIIIIIIIIIII'
+        doorRow(opts.doors)
       ], 14, 11),
       deco: blank(14, 11),
       shopInventory: inventory,
@@ -3521,6 +3532,7 @@
 
   // 1F is the lobby: no counter, just the directory and the way back out.
   storeFloor(1, 'Reception', null, {
+    doors: [6, 7],
     warps: [
       { x: 6, y: 10, to: 'celadon', tx: 6, ty: 6, dir: 'down' },
       { x: 7, y: 10, to: 'celadon', tx: 7, ty: 6, dir: 'down' },
