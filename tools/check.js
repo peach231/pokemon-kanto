@@ -998,6 +998,13 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   const have = new Set();
   const entriesOf = { playerhome: [{ x: 4, y: 6 }] };
   const seenMaps = new Set(['playerhome']);
+  // How many badges you are carrying the FIRST time each map becomes
+  // reachable. This is the only honest way to ask whether a trainer is too
+  // strong for where it stands: Kanto is gated by geography and HMs far more
+  // than by badges, so counting badge-gates alone flags half the region.
+  const badgesAt = { playerhome: 0 };
+  const badgeCount = () => ['badge1','badge2','badge3','badge4','badge5','badge6','badge7','badge8']
+    .filter(b => have.has(b)).length;
   let grew = true, rounds = 0;
 
   while (grew && rounds++ < 80) {
@@ -1039,6 +1046,7 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
         for (const mt of String(G.EVENTS[ev]).matchAll(/loadMap\(\s*['"]([a-z0-9_]+)['"]/g)) {
           if (G.MAPS[mt[1]] && !seenMaps.has(mt[1])) {
             seenMaps.add(mt[1]);
+            badgesAt[mt[1]] = badgeCount();
             (entriesOf[mt[1]] = entriesOf[mt[1]] || []).push({ x: 9, y: 9 });
             grew = true;
           }
@@ -1056,7 +1064,11 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
           entries.push({ x: w.tx, y: w.ty });
           grew = true;
         }
-        if (!seenMaps.has(w.to)) { seenMaps.add(w.to); grew = true; }
+        if (!seenMaps.has(w.to)) {
+          seenMaps.add(w.to);
+          badgesAt[w.to] = badgeCount();
+          grew = true;
+        }
       }
     }
   }
@@ -1088,6 +1100,31 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
   if (!dark.length && !missing.length) {
     console.log(`  progression: every map, badge and HM reachable from an empty save (${rounds} rounds, walking each map tile by tile)`);
+  }
+
+  // Difficulty ordering, using the badge count computed above rather than a
+  // guess. Route 23 shipped with level-47 teams and its seven badge guards
+  // standing INSIDE the cliff face, so a player who turned left out of
+  // Viridian on day one met an Arcanine twenty levels above anything they
+  // owned. That is the shape of bug this catches.
+  {
+    const BAND = [14, 22, 26, 32, 42, 47, 50, 54, 66];
+    const loud = [];
+    for (const id in G.MAPS) {
+      if (!(id in badgesAt)) continue;
+      const gate = badgesAt[id];
+      const ceiling = BAND[Math.min(BAND.length - 1, gate)] + 10;
+      for (const t of (G.MAPS[id].trainers || [])) {
+        const def = (G.TRAINERS || {})[t.trainer];
+        if (!def || !def.party) continue;
+        const top = Math.max(...def.party.map(p => p.level));
+        if (top > ceiling) {
+          loud.push(`${id} '${t.trainer}' fields Lv${top}, but that map is first reachable on ${gate} badge(s) — expect no more than Lv${ceiling}`);
+        }
+      }
+    }
+    for (const l of loud) warn.push('DIFFICULTY — ' + l);
+    if (!loud.length) console.log(`  difficulty: every trainer is in level band for where it first becomes reachable`);
   }
 }
 

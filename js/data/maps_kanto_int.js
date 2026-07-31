@@ -3696,11 +3696,11 @@
   // very next run. Placement is therefore restricted to tiles with three or
   // more open neighbours: a junction or open ground, never a corridor.
   [
-    ['route23', 12, 31, 'r23_naoko', 'cooltrainerf'],
+    ['route23', 6, 26, 'r23_naoko', 'cooltrainerf'],
     ['route23', 7, 2, 'r23_fidel', 'cooltrainerm'],
     ['route23', 12, 2, 'r23_yuji', 'cooltrainerm'],
-    ['route23', 5, 31, 'r23_warren', 'birdkeeper'],
-    ['route23', 6, 28, 'r23_mary', 'cooltrainerf'],
+    ['route23', 13, 22, 'r23_warren', 'birdkeeper'],
+    ['route23', 6, 18, 'r23_mary', 'cooltrainerf'],
     ['route10', 8, 2, 'r10_nob', 'hiker'],
     ['route10', 13, 2, 'r10_dana', 'picnicker'],
     ['victoryroad3f', 7, 15, 'vr_edgar', 'cooltrainerm'],
@@ -3846,4 +3846,37 @@
       x: e[1], y: e[2], sprite: e[4], dir: 'down', trainer: e[3], sight: 3
     });
   });
+
+  // ROUTE 23's checkpoints. Seven of them, one badge more at each, and they
+  // turn you back rather than merely comment — a guard you can walk past is
+  // scenery, not a gate.
+  G.EVENTS.badgeGate = function* () {
+    // Seven checkpoints, but ROUTE 23 is the LEAGUE ROAD: every trainer on it
+    // is level 47 or higher, because it exists to be the last stretch before
+    // VICTORY ROAD. Gating the first one at a single badge — which is what
+    // Red/Blue does, on a route whose trainers are twenty levels lower — meant
+    // a player who turned left out of VIRIDIAN on day one met a level 47
+    // ARCANINE. The gate has to match what is behind it.
+    var NEED = { 29: 7, 25: 7, 21: 8, 17: 8, 13: 8, 9: 8, 5: 8 };
+    var p = G.world.player;
+    var need = NEED[p.y] || 1;
+    var have = (G.player.badges || []).filter(Boolean).length;
+    if (have >= need) return;                       // walk on through
+    yield { t: 'fn', fn: function () {
+      // step back the way you came and face south again
+      p.y = p.y + 1;
+      p.fromX = p.x; p.fromY = p.y;
+      p.moving = false; p.step = 0;
+      p.dir = 'down';
+      G.audio.sfx('bump');
+    } };
+    yield { t: 'text', s: 'GUARD: Hold it. Nobody goes up this road without ' + need + ' BADGES.' };
+    yield { t: 'text', s: 'GUARD: You are carrying ' + have + '.' };
+    if (have === 0) {
+      yield { t: 'text', s: 'GUARD: Everything past me is LEAGUE country — the trainers up there are twice the level of anything you have met.' };
+      yield { t: 'text', s: 'GUARD: Start at PEWTER. North of VIRIDIAN, through the forest. Come back when you have the set.' };
+    } else {
+      yield { t: 'text', s: 'GUARD: The trainers past this point are LEAGUE standard. I would be doing you no favours.' };
+    }
+  };
 })();

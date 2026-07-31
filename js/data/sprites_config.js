@@ -46,6 +46,21 @@
     remoteIcon:  '{dex}.gif',
     remoteShiny: 'shiny/{dex}.gif',       // lazy-loaded the first time a shiny shows
 
+    // The Gen-5 STATIC back set, used only where the animated one is wrong.
+    remoteBackStill: '../back/{dex}.png',
+
+    // PokeAPI's animated back sprite for RATTATA (#19) is a dark, desaturated
+    // standing figure rather than a purple rear view — the sprite is simply
+    // bad data in that set. Every other one of the 151 is fine: a sweep
+    // comparing mean saturation and luminance of the animated back against the
+    // static back of the same species flagged exactly one entry, #19, at
+    // saturation 0.09 against 0.41 and luminance 69 against 109.
+    //
+    // These fall back to the static Gen-5 back, which is correct. They do not
+    // animate, and a still sprite in the right colours beats a moving one in
+    // the wrong ones.
+    backStill: { 19: true },
+
     preferRemote: true,
     pad: 0,                // PokeAPI uses unpadded ids
     box: 80,               // Gen-5 battlers are up to 96px; 80 keeps them in frame
@@ -60,6 +75,10 @@
     var cap = which.charAt(0).toUpperCase() + which.slice(1);
     var localTpl = cfg['local' + cap] || cfg.localFront;
     var remoteTpl = cfg['remote' + cap] || cfg.remoteFront;
+    // species whose animated back is broken take the static one instead
+    if (which === 'back' && cfg.backStill && cfg.backStill[dexId] && cfg.remoteBackStill) {
+      remoteTpl = cfg.remoteBackStill;
+    }
     var urls = [];
     function add(base, tpl) { if (base && tpl) urls.push(base + tpl.replace('{dex}', dex)); }
     if (cfg.preferRemote) { add(cfg.remoteBase, remoteTpl); add(cfg.localBase, localTpl); }

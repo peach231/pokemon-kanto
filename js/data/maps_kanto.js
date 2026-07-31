@@ -2616,13 +2616,27 @@
       { x: 8, y: 30, text: 'BADGE CHECK GATE 1 — VICTORY ROAD lies beyond. Present all eight BADGES.' }
     ],
     npcs: [
-      { x: 9, y: 29, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
-      { x: 9, y: 25, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
-      { x: 9, y: 21, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
-      { x: 9, y: 17, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
-      { x: 9, y: 13, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
-      { x: 9, y: 9, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' },
-      { x: 9, y: 5, sprite: 'gymguy', dir: 'down', event: 'badgeCheck' }
+      { x: 4, y: 30, sprite: 'gymguy', dir: 'right', event: 'badgeCheck' },
+      { x: 4, y: 26, sprite: 'gymguy', dir: 'right', event: 'badgeCheck' },
+      { x: 4, y: 22, sprite: 'gymguy', dir: 'right', event: 'badgeCheck' },
+      { x: 4, y: 18, sprite: 'gymguy', dir: 'right', event: 'badgeCheck' },
+      { x: 4, y: 14, sprite: 'gymguy', dir: 'right', event: 'badgeCheck' },
+      { x: 4, y: 10, sprite: 'gymguy', dir: 'right', event: 'badgeCheck' },
+      { x: 4, y: 6, sprite: 'gymguy', dir: 'right', event: 'badgeCheck' }
+    ],
+    // The gate itself. Seven checkpoints, one badge more at each, and they
+    // stop you rather than talk at you — the previous version put the
+    // guards inside the cliff face, so ROUTE 23 was walkable from VIRIDIAN
+    // with no badges at all and the first thing you met was a level 47
+    // ARCANINE.
+    scripts: [
+      { x: [3, 16], y: 29, run: 'badgeGate' },
+      { x: [3, 16], y: 25, run: 'badgeGate' },
+      { x: [3, 16], y: 21, run: 'badgeGate' },
+      { x: [3, 16], y: 17, run: 'badgeGate' },
+      { x: [3, 16], y: 13, run: 'badgeGate' },
+      { x: [3, 16], y: 9, run: 'badgeGate' },
+      { x: [3, 16], y: 5, run: 'badgeGate' }
     ]
   };
 
