@@ -780,7 +780,11 @@
         G.text(ctx, 'HP', 12, 20, '#d06028');
         drawStatusTag(ctx, 12, 27, f.status);
       }
-      // player panel
+      // player panel. Gated on the sprite being out, like the foe's: it used
+      // to appear during the send-out, so for a second and a half the screen
+      // showed a trainer with his back to you and a health bar for a POKéMON
+      // that was still in its ball.
+      if (!sprites.p.visible && hpShown.p <= 0) return;
       G.nineSlice(ctx, G.IMG.ui_box, 128, 78, 108, 36, 4);
       G.text(ctx, G.monName(p), 136, 83, G.UI.text, G.UI.textShadow);
       G.text(ctx, 'Lv' + p.level, 204, 83, G.UI.text, G.UI.textShadow);
