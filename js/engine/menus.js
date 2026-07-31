@@ -439,6 +439,30 @@
 
   // Key items mostly just describe themselves, but a few DO something when
   // used from the bag. Returning a string replaces the default description.
+  // An ESCAPE ROPE only means anything underground. The dungeons are exactly
+  // the maps floored in rock, tower stone, scorched board or plating — caves,
+  // MT. MOON, ROCK TUNNEL, VICTORY ROAD, SEAFOAM, the TOWER, the POWER PLANT,
+  // ROCKET HIDEOUT, SILPH and the MANSION — and nothing else. The LEAGUE is
+  // built out of the same floors and is pointedly excluded: the five rooms are
+  // one fight, and a rope out of AGATHA's chamber would be a trapdoor under
+  // the only part of the game with any weight to it.
+  var DUNGEON_FLOORS = { cavefloor: 1, darkfloor: 1, icefloor: 1,
+                         towerfloor: 1, metalfloor: 1, burntfloor: 1 };
+  function useEscapeRope(id) {
+    var map = G.world && G.world.map;
+    if (!map || map.league || !DUNGEON_FLOORS[map.base]) {
+      return 'There is nothing here to climb down from.';
+    }
+    var r = G.player.respawn;
+    if (!r) return 'You have nowhere to climb back to yet.';
+    G.player.bag[id]--;
+    if (!G.player.bag[id]) delete G.player.bag[id];
+    G.audio.sfx('confirm');
+    while (G.scenes.length > 1) G.popScene();      // drop the bag + menu stack
+    G.world.loadMap(r.mapId, r.x, r.y, 'down');
+    return 'You played out the ESCAPE ROPE and climbed back into the light.';
+  }
+
   function useKeyItem(id) {
     if (id === 'townmap') { G.pushScene(G.RegionMapScene()); return ' '; }
     if (id === 'pokeflute') {
@@ -504,6 +528,32 @@
             G.player.repelSteps = item.steps;
             G.audio.sfx('heal');
             G.pushScene(G.Textbox('You spritzed the Repel Mist. Weak wild creatures will keep away!'));
+          } else if (item.kind === 'escape') {
+            // A rope is used on the ceiling, not on a POKéMON. This had no
+            // branch at all, so it fell through to the party picker below,
+            // asked which of your six you wanted to use a length of rope on,
+            // and then told you it had no effect.
+            G.pushScene(G.Textbox(useEscapeRope(id)));
+          } else if (item.kind === 'stone') {
+            // Stones DO want a target, but nothing below knew what to do with
+            // one either — every stone reached the picker and came back "It
+            // had no effect...", which quietly cost the game ten evolutions.
+            G.pushScene(G.PartyScene({
+              pickMode: true,
+              onPick: function (idx) {
+                if (idx < 0) return;
+                var mon = G.player.party[idx];
+                var into = G.stoneEvolution(mon, id);
+                if (!into) {
+                  G.pushScene(G.Textbox('It had no effect on ' + G.monName(mon) + '.'));
+                  return;
+                }
+                G.player.bag[id]--;
+                if (!G.player.bag[id]) delete G.player.bag[id];
+                G.popScene();                       // close the party list
+                G.pushScene(G.EvolutionScene([{ mon: mon, to: into }]));
+              }
+            }));
           } else {
             G.pushScene(G.PartyScene({
               pickMode: true,

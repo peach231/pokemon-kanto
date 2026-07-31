@@ -654,7 +654,11 @@ if (G.SPECIES) {
     console.log(`  TMs: ${tms.length - missing.length}/${tms.length} findable`);
   }
 
-  console.log(`  items: ${seen.size} item kinds, all handled by the engine`);
+  // Careful with the wording. This pass checks that every kind an item claims
+  // is DECLARED, and vice versa — it has never checked that the bag can do
+  // anything with one, and while it said "all handled by the engine" two of
+  // the ten were not. Whether a branch exists is the ITEMKIND pass, below.
+  console.log(`  items: ${seen.size} item kinds, all declared on both sides`);
 }
 
 // --- overworld sprite coverage ---
@@ -1193,6 +1197,70 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     }
     for (const l of loud) warn.push('DIFFICULTY — ' + l);
     if (!loud.length) console.log(`  difficulty: every trainer is in level band for where it first becomes reachable`);
+  }
+}
+
+// --- every item kind is actually handled by the bag ---
+// G.ITEM_KINDS already stopped an item from declaring a kind nobody had heard
+// of. It could not stop the reverse: a kind everybody had heard of that the
+// bag had no branch for. Two of the ten were in that state.
+//
+// `escape` had no branch, so an ESCAPE ROPE fell through to the party picker,
+// asked which POKéMON you wanted to use a length of rope on, and reported that
+// it had no effect. `stone` reached the picker legitimately and then matched
+// none of heal/cure/revive/xp, so every evolution stone in the game came back
+// "It had no effect..." — RAICHU, NINETALES, ARCANINE, VILEPLUME, VICTREEBEL,
+// CLOYSTER, EXEGGUTOR, STARMIE, CLEFABLE, NIDOKING and NIDOQUEEN were all
+// unreachable by the only means that makes them.
+//
+// The dex audit never saw it: it reads the evolution TABLES, which were right.
+{
+  const src = fs.readFileSync('js/engine/menus.js', 'utf8');
+  const bagStart = src.indexOf('function useKeyItem');
+  const bag = bagStart >= 0 ? src.slice(bagStart) : src;
+  const unhandled = (G.ITEM_KINDS || []).filter(k => !bag.includes(`item.kind === '${k}'`));
+  // `heal`, `cure`, `revive` and `xp` are handled inside the shared picker and
+  // do appear by name, so a plain text search is enough here.
+  for (const k of unhandled) {
+    errors.push(`ITEMKIND: '${k}' is a declared item kind, but the bag has no branch for it — items of that kind fall through to the party picker and report no effect`);
+  }
+  if (!unhandled.length) {
+    console.log(`  item kinds: all ${(G.ITEM_KINDS || []).length} declared kinds have a branch in the bag`);
+  }
+}
+
+// --- TM compatibility, asked the way the GAME asks it ---
+// Every audit that touched TMs before this one read G.TM_COMPAT directly, and
+// the table was always right: Charmeleon has had tm01 since the data was
+// generated. What was wrong was the one function standing between the table
+// and the player, which read the species off a mon as `mon.species` when a
+// mon calls it `sp`. Undefined key, empty list, NO — for all 151 species and
+// all 55 machines. Nothing in Kanto could learn a TM or an HM.
+//
+// So this asks G.canLearnTm, with real mons built by G.makeMon, and checks it
+// agrees with the table it is supposed to be reading. A test that consults the
+// data instead of the code cannot catch a broken accessor.
+{
+  const machines = Object.keys(G.TM_MOVES || {});
+  const bad = [];
+  let yes = 0;
+  for (const key in G.SPECIES) {
+    const mon = G.makeMon(key, 30);
+    if (mon.sp !== key) { bad.push(`makeMon('${key}') stores its species as '${mon.sp}'`); break; }
+    for (const tm of machines) {
+      const table = (G.TM_COMPAT[key] || []).indexOf(tm) !== -1;
+      const asked = G.canLearnTm(mon, tm);
+      if (table) yes++;
+      if (table !== asked) {
+        bad.push(`${key} + ${tm}: the table says ${table}, canLearnTm says ${asked}`);
+      }
+    }
+  }
+  if (!yes) bad.push('no species is compatible with any machine — the tables are empty');
+  for (const b of bad.slice(0, 8)) errors.push('TMCOMPAT: ' + b);
+  if (bad.length > 8) errors.push(`TMCOMPAT: …and ${bad.length - 8} more`);
+  if (!bad.length) {
+    console.log(`  tm compat: canLearnTm agrees with the tables across ${Object.keys(G.SPECIES).length} species x ${machines.length} machines (${yes} pairs teachable)`);
   }
 }
 

@@ -223,6 +223,57 @@
       assert(G.ITEMS.pokeball.kind === 'ball', 'pokeball is not kind ball');
     })();
 
+    // END-TO-END BAG USE. Same shape of failure as the capture bug above, and
+    // the same reason a data test could not see it: the ESCAPE ROPE and the
+    // evolution STONES both had correct entries in items.js and no branch in
+    // the bag, so both fell through to the party picker. The rope asked which
+    // POKéMON you wanted to use a length of rope on; the stones asked properly
+    // and then said "It had no effect..." to all ten of their evolutions.
+    //
+    // So this opens the real BagScene, selects the real item and presses A,
+    // and asserts something happened in the world.
+    (function () {
+      if (!G.BagScene || !G.world || !G.world.loadMap) return;
+      var realPlayer = G.player, realScenes = G.scenes.slice();
+
+      // the rope, underground: it should move you, and not ask a question
+      G.player = {
+        party: [G.makeMon('pidgeot', 30)], box: [], bag: { escaperope: 2 },
+        dexSeen: {}, dexCaught: {}, money: 0, badges: [],
+        respawn: { mapId: 'pewter', x: 5, y: 12 }
+      };
+      G.world.loadMap('mtmoon1f', 14, 20, 'down');
+      assert(G.world.map.id === 'mtmoon1f', 'could not reach MT. MOON to test the rope');
+      var bag = G.BagScene();
+      G.pushScene(bag);
+      // press A on the only item in the bag
+      var realInput = G.input;
+      G.input = {
+        held: {},
+        justPressed: function (b) { return b === 'A'; },
+        repeat: function () { return false; },
+        heldDir: function () { return null; }
+      };
+      try { bag.update(); } finally { G.input = realInput; }
+      assert(G.world.map.id === 'pewter',
+        'the ESCAPE ROPE left you in ' + G.world.map.id + ' — it should climb out to the last CENTRE');
+      assert(!G.player.bag.escaperope || G.player.bag.escaperope === 1,
+        'the ESCAPE ROPE was not consumed');
+
+      // and a stone, which must resolve to a real evolution
+      G.player = {
+        party: [G.makeMon('pikachu', 25)], box: [], bag: { thunderstone: 1 },
+        dexSeen: {}, dexCaught: {}, money: 0, badges: [], respawn: null
+      };
+      assert(G.stoneEvolution(G.player.party[0], 'thunderstone') === 'raichu',
+        'a THUNDERSTONE no longer turns PIKACHU into RAICHU');
+      assert(G.stoneEvolution(G.player.party[0], 'firestone') === null,
+        'a FIRE STONE should do nothing to PIKACHU');
+
+      G.scenes = realScenes;
+      G.player = realPlayer;
+    })();
+
     // THE SAFARI ZONE is a different game for one battle: no moves, no foe
     // turn, and two levers that pull the catch rate in opposite directions.
     // Driven end to end here because the menu that exposes it is the only

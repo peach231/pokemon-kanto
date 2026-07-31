@@ -232,10 +232,18 @@
     mew: ['tm01', 'tm02', 'tm03', 'tm04', 'tm05', 'tm06', 'tm07', 'tm08', 'tm09', 'tm10', 'tm11', 'tm12', 'tm13', 'tm14', 'tm15', 'tm16', 'tm17', 'tm18', 'tm19', 'tm20', 'tm21', 'tm22', 'tm23', 'tm24', 'tm25', 'tm26', 'tm27', 'tm28', 'tm29', 'tm30', 'tm31', 'tm32', 'tm33', 'tm34', 'tm35', 'tm36', 'tm37', 'tm38', 'tm39', 'tm40', 'tm41', 'tm42', 'tm43', 'tm44', 'tm45', 'tm46', 'tm47', 'tm48', 'tm49', 'tm50', 'hm01', 'hm02', 'hm03', 'hm04', 'hm05']
   };
 
+  // A mon carries its species in `sp`. This read it as `mon.species`, which is
+  // undefined on every mon the game has ever made, so the lookup fell to an
+  // empty list and the answer was NO for all 151 species and all 55 machines:
+  // nothing in KANTO could be taught a TM or an HM. The compatibility tables
+  // underneath were correct the whole time — CHARMELEON has always had tm01 —
+  // which is why this looked like bad data rather than a one-word typo.
+  //
+  // Takes either a mon or a bare species key, since half the callers of a
+  // question like this only have the species.
   G.canLearnTm = function (mon, tmId) {
-    var sp = mon && G.SPECIES[mon.species];
-    if (!sp) return false;
-    var list = G.TM_COMPAT[mon.species] || [];
-    return list.indexOf(tmId) !== -1;
+    var key = typeof mon === 'string' ? mon : (mon && mon.sp);
+    if (!key || !G.SPECIES[key]) return false;
+    return (G.TM_COMPAT[key] || []).indexOf(tmId) !== -1;
   };
 })();

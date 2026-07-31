@@ -473,11 +473,19 @@ ${list.map(e => `    ${e.id}: ${q(e.move)}`).join(',\n')}
 ${compat}
   };
 
+  // A mon carries its species in \`sp\`. This read it as \`mon.species\`, which is
+  // undefined on every mon the game has ever made, so the lookup fell to an
+  // empty list and the answer was NO for all 151 species and all 55 machines:
+  // nothing in KANTO could be taught a TM or an HM. The compatibility tables
+  // underneath were correct the whole time — CHARMELEON has always had tm01 —
+  // which is why this looked like bad data rather than a one-word typo.
+  //
+  // Takes either a mon or a bare species key, since half the callers of a
+  // question like this only have the species.
   G.canLearnTm = function (mon, tmId) {
-    var sp = mon && G.SPECIES[mon.species];
-    if (!sp) return false;
-    var list = G.TM_COMPAT[mon.species] || [];
-    return list.indexOf(tmId) !== -1;
+    var key = typeof mon === 'string' ? mon : (mon && mon.sp);
+    if (!key || !G.SPECIES[key]) return false;
+    return (G.TM_COMPAT[key] || []).indexOf(tmId) !== -1;
   };
 })();
 `;
