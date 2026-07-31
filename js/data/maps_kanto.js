@@ -320,11 +320,11 @@
       '..GHI...pp......',   // 3  Diglett's Cave — the long way round to Vermilion
       '..KLM...pp..ggg.',
       '..WEW...pp..ggg.',
+      '.......GHI......',
+      '....S..KLM......',
+      '.......WEW......',
       '........pp......',
-      '....S...pp......',
-      '........pp......',
-      '........pp......',
-      '........pp......',   // 10 — the forest's north exit lands here
+      '........pp......',   // 10
       'tutututututututu',   // 12 — the impassable band. No way around the
       'vxvxvxvxvxvxvxvx',   //      forest, only through it.
       'tutututututututu',
@@ -357,6 +357,12 @@
       { x: 10, y: 33, to: 'viridian', tx: 12, ty: 1, dir: 'down' },
       { x: 11, y: 33, to: 'viridian', tx: 13, ty: 1, dir: 'down' },
       { x: 10, y: 23, to: 'viridianforest', tx: 11, ty: 26, dir: 'up' },
+      // The NORTH gate, which was never built. Red and Blue put a gate house
+      // at each end of VIRIDIAN FOREST; with only the southern one the forest
+      // was a one-way door, and since the tree band across the middle of this
+      // route is the only other thing joining its two halves, PEWTER was a
+      // one-way trip. Getting home meant DIGLETT'S CAVE and a lap of Kanto.
+      { x: 10, y: 8, to: 'viridianforest', tx: 12, ty: 1, dir: 'down' },
       { x: 5, y: 5, to: 'diglettscave', tx: 4, ty: 2, dir: 'up' }
     ],
     signs: [
@@ -415,8 +421,8 @@
     deco: blank(24, 28),
     encounters: (G.ENCOUNTERS || {}).viridianforest,
     warps: [
-      { x: 13, y: 0, to: 'route2', tx: 10, ty: 10, dir: 'up' },
-      { x: 12, y: 0, to: 'route2', tx: 11, ty: 10, dir: 'up' },
+      { x: 13, y: 0, to: 'route2', tx: 11, ty: 9, dir: 'up' },
+      { x: 12, y: 0, to: 'route2', tx: 10, ty: 9, dir: 'up' },
       { x: 11, y: 27, to: 'route2', tx: 10, ty: 24, dir: 'down' },
       { x: 12, y: 27, to: 'route2', tx: 10, ty: 24, dir: 'down' }
     ],

@@ -1340,6 +1340,96 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   if (!uniq.length) console.log('  crossing: from every entrance, every exit of that map can be reached');
 }
 
+// --- and can you get BACK? ---
+// The crossing audit asks whether each map has a way onward. That still lets
+// the world be a one-way street: Viridian Forest had a gate house at its south
+// end and none at its north, so you could come out into the Pewter half of
+// Route 2 and never get back in. Since the tree band across the middle of that
+// route is the only other thing joining its halves, Pewter was a one-way trip
+// — and the shortest way home to Pallet was Diglett's Cave, Route 11, and a
+// full lap of Kanto through Lavender, Fuchsia, the sea routes and Cinnabar.
+//
+// Every audit passed. "Every map is reachable" was true, and said nothing at
+// all about coming back.
+{
+  const pass = (m, x, y) => {
+    if (x < 0 || y < 0 || x >= m.w || y >= m.h) return false;
+    const d = m.deco && m.deco[y] && m.deco[y][x];
+    const n = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[y][x]];
+    const t = n && G.TILES[n];
+    if (!t) return false;
+    if (t.water || t.cut || t.strength || t.story) return true;
+    return !t.solid;
+  };
+  const flood = (m, ax, ay) => {
+    const s = new Set([ax + ',' + ay]), q = [[ax, ay]];
+    while (q.length) {
+      const [x, y] = q.shift();
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+        if (s.has(k) || !pass(m, nx, ny)) continue;
+        s.add(k); q.push([nx, ny]);
+      }
+    }
+    return s;
+  };
+  // Nodes are (map, tile you arrived on) — the same map entered by two doors
+  // is genuinely two different places to be standing.
+  const START = 'pallet:5,6';
+  const edges = new Map(), rev = new Map();
+  const seen = new Set([START]), q = [['pallet', 5, 6]];
+  while (q.length) {
+    const [id, ax, ay] = q.shift();
+    const key = id + ':' + ax + ',' + ay;
+    const m = G.MAPS[id];
+    edges.set(key, []);
+    if (!m || !pass(m, ax, ay)) continue;
+    const st = flood(m, ax, ay);
+    for (const w of (m.warps || [])) {
+      if (!G.MAPS[w.to] || !st.has(w.x + ',' + w.y)) continue;
+      const to = w.to + ':' + w.tx + ',' + w.ty;
+      edges.get(key).push(to);
+      if (!rev.has(to)) rev.set(to, []);
+      rev.get(to).push(key);
+      if (seen.has(to)) continue;
+      seen.add(to);
+      q.push([w.to, w.tx, w.ty]);
+    }
+  }
+  // Which nodes can get home? Walk the edges backwards from every Pallet node.
+  const home = new Set();
+  const hq = [...seen].filter(k => k.startsWith('pallet:'));
+  hq.forEach(k => home.add(k));
+  while (hq.length) {
+    const k = hq.shift();
+    for (const from of (rev.get(k) || [])) {
+      if (home.has(from)) continue;
+      home.add(from); hq.push(from);
+    }
+  }
+  // The LEAGUE is one-way by design and leaves by EVENT rather than by door:
+  // the five rooms are a single fight with four intermissions, losing drops
+  // you at your respawn, and the ceremony in the HALL OF FAME walks you back
+  // to your own front room. A warp out of Agatha's chamber would be a trapdoor
+  // under the only part of this game with any weight to it.
+  const BY_DESIGN = new Set(['e4lorelei', 'e4bruno', 'e4agatha', 'e4lance',
+                             'e4champion', 'halloffame']);
+  const stranded = [...seen].filter(k => !home.has(k) && !BY_DESIGN.has(k.split(':')[0]));
+  const byMap = {};
+  for (const k of stranded) {
+    const id = k.split(':')[0];
+    (byMap[id] = byMap[id] || []).push(k.split(':')[1]);
+  }
+  const names = Object.keys(byMap);
+  for (const id of names.slice(0, 8)) {
+    errors.push(`ONEWAY: you can walk into ${id} (arriving at ${byMap[id].join(' / ')}) and never get back to PALLET`);
+  }
+  if (names.length > 8) errors.push(`ONEWAY: …and ${names.length - 8} more maps you cannot come home from`);
+  if (!names.length) {
+    console.log(`  two-way: all ${seen.size} places you can stand have a way back to PALLET`);
+  }
+}
+
 // --- every item kind is actually handled by the bag ---
 // G.ITEM_KINDS already stopped an item from declaring a kind nobody had heard
 // of. It could not stop the reverse: a kind everybody had heard of that the
