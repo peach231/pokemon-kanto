@@ -1296,13 +1296,9 @@
 
       drawTownCard(ctx);
 
-      // controls hint — small + discreet, two tucked lines in the corner
-      var hl1 = 'Z/Space talk  Shift run', hl2 = 'Del back  Enter menu';
-      var hw = Math.max(G.textWidth(hl1), G.textWidth(hl2)) + 6;
-      ctx.fillStyle = 'rgba(20,22,38,0.4)';
-      ctx.fillRect(0, G.SCREEN_H - 19, hw, 19);
-      G.text(ctx, hl1, 3, G.SCREEN_H - 17, G.C.lgry);
-      G.text(ctx, hl2, 3, G.SCREEN_H - 8, G.C.lgry);
+      // The control hints used to live here, pinned to the corner for the
+      // whole playthrough. They are in the menu under HELP now, and the field
+      // is the world and nothing else.
     },
 
     _drawLayer: function (ctx, layer, x0, y0, x1, y1, cam) {

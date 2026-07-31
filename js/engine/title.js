@@ -227,13 +227,21 @@
             }
           } else if (pick === 'NEW GAME') {
             G.newGame();
-            var startGame = function () {
+            var enterWorld = function () {
               G.world.loadMap('playerhome', 4, 4, 'down');
               G.replaceScene(G.overworldScene);
-              G.pushScene(G.Textbox([
-                'A bright Kanto morning, ' + (G.player.name || 'friend') + '! PROF. OAK is expecting you at his lab, just down the road.',
-                '(Arrows to move, Z to talk and confirm, X to cancel, Enter for the menu. M mutes.)'
-              ]));
+              // No control crib here any more — the HELP NOTES cover it, and
+              // this line is for the morning rather than for the keyboard.
+              G.pushScene(G.Textbox(
+                'A bright KANTO morning, ' + (G.player.name || 'friend') + '! PROF. OAK is expecting you at his lab, just down the road.'
+              ));
+            };
+            // The notes are offered once, here, before the world loads — and
+            // declining is free, because everything in them is also said by
+            // somebody standing in KANTO.
+            var startGame = function () {
+              if (G.TutorialPrompt) G.replaceScene(G.TutorialPrompt(enterWorld));
+              else enterWorld();
             };
             var toChar = function () {
               if (G.CharSelectScene) G.replaceScene(G.CharSelectScene(startGame));

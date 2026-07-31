@@ -95,6 +95,19 @@
         var wildKey = G.SPECIES.pidgey ? 'pidgey' : G.DEX_ORDER[0];
         G.pushScene(G.BattleScene(new G.Battle({ party: G.player.party, foes: [G.makeMon(wildKey, 7)], wild: true }), { bg: 'meadow', autoPlay: auto }));
       }
+    } else if (hashIs('help') && G.TutorialScene) {
+      // #help, or #help&p=4 to jump to a page — the notes are the one screen
+      // that is pure layout, so being able to look at any page without
+      // playing to it is worth the four lines.
+      G.pushScene(G.TutorialScene());
+      var hp = parseInt((location.hash.match(/p=(\d+)/) || [])[1] || '0', 10);
+      var ts = G.topScene();
+      for (var hi = 0; hi < hp; hi++) {
+        var realJP = G.input.justPressed;
+        G.input.justPressed = function (b) { return b === 'A'; };
+        ts.update();
+        G.input.justPressed = realJP;
+      }
     } else if (hashIs('charsel') && G.CharSelectScene) {
       G.pushScene(G.CharSelectScene(function () {}));
     } else if (G.TitleScene) {

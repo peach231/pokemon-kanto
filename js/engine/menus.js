@@ -247,7 +247,10 @@
   };
 
   G.StartMenu = function () {
-    var items = ['DEX', 'MAP', 'PARTY', 'BAG', 'OPTION', 'SAVE', 'EXIT'];
+    // HELP is where the field's control hints went. They used to be welded
+    // to the corner of the screen for the whole game; nobody reads them
+    // after the first five minutes and they never go away.
+    var items = ['DEX', 'MAP', 'PARTY', 'BAG', 'HELP', 'OPTION', 'SAVE', 'EXIT'];
     return {
       opaque: false,
       sel: 0,
@@ -263,6 +266,7 @@
           if (pick === 'MAP') G.pushScene(G.RegionMapScene());
           if (pick === 'PARTY') G.pushScene(G.PartyScene());
           if (pick === 'BAG') G.pushScene(G.BagScene());
+          if (pick === 'HELP') G.pushScene(G.TutorialScene());
           if (pick === 'OPTION') G.pushScene(G.OptionsScene());
           if (pick === 'SAVE') {
             G.ask('Save your progress?', function () {
@@ -1308,6 +1312,208 @@
             : '';
         G.text(ctx, hint, 12, H - 24, G.C.lgry);
         G.text(ctx, '<> change   X: back', 12, H - 12, G.C.lgry);
+      }
+    };
+  };
+
+  // ==========================================================================
+  // THE HELP NOTES.
+  //
+  // Red/Blue teaches you by scattering the lesson through the world — the
+  // school in Viridian, the Mart clerk, the guide inside every gym — and never
+  // prints a control hint on the field. This game had it the other way round:
+  // two lines of key bindings welded to the corner of the screen for the whole
+  // playthrough, which is both uglier and less useful, because after five
+  // minutes you stop reading them and they never leave.
+  //
+  // So the hints move in here, the field is clear, and this is offered once at
+  // the start and available forever from the menu. Declining costs nothing:
+  // everything it says is also said by somebody in the world.
+  var TUT_PAGES = [
+    {
+      title: 'MOVING',
+      body: ['Arrow keys or WASD to walk.',
+             'Hold SHIFT to run — you will want this;',
+             'KANTO is bigger than it looks.'],
+      keys: [['Arrows / WASD', 'walk'], ['Shift', 'run']]
+    },
+    {
+      title: 'TALKING',
+      body: ['Face someone and press Z to speak to them.',
+             'Z also reads signs, opens doors, picks things',
+             'up, and confirms a choice. X goes back.'],
+      keys: [['Z or Space', 'talk / confirm'], ['X or Del', 'cancel / back']]
+    },
+    {
+      title: 'THE MENU',
+      body: ['Press ENTER to open it. Everything you own',
+             'and everything you have caught lives in here.'],
+      keys: [['Enter', 'open the menu']]
+    },
+    {
+      title: 'IN THE MENU',
+      // Two real columns rather than space-padding, because the font is
+      // proportional and padded text does not line up.
+      rows: [['DEX', 'every POKéMON seen and caught'],
+             ['MAP', 'the TOWN MAP, and FLY once you have it'],
+             ['PARTY', 'your six — HP, moves and stats'],
+             ['BAG', 'items, TMs and the balls you throw'],
+             ['HELP', 'these notes, any time'],
+             ['OPTION', 'text speed, MOTION and the FOLLOWER'],
+             ['SAVE', 'write your progress down']]
+    },
+    {
+      title: 'TALL GRASS',
+      body: ['Wild POKéMON hide in the long grass.',
+             'Walk through it to find them — and weaken',
+             'one before you throw a ball, or it will break',
+             'out. A sleeping POKéMON is easiest of all.']
+    },
+    {
+      title: 'BATTLES',
+      body: ['FIGHT   choose one of four moves',
+             'BAG     use a potion, or throw a ball',
+             'PARTY   switch to another POKéMON',
+             'RUN     leave a wild battle (never a trainer)',
+             '',
+             'Type matters more than level. WATER beats',
+             'FIRE, FIRE beats GRASS, GRASS beats WATER.']
+    },
+    {
+      title: 'TOWNS',
+      body: ['The building with the RED roof and the',
+             'POKé BALL sign heals your whole party, free,',
+             'every time. The BLUE one sells what you need.',
+             'Healing also sets where you reappear if you',
+             'lose, so drop in when you pass one.']
+    },
+    {
+      title: 'GYMS AND BADGES',
+      body: ['Each city has a GYM — look for the sign on',
+             'the wall with the word on it. Beating the',
+             'LEADER earns a BADGE.',
+             'Eight badges open the road to the LEAGUE,',
+             'and each one lets you use another HM.']
+    },
+    {
+      title: 'HMs',
+      body: ['CUT, FLY, SURF, STRENGTH and FLASH are moves',
+             'that work OUTSIDE battle. Teach one to a',
+             'POKéMON and walk up to the tree, water or',
+             'boulder in your way.',
+             'Half of KANTO is behind one of these.']
+    },
+    {
+      title: 'SAVING',
+      body: ['ENTER, then SAVE. Do it often.',
+             'Your progress waits on the title screen',
+             'under CONTINUE.',
+             '',
+             'That is everything. Press Z to begin.']
+    }
+  ];
+
+  G.TutorialScene = function (onDone) {
+    var page = 0;
+    return {
+      opaque: true,
+      update: function () {
+        if (G.input.justPressed('A') || G.input.justPressed('right')) {
+          if (page >= TUT_PAGES.length - 1) {
+            G.audio.sfx('confirm');
+            G.popScene();
+            if (onDone) onDone();
+            return;
+          }
+          page++; G.audio.sfx('menuMove');
+        }
+        if (G.input.justPressed('left') && page > 0) { page--; G.audio.sfx('menuMove'); }
+        if (G.input.justPressed('B') || G.input.justPressed('start')) {
+          G.audio.sfx('cancel');
+          G.popScene();
+          if (onDone) onDone();
+        }
+      },
+      draw: function (ctx) {
+        var p = TUT_PAGES[page];
+        p.body = p.body || [];
+        ctx.fillStyle = '#1a1c2c'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#2a3050'; ctx.fillRect(0, 0, W, 20);
+        ctx.fillStyle = '#f8e878'; ctx.fillRect(0, 20, W, 1);
+        G.text(ctx, p.title, 8, 6, G.C.white, '#101018');
+        G.text(ctx, (page + 1) + '/' + TUT_PAGES.length, W - 30, 6, '#c2c2d6', '#101018');
+
+        var y = 30;
+        if (p.rows) {
+          for (var r = 0; r < p.rows.length; r++) {
+            G.text(ctx, p.rows[r][0], 12, y, '#f8e878', G.UI.textShadow);
+            G.text(ctx, p.rows[r][1], 62, y, G.UI.text, G.UI.textShadow);
+            y += 12;
+          }
+        } else {
+          for (var i = 0; i < p.body.length; i++) {
+            G.text(ctx, p.body[i], 12, y, G.UI.text, G.UI.textShadow);
+            y += 11;
+          }
+        }
+        // key caps, drawn as actual keys so the binding is unmistakable
+        if (p.keys) {
+          y += 4;
+          for (var k = 0; k < p.keys.length; k++) {
+            var lbl = p.keys[k][0], what = p.keys[k][1];
+            var kw = G.textWidth(lbl) + 10;
+            ctx.fillStyle = '#e8e8f0'; ctx.fillRect(12, y, kw, 13);
+            ctx.fillStyle = '#8a8aa4'; ctx.fillRect(12, y + 11, kw, 2);
+            ctx.fillStyle = '#1a1c2c'; ctx.fillRect(12, y + 13, kw, 1);
+            G.text(ctx, lbl, 17, y + 3, '#1a1c2c');
+            G.text(ctx, what, 20 + kw, y + 3, '#c2c2d6', '#101018');
+            y += 18;
+          }
+        }
+        G.text(ctx, page > 0 ? '< back' : '', 10, H - 11, G.C.lgry);
+        G.text(ctx, page < TUT_PAGES.length - 1 ? 'Z: next    X: skip' : 'Z: start',
+          W - 96, H - 11, '#f8e878');
+      }
+    };
+  };
+
+  // The offer. One question, before the world loads.
+  G.TutorialPrompt = function (onDone) {
+    var sel = 0;
+    return {
+      opaque: true,
+      update: function () {
+        if (G.input.repeat('left') || G.input.repeat('right') ||
+            G.input.repeat('up') || G.input.repeat('down')) { sel ^= 1; G.audio.sfx('menuMove'); }
+        if (G.input.justPressed('B')) { sel = 1; }
+        if (G.input.justPressed('A') || G.input.justPressed('B') || G.input.justPressed('start')) {
+          G.audio.sfx('confirm');
+          G.popScene();
+          if (sel === 0) G.pushScene(G.TutorialScene(onDone));
+          else if (onDone) onDone();
+        }
+      },
+      draw: function (ctx) {
+        ctx.fillStyle = '#1a1c2c'; ctx.fillRect(0, 0, W, H);
+        var t1 = 'First time in KANTO?';
+        var t2 = 'These notes cover the controls, the menu,';
+        var t3 = 'battles, gyms and everything else.';
+        var t4 = 'You can read them any time from the menu.';
+        G.text(ctx, t1, Math.round((W - G.textWidth(t1)) / 2), 34, G.C.white, '#101018');
+        G.text(ctx, t2, Math.round((W - G.textWidth(t2)) / 2), 56, '#c2c2d6', '#101018');
+        G.text(ctx, t3, Math.round((W - G.textWidth(t3)) / 2), 67, '#c2c2d6', '#101018');
+        G.text(ctx, t4, Math.round((W - G.textWidth(t4)) / 2), 84, '#8a8aa4', '#101018');
+        var opts = ['READ THEM', 'SKIP'];
+        for (var i = 0; i < 2; i++) {
+          var ox = 44 + i * 88, oy = 108;
+          var on = i === sel;
+          ctx.fillStyle = on ? '#f8e878' : '#3a4060';
+          ctx.fillRect(ox - 4, oy - 4, 84, 20);
+          ctx.fillStyle = on ? '#2a3050' : '#22263c';
+          ctx.fillRect(ox - 2, oy - 2, 80, 16);
+          G.text(ctx, opts[i], Math.round(ox + 38 - G.textWidth(opts[i]) / 2), oy + 2,
+            on ? '#f8e878' : G.C.lgry);
+        }
       }
     };
   };
