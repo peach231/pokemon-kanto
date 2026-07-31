@@ -2551,124 +2551,124 @@
 
   mansionFloor('mansion1f', 'Pokémon Mansion 1F', [
       '####################',
-      '#..................#',
-      '#.####.######.####.#',
-      '#.#..#.#....#.#..#.#',
-      '#.#..#.#....#.#..#.#',
-      '#.#..#.#.>..#.#..#.#',
-      '#.####.######.####.#',
-      '#..................#',
-      '#.########.#######.#',
-      '#.#......#.#.....#.#',
-      '#.#......#.#.....#.#',
-      '#.#......#.#.....#.#',
-      '#.########.#######.#',
-      '#..................#',
-      '#.####.######.#####.',
-      '#.#..#.#....#......#',
-      '#.#..#.#....#.####.#',
-      '#....#.#....#....#.#',
-      '#########..#########',
+      '#.#.........#.#...##',
+      '#.#####.#.#.#.#.#.##',
+      '#.#.....#.#.....#.##',
+      '#....####.#.#.###.##',
+      '#...........#...#.##',
+      '#.....#.#.#.#.###.##',
+      '#...#.#.#...#.#...##',
+      '#####.#.#.#.#.#.####',
+      '#.....#.......#...##',
+      '#....#...####.###.##',
+      '#.........#...#...##',
+      '#....#...#...##.#.##',
+      '#.#.............#.##',
+      '#.###.####...####.##',
+      '#...#.#...........##',
+      '###.###.#.....###.##',
+      '#.......#.....#...##',
+      '####################',
       '####################'
     ], {
     warps: [
-      { x: 9, y: 18, to: 'cinnabar', tx: 8, ty: 11, dir: 'down' },
-      { x: 10, y: 18, to: 'cinnabar', tx: 9, ty: 11, dir: 'down' },
-      { x: 9, y: 5, to: 'mansion2f', tx: 11, ty: 9, dir: 'up' }
+      { x: 10, y: 17, to: 'cinnabar', tx: 8, ty: 11, dir: 'down' },
+      { x: 17, y: 3, to: 'cinnabar', tx: 9, ty: 11, dir: 'down' },
+      { x: 1, y: 1, to: 'mansion2f', tx: 9, ty: 17, dir: 'up' }
     ],
     signs: [
-      { x: 5, y: 7, text: 'A research journal, water-damaged. "DIARY: JULY 5. GUYANA, SOUTH AMERICA. A new POKéMON was discovered deep in the jungle."' },
-      { x: 14, y: 13, text: 'Scorch marks up the wall, and a handprint in the soot at shoulder height. Someone left in a hurry.' }
+      { x: 1, y: 7, text: 'A research journal, water-damaged. "DIARY: JULY 5. GUYANA, SOUTH AMERICA. A new POKéMON was discovered deep in the jungle."' },
+      { x: 7, y: 3, text: 'Scorch marks up the wall, and a handprint in the soot at shoulder height. Someone left in a hurry.' }
     ],
     items: [
-      { x: 3, y: 9, item: 'escaperope', flag: 'mn_rope' },
-      { x: 16, y: 3, item: 'tm14', flag: 'mn_tm14' }
+      { x: 11, y: 1, item: 'escaperope', flag: 'mn_rope' },
+      { x: 16, y: 7, item: 'tm14', flag: 'mn_tm14' }
     ],
     trainers: [
-      { x: 6, y: 13, sprite: 'scientist', dir: 'right', trainer: 'mn_braydon', sight: 3 },
-      { x: 15, y: 9, sprite: 'burglar', dir: 'left', trainer: 'mn_ramon', sight: 3 }
+      { x: 3, y: 4, sprite: 'scientist', dir: 'right', trainer: 'mn_braydon', sight: 3 },
+      { x: 11, y: 6, sprite: 'burglar', dir: 'left', trainer: 'mn_ramon', sight: 3 }
     ]
   });
 
   mansionFloor('mansion2f', 'Pokémon Mansion 2F', [
       '####################',
-      '#..................#',
-      '#.#####.#####.####.#',
-      '#.#...#.#...#.#..#.#',
-      '#.#...#.#...#.#..#.#',
-      '#.#####.#####.####.#',
-      '#..................#',
-      '#.####.#########.#.#',
-      '#.#..#.#.......#.#.#',
-      '#.#..#.#..>....#.#.#',
-      '#.#..#.#.......#.#.#',
-      '#.####.#########.#.#',
-      '#..................#',
-      '#.#############.##.#',
-      '#.#...........#....#',
-      '#.#....>......#.####',
-      '#.#...........#....#',
-      '#.#############....#',
-      '#..................#',
+      '#.#.....#.....#...##',
+      '#.#.##........#.####',
+      '#.#...........#...##',
+      '#.###....#....#.#.##',
+      '#.............#...##',
+      '#####.....##....#.##',
+      '#.....#...#.....#.##',
+      '#.#####.###.....#.##',
+      '#.#.....#...#...#.##',
+      '#.#.###.#.#.#.#.#.##',
+      '#...#...#.........##',
+      '####....#.#.#####.##',
+      '#.......#.......#.##',
+      '#.##...##.###.#.#.##',
+      '#.#...........#...##',
+      '#.#.#.#.#####.###.##',
+      '#...#.......#.....##',
+      '####################',
       '####################'
     ], {
     warps: [
-      { x: 10, y: 9, to: 'mansion1f', tx: 10, ty: 5, dir: 'down' },
-      { x: 7, y: 15, to: 'mansionb1f', tx: 10, ty: 5, dir: 'down' }
+      { x: 10, y: 17, to: 'mansion1f', tx: 9, ty: 17, dir: 'down' },
+      { x: 17, y: 1, to: 'mansionb1f', tx: 9, ty: 17, dir: 'down' }
     ],
     signs: [
-      { x: 4, y: 3, text: '"DIARY: JULY 10. We named the newly discovered POKéMON MEW."' },
-      { x: 15, y: 8, text: '"DIARY: FEB 6. MEW gave birth. We named the new POKéMON MEWTWO."' }
+      { x: 1, y: 1, text: '"DIARY: JULY 10. We named the newly discovered POKéMON MEW."' },
+      { x: 11, y: 1, text: '"DIARY: FEB 6. MEW gave birth. We named the new POKéMON MEWTWO."' }
     ],
     items: [
-      { x: 3, y: 18, item: 'maxpotion', flag: 'mn_maxpotion' },
-      { x: 16, y: 3, item: 'tm22', flag: 'mn_tm22' }
+      { x: 17, y: 6, item: 'maxpotion', flag: 'mn_maxpotion' },
+      { x: 1, y: 8, item: 'tm22', flag: 'mn_tm22' }
     ],
     trainers: [
-      { x: 9, y: 3, sprite: 'burglar', dir: 'down', trainer: 'mn_dalton', sight: 3 },
-      { x: 5, y: 14, sprite: 'scientist', dir: 'right', trainer: 'mn_ivan', sight: 3 }
+      { x: 13, y: 4, sprite: 'burglar', dir: 'down', trainer: 'mn_dalton', sight: 3 },
+      { x: 4, y: 3, sprite: 'scientist', dir: 'right', trainer: 'mn_ivan', sight: 3 }
     ]
   });
 
   mansionFloor('mansionb1f', 'Pokémon Mansion B1F', [
       '####################',
-      '#..................#',
-      '#.####.######.####.#',
-      '#.#..#.#....#.#..#.#',
-      '#.#..#.#....#.#..#.#',
-      '#.####.#.>..#.####.#',
-      '#......#....#......#',
-      '#.############.###.#',
-      '#.#..........#...#.#',
-      '#.#..........#...#.#',
-      '#.#..........#...#.#',
-      '#.############...#.#',
-      '#................#.#',
-      '#.##############.#.#',
-      '#.#............#.#.#',
-      '#.#............#...#',
-      '#.##############.###',
-      '#..................#',
-      '#..................#',
+      '#...............#.##',
+      '#.#######.#.#.#.#.##',
+      '#.......#.#...#...##',
+      '####....#.#.#####.##',
+      '#.......#.#.#.....##',
+      '#.##...##.#.###.####',
+      '#...#.....#...#...##',
+      '#.#.#....####.###.##',
+      '#.#...........#.#.##',
+      '#.####....#####.#.##',
+      '#.......#.....#...##',
+      '######...#....#.####',
+      '#.............#...##',
+      '#.#.#....#...##.#.##',
+      '#...#.....#.....#.##',
+      '###.#....##.#.###.##',
+      '#...#.......#.....##',
+      '####################',
       '####################'
     ], {
     warps: [
-      { x: 9, y: 5, to: 'mansion2f', tx: 7, ty: 16, dir: 'up' }
+      { x: 10, y: 17, to: 'mansion2f', tx: 9, ty: 17, dir: 'up' }
     ],
     signs: [
-      { x: 5, y: 9, text: '"DIARY: SEPT 1. MEWTWO is far too strong. We have failed to curb its vicious tendencies."' },
-      { x: 14, y: 15, text: 'The last page is not a diary entry. It is a single word, pressed hard enough to tear the paper: RUN.' }
+      { x: 15, y: 3, text: '"DIARY: SEPT 1. MEWTWO is far too strong. We have failed to curb its vicious tendencies."' },
+      { x: 3, y: 1, text: 'The last page is not a diary entry. It is a single word, pressed hard enough to tear the paper: RUN.' }
     ],
     items: [
-      { x: 3, y: 15, item: 'secretkey', flag: 'got_secretkey' },
-      { x: 16, y: 9, item: 'rarecandy', flag: 'mn_candy' },
-      { x: 6, y: 17, item: 'fullrestore', flag: 'mn_full' }
+      { x: 11, y: 4, item: 'secretkey', flag: 'got_secretkey' },
+      { x: 8, y: 1, item: 'rarecandy', flag: 'mn_candy' },
+      { x: 1, y: 5, item: 'fullrestore', flag: 'mn_full' }
     ],
     trainers: [
-      { x: 12, y: 12, sprite: 'burglar', dir: 'left', trainer: 'mn_kelly', sight: 3 }
+      { x: 16, y: 7, sprite: 'burglar', dir: 'left', trainer: 'mn_kelly', sight: 3 }
     ],
     npcs: [
-      { x: 10, y: 17, sprite: 'scientist', dir: 'down',
+      { x: 5, y: 4, sprite: 'scientist', dir: 'down',
         dialog: ['I worked here. I was twenty-four and I thought we were doing biology.',
                  'It got out through the wall. Not a door. The wall.',
                  'They tell people the fire was an accident.'] }
@@ -2847,66 +2847,66 @@
 
   seafoamFloor('seafoam1f', 'Seafoam Islands 1F', [
       '####################',
-      '#iiiiiiii##iiiiiiii#',
-      '#i######i##i######i#',
-      '#i#....i####i....#i#',
-      '#i#.##.iiiiii.##.#i#',
-      '#i#.#O......O#.#..i#',
-      '#i#.#.######.#.#..i#',
-      '#i#.#.#~~~~#.#.#..i#',
-      '#i#...#~~~~#...#..i#',
-      '#i#####~~~~#####..i#',
-      '#i.....>...........#',
-      '#iiiiiiiiiiiiiiiiii#',
-      '#i##..############i#',
-      '#iiii..iiiiiiiiiiii#',
+      '#.#...............##',
+      '#.###.#######.###.##',
+      '#...#.........#.#.##',
+      '###.....#.##....#.##',
+      '#.........#.....#.##',
+      '#.##...####.....#.##',
+      '#.#.#.#.....#...#.##',
+      '#........##.#.#.#.##',
+      '#...........#.#.#.##',
+      '#....#....#####.#.##',
+      '#...#...#.#.....#.##',
+      '###.#####.#.#.###.##',
+      '#.........#.#.....##',
       '####################'
     ], {
     h: 15,
     warps: [
-      { x: 5, y: 13, to: 'route20', tx: 14, ty: 4, dir: 'down' },
-      { x: 6, y: 13, to: 'route20', tx: 15, ty: 4, dir: 'down' },
-      { x: 7, y: 10, to: 'seafoamb1f', tx: 8, ty: 14, dir: 'down' }
+      { x: 6, y: 13, to: 'route20', tx: 14, ty: 4, dir: 'down' },
+      { x: 17, y: 10, to: 'route20', tx: 15, ty: 4, dir: 'down' },
+      { x: 11, y: 13, to: 'seafoamb1f', tx: 7, ty: 15, dir: 'down' }
     ],
     signs: [
-      { x: 10, y: 10, text: 'The current runs south through the rock. Something heavy would stop it.' }
+      { x: 17, y: 5, text: 'The current runs south through the rock. Something heavy would stop it.' }
     ],
     items: [
-      { x: 17, y: 5, item: 'ultraball', flag: 'sf_ultraball' }
+      { x: 16, y: 1, item: 'ultraball', flag: 'sf_ultraball' }
     ]
   });
 
   seafoamFloor('seafoamb1f', 'Seafoam Islands B1F', [
       '####################',
-      '#..................#',
-      '#.####.######.####.#',
-      '#.#~~#.#~~~~#.#~~#.#',
-      '#.#~~#.#~~~~#.#~~#.#',
-      '#.####.######.####.#',
-      '#....O........O....#',
-      '#.################.#',
-      '#.#..............#.#',
-      '#.#....######....#.#',
-      '#.#....#....#....#.#',
-      '#.#....#....#....#.#',
-      '#.#....######....#.#',
-      '#.#..............#.#',
-      '#.####.>....######.#',
-      '#..................#',
+      '#.#...#.........#.##',
+      '#.#....###...##.#.##',
+      '#...............#.##',
+      '####....##....#.#.##',
+      '#...#.#...#...#.#.##',
+      '#.###.#.#.###.#.#.##',
+      '#.#...#.#...#.#.#.##',
+      '#.#.#######.....#.##',
+      '#.#.#.............##',
+      '#.#.#.#.####......##',
+      '#...#...#.........##',
+      '#.###.###.##......##',
+      '#...#...#.....#...##',
+      '###.###.#.###.#.####',
+      '#.......#...#.....##',
       '####################'
     ], {
     h: 17,
     warps: [
-      { x: 7, y: 14, to: 'seafoam1f', tx: 8, ty: 10, dir: 'up' }
+      { x: 7, y: 14, to: 'seafoam1f', tx: 5, ty: 13, dir: 'up' }
     ],
     signs: [
-      { x: 4, y: 15, text: 'It is colder down here than the sea outside has any right to make it.' }
+      { x: 7, y: 1, text: 'It is colder down here than the sea outside has any right to make it.' }
     ],
     items: [
-      { x: 17, y: 1, item: 'maxrevive', flag: 'sf_maxrevive' }
+      { x: 1, y: 1, item: 'maxrevive', flag: 'sf_maxrevive' }
     ],
     npcs: [
-      { x: 10, y: 10, sprite: 'articuno', obj: true, dir: 'down',
+      { x: 17, y: 1, sprite: 'articuno', obj: true, dir: 'down',
         unlessFlag: 'articuno_caught', event: 'articunoEncounter' }
     ]
   });
@@ -3228,8 +3228,8 @@
     ], 10, 9),
     deco: blank(10, 9),
     warps: [
-      { x: 4, y: 7, to: 'cerulean', tx: 7, ty: 12, dir: 'down' },
-      { x: 5, y: 7, to: 'cerulean', tx: 7, ty: 12, dir: 'down' }
+      { x: 4, y: 7, to: 'cerulean', tx: 18, ty: 23, dir: 'down' },
+      { x: 5, y: 7, to: 'cerulean', tx: 18, ty: 23, dir: 'down' }
     ],
     npcs: [
       { x: 4, y: 2, sprite: 'clerk', dir: 'down', event: 'bikeShop' }

@@ -264,7 +264,12 @@
       '...S......pp.......Q..',
       '..........pp..........',
       '..........pp..........'    // 23
-    ], 2)), 26, 24),
+    ], 2))
+      // The south street runs WEST out of town onto ROUTE 22 and the League
+      // road. Without this the border tree stayed put and the warp sat inside
+      // it — present in the warp graph, unreachable on foot.
+      .map(function (r, i) { return i === 15 ? 'pp' + r.slice(2) : r; }),
+      26, 24),
     deco: blank(26, 24),
     warps: [
       { x: 12, y: 0, to: 'route2', tx: 10, ty: 32, dir: 'up' },
@@ -728,9 +733,9 @@
       '...WNDW...pp....WNEW..',
       '..........pp..........',
       '..S.......pp.......Q..',
-      '..........pp..........',
-      '..........pp..........',
-      '..........pp..........'    // 23
+      '..........pp..1223....',
+      '..........pp..4556....',
+      '..........pp..WNDW....'    // 23
     ], 2))
       // The south street runs west onto Route 4 and east onto Route 9.
       .map(function (r, i) { return i === 13 ? 'pp' + r.slice(2, 24) + 'pp' : r; }),
@@ -748,8 +753,9 @@
       { x: 6, y: 11, to: 'ceruleangym', tx: 6, ty: 12, dir: 'up' },
       { x: 20, y: 5, to: 'ceruleancentre', tx: 4, ty: 6, dir: 'up' },
       { x: 20, y: 17, to: 'ceruleanmart', tx: 4, ty: 6, dir: 'up' },
-      { x: 7, y: 11, to: 'bikeshop', tx: 4, ty: 7, dir: 'up' },
+
       { x: 20, y: 11, to: 'ceruleanhouse', tx: 4, ty: 7, dir: 'up' },
+      { x: 18, y: 22, to: 'bikeshop', tx: 4, ty: 7, dir: 'up' },
       { x: 7, y: 17, to: 'robbedhouse', tx: 4, ty: 7, dir: 'up' },
       { x: 2, y: 3, to: 'ceruleancave1f', tx: 1, ty: 15, dir: 'up', needFlag: 'badge7',
         deniedText: 'A steel shutter, with a notice bolted to it: UNSTABLE. LEAGUE PERSONNEL ONLY. Seven BADGES is what the LEAGUE counts as personnel.' }
@@ -1300,8 +1306,8 @@
       { x: 11, y: 0, to: 'rocktunnel1f', tx: 25, ty: 14, dir: 'up' },
       { x: 10, y: 15, to: 'lavender', tx: 12, ty: 1, dir: 'down' },
       { x: 11, y: 15, to: 'lavender', tx: 13, ty: 1, dir: 'down' },
-      { x: 17, y: 8, to: 'powerplant', tx: 20, ty: 15, dir: 'right' },
-      { x: 17, y: 9, to: 'powerplant', tx: 20, ty: 15, dir: 'right' }
+      { x: 17, y: 8, to: 'powerplant', tx: 19, ty: 15, dir: 'right' },
+      { x: 17, y: 9, to: 'powerplant', tx: 19, ty: 15, dir: 'right' }
     ],
     signs: [
       { x: 9, y: 12, text: 'ROUTE 10 — LAVENDER TOWN to the south.' },
@@ -1671,7 +1677,7 @@
       { x: 1, y: 24, to: 'route11', tx: 30, ty: 6, dir: 'left' },
       { x: 10, y: 31, to: 'route13', tx: 2, ty: 2, dir: 'down' },
       { x: 11, y: 31, to: 'route13', tx: 3, ty: 2, dir: 'down' },
-      { x: 6, y: 22, to: 'fishinghut', tx: 4, ty: 7, dir: 'up' }
+      { x: 5, y: 22, to: 'fishinghut', tx: 4, ty: 7, dir: 'up' }
     ],
     signs: [
       { x: 6, y: 7, text: 'ROUTE 12 — SILENCE BRIDGE. Fishing from the rail is permitted.' }
@@ -2327,8 +2333,8 @@
       { x: 33, y: 7, to: 'route19', tx: 9, ty: 20, dir: 'right' },
       { x: 0, y: 6, to: 'cinnabar', tx: 20, ty: 8, dir: 'left' },
       { x: 0, y: 7, to: 'cinnabar', tx: 20, ty: 9, dir: 'left' },
-      { x: 14, y: 4, to: 'seafoam1f', tx: 4, ty: 12, dir: 'up' },
-      { x: 15, y: 4, to: 'seafoam1f', tx: 5, ty: 12, dir: 'up' }
+      { x: 14, y: 4, to: 'seafoam1f', tx: 5, ty: 13, dir: 'up' },
+      { x: 15, y: 4, to: 'seafoam1f', tx: 5, ty: 13, dir: 'up' }
     ],
     signs: [
       { x: 13, y: 7, text: 'SEAFOAM ISLANDS — Sea currents run right through the caves. Do not enter without a plan.' }
@@ -2435,10 +2441,10 @@
       { x: 8, y: 5, to: 'cinnabarlab', tx: 6, ty: 11, dir: 'up' },
       { x: 15, y: 5, to: 'cinnabarcentre', tx: 4, ty: 6, dir: 'up' },
       { x: 8, y: 10, to: 'mansion1f', tx: 9, ty: 17, dir: 'up' },
-      { x: 9, y: 10, to: 'mansion1f', tx: 10, ty: 17, dir: 'up' },
+      { x: 9, y: 10, to: 'mansion1f', tx: 9, ty: 17, dir: 'up' },
       { x: 6, y: 14, to: 'cinnabargym', tx: 5, ty: 16, dir: 'up' },
       { x: 7, y: 14, to: 'cinnabargym', tx: 6, ty: 16, dir: 'up' },
-      { x: 16, y: 14, to: 'cinnabarmart', tx: 4, ty: 6, dir: 'up' }
+      { x: 15, y: 14, to: 'cinnabarmart', tx: 4, ty: 6, dir: 'up' }
     ],
     signs: [
       { x: 5, y: 15, text: 'CINNABAR ISLAND — The Fiery Town of Burning Desire.' },
@@ -2471,39 +2477,39 @@
     legend: { '.': 'metalfloor', '#': 'metalwall' },
     ground: pad([
       '######################',
-      '#....................#',
-      '#.####.####.####.###.#',
-      '#.#..........#.....#.#',
-      '#.#.####.###.#.###.#.#',
-      '#...#......#...#.....#',
-      '#.###.####.#####.###.#',
-      '#.....#..........#...#',
-      '#.#####.########.#.###',
-      '#.......#......#.#...#',
-      '#.#####.#.####.#.###.#',
-      '#.#...#.#.#..#.#...#.#',
-      '#.#.#.#.#.#..#.###.#.#',
-      '#...#...#....#.....#.#',
-      '#.#########.##########',
-      '#..........#..........',
+      '#.....#...#...#.....##',
+      '#.........#.....#.#.##',
+      '#.........#.....#.#.##',
+      '#.........#....##.#.##',
+      '#.......#.#.......#.##',
+      '####...##.#.#######.##',
+      '#.........#.#.....#.##',
+      '#.###.#######.#.#.#.##',
+      '#.....#.......#...#.##',
+      '#.###.#....####.###.##',
+      '#.#...........#.#...##',
+      '#.###.##....#.#.#.#.##',
+      '#...#...#...#.#.#.#.##',
+      '###.###.#.###.#.###.##',
+      '#.......#...#.......##',
       '######################'
     ], 22, 17),
     deco: blank(22, 17),
     encounters: (G.ENCOUNTERS || {}).powerplant,
     warps: [
-      { x: 21, y: 15, to: 'route10', tx: 16, ty: 8, dir: 'right' }
+      { x: 19, y: 14, to: 'route10', tx: 16, ty: 8, dir: 'right' }
     ],
     signs: [
-      { x: 2, y: 1, text: 'A safety notice, sun-bleached to nothing. Only the word DANGER survives.' },
-      { x: 10, y: 9, text: 'The floor here is warm. The hum is coming up through your boots.' }
+      { x: 9, y: 1, text: 'A safety notice, sun-bleached to nothing. Only the word DANGER survives.' },
+      { x: 1, y: 1, text: 'The floor here is warm. The hum is coming up through your boots.' }
     ],
     items: [
-      { x: 3, y: 11, item: 'tm25', flag: 'pp_tm25' },
-      { x: 18, y: 3, item: 'maxrepel', flag: 'pp_maxrepel' },
-      { x: 6, y: 13, item: 'ultraball', flag: 'pp_ultraball' }
+      { x: 1, y: 15, item: 'tm25', flag: 'pp_tm25' },
+      { x: 11, y: 7, item: 'maxrepel', flag: 'pp_maxrepel' },
+      { x: 7, y: 4, item: 'ultraball', flag: 'pp_ultraball' }
     ],
     npcs: [
-      { x: 10, y: 1, sprite: 'zapdos', obj: true, dir: 'down', unlessFlag: 'zapdos_caught', event: 'zapdosEncounter' }
+      { x: 2, y: 5, sprite: 'zapdos', obj: true, dir: 'down', unlessFlag: 'zapdos_caught', event: 'zapdosEncounter' }
     ]
   };
 
@@ -2602,7 +2608,7 @@
       { x: 9, y: 0, to: 'victoryroad1f', tx: 9, ty: 17, dir: 'up',
         needFlag: ['badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8'],
         deniedText: 'The final gate reads your BADGE CASE, finds a gap in it, and does not open. VICTORY ROAD takes all eight or none.' },
-      { x: 10, y: 0, to: 'victoryroad1f', tx: 10, ty: 17, dir: 'up',
+      { x: 10, y: 0, to: 'victoryroad1f', tx: 9, ty: 17, dir: 'up',
         needFlag: ['badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8'],
         deniedText: 'The final gate reads your BADGE CASE, finds a gap in it, and does not open. VICTORY ROAD takes all eight or none.' }
     ],
@@ -2644,119 +2650,119 @@
 
   victoryFloor('victoryroad1f', 'Victory Road 1F', [
       '####################',
-      '#..................#',
-      '#.####.######.####.#',
-      '#.#..#.#....#.#..#.#',
-      '#.#..#.#.O..#.#..#.#',
-      '#.#..#.#....#.#..#.#',
-      '#.####.###.##.####.#',
-      '#........O.........#',
-      '#.##.############.##',
-      '#..#.#..........#..#',
-      '#.O#.#.########.#..#',
-      '#..#.#.#......#.#..#',
-      '#..#...#..>...#....#',
-      '#..#####..#####..###',
-      '#................###',
-      '#.####.#######.#####',
-      '#......#.....#......',
-      '########.....#######',
-      '#..................#',
+      '#...#.............##',
+      '###.#.#####.#.#.#.##',
+      '#.....#.....#.....##',
+      '#.#####.#.#######.##',
+      '#.....#.#.#...#...##',
+      '#####.#.#.#....##.##',
+      '#.....#...#.....#.##',
+      '#.#####.##......#.##',
+      '#.#...#.......#.#.##',
+      '#.###.#.#.....#.#.##',
+      '#.......#.....#.#.##',
+      '###.##########....##',
+      '#.#.......#.......##',
+      '#.##...##.#.##....##',
+      '#.......#...#.....##',
+      '#.##....#.#.#.###.##',
+      '#...#.......#.....##',
+      '####################',
       '####################'
     ], {
     h: 20,
     warps: [
-      { x: 9, y: 18, to: 'route23', tx: 9, ty: 1, dir: 'down' },
-      { x: 10, y: 18, to: 'route23', tx: 10, ty: 1, dir: 'down' },
-      { x: 10, y: 12, to: 'victoryroad2f', tx: 8, ty: 8, dir: 'up' }
+      { x: 10, y: 17, to: 'route23', tx: 9, ty: 1, dir: 'down' },
+      { x: 5, y: 1, to: 'route23', tx: 10, ty: 1, dir: 'down' },
+      { x: 10, y: 1, to: 'victoryroad2f', tx: 9, ty: 15, dir: 'up' }
     ],
     signs: [
-      { x: 4, y: 14, text: 'VICTORY ROAD. Someone has scratched a tally into the wall. It stops at forty-one.' }
+      { x: 2, y: 3, text: 'VICTORY ROAD. Someone has scratched a tally into the wall. It stops at forty-one.' }
     ],
     items: [
-      { x: 3, y: 16, item: 'tm05', flag: 'vr_tm05' }
+      { x: 13, y: 3, item: 'tm05', flag: 'vr_tm05' }
     ],
     trainers: [
-      { x: 6, y: 9, sprite: 'cooltrainerm', dir: 'down', trainer: 'vr_naoko', sight: 3 },
-      { x: 15, y: 14, sprite: 'cooltrainerf', dir: 'left', trainer: 'vr_george', sight: 3 }
+      { x: 16, y: 1, sprite: 'cooltrainerm', dir: 'down', trainer: 'vr_naoko', sight: 3 },
+      { x: 9, y: 5, sprite: 'cooltrainerf', dir: 'left', trainer: 'vr_george', sight: 3 }
     ]
   });
 
   victoryFloor('victoryroad2f', 'Victory Road 2F', [
       '####################',
-      '#..................#',
-      '#.##############.#.#',
-      '#.#............#.#.#',
-      '#.#.##########.#.#.#',
-      '#.#.#........#.#.#.#',
-      '#.#.#.######.#.#.#.#',
-      '#.#.#.#....#.#.#.#.#',
-      '#.#.#.#.>O.#.#.#.#.#',
-      '#.#.#.#....#.#.#...#',
-      '#.#.#.###.##.#.####.',
-      '#.#.#......#.#.....#',
-      '#.#.########.#####.#',
-      '#.#.........O.....##',
-      '#.###############..#',
-      '#.................>#',
+      '#...#...#.....#...##',
+      '###.#.#.....#.#.#.##',
+      '#.#...#.....#.#.#.##',
+      '#.#####.....#.###.##',
+      '#.....#.....#.#...##',
+      '#.##.......##.#.####',
+      '#.......#.#...#...##',
+      '###....##.#.#.#.#.##',
+      '#.#.......#.#.....##',
+      '#.###.###.#.#####.##',
+      '#...#...#.......#.##',
+      '#.#.#.#....####.#.##',
+      '#...#.#.........#.##',
+      '#.#.#.#.....#.#.#.##',
+      '#.#...#.......#...##',
       '####################'
     ], {
     h: 17,
     warps: [
-      { x: 8, y: 8, to: 'victoryroad1f', tx: 11, ty: 12, dir: 'down' },
-      { x: 18, y: 15, to: 'victoryroad3f', tx: 9, ty: 15, dir: 'up' }
+      { x: 10, y: 15, to: 'victoryroad1f', tx: 9, ty: 17, dir: 'down' },
+      { x: 15, y: 3, to: 'victoryroad3f', tx: 9, ty: 17, dir: 'up' }
     ],
     signs: [
-      { x: 5, y: 11, text: 'A boulder, seated in a socket worn smooth. It has been pushed into place many times.' }
+      { x: 1, y: 1, text: 'A boulder, seated in a socket worn smooth. It has been pushed into place many times.' }
     ],
     items: [
-      { x: 3, y: 3, item: 'maxrevive', flag: 'vr_maxrevive' },
-      { x: 17, y: 1, item: 'fullrestore', flag: 'vr_full' }
+      { x: 1, y: 9, item: 'maxrevive', flag: 'vr_maxrevive' },
+      { x: 4, y: 3, item: 'fullrestore', flag: 'vr_full' }
     ],
     trainers: [
-      { x: 5, y: 5, sprite: 'cooltrainerm', dir: 'right', trainer: 'vr_daisuke', sight: 3 },
-      { x: 12, y: 11, sprite: 'pokemaniac', dir: 'left', trainer: 'vr_dawson', sight: 3 }
+      { x: 17, y: 7, sprite: 'cooltrainerm', dir: 'right', trainer: 'vr_daisuke', sight: 3 },
+      { x: 1, y: 15, sprite: 'pokemaniac', dir: 'left', trainer: 'vr_dawson', sight: 3 }
     ]
   });
 
   victoryFloor('victoryroad3f', 'Victory Road 3F', [
       '####################',
-      '#..................#',
-      '#.####.#....#.####.#',
-      '#.#..#.#....#.#..#.#',
-      '#.#..#.#....#.#..#.#',
-      '#.####.#.O..#.####.#',
-      '#......#....#......#',
-      '#.####.######.####.#',
-      '#.#..............#.#',
-      '#.#.O..........O.#.#',
-      '#.#..............#.#',
-      '#.################.#',
-      '#..................#',
-      '#.####.######.####.#',
-      '#.#..#.#....#.#..#.#',
-      '#.#..#.#.>..#.#..#.#',
-      '#.####.######.####.#',
-      '#..................#',
+      '#.#.....#.....#...##',
+      '#.#.###.#.##....#.##',
+      '#...#...#.......#.##',
+      '#####.###......##.##',
+      '#...#.#.........#.##',
+      '###.#........####.##',
+      '#...........#.....##',
+      '#.####....###.....##',
+      '#.....#...........##',
+      '#.###.########...###',
+      '#.#.............#.##',
+      '#.#.#####.###.#.#.##',
+      '#...#...#...#.#...##',
+      '###.###.###.###.#.##',
+      '#.#.#...#.#.....#.##',
+      '#.#.#.#.#.#######.##',
+      '#.....#...........##',
       '####################'
     ], {
     h: 19,
     warps: [
-      { x: 9, y: 15, to: 'victoryroad2f', tx: 17, ty: 15, dir: 'down' },
-      { x: 9, y: 1, to: 'indigo', tx: 9, ty: 18, dir: 'up' },
-      { x: 10, y: 1, to: 'indigo', tx: 10, ty: 18, dir: 'up' }
+      { x: 10, y: 17, to: 'victoryroad2f', tx: 9, ty: 15, dir: 'down' },
+      { x: 1, y: 1, to: 'indigo', tx: 9, ty: 18, dir: 'up' },
+      { x: 12, y: 1, to: 'indigo', tx: 10, ty: 18, dir: 'up' }
     ],
     signs: [
-      { x: 4, y: 12, text: 'Light from above. The exit is close, and it is the last piece of KANTO you will walk through as a challenger.' }
+      { x: 6, y: 1, text: 'Light from above. The exit is close, and it is the last piece of KANTO you will walk through as a challenger.' }
     ],
     items: [
-      { x: 16, y: 17, item: 'tm47', flag: 'vr_tm47' }
+      { x: 15, y: 5, item: 'tm47', flag: 'vr_tm47' }
     ],
     trainers: [
-      { x: 4, y: 6, sprite: 'cooltrainerf', dir: 'right', trainer: 'vr_caroline', sight: 3 }
+      { x: 7, y: 5, sprite: 'cooltrainerf', dir: 'right', trainer: 'vr_caroline', sight: 3 }
     ],
     npcs: [
-      { x: 15, y: 12, sprite: 'moltres', obj: true, dir: 'down',
+      { x: 11, y: 6, sprite: 'moltres', obj: true, dir: 'down',
         unlessFlag: 'moltres_caught', event: 'moltresEncounter' }
     ]
   });
@@ -2773,34 +2779,34 @@
     legend: G.LEG_CAVE,
     ground: pad([
       '####################',
-      '#..................#',
-      '#.####.######.####.#',
-      '#.#..#.#~~~~#.#..#.#',
-      '#.#..#.#~~~~#.#..#.#',
-      '#.####.######.####.#',
-      '#..................#',
-      '#.##############.###',
-      '#.#............#...#',
-      '#.#.##########.#.#.#',
-      '#.#.#........#.#.#.#',
-      '#.#.#.>......#...#.#',
-      '#.#.##########.###.#',
-      '#.#............#...#',
-      '#.##############.###',
-      '#..................#',
+      '#...#.#.........#.##',
+      '#.....#.###.#.#.#.##',
+      '#.......#.....#.#.##',
+      '#.....###.###.#.#.##',
+      '#.#.........#.#...##',
+      '#.#.#########.#.#.##',
+      '#.#...#.....#...#.##',
+      '#.####...##.....#.##',
+      '#.........#.......##',
+      '#.#.#.....##...##.##',
+      '#.#...#...........##',
+      '#.###.#........##.##',
+      '#.#...#...........##',
+      '#.#.###....#...#####',
+      '#...#...#.........##',
       '####################'
     ], 20, 17),
     deco: blank(20, 17),
     encounters: (G.ENCOUNTERS || {}).ceruleancave1f,
     warps: [
-      { x: 1, y: 15, to: 'cerulean', tx: 3, ty: 3, dir: 'down' },
-      { x: 6, y: 11, to: 'ceruleancave2f', tx: 9, ty: 13, dir: 'down' }
+      { x: 2, y: 15, to: 'cerulean', tx: 3, ty: 3, dir: 'down' },
+      { x: 17, y: 1, to: 'ceruleancave2f', tx: 9, ty: 13, dir: 'down' }
     ],
     signs: [
-      { x: 4, y: 6, text: 'The rock here is scored in long parallel lines, at a height nothing native to this cave could reach.' }
+      { x: 17, y: 6, text: 'The rock here is scored in long parallel lines, at a height nothing native to this cave could reach.' }
     ],
     items: [
-      { x: 17, y: 1, item: 'fullrestore', flag: 'cc_full' }
+      { x: 13, y: 2, item: 'fullrestore', flag: 'cc_full' }
     ]
   };
 
@@ -2810,34 +2816,34 @@
     legend: G.LEG_CAVE,
     ground: pad([
       '####################',
-      '#..................#',
-      '#.################.#',
-      '#.#~~~~~~~~~~~~~~#.#',
-      '#.#~~~~~~~~~~~~~~#.#',
-      '#.#~~~##########~#.#',
-      '#.#~~~#........#~#.#',
-      '#.#~~~#........#~#.#',
-      '#.#~~~#........#~#.#',
-      '#.#~~~##.#######~#.#',
-      '#.#~~~~~~~~~~~~~~#.#',
-      '#.#~~~~~~~~~~~~~~#.#',
-      '#.################.#',
-      '#........>.........#',
+      '#.#...#.......#...##',
+      '#.#.....#####.#.#.##',
+      '#.#.....#...#.....##',
+      '#.#....####.......##',
+      '#.....#...........##',
+      '#.###.....#......###',
+      '#.........#.#.....##',
+      '###.##...##.#.#.#.##',
+      '#.......#...#.#.#.##',
+      '#.#.###.###.#.###.##',
+      '#...#.#...#.#...#.##',
+      '#.###.###.#####.#.##',
+      '#.......#.........##',
       '####################'
     ], 20, 15),
     deco: blank(20, 15),
     encounters: (G.ENCOUNTERS || {}).ceruleancaveb1f,
     warps: [
-      { x: 9, y: 13, to: 'ceruleancave1f', tx: 7, ty: 11, dir: 'up' }
+      { x: 10, y: 13, to: 'ceruleancave1f', tx: 1, ty: 15, dir: 'up' }
     ],
     signs: [
-      { x: 4, y: 13, text: 'The water in here does not move. Not with the current, not with your footsteps. Not at all.' }
+      { x: 16, y: 1, text: 'The water in here does not move. Not with the current, not with your footsteps. Not at all.' }
     ],
     items: [
-      { x: 18, y: 11, item: 'maxrevive', flag: 'cc_maxrevive' }
+      { x: 11, y: 1, item: 'maxrevive', flag: 'cc_maxrevive' }
     ],
     npcs: [
-      { x: 10, y: 7, sprite: 'mewtwo', obj: true, dir: 'down',
+      { x: 7, y: 13, sprite: 'mewtwo', obj: true, dir: 'down',
         unlessFlag: 'mewtwo_caught', event: 'mewtwoEncounter' }
     ]
   };
@@ -2882,8 +2888,8 @@
     ], 20, 20),
     deco: blank(20, 20),
     warps: [
-      { x: 9, y: 19, to: 'victoryroad3f', tx: 9, ty: 2, dir: 'down' },
-      { x: 10, y: 19, to: 'victoryroad3f', tx: 10, ty: 2, dir: 'down' },
+      { x: 9, y: 19, to: 'victoryroad3f', tx: 9, ty: 17, dir: 'down' },
+      { x: 10, y: 19, to: 'victoryroad3f', tx: 9, ty: 17, dir: 'down' },
       { x: 9, y: 1, to: 'e4lorelei', tx: 9, ty: 11, dir: 'up' },
       { x: 10, y: 1, to: 'e4lorelei', tx: 10, ty: 11, dir: 'up' }
     ],

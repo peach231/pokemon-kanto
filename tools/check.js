@@ -560,15 +560,22 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
 // own bedroom with no badges and no HMs, does the world open up in an order
 // that actually works?
 //
-// It is a fixpoint. Reachable maps grant items, badges and flags; those grant
-// capabilities; capabilities open more warps. Iterate until nothing new
-// appears, then check what is still dark. A cycle — SURF locked behind a door
-// that needs SURF — shows up here as a set of maps that never become
-// reachable, which is exactly the bug that is impossible to see by reading the
-// map files and catastrophic to ship.
+// It is a fixpoint over two things at once:
+//
+//   * WHERE YOU CAN STAND — a flood fill inside each map from the tiles you
+//     arrive on, respecting solid terrain, water you cannot yet SURF, trees
+//     you cannot yet CUT, boulders you cannot yet shift, and NPCs who are
+//     standing in the way given the flags you currently hold. A SNORLAX
+//     asleep across a two-tile road is a wall until the flute exists, and
+//     that has to be part of the model or the model is a lie.
+//   * WHAT YOU ARE HOLDING — items, badges and flags granted by the maps you
+//     can stand in, which unlock more terrain, which unlocks more maps.
+//
+// Iterate until nothing new appears, then look at what is still dark. A cycle
+// (SURF behind a door that needs SURF, a road behind a POKéMON that needs the
+// flute that is behind the road) surfaces here as maps that never light up,
+// and is invisible any other way.
 {
-  // What each map hands out. Ground items are explicit; event grants are read
-  // out of the event body and attributed to the map whose NPC runs it.
   const grants = {};
   const add = (mid, thing) => { (grants[mid] = grants[mid] || new Set()).add(thing); };
 
@@ -579,11 +586,6 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
       const ev = o.event || o.run;
       if (ev && !eventHome[ev]) eventHome[ev] = id;
     }
-    for (const it of (m.items || [])) { add(id, it.item); if (it.flag) add(id, it.flag); }
-    for (const t of (m.trainers || [])) {
-      const def = (G.TRAINERS || {})[t.trainer];
-      if (def) { add(id, t.trainer); if (def.reward && def.reward.flag) add(id, def.reward.flag); }
-    }
   }
   for (const eid in (G.EVENTS || {})) {
     const home = eventHome[eid];
@@ -593,75 +595,163 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     for (const mt of src.matchAll(/G\.flags\.([A-Za-z_$][\w$]*)\s*=\s*1/g)) add(home, mt[1]);
   }
 
-  // Capabilities, in terms of what you are holding. These are the real gates:
-  // Kanto is a region where three quarters of the exits are terrain.
+  // Capabilities. These are the real gates: Kanto is a region where three
+  // quarters of the exits are terrain rather than doors.
   const CAPS = {
     surf:     s => s.has('hm03') && s.has('badge5'),
     strength: s => s.has('hm04') && s.has('badge4'),
-    cut:      s => s.has('hm01') && s.has('badge2')
+    cut:      s => s.has('hm01') && s.has('badge2'),
+    flute:    s => s.has('pokeflute')
   };
 
-  // What a warp costs to walk through. `needFlag` is explicit; arriving on
-  // water costs SURF, because you are arriving on it by surfing.
-  function warpCost(from, w) {
-    const need = [];
-    if (w.needFlag) need.push.apply(need, Array.isArray(w.needFlag) ? w.needFlag : [w.needFlag]);
-    const t = G.MAPS[w.to];
-    if (t) {
-      const row = t.ground[w.ty];
-      const ch = row && row[w.tx];
-      const tile = ch != null ? G.TILES[t.legend[ch]] : null;
-      if (tile && tile.water) need.push('@surf');
+  function tileAt(m, x, y) {
+    if (x < 0 || y < 0 || x >= m.w || y >= m.h) return null;
+    const d = m.deco && m.deco[y] && m.deco[y][x];
+    const name = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[y][x]];
+    return name ? G.TILES[name] : null;
+  }
+
+  // Who is standing in the way, given what we currently hold. An NPC or a
+  // trainer occupies its tile; a SNORLAX across a road is exactly this.
+  function blockers(m, have) {
+    const set = new Set();
+    for (const o of (m.npcs || []).concat(m.trainers || [])) {
+      if (o.ifFlag && !have.has(o.ifFlag)) continue;
+      if (o.unlessFlag && have.has(o.unlessFlag)) continue;
+      set.add(o.x + ',' + o.y);
     }
-    return need;
+    return set;
+  }
+
+  function walkable(m, x, y, have, npcs) {
+    const t = tileAt(m, x, y);
+    if (!t) return false;
+    if (npcs.has(x + ',' + y)) return false;
+    if (t.water) return have.has('@surf');
+    if (t.cut) return have.has('@cut');
+    if (t.strength) return have.has('@strength');
+    // A `story` tile is solid until you interact with it — BLAINE's quiz
+    // shutters open whether you answer right or wrong, so from a reachability
+    // point of view they are a door with no lock, only a toll.
+    if (t.story) return true;
+    if (t.solid) return false;
+    return true;
+  }
+
+  // Flood fill a map from the tiles we arrive on. Ledges are treated as
+  // passable because you can always hop DOWN one — generous, and generous is
+  // the right direction for an audit that must never cry wolf.
+  function reachIn(m, entries, have) {
+    const npcs = blockers(m, have);
+    const seen = new Set();
+    const q = entries.filter(e => e.x >= 0 && e.y >= 0 && e.x < m.w && e.y < m.h);
+    for (const e of q) seen.add(e.x + ',' + e.y);
+    while (q.length) {
+      const c = q.shift();
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = c.x + dx, ny = c.y + dy, k = nx + ',' + ny;
+        if (seen.has(k)) continue;
+        if (!walkable(m, nx, ny, have, npcs)) continue;
+        seen.add(k);
+        q.push({ x: nx, y: ny });
+      }
+    }
+    return seen;
   }
 
   const have = new Set();
-  const seen = new Set(['playerhome']);
+  const entriesOf = { playerhome: [{ x: 4, y: 6 }] };
+  const seenMaps = new Set(['playerhome']);
   let grew = true, rounds = 0;
-  while (grew && rounds++ < 60) {
+
+  while (grew && rounds++ < 80) {
     grew = false;
-    // bank everything the currently-reachable world offers
-    for (const id of seen) {
-      for (const thing of (grants[id] || [])) {
-        if (!have.has(thing)) { have.add(thing); grew = true; }
-      }
-    }
-    // derived capabilities
     for (const cap in CAPS) {
       if (!have.has('@' + cap) && CAPS[cap](have)) { have.add('@' + cap); grew = true; }
     }
-    // walk every warp we can now afford
-    for (const id of [...seen]) {
+    for (const id of [...seenMaps]) {
       const m = G.MAPS[id];
       if (!m) continue;
-      for (const w of (m.warps || [])) {
-        if (!G.MAPS[w.to] || seen.has(w.to)) continue;
-        if (warpCost(id, w).every(n => have.has(n))) { seen.add(w.to); grew = true; }
+      const stand = reachIn(m, entriesOf[id] || [], have);
+
+      // Anything you can walk up to, you can have.
+      for (const it of (m.items || [])) {
+        if (!stand.has(it.x + ',' + it.y) && !nearStand(stand, it)) continue;
+        if (!have.has(it.item)) { have.add(it.item); grew = true; }
+        if (it.flag && !have.has(it.flag)) { have.add(it.flag); grew = true; }
       }
-      // and any map an event in this map teleports us to
-      for (const o of (m.npcs || []).concat(m.trainers || [], m.scripts || [])) {
+      for (const t of (m.trainers || [])) {
+        if (t.ifFlag && !have.has(t.ifFlag)) continue;
+        if (t.unlessFlag && have.has(t.unlessFlag)) continue;
+        if (!nearStand(stand, t)) continue;
+        const def = (G.TRAINERS || {})[t.trainer];
+        if (!def) continue;
+        if (!have.has(t.trainer)) { have.add(t.trainer); grew = true; }
+        if (def.reward && def.reward.flag && !have.has(def.reward.flag)) {
+          have.add(def.reward.flag); grew = true;
+        }
+      }
+      for (const o of (m.npcs || []).concat(m.scripts || [])) {
+        if (o.ifFlag && !have.has(o.ifFlag)) continue;
+        if (o.unlessFlag && have.has(o.unlessFlag)) continue;
         const ev = o.event || o.run;
         if (!ev || !G.EVENTS[ev]) continue;
-        for (const mt of String(G.EVENTS[ev]).matchAll(/loadMap\(\s*['"]([a-z0-9_]+)['"]/g)) {
-          if (G.MAPS[mt[1]] && !seen.has(mt[1])) { seen.add(mt[1]); grew = true; }
+        if (o.x != null && !nearStand(stand, o)) continue;
+        for (const thing of (grants[id] || [])) {
+          if (!have.has(thing)) { have.add(thing); grew = true; }
         }
+        for (const mt of String(G.EVENTS[ev]).matchAll(/loadMap\(\s*['"]([a-z0-9_]+)['"]/g)) {
+          if (G.MAPS[mt[1]] && !seenMaps.has(mt[1])) {
+            seenMaps.add(mt[1]);
+            (entriesOf[mt[1]] = entriesOf[mt[1]] || []).push({ x: 9, y: 9 });
+            grew = true;
+          }
+        }
+      }
+
+      // Only warps you can physically stand on count.
+      for (const w of (m.warps || [])) {
+        if (!G.MAPS[w.to]) continue;
+        if (!stand.has(w.x + ',' + w.y)) continue;
+        const need = w.needFlag ? (Array.isArray(w.needFlag) ? w.needFlag : [w.needFlag]) : [];
+        if (!need.every(f => have.has(f))) continue;
+        const entries = (entriesOf[w.to] = entriesOf[w.to] || []);
+        if (!entries.some(e => e.x === w.tx && e.y === w.ty)) {
+          entries.push({ x: w.tx, y: w.ty });
+          grew = true;
+        }
+        if (!seenMaps.has(w.to)) { seenMaps.add(w.to); grew = true; }
       }
     }
   }
 
-  const dark = Object.keys(G.MAPS).filter(id => !seen.has(id));
+  // An NPC or item is usable if you can stand ON it or NEXT to it — you talk
+  // across a tile, you do not walk into people.
+  function nearStand(stand, o) {
+    // A `scripts` trigger carries an x RANGE rather than a single tile, and
+    // treating that array as a number quietly concatenated strings and made
+    // the HALL OF FAME look unreachable.
+    const xs = Array.isArray(o.x) ? o.x : [o.x, o.x];
+    for (let x = xs[0]; x <= xs[1]; x++) {
+      if (stand.has(x + ',' + o.y)) return true;
+      if (stand.has((x + 1) + ',' + o.y) || stand.has((x - 1) + ',' + o.y)) return true;
+      if (stand.has(x + ',' + (o.y + 1)) || stand.has(x + ',' + (o.y - 1))) return true;
+    }
+    return false;
+  }
+
+  const dark = Object.keys(G.MAPS).filter(id => !seenMaps.has(id));
   if (dark.length) {
-    errors.push(`PROGRESSION: ${dark.length} map(s) can never be reached by an honest playthrough — ${dark.slice(0, 8).join(', ')}${dark.length > 8 ? ' …' : ''}`);
+    errors.push(`PROGRESSION: ${dark.length} map(s) can never be reached on an honest playthrough — ${dark.slice(0, 10).join(', ')}${dark.length > 10 ? ' …' : ''}`);
   }
   const MUST = ['badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8',
-                'hm01', 'hm02', 'hm03', 'hm04', 'hm05', 'e4_champion'];
-  const unreachable = MUST.filter(f => !have.has(f));
-  if (unreachable.length) {
-    errors.push(`PROGRESSION: unobtainable on an honest playthrough — ${unreachable.join(', ')}`);
+                'hm01', 'hm02', 'hm03', 'hm04', 'hm05', 'pokeflute', 'silphscope', 'e4_champion'];
+  const missing = MUST.filter(f => !have.has(f));
+  if (missing.length) {
+    errors.push(`PROGRESSION: unobtainable on an honest playthrough — ${missing.join(', ')}`);
   }
-  if (!dark.length && !unreachable.length) {
-    console.log(`  progression: all 8 badges, all 5 HMs and the CHAMPION title reachable from an empty save in ${rounds} rounds`);
+  if (!dark.length && !missing.length) {
+    console.log(`  progression: every map, badge and HM reachable from an empty save (${rounds} rounds, walking each map tile by tile)`);
   }
 }
 
