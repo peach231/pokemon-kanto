@@ -524,6 +524,7 @@
       { x: 3, y: 6, text: 'A slab of AMBER with an insect sealed inside. And something larger.' }
     ],
     npcs: [
+      { x: 9, y: 8, sprite: 'scientist', dir: 'left', event: 'oldAmberGift' },
       { x: 5, y: 8, sprite: 'scientist', dir: 'down',
         dialog: ['These came out of MT. MOON. There are more still in the rock.',
                  'If you find one, bring it to the LAB on CINNABAR. They can revive them now.',
@@ -611,7 +612,8 @@
     npcs: [
       { x: 6, y: 3, sprite: 'woman3', dir: 'down',
         dialog: ['MISTY is the youngest of four sisters and the only one who battles.',
-                 'The other three do a water ballet. She finds this excruciating.'] }
+                 'The other three do a water ballet. She finds this excruciating.'] },
+      { x: 2, y: 3, sprite: 'beauty', dir: 'down', event: 'tradeJynx' }
     ]
   };
 
@@ -860,7 +862,8 @@
       { x: 6, y: 3, sprite: 'fisher', dir: 'down',
         dialog: ['My MAGIKARP is useless. Utterly useless.',
                  'They keep telling me it evolves. Twenty levels, they say.',
-                 'I have had it eleven years.'] }
+                 'I have had it eleven years.'] },
+      { x: 2, y: 3, sprite: 'gentleman', dir: 'down', event: 'tradeFarfetchd' }
     ]
   };
 
@@ -1042,7 +1045,8 @@
     npcs: [
       { x: 6, y: 3, sprite: 'oldman', dir: 'down',
         dialog: ['My CUBONE will not stop crying.',
-                 'Its mother is up in that tower. TEAM ROCKET put her there.'] }
+                 'Its mother is up in that tower. TEAM ROCKET put her there.'] },
+      { x: 2, y: 3, sprite: 'littleboy', dir: 'down', event: 'tradeLickitung' }
     ]
   };
 
@@ -1388,7 +1392,9 @@
       { x: 5, y: 8, to: 'celadon', tx: 19, ty: 12, dir: 'down' }
     ],
     npcs: [
-      { x: 6, y: 3, sprite: 'gentleman', dir: 'down',
+      { x: 6, y: 3, sprite: 'gentleman', dir: 'down', event: 'coinCaseGift' },
+      { x: 2, y: 5, sprite: 'orb_stand', obj: true, event: 'eeveeGift' },
+      { x: 8, y: 5, sprite: 'woman3', dir: 'left',
         dialog: ['My grandson goes to that GAME CORNER every day and never comes home richer.',
                  'I have started to wonder what he is actually doing in there.'] }
     ]
@@ -1471,10 +1477,15 @@
       { x: 15, y: 9, to: 'rockethideout1', tx: 2, ty: 1, dir: 'down' }
     ],
     signs: [
-      { x: 4, y: 2, text: 'A slot machine. The reels are worn smooth. It has not paid out in a very long time.' }
+      { x: 16, y: 2, text: 'PRIZE EXCHANGE — coins only. No refunds, no exceptions, no exchanges back to cash.' }
     ],
     npcs: [
       { x: 14, y: 9, sprite: 'rocket', dir: 'left', event: 'gameCornerPoster' },
+      { x: 15, y: 2, sprite: 'clerk', dir: 'down', event: 'prizeCounter' },
+      { x: 2, y: 2, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
+      { x: 6, y: 2, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
+      { x: 2, y: 6, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
+      { x: 6, y: 6, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
       { x: 5, y: 10, sprite: 'gambler', dir: 'down',
         dialog: ['Been here eleven hours. Down four thousand.',
                  'The machines are fine. It is me. It must be me.'] },
@@ -1662,7 +1673,8 @@
     npcs: [
       { x: 6, y: 3, sprite: 'woman3', dir: 'down',
         dialog: ['We stayed indoors for three weeks.',
-                 'You get used to it. That is the frightening bit.'] }
+                 'You get used to it. That is the frightening bit.'] },
+      { x: 2, y: 3, sprite: 'gentleman', dir: 'down', event: 'tradeMrMime' }
     ]
   };
 
@@ -2466,7 +2478,26 @@
       yield { t: 'text', s: 'SCIENTIST: Bring me something old enough and I will show you.' };
       return;
     }
+    // You will normally be holding TWO — a Mt. Moon fossil and the OLD AMBER
+    // from the Pewter museum — so the machine has to ask which. Picking one
+    // automatically meant the other could never be revived at all.
     var f = held[0];
+    if (held.length > 1) {
+      var choice = { v: 0 };
+      var names = held.map(function (h) { return h.name; }).concat(['Neither']);
+      yield { t: 'text', s: 'SCIENTIST: You are carrying more than one. Which should I work on?' };
+      yield {
+        t: 'custom',
+        run: function (done) {
+          G.pushScene(G.Chooser({
+            items: names, cancelIndex: names.length - 1,
+            onPick: function (i) { choice.v = i; done(); }
+          }));
+        }
+      };
+      if (choice.v >= held.length) { yield { t: 'text', s: 'SCIENTIST: Come back when you have decided.' }; return; }
+      f = held[choice.v];
+    }
     yield { t: 'text', s: 'SCIENTIST: That is a ' + f.name + '. Where did you— no. Never mind. May I?' };
     yield { t: 'text', s: 'You handed over the ' + f.name + '.' };
     yield { t: 'text', s: 'SCIENTIST: Come back in a while. This is not quick and it is not always kind.' };
@@ -3237,5 +3268,232 @@
     signs: [
       { x: 7, y: 1, text: 'A price tag: ₽1,000,000. There is no decimal point and no mistake.' }
     ]
+  };
+
+  // ========================================================= IN-GAME TRADES =
+  // Gen 1's trades are the only way to get four species, and they are all the
+  // same joke: somebody wants a POKéMON you can catch in the first hour, and
+  // will hand you one you cannot catch at all. The traded creature also grows
+  // faster, which nobody ever explained.
+  //
+  // The trade is irreversible and it takes the POKéMON out of your party, so
+  // the confirmation names both sides plainly.
+  function tradeEvent(id, wantKey, giveKey, name, lines) {
+    return function* () {
+      if (G.flags['trade_' + id]) {
+        yield { t: 'text', s: lines.after };
+        return;
+      }
+      yield { t: 'text', s: lines.intro };
+      var idx = -1;
+      for (var i = 0; i < G.player.party.length; i++) {
+        if (G.player.party[i].sp === wantKey) { idx = i; break; }
+      }
+      if (idx === -1) {
+        yield { t: 'text', s: lines.want };
+        return;
+      }
+      yield { t: 'text', s: 'Trade your ' + G.SPECIES[wantKey].name.toUpperCase() +
+        ' for ' + name + ' the ' + G.SPECIES[giveKey].name.toUpperCase() + '?' };
+      var yes = { v: false };
+      yield {
+        t: 'custom',
+        run: function (done) {
+          G.pushScene(G.Chooser({
+            items: ['Yes', 'No'], cancelIndex: 1,
+            onPick: function (i) { yes.v = (i === 0); done(); }
+          }));
+        }
+      };
+      if (!yes.v) { yield { t: 'text', s: lines.refuse }; return; }
+      yield {
+        t: 'fn',
+        fn: function () {
+          var lvl = G.player.party[idx].level;
+          var got = G.makeMon(giveKey, lvl);
+          got.nickname = name;
+          got.traded = true;              // traded POKéMON gain exp faster
+          G.player.party[idx] = got;
+          G.player.dexSeen[giveKey] = 1;
+          G.player.dexCaught[giveKey] = 1;
+          G.flags['trade_' + id] = 1;
+        }
+      };
+      yield { t: 'sfx', id: 'heal' };
+      yield { t: 'text', s: 'You traded your ' + G.SPECIES[wantKey].name.toUpperCase() +
+        ' for ' + name + '!' };
+      yield { t: 'text', s: lines.after };
+    };
+  }
+
+  G.EVENTS.tradeMrMime = tradeEvent('mrmime', 'abra', 'mrmime', 'MARCEL', {
+    intro: 'TRADER: I have a MR. MIME. Nobody in KANTO has a MR. MIME.',
+    want: 'TRADER: I want an ABRA for it. They are all over ROUTE 24, if you can catch one before it teleports.',
+    refuse: 'TRADER: Think about it. I am not going anywhere.',
+    after: 'TRADER: MARCEL is happier with you. I can tell. That is not a nice thing to learn about yourself.'
+  });
+  G.EVENTS.tradeFarfetchd = tradeEvent('farfetchd', 'spearow', 'farfetchd', 'DUX', {
+    intro: 'TRADER: Do you have a SPEAROW? I want a SPEAROW.',
+    want: 'TRADER: Any SPEAROW. ROUTE 3 is full of them and they are all furious.',
+    refuse: 'TRADER: Suit yourself.',
+    after: "TRADER: DUX carries that stick everywhere. Do not try to take it."
+  });
+  G.EVENTS.tradeJynx = tradeEvent('jynx', 'poliwhirl', 'jynx', 'LOLA', {
+    intro: 'TRADER: I will trade you a JYNX. She is the only one I have ever seen.',
+    want: 'TRADER: I want a POLIWHIRL. Fish one up and evolve it — that is the usual way.',
+    refuse: 'TRADER: The offer stands.',
+    after: 'TRADER: LOLA hums constantly. I miss it, honestly.'
+  });
+  G.EVENTS.tradeLickitung = tradeEvent('lickitung', 'slowbro', 'lickitung', 'MARC', {
+    intro: 'TRADER: Ever seen a LICKITUNG? Most people have not.',
+    want: 'TRADER: Bring me a SLOWBRO and it is yours.',
+    refuse: 'TRADER: No rush.',
+    after: 'TRADER: Keep MARC away from anything you care about. Everything gets licked.'
+  });
+
+  // ================================================================ GIFTS ===
+  // EEVEE, in the block of flats behind the CELADON store. Three stones, three
+  // futures, and the game never tells you that choosing is permanent.
+  G.EVENTS.eeveeGift = function* () {
+    if (G.flags.got_eevee) {
+      yield { t: 'text', s: 'The empty ball is still on the table. Nobody has moved it.' };
+      return;
+    }
+    yield { t: 'text', s: 'There is a POKé BALL on the table and a note taped to it.' };
+    yield { t: 'text', s: '"Whoever finds this: it is an EEVEE. I could not decide what to make it, and it deserves somebody who can."' };
+    yield { t: 'sfx', id: 'heal' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        var mon = G.makeMon('eevee', 25);
+        if (G.player.party.length < 6) G.player.party.push(mon);
+        else G.player.box.push(mon);
+        G.player.dexSeen.eevee = 1;
+        G.player.dexCaught.eevee = 1;
+        G.flags.got_eevee = 1;
+      }
+    };
+    yield { t: 'text', s: 'You received an EEVEE!' };
+    yield { t: 'text', s: 'A FIRE, WATER or THUNDER STONE will settle it. So will never using one.' };
+  };
+
+  // LAPRAS, from a Silph employee who was keeping it in a stairwell.
+  G.EVENTS.laprasGift = function* () {
+    if (G.flags.got_lapras) {
+      yield { t: 'text', s: 'EMPLOYEE: Is it eating? It never ate here.' };
+      return;
+    }
+    if (!G.flags.silph_giovanni) {
+      yield { t: 'text', s: 'EMPLOYEE: Not now. Not while they are still in the building.' };
+      return;
+    }
+    yield { t: 'text', s: 'EMPLOYEE: You got them out. Thank you. Genuinely, thank you.' };
+    yield { t: 'text', s: 'EMPLOYEE: We have had this in a stairwell for four months because nobody could get it down to the sea.' };
+    yield { t: 'sfx', id: 'heal' };
+    yield {
+      t: 'fn',
+      fn: function () {
+        var mon = G.makeMon('lapras', 15);
+        if (G.player.party.length < 6) G.player.party.push(mon);
+        else G.player.box.push(mon);
+        G.player.dexSeen.lapras = 1;
+        G.player.dexCaught.lapras = 1;
+        G.flags.got_lapras = 1;
+      }
+    };
+    yield { t: 'text', s: 'You received a LAPRAS!' };
+    yield { t: 'text', s: 'EMPLOYEE: Take it out on the water. It has been waiting.' };
+  };
+
+  // The slots themselves. You cannot play without a COIN CASE, which is the
+  // one thing the Game Corner will not sell you.
+  G.EVENTS.playSlots = function* () {
+    if (!G.player.bag.coincase) {
+      yield { t: 'text', s: 'A slot machine, humming to itself.' };
+      yield { t: 'text', s: 'You have nowhere to put any coins even if you won some. Somebody in CELADON must hand out COIN CASES.' };
+      return;
+    }
+    yield { t: 'custom', run: function (done) { G.pushScene(G.SlotScene()); done(); } };
+  };
+
+  // The COIN CASE, from the man in the Celadon block of flats who has clearly
+  // given up on it.
+  G.EVENTS.coinCaseGift = function* () {
+    if (G.player.bag.coincase) {
+      yield { t: 'text', s: 'MAN: Keep it. I am not going back in there.' };
+      return;
+    }
+    yield { t: 'text', s: 'MAN: Do you want my COIN CASE? I am serious. Take it.' };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.coincase = 1; G.player.coins = G.player.coins || 0; } };
+    yield { t: 'text', s: 'You received the COIN CASE!' };
+    yield { t: 'text', s: 'MAN: I worked out what the GAME CORNER is for about a year too late. It is not for winning.' };
+  };
+
+  // The prize counter. Two POKéMON nobody can catch, and the TMs that make
+  // half the roster worth using.
+  G.EVENTS.prizeCounter = function* () {
+    var PRIZES = [
+      { id: 'abra',      cost: 180,  kind: 'mon', label: 'ABRA — 180' },
+      { id: 'dratini',   cost: 2800, kind: 'mon', label: 'DRATINI — 2800' },
+      { id: 'porygon',   cost: 6500, kind: 'mon', label: 'PORYGON — 6500' },
+      { id: 'tm23',      cost: 3300, kind: 'item', label: 'TM23 DRAGON RAGE — 3300' },
+      { id: 'tm15',      cost: 5500, kind: 'item', label: 'TM15 HYPER BEAM — 5500' },
+      { id: 'tm50',      cost: 7700, kind: 'item', label: 'TM50 SUBSTITUTE — 7700' }
+    ];
+    if (!G.player.bag.coincase) {
+      yield { t: 'text', s: 'CLERK: Prizes are exchanged for COINS. You do not appear to have anywhere to keep any.' };
+      return;
+    }
+    yield { t: 'text', s: 'CLERK: Welcome! You have ' + (G.player.coins || 0) + ' coins. What can I get you?' };
+    var pick = { v: -1 };
+    var items = PRIZES.map(function (p) { return p.label; }).concat(['Nothing']);
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.Chooser({
+          items: items, cols: 1, cancelIndex: items.length - 1,
+          onPick: function (i) { pick.v = i; done(); }
+        }));
+      }
+    };
+    if (pick.v < 0 || pick.v >= PRIZES.length) { yield { t: 'text', s: 'CLERK: Do come back.' }; return; }
+    var prize = PRIZES[pick.v];
+    if ((G.player.coins || 0) < prize.cost) {
+      yield { t: 'text', s: 'CLERK: You need ' + prize.cost + ' coins for that. Machines are through there.' };
+      return;
+    }
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.player.coins -= prize.cost;
+        if (prize.kind === 'mon') {
+          var mon = G.makeMon(prize.id, prize.id === 'porygon' ? 26 : prize.id === 'dratini' ? 18 : 9);
+          if (G.player.party.length < 6) G.player.party.push(mon);
+          else G.player.box.push(mon);
+          G.player.dexSeen[prize.id] = 1;
+          G.player.dexCaught[prize.id] = 1;
+        } else {
+          G.player.bag[prize.id] = (G.player.bag[prize.id] || 0) + 1;
+        }
+      }
+    };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'text', s: 'You received ' + prize.label.split(' —')[0] + '!' };
+  };
+
+  // OLD AMBER. Gen 1 keeps AERODACTYL behind a museum exhibit nobody thinks to
+  // ask about, which is why most players never saw one.
+  G.EVENTS.oldAmberGift = function* () {
+    if (G.flags.got_oldamber) {
+      yield { t: 'text', s: 'CURATOR: The case is empty now. It looks worse empty, honestly.' };
+      return;
+    }
+    yield { t: 'text', s: 'CURATOR: That lump in the case? Amber. There is an insect in it, and something else besides.' };
+    yield { t: 'text', s: 'CURATOR: We have had it forty years and never once been able to do anything with it.' };
+    yield { t: 'text', s: 'CURATOR: The LAB on CINNABAR can, apparently. Take it. Genuinely — take it.' };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'fn', fn: function () { G.player.bag.oldamber = 1; G.flags.got_oldamber = 1; } };
+    yield { t: 'text', s: 'You received the OLD AMBER!' };
   };
 })();

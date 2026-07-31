@@ -1044,4 +1044,112 @@
       }
     };
   };
+
+  // ==========================================================================
+  // THE SLOT MACHINE.
+  //
+  // Three reels, one payline, three coins a spin. Gen 1's Game Corner is the
+  // only place in the game that takes something from you and gives nothing
+  // back, and it is also where two POKéMON and a shelf of TMs live — which is
+  // the joke, and the reason the building has to actually work rather than
+  // being a room with a poster in it.
+  //
+  // The odds are deliberately honest and deliberately bad: a ~4% return to
+  // player per spin on the top prize, which is roughly what the original paid.
+  // Nobody grinds this for fun. They grind it for a PORYGON.
+  G.SlotScene = function () {
+    var SYM = ['7', 'B', 'C', 'K', 'S', 'P'];          // 7, bar, cherry, ...
+    var NAME = { '7': 'SEVEN', 'B': 'BAR', 'C': 'CHERRY', 'K': 'CLEFAIRY', 'S': 'STAR', 'P': 'POKé BALL' };
+    var PAY  = { '7': 300, 'B': 100, 'K': 50, 'S': 30, 'P': 15, 'C': 8 };
+    var BET = 3;
+
+    var reels = [0, 0, 0];
+    var spin = [0, 0, 0];
+    var stopped = [true, true, true];
+    var phase = 'idle';   // idle | spinning | result
+    var msg = 'Insert 3 coins and press Z to spin.';
+    var flash = 0;
+
+    function coins() { return G.player.coins || 0; }
+
+    function evaluate() {
+      var a = SYM[reels[0]], b = SYM[reels[1]], c = SYM[reels[2]];
+      var win = 0, what = '';
+      if (a === b && b === c) { win = PAY[a]; what = 'Three ' + NAME[a] + '!'; }
+      else if (a === 'C' && b === 'C') { win = 4; what = 'Two CHERRY.'; }
+      else if (a === 'C') { win = 2; what = 'One CHERRY.'; }
+      if (win) {
+        G.player.coins = coins() + win;
+        msg = what + ' You won ' + win + ' coins!';
+        G.audio.sfx('money');
+        flash = 40;
+      } else {
+        msg = 'Nothing. Again?';
+      }
+      phase = 'idle';
+    }
+
+    return {
+      opaque: true,
+      enter: function () { G.audio.playMusic('town'); },
+      update: function () {
+        if (phase === 'spinning') {
+          for (var r = 0; r < 3; r++) {
+            if (stopped[r]) continue;
+            spin[r]++;
+            if (spin[r] % 2 === 0) reels[r] = (reels[r] + 1) % SYM.length;
+            // reels stop left to right on their own, then the player can nudge
+            if (spin[r] > 30 + r * 22) { stopped[r] = true; G.audio.sfx('menuMove'); }
+          }
+          if (G.input.justPressed('A')) {
+            for (var s = 0; s < 3; s++) {
+              if (!stopped[s]) { stopped[s] = true; G.audio.sfx('menuMove'); break; }
+            }
+          }
+          if (stopped[0] && stopped[1] && stopped[2]) evaluate();
+          return;
+        }
+        if (flash > 0) flash--;
+        if (G.input.justPressed('B') || G.input.justPressed('start')) { G.audio.sfx('cancel'); G.popScene(); return; }
+        if (G.input.justPressed('A')) {
+          if (coins() < BET) { msg = 'Not enough coins. See the counter.'; G.audio.sfx('cancel'); return; }
+          G.player.coins = coins() - BET;
+          phase = 'spinning';
+          stopped = [false, false, false];
+          spin = [0, 0, 0];
+          msg = 'Press Z to stop each reel!';
+          G.audio.sfx('confirm');
+        }
+      },
+      draw: function (ctx) {
+        ctx.fillStyle = (flash > 0 && (G.frame >> 2) % 2 === 0) ? '#3a2d55' : '#241a38';
+        ctx.fillRect(0, 0, W, H);
+        G.text(ctx, 'ROCKET GAME CORNER', 58, 8, '#f8e878', '#1a1c2c');
+
+        // the machine
+        ctx.fillStyle = '#4a3a68'; ctx.fillRect(52, 30, 136, 66);
+        ctx.fillStyle = '#1a1428'; ctx.fillRect(58, 40, 124, 46);
+        for (var r = 0; r < 3; r++) {
+          var x = 64 + r * 40;
+          ctx.fillStyle = '#f4f4f4'; ctx.fillRect(x, 46, 32, 34);
+          ctx.fillStyle = '#c8c8dc'; ctx.fillRect(x, 46, 32, 2);
+          var sym = SYM[reels[r]];
+          var col = sym === '7' ? '#d84a4a' : sym === 'B' ? '#3a3a5a' : sym === 'C' ? '#d84a6a'
+                  : sym === 'K' ? '#f0a0c0' : sym === 'S' ? '#f8e878' : '#e05050';
+          G.text(ctx, sym, x + 13, 58, col, null);
+          if (!stopped[r]) { ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x, 46, 32, 34); }
+        }
+        // payline
+        ctx.fillStyle = '#f8e878'; ctx.fillRect(58, 62, 124, 1);
+
+        G.nineSlice(ctx, G.IMG.ui_box, 4, 104, W - 8, 34, 4);
+        var lines = G.textWrap(msg, W - 24);
+        for (var i = 0; i < Math.min(2, lines.length); i++) {
+          G.text(ctx, lines[i], 12, 111 + i * 11, G.UI.text, G.UI.textShadow);
+        }
+        G.text(ctx, 'COINS ' + coins(), 8, 92, '#f8e878', '#1a1c2c');
+        G.text(ctx, 'Z: spin/stop   X: leave', 118, 92, G.C.lgry);
+      }
+    };
+  };
 })();

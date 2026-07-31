@@ -969,7 +969,15 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     // dry run never takes the branch behind it — which is exactly where the
     // starters, the DOJO prize and the fossils are built, so they looked
     // unobtainable when they are not.
-    const say = function (opts) { if (opts && opts.onPick) opts.onPick(0); return stub(); };
+    // Which option the stubbed chooser picks. A stub that always answers 0
+    // only ever explores the first branch — the prize counter's first item is
+    // an ABRA, so PORYGON and DRATINI looked unobtainable when they are two
+    // rows further down the same menu.
+    const choice = { i: 0 };
+    const say = function (opts) {
+      if (opts && opts.onPick) opts.onPick(Math.min(choice.i, (opts.items || [0]).length - 1));
+      return stub();
+    };
     G.Textbox = function (t, o) { if (o && o.onDone) o.onDone(); return stub(); };
     G.Chooser = say;
     G.FadeScene = function (f) { if (f) f(); return stub(); };
@@ -981,15 +989,26 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     G.startTrainerBattle = function () { return {}; };
 
     const savedP = JSON.stringify(G.player), savedF = JSON.stringify(G.flags);
+    // Trades ask for a SPECIFIC species in your party, and the prize counter
+    // asks for coins. A dry run holding one Bulbasaur and no money takes the
+    // "you do not have one" branch every time and concludes those species are
+    // unobtainable — so the party is cycled through the whole roster, six at a
+    // time, and the wallet is full.
+    const seeds = [];
+    for (let i = 0; i < G.DEX_ORDER.length; i += 6) seeds.push(G.DEX_ORDER.slice(i, i + 6));
     for (const eid in G.EVENTS) {
-      for (const finished of [false, true]) {
+      for (const seed of seeds) {
+       for (choice.i = 0; choice.i < 6; choice.i++) {
         G.newGame('DEX');
-        G.player.party = [realMake('bulbasaur', 30)];
+        G.player.party = seed.map(k => realMake(k, 30));
         G.player.money = 999999;
-        if (finished) {
+        G.player.coins = 99999;
+        {
           for (const it in G.ITEMS) G.player.bag[it] = 1;
           for (let b = 1; b <= 8; b++) G.flags['badge' + b] = 1;
           G.flags.strengthOn = 1;   // MEW is under a lorry that needs shifting
+          G.flags.silph_giovanni = 1;
+          G.flags.dojo_master = 1;
         }
         G.world.mapId = 'pallet'; G.world.map = G.MAPS.pallet;
         G.world.player = { x: 5, y: 5, dir: 'down' };
@@ -1004,8 +1023,10 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
             st = it.next();
           }
         } catch (e) { /* branch not taken in this state */ }
+       }
       }
     }
+    choice.i = 0;
     G.makeMon = realMake;
     G.pushScene = realPush; G.popScene = realPop;
     G.runEvent = realRun; G.runEventGen = realRunGen;
