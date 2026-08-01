@@ -60,14 +60,30 @@
     fly:      'It is a long way, and the sky is open.'
   };
 
+  // Which gym hands over which badge. Only used to finish the sentence below:
+  // "you need the THUNDER BADGE" is a fact, and "LT. SURGE has it, in
+  // VERMILION CITY" is directions, and the second is what a stuck player
+  // actually needs.
+  var BADGE_FROM = {
+    badge1: 'BROCK, at the GYM in PEWTER CITY',
+    badge2: 'MISTY, at the GYM in CERULEAN CITY',
+    badge3: 'LT. SURGE, at the GYM in VERMILION CITY',
+    badge4: 'ERIKA, at the GYM in CELADON CITY',
+    badge5: 'KOGA, at the GYM in FUCHSIA CITY',
+    badge6: 'SABRINA, at the GYM in SAFFRON CITY',
+    badge7: 'BLAINE, at the GYM on CINNABAR ISLAND',
+    badge8: 'GIOVANNI, at the GYM in VIRIDIAN CITY'
+  };
+
   G.fieldBlockedText = function (kind, use) {
     var f = use.f;
     var lead = FLAVOUR[kind] || '';
     var join = lead ? lead + ' ' : '';
     if (use.blocked === 'nohm') return lead || 'Nothing happens.';
     if (use.blocked === 'nobadge') {
-      return join + 'You have the HM — but no trainer here will let you use it without the ' +
-        f.badgeName + '.';
+      var from = BADGE_FROM[f.badge];
+      return join + 'You have the HM — but nobody will let you use it without the ' +
+        f.badgeName + (from ? '. That one is ' + from + '.' : '.');
     }
     return join + 'None of your POKéMON knows ' + G.MOVES[f.move].name.toUpperCase() + '.';
   };

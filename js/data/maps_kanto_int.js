@@ -2501,6 +2501,12 @@
   G.EVENTS.flyGift = function* () {
     if (G.flags.got_fly) {
       yield { t: 'text', s: 'She waves at you from the window seat. Her PIDGEY is asleep on the sill.' };
+      // She will say it again, because this is the one instruction in the game
+      // you are most likely to be told once and need much later.
+      yield { t: 'text', s: '???: Menu, then MAP, then Z on a town you have already been to.' };
+      if (!G.flags.badge3) {
+        yield { t: 'text', s: '???: And you still want the THUNDER BADGE first. LT. SURGE, VERMILION CITY. Without it the map will refuse you.' };
+      }
       return;
     }
     yield { t: 'text', s: 'She is watching the road. There is a very old PIDGEY asleep on the windowsill beside her.' };
@@ -2509,8 +2515,15 @@
     yield { t: 'sfx', id: 'heal' };
     yield { t: 'fn', fn: function () { G.player.bag.hm02 = 1; G.flags.got_fly = 1; } };
     yield { t: 'text', s: 'You received HM02 FLY!' };
-    yield { t: 'text', s: '???: Now you do not have to. Teach it to something with wings, open your TOWN MAP, and pick anywhere you have already been.' };
-    yield { t: 'text', s: '???: It will not take you anywhere new. That part is still yours.' };
+    // Everything a player needs to actually use it, said once, here. She used
+    // to describe the TOWN MAP and stop — which leaves out the badge, and
+    // leaves out the button. Somebody with FLY taught to a PIDGEOT and no
+    // THUNDER BADGE gets refused with no idea which of the two is missing.
+    yield { t: 'text', s: '???: Teach it to something with wings. Anything that flies will take it.' };
+    yield { t: 'text', s: '???: Then press ENTER for the menu, choose MAP, move the cursor onto a town, and press Z.' };
+    yield { t: 'text', s: '???: One catch. Nobody will let you fly over KANTO without the THUNDER BADGE — that is LT. SURGE, at the GYM in VERMILION CITY.' };
+    yield { t: 'text', s: '???: Until you have it, the map will just say no.' };
+    yield { t: 'text', s: '???: And it only takes you where you have already stood. It will not take you anywhere new — that part is still yours.' };
   };
 
   // The SUPER ROD hut on ROUTE 15 — the third and last rod. The brothers have
