@@ -244,6 +244,14 @@
       };
       G.world.loadMap('mtmoon1f', 14, 20, 'down');
       assert(G.world.map.id === 'mtmoon1f', 'could not reach MT. MOON to test the rope');
+      // Something UNDER the overworld, which is what a real playthrough leaves
+      // behind: the title flow replaces its way through a cinematic, a
+      // character select and the tutorial prompt before the world is pushed.
+      // Both this and FLY used to pop to a stack DEPTH of one, which assumes
+      // the field is the bottom scene — so an ESCAPE ROPE put you on the TITLE
+      // SCREEN, asking for a new game, instead of outside the cave.
+      var basement = { update: function () {}, draw: function () {} };
+      G.scenes = [basement, G.overworldScene];
       var bag = G.BagScene();
       G.pushScene(bag);
       // press A on the only item in the bag
@@ -259,6 +267,9 @@
         'the ESCAPE ROPE left you in ' + G.world.map.id + ' — it should climb out to the last CENTRE');
       assert(!G.player.bag.escaperope || G.player.bag.escaperope === 1,
         'the ESCAPE ROPE was not consumed');
+      assert(G.scenes.indexOf(G.overworldScene) !== -1,
+        'the ESCAPE ROPE popped the field off the scene stack — you would land on the TITLE SCREEN');
+      assert(G.scenes.indexOf(bag) === -1, 'the ESCAPE ROPE left the bag open');
 
       // and a stone, which must resolve to a real evolution
       G.player = {

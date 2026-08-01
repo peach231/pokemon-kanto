@@ -539,7 +539,7 @@
     G.player.bag[id]--;
     if (!G.player.bag[id]) delete G.player.bag[id];
     G.audio.sfx('confirm');
-    while (G.scenes.length > 1) G.popScene();      // drop the bag + menu stack
+    G.popToOverworld();
     G.world.loadMap(r.mapId, r.x, r.y, 'down');
     return 'You played out the ESCAPE ROPE and climbed back into the light.';
   }

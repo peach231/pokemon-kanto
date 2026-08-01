@@ -24,6 +24,24 @@
 
   G.topScene = function () { return G.scenes[G.scenes.length - 1]; };
 
+  // Get back to the field, from wherever you are in a menu.
+  //
+  // FLY and the ESCAPE ROPE both used to do `while (G.scenes.length > 1)
+  // popScene()`, which assumes the overworld is the BOTTOM of the stack. It is
+  // not reliably: the title flow replaces its way through a cinematic, a
+  // character select and the tutorial prompt before the world is ever pushed,
+  // and whatever is left underneath stays there. So an ESCAPE ROPE dropped you
+  // on the TITLE SCREEN — new game or continue — instead of outside the cave.
+  //
+  // Pop until the field is what you are looking at, and never mind how deep it
+  // turns out to be. The counter is a backstop against a stack that somehow
+  // does not contain it at all.
+  G.popToOverworld = function () {
+    var guard = 0;
+    while (G.scenes.length && G.topScene() !== G.overworldScene && guard++ < 64) G.popScene();
+    if (G.topScene() !== G.overworldScene) G.pushScene(G.overworldScene);
+  };
+
   G.updateScenes = function () {
     var top = G.topScene();
     if (top && top.update) top.update();

@@ -561,9 +561,13 @@
     for (var y = y0; y <= y1; y++) {
       for (var x = x0; x <= x1; x++) {
         var dx = Math.abs(x - cx), dy = Math.abs(y - cy);
-        var d = Math.max(dx, dy);
+        // A diamond rather than a square, which is the shape Gen 1's cave
+        // lantern actually was, and softened over two rings instead of
+        // stopping dead at one — a hard square edge reads as a bug.
+        var d = Math.max(Math.max(dx, dy), Math.round((dx + dy) * 0.72));
         if (d <= radius - 1) continue;
-        ctx.fillStyle = (d === radius) ? 'rgba(8,8,16,0.6)' : '#06060c';
+        ctx.fillStyle = (d === radius) ? 'rgba(8,8,16,0.45)'
+          : (d === radius + 1) ? 'rgba(6,6,12,0.82)' : '#06060c';
         ctx.fillRect(x * TILEPX - cam.x, y * TILEPX - cam.y, TILEPX, TILEPX);
       }
     }
@@ -1328,8 +1332,13 @@
       // exactly as memorable. The mask is drawn in hard tile-sized blocks
       // rather than a soft radial gradient, because a smooth falloff reads as
       // a modern lighting effect and this should read as a Game Boy.
-      if (map.dark && !G.flags.flashOn) drawDarkness(ctx, cam, 1);
-      else if (map.dark) drawDarkness(ctx, cam, 3);
+      // A radius of 1 lit the tile you were standing on and nothing else, so
+      // ROCK TUNNEL was a 28x18 maze navigated by braille — you could not see
+      // a wall until you had walked into it, let alone find the far exit. Two
+      // is still oppressive and still makes FLASH the thing you want; it is
+      // just possible to play without it.
+      if (map.dark && !G.flags.flashOn) drawDarkness(ctx, cam, 2);
+      else if (map.dark) drawDarkness(ctx, cam, 4);
 
       // interior lighting, then weather — both over the world, under the HUD
       drawInteriorLight(ctx, map, cam);

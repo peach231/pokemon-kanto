@@ -195,7 +195,7 @@
     var use = G.fieldUser('fly');
     if (use.blocked) return false;
     G.audio.sfx('confirm');
-    while (G.scenes.length > 1) G.popScene();   // drop the map + menu stack
+    G.popToOverworld();
     G.world.loadMap(pt.map, pt.x, pt.y, 'down');
     G.pushScene(G.Textbox(G.monName(use.mon) + ' flew you to ' + pt.label + '.'));
     return true;

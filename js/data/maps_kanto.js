@@ -1267,7 +1267,7 @@
       { x: 25, y: 15, to: 'route10', tx: 10, ty: 2, dir: 'down' }
     ],
     signs: [
-      { x: 3, y: 2, text: 'ROCK TUNNEL — Unlit. Turn back or bring a light.' }
+      { x: 3, y: 2, text: 'ROCK TUNNEL — Unlit, and it does not get better. Teach a POKéMON FLASH before you go any further in. The far side comes out on ROUTE 10, down and to the EAST.' }
     ],
     trainers: [
       { x: 8, y: 8, sprite: 'hiker', dir: 'right', trainer: 'rt_lenny', sight: 2 },
