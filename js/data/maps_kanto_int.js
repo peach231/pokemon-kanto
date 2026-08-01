@@ -1207,7 +1207,8 @@
       signs: opts.signs || [],
       npcs: opts.npcs || [],
       trainers: opts.trainers || [],
-      items: opts.items || []
+      items: opts.items || [],
+      scripts: opts.scripts || []
     };
   }
 
@@ -1308,7 +1309,13 @@
       { x: 13, y: 9, sprite: 'channeler', dir: 'left', trainer: 'pt_karina', sight: 3 }
     ],
     npcs: [
-      { x: 10, y: 12, sprite: 'orb_stand', obj: true, event: 'towerGhost' }
+      { x: 10, y: 12, sprite: 'orb_stand', obj: true, event: 'towerGhost', unlessFlag: 'marowakLaid' }
+    ],
+    // She cannot block an open room by standing in one corner of it, so the
+    // approach to the stairs is the gate: walk into it without the SILPH SCOPE
+    // and she turns you back. This is the whole reason to go to CELADON.
+    scripts: [
+      { x: [1, 18], y: 13, run: 'towerGhost' }
     ]
   });
 
@@ -1333,10 +1340,31 @@
   // The restless MAROWAK. Without the SILPH SCOPE you cannot see it, and you
   // cannot fight what you cannot see, which is the entire justification for
   // that item existing.
-  G.EVENTS.towerGhost = function* () {
+  // She is a GATE, not scenery. In Red/Blue the unidentifiable ghost is the
+  // reason you go to CELADON at all — you cannot get past her to MR. FUJI
+  // without the SILPH SCOPE, and the SCOPE is under the GAME CORNER. Here she
+  // stood in the middle of an open room and you could simply walk round her,
+  // which made the SCOPE optional, the MAROWAK fight skippable, and MR. FUJI's
+  // rescue something you could stumble into with no idea why it mattered.
+  //
+  // Invoked two ways now: talked to, or walked into. Only the second turns you
+  // back, so speaking to her is still just speaking to her.
+  G.EVENTS.towerGhost = function* (ctx) {
+    var asGate = !!(ctx && ctx.run);
     if (G.flags.marowakLaid) {
+      if (asGate) return;                       // the way is open; say nothing
       yield { t: 'text', s: 'The air here is ordinary now. Just a room.' };
       return;
+    }
+    if (asGate) {
+      yield { t: 'fn', fn: function () {
+        var p = G.world.player;
+        p.y = p.y - 1;                          // back the way you came
+        p.fromX = p.x; p.fromY = p.y;
+        p.moving = false; p.step = 0;
+        p.dir = 'down';
+        G.audio.sfx('bump');
+      } };
     }
     if (!G.flags.silphscope) {
       yield { t: 'text', s: 'Something is here. The temperature drops.' };
@@ -1363,6 +1391,13 @@
   };
 
   G.EVENTS.towerRival = function* () {
+    // Belt and braces. The map retires him the moment the flag is set, but an
+    // event that can start a fight should never rely on somebody else having
+    // removed the person who starts it.
+    if (G.flags.blue_tower) {
+      yield { t: 'text', s: 'Blue: Go on, then. The stairs are that way.' };
+      return;
+    }
     yield { t: 'text', s: 'Blue: You again. Of course.' };
     yield { t: 'text', s: 'Blue: I came to see whether the ghost story was true. It is, by the way.' };
     yield {

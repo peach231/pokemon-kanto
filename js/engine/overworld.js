@@ -694,6 +694,43 @@
     npcs: [],
     follower: null,
 
+    // Who should be standing here, given what is true NOW.
+    //
+    // loadMap filters npcs and trainers by their ifFlag/unlessFlag once, when
+    // the map loads, and never again — so anybody whose condition changed
+    // while you were standing there stayed exactly as they were until you left
+    // and came back. BLUE in POKéMON TOWER is placed `unlessFlag: blue_tower`,
+    // which is set the moment you beat him, and he carried on standing in the
+    // stairwell afterwards, ready to be fought a second time.
+    //
+    // Called when an event finishes, which is when these flags actually move.
+    syncActors: function () {
+      if (!this.map) return;
+      var allowed = function (d) {
+        if (d.ifFlag && !G.flags[d.ifFlag]) return false;
+        if (d.unlessFlag && G.flags[d.unlessFlag]) return false;
+        return true;
+      };
+      var kept = [], present = [];
+      for (var i = 0; i < this.npcs.length; i++) {
+        var a = this.npcs[i];
+        if (a.def && !allowed(a.def)) continue;      // their moment has passed
+        kept.push(a);
+        if (a.def) present.push(a.def);
+      }
+      // and anybody whose moment has just arrived
+      var defs = (this.map.npcs || []).concat(this.map.trainers || []);
+      for (var j = 0; j < defs.length; j++) {
+        var d = defs[j];
+        if (!allowed(d) || present.indexOf(d) !== -1) continue;
+        var na = makeActor(d.sprite, d.x, d.y, d.dir || 'down');
+        na.def = d;
+        na.obj = !!d.obj;
+        kept.push(na);
+      }
+      this.npcs = kept;
+    },
+
     loadMap: function (id, x, y, dir) {
       var map = G.MAPS[id];
       G.decorateMap(map);   // lazily scatter scenery (once per map)
@@ -1937,7 +1974,14 @@
         }
         if (waiting) return;
         var r = gen.next();
-        if (r.done) { G.popScene(); return; }
+        if (r.done) {
+          G.popScene();
+          // Flags move inside events, and who is standing on the map depends
+          // on them. Without this, anybody the event just retired carries on
+          // standing there until you leave the map and come back.
+          if (G.world.syncActors) G.world.syncActors();
+          return;
+        }
         var step = r.value;
         if (!step) return;
         if (step.t === 'text') {
