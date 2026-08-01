@@ -25,7 +25,7 @@ global.document = {
 
 // --- load scripts in index.html order ---
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-const srcs = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]);
+const srcs = [...html.matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)].map(m => m[1]);
 let loaded = 0;
 for (const src of srcs) {
   if (src === 'main.js') continue; // boots the game; skip under Node
@@ -1378,6 +1378,31 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   for (const s of uniq.slice(0, 10)) errors.push('CROSSING: ' + s);
   if (uniq.length > 10) errors.push(`CROSSING: …and ${uniq.length - 10} more`);
   if (!uniq.length) console.log('  crossing: from every entrance, every exit of that map can be reached');
+}
+
+// --- the browser must be able to tell that the code changed ---
+// There is no build step here, which is a feature, and it means every script
+// is cached by a filename that never changes. So a fix can be written, tested,
+// committed, pushed and deployed while the player carries on running the code
+// that had the bug in it — which is exactly what happened after six frozen
+// story battles were fixed and the freeze was still there.
+//
+// index.html stamps each script with ?v=<hash of every script's contents>, so
+// the URL changes precisely when the code does. This fails when that stamp is
+// out of date, because a stale stamp is worse than none: it looks handled.
+{
+  const bump = require('./bump_cache.js');
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const want = bump.tokenFor(html);
+  const have = (html.match(/\?v=([0-9a-f]+)/) || [])[1];
+  const stamped = (html.match(/<script src="[^"]+\?v=/g) || []).length;
+  const total = (html.match(/<script src="/g) || []).length;
+  if (have !== want || stamped !== total) {
+    errors.push(`CACHE: index.html's cache token is stale (${have || 'none'}, should be ${want}) — ` +
+      `players would keep running the old code. Run: node tools/bump_cache.js`);
+  } else {
+    console.log(`  cache: all ${total} scripts stamped ?v=${want}, so a reload picks up new code`);
+  }
 }
 
 // --- a battle inside an event must hand control back ---

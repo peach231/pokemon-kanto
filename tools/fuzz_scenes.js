@@ -28,7 +28,7 @@ const CANVAS = { getContext: () => CTX, style: {}, width: 240, height: 160 };
 global.document = { createElement: () => CANVAS, getElementById: () => CANVAS };
 
 const srcs = [...fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
-  .matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]).filter(s => s !== 'main.js');
+  .matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)].map(m => m[1]).filter(s => s !== 'main.js');
 for (const f of srcs) vm.runInThisContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), { filename: f });
 
 // every image the drawing code asks for resolves to a dummy

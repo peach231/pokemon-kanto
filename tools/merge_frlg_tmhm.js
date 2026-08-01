@@ -36,7 +36,7 @@ global.document = {
   getElementById: () => ({ getContext: () => null, style: {} })
 };
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-for (const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)) {
+for (const m of html.matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)) {
   if (m[1] === 'main.js') continue;
   vm.runInThisContext(fs.readFileSync(path.join(ROOT, m[1]), 'utf8'), { filename: m[1] });
 }
