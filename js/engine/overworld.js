@@ -127,9 +127,38 @@
     }
   }
 
+  // Every way out of a cave, made visible.
+  //
+  // Almost every cave warp in Kanto sat on plain floor: Rock Tunnel's exit to
+  // Route 10, Mt. Moon's to Route 3, Diglett's Cave at both ends, all eight
+  // warps in Victory Road, Cerulean Cave and Seafoam. Only Mt. Moon's own
+  // inter-floor stairs were ever drawn. So the way out looked exactly like the
+  // ground beside it, and in an unlit cave — where you can see two tiles —
+  // that is not a hard exit to find, it is an invisible one. You could stand
+  // on the tile and see nothing at all.
+  //
+  // Done here rather than in twenty-odd grids so it holds for every cave that
+  // exists and every cave anybody adds later.
+  var PLAIN_CAVE = { cavefloor: 1, cavecalm: 1, darkfloor: 1, icefloor: 1 };
+  function markCaveExits(map) {
+    if (!map.deco || !map.legend) return;
+    var stairChar = null;
+    for (var c in map.legend) if (map.legend[c] === 'stairs') { stairChar = c; break; }
+    if (!stairChar) return;
+    for (var i = 0; i < (map.warps || []).length; i++) {
+      var w = map.warps[i];
+      var here = map.ground[w.y] && map.ground[w.y][w.x];
+      if (!PLAIN_CAVE[map.legend[here]]) continue;      // already drawn as something
+      var row = map.deco[w.y];
+      if (!row) continue;
+      map.deco[w.y] = row.slice(0, w.x) + stairChar + row.slice(w.x + 1);
+    }
+  }
+
   G.decorateMap = function (map) {
     if (!map || map._decorated) return;
     map._decorated = true;
+    markCaveExits(map);
     if (!map.deco || !map.ground || map.indoors) return;
     var isOutdoor = map.legend === G.LEG_EXT ||
       Object.keys(map.legend).some(function (c) { return map.legend[c] === 'door'; });
@@ -569,6 +598,33 @@
         ctx.fillStyle = (d === radius) ? 'rgba(8,8,16,0.45)'
           : (d === radius + 1) ? 'rgba(6,6,12,0.82)' : '#06060c';
         ctx.fillRect(x * TILEPX - cam.x, y * TILEPX - cam.y, TILEPX, TILEPX);
+      }
+    }
+  }
+
+  // Daylight at the mouth of a cave. Only for exits that actually lead OUT —
+  // a staircase down to the next floor of Victory Road gets nothing, because
+  // there is no daylight down there and a beacon on every warp would tell you
+  // nothing about which one is the way home.
+  //
+  // Warm, soft, and slowly breathing, so it reads as light rather than as a
+  // highlighted game object. Respects the motion setting: at zero it holds
+  // steady instead of pulsing.
+  function drawExitGlow(ctx, cam, map) {
+    var TILEPX = 16;
+    for (var i = 0; i < (map.warps || []).length; i++) {
+      var w = map.warps[i];
+      var to = G.MAPS[w.to];
+      if (!to || to.dark || to.indoors) continue;         // not a way outside
+      var sx = w.x * TILEPX - cam.x, sy = w.y * TILEPX - cam.y;
+      if (sx < -80 || sy < -80 || sx > G.SCREEN_W + 80 || sy > G.SCREEN_H + 80) continue;
+      var breathe = G.motionScale && G.motionScale() === 0
+        ? 0.5 : 0.5 + 0.5 * Math.sin(G.frame / 34);
+      var cx = sx + 8, cy = sy + 8;
+      for (var r = 5; r >= 1; r--) {
+        var a = (0.055 + 0.02 * breathe) * (6 - r) / 5;
+        ctx.fillStyle = 'rgba(255,238,190,' + a.toFixed(3) + ')';
+        ctx.fillRect(cx - r * 8, cy - r * 8, r * 16, r * 16);
       }
     }
   }
@@ -1339,6 +1395,11 @@
       // just possible to play without it.
       if (map.dark && !G.flags.flashOn) drawDarkness(ctx, cam, 2);
       else if (map.dark) drawDarkness(ctx, cam, 4);
+      // and daylight, spilling in from whichever way leads out. Drawn AFTER
+      // the darkness so it shows through it: in an unlit cave the exit is now
+      // a glow you can see across the room and walk toward, rather than a
+      // staircase you have to be standing on to notice.
+      if (map.dark) drawExitGlow(ctx, cam, map);
 
       // interior lighting, then weather — both over the world, under the HUD
       drawInteriorLight(ctx, map, cam);

@@ -1380,6 +1380,37 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   if (!uniq.length) console.log('  crossing: from every entrance, every exit of that map can be reached');
 }
 
+// --- every way out of a cave is DRAWN ---
+// Reachability audits ask whether a player COULD get to the exit. They cannot
+// ask whether the exit is visible, and almost every cave warp in Kanto was
+// sitting on plain floor: Rock Tunnel's exit to Route 10, Mt. Moon's to Route
+// 3, both ends of Diglett's Cave, all of Victory Road, Cerulean Cave and
+// Seafoam. Only Mt. Moon's own stairs were ever drawn.
+//
+// In an unlit cave, where you can see two tiles, an exit that looks exactly
+// like the ground beside it is not hard to find — it is invisible. You could
+// stand on the tile and see nothing.
+{
+  const PLAIN = new Set(['cavefloor', 'cavecalm', 'darkfloor', 'icefloor']);
+  const CAVE_BASE = new Set(['cavefloor', 'darkfloor', 'icefloor']);
+  const blind = [];
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    if (!CAVE_BASE.has(m.base)) continue;
+    if (G.decorateMap) G.decorateMap(m);        // the marker is applied on load
+    for (const w of (m.warps || [])) {
+      const d = m.deco && m.deco[w.y] && m.deco[w.y][w.x];
+      const n = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[w.y][w.x]];
+      if (PLAIN.has(n)) {
+        blind.push(`${id}: the way out to ${w.to} at (${w.x},${w.y}) is drawn as plain ${n} — nothing marks it`);
+      }
+    }
+  }
+  for (const b of blind.slice(0, 10)) errors.push('BLINDEXIT: ' + b);
+  if (blind.length > 10) errors.push(`BLINDEXIT: …and ${blind.length - 10} more`);
+  if (!blind.length) console.log('  cave exits: every warp out of a cave is drawn as something you can see');
+}
+
 // --- and can you get BACK? ---
 // The crossing audit asks whether each map has a way onward. That still lets
 // the world be a one-way street: Viridian Forest had a gate house at its south
