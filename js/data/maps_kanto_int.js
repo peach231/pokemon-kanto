@@ -82,8 +82,16 @@
       shopInventory: inventory,
       npcs: [
         { x: 3, y: 2, sprite: 'clerk', dir: 'down', event: 'shopBuy' },
+        // The regular. In a mart that stocks the EXP SHARE he talks about
+        // that instead, because a shop list only ever shows you a name and a
+        // price, and this is the one item on the shelf whose whole value is
+        // in what it does rather than what it is.
         { x: 8, y: 4, sprite: 'youngster', dir: 'left',
-          dialog: ['POTIONs are cheap and they save runs.', 'Buy more than you think you need. Trust me.'] }
+          dialog: (inventory && inventory.indexOf('expshare') !== -1)
+            ? ['See that EXP SHARE? Carry one and your WHOLE TEAM levels up, not just whoever is out front.',
+               'Half shares for the ones still in their balls — and it takes nothing off the one doing the fighting.',
+               'Cheapest way there is to stop dragging five POKéMON around behind one.']
+            : ['POTIONs are cheap and they save runs.', 'Buy more than you think you need. Trust me.'] }
       ]
     };
   }
@@ -378,6 +386,13 @@
       };
       yield { t: 'sfx', id: 'confirm' };
       yield { t: 'text', s: 'You bought a ' + item.name + '.  ($' + G.player.money + ' left)' };
+      // A shop list has room for a name and a price and nothing else, so
+      // anything whose value is in what it DOES says so on the way out. Only
+      // the first one — after that you know.
+      if (item.kind === 'key' && !G.flags['told_' + item.id]) {
+        G.flags['told_' + item.id] = 1;
+        yield { t: 'text', s: 'Clerk: ' + item.desc };
+      }
     }
     yield { t: 'text', s: 'Clerk: Please come again!' };
   };
@@ -648,7 +663,7 @@
   // ========================================================== CERULEAN CITY =
   healCentre('ceruleancentre', 'CERULEAN', { map: 'cerulean', x: 20, y: 6 });
   pokeMart('ceruleanmart', 'CERULEAN', { map: 'cerulean', x: 20, y: 18 },
-    ['potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+    ['expshare', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
      'pokeball', 'greatball', 'repel', 'escaperope']);
 
   G.MAPS.ceruleanhouse = {
@@ -903,7 +918,7 @@
   // ========================================================= VERMILION CITY ==
   healCentre('vermilioncentre', 'VERMILION', { map: 'vermilion', x: 6, y: 6 });
   pokeMart('vermilionmart', 'VERMILION', { map: 'vermilion', x: 20, y: 6 },
-    ['potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+    ['expshare', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
      'iceheal', 'pokeball', 'greatball', 'repel', 'escaperope']);
 
   G.MAPS.vermilionhouse = {
@@ -1085,7 +1100,7 @@
   // ========================================================== LAVENDER TOWN =
   healCentre('lavendercentre', 'LAVENDER', { map: 'lavender', x: 6, y: 6 });
   pokeMart('lavendermart', 'LAVENDER', { map: 'lavender', x: 7, y: 18 },
-    ['potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+    ['expshare', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
      'iceheal', 'revive', 'pokeball', 'greatball', 'escaperope']);
 
   G.MAPS.lavenderhouse = {
@@ -1671,7 +1686,7 @@
   // ============================================================ SAFFRON CITY =
   healCentre('saffroncentre', 'SAFFRON', { map: 'saffron', x: 18, y: 6 });
   pokeMart('saffronmart', 'SAFFRON', { map: 'saffron', x: 18, y: 12 },
-    ['potion', 'superpotion', 'hyperpotion', 'maxpotion', 'fullrestore',
+    ['expshare', 'potion', 'superpotion', 'hyperpotion', 'maxpotion', 'fullrestore',
      'antidote', 'parlyzheal', 'awakening', 'fullheal', 'revive',
      'pokeball', 'greatball', 'ultraball', 'repel', 'escaperope']);
 
@@ -2000,7 +2015,7 @@
   // ============================================================== FUCHSIA ===
   healCentre('fuchsiacentre', 'FUCHSIA', { map: 'fuchsia', x: 6, y: 9 });
   pokeMart('fuchsiamart', 'FUCHSIA', { map: 'fuchsia', x: 20, y: 9 },
-    ['ultraball', 'greatball', 'hyperpotion', 'superpotion', 'fullheal', 'revive', 'maxrepel']);
+    ['expshare', 'ultraball', 'greatball', 'hyperpotion', 'superpotion', 'fullheal', 'revive', 'maxrepel']);
 
   // KOGA's gym. In Red/Blue this room is invisible walls — a puzzle built out
   // of bad information rather than out of geometry, and the only way through
@@ -2458,7 +2473,7 @@
   // ============================================================= CINNABAR ===
   healCentre('cinnabarcentre', 'CINNABAR', { map: 'cinnabar', x: 15, y: 6 });
   pokeMart('cinnabarmart', 'CINNABAR', { map: 'cinnabar', x: 16, y: 15 },
-    ['ultraball', 'greatball', 'maxpotion', 'hyperpotion', 'fullheal', 'revive', 'maxrepel', 'escaperope']);
+    ['expshare', 'ultraball', 'greatball', 'maxpotion', 'hyperpotion', 'fullheal', 'revive', 'maxrepel', 'escaperope']);
 
   // The LAB. Two rooms in one: the fossil bench at the back, and the trade
   // desk at the front. The fossil you did NOT take in MT. MOON is gone

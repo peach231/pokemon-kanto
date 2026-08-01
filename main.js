@@ -130,7 +130,10 @@
       G.runEvent('shopBuy');
       // Hold A down for a moment so the clerk's greeting types out and
       // dismisses itself and the list is what you are looking at.
-      var realJP2 = G.input.justPressed, holdFor = 90;
+      // #shop=x&hold=n — how many frames to hold A for. Long enough clears
+      // the greeting and leaves the list up; longer still walks into it.
+      var realJP2 = G.input.justPressed;
+      var holdFor = parseInt((location.hash.match(/hold=(\d+)/) || [])[1] || '40', 10);
       G.input.justPressed = function (b) {
         if (holdFor-- <= 0) { G.input.justPressed = realJP2; return realJP2.call(G.input, b); }
         return b === 'A';

@@ -274,6 +274,50 @@
       G.player = realPlayer;
     })();
 
+    // WHAT YOU ARE FACING WINS. Talking is forgiving — anybody standing beside
+    // you will do if the tile ahead is empty — but that fallback used to run
+    // BEFORE the item and sign checks, which made it greedy rather than
+    // forgiving. In ROCK TUNNEL, with a beaten trainer north and an item ball
+    // west, facing the ball and pressing A turned you round and replayed the
+    // trainer's parting line, every time, and the ball could not be picked up
+    // at all.
+    (function () {
+      function noop2() {}
+      var scene = G.overworldScene;
+      if (!scene || !scene._interact || !G.MAPS.rocktunnel1f) return;
+      var realPlayer = G.player, realTB = G.Textbox;
+      var realPush = G.pushScene, realPop = G.popScene, realFlags = G.flags;
+      var realMap = G.world.mapId, realX = G.world.player.x, realY = G.world.player.y;
+
+      G.flags = {}; G.flags.rt_lenny = 1;                    // trainer already beaten
+      G.player = { party: [G.makeMon('pidgeot', 20)], box: [], bag: {},
+                   dexSeen: {}, dexCaught: {}, money: 0, badges: [] };
+      G.world.loadMap('rocktunnel1f', 5, 16, 'down');
+      G.world.npcs.push({ x: 5, y: 15, dir: 'down', obj: false,
+        def: { trainer: 'rt_lenny', beaten: 'Still standing?' } });
+      var said = [];
+      G.Textbox = function (t) { said.push(String(t)); return { update: noop2, draw: noop2 }; };
+      G.pushScene = noop2; G.popScene = noop2;
+
+      var p = G.world.player;
+      p.x = 5; p.y = 16; p.dir = 'left';                     // facing the ball at (4,16)
+      scene._interact();
+      assert(G.player.bag.escaperope === 1,
+        'facing an item ball and pressing A did not pick it up — the beaten trainer beside you spoke instead');
+      assert(p.dir === 'left', 'picking up an item turned the player away from it');
+
+      // and the forgiving talk still works when there IS nothing ahead
+      said.length = 0;
+      p.x = 5; p.y = 16; p.dir = 'right';
+      scene._interact();
+      assert(said.length === 1 && p.dir === 'up',
+        'talking to somebody beside you stopped working');
+
+      G.Textbox = realTB; G.pushScene = realPush; G.popScene = realPop;
+      G.flags = realFlags; G.player = realPlayer;
+      G.world.loadMap(realMap, realX, realY, 'down');
+    })();
+
     // THE EXP SHARE. The whole point of it is that it pays the bench WITHOUT
     // taxing the fighter — Gen 1's own EXP. ALL halved the fighter's share to
     // fund the rest, which is exactly why nobody ever carried one. If that

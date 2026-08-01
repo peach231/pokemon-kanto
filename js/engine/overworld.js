@@ -1121,7 +1121,7 @@
     },
 
     _interact: function () {
-      var w = G.world, p = w.player;
+      var w = G.world, p = w.player, self = this;
       var d = G.DIRS[p.dir];
       var fx = p.x + d.dx, fy = p.y + d.dy;
 
@@ -1132,45 +1132,37 @@
         return;
       }
 
-      // talking is forgiving: the faced tile first, then any adjacent side
-      var npc = w.npcAt(fx, fy);
-      if (!npc) {
-        var dirs = ['down', 'up', 'left', 'right'];
-        for (var di = 0; di < dirs.length; di++) {
-          var dd = G.DIRS[dirs[di]];
-          var cand = w.npcAt(p.x + dd.dx, p.y + dd.dy);
-          if (cand) {
-            npc = cand;
-            p.dir = dirs[di]; // turn toward them
-            break;
-          }
-        }
-      }
-      // talk across counters: nurse/clerk stand one tile beyond the desk
-      if (!npc) {
-        var facedName = w.tileNameAt('deco', fx, fy) || w.tileNameAt('ground', fx, fy);
-        if (facedName === 'icounter') {
-          npc = w.npcAt(fx + d.dx, fy + d.dy);
-        }
-      }
-      if (npc) {
+      // What talking to somebody does, wherever we found them.
+      function talkTo(npc) {
         if (!npc.obj) npc.dir = G.OPPOSITE_DIR[p.dir]; // face the player
-        if (G.hooks.interact && G.hooks.interact(npc)) return;
+        if (G.hooks.interact && G.hooks.interact(npc)) return true;
         if (npc.def.trainer) {
           if (!G.flags[npc.def.trainer]) {
-            G.runEventGen(this._engageGen(npc, npc.def));
+            G.runEventGen(self._engageGen(npc, npc.def));
           } else {
             G.audio.sfx('confirm');
             G.pushScene(G.Textbox(npc.def.beaten || G.TRAINERS[npc.def.trainer].defeat || '...'));
           }
-          return;
+          return true;
         }
-        if (npc.def.event && G.EVENTS && G.EVENTS[npc.def.event]) { G.runEvent(npc.def.event); return; }
+        if (npc.def.event && G.EVENTS && G.EVENTS[npc.def.event]) { G.runEvent(npc.def.event); return true; }
         if (npc.def.dialog) {
           G.audio.sfx('confirm');
           G.pushScene(G.Textbox(npc.def.dialog));
+          return true;
         }
-        return;
+        return true;
+      }
+
+      // Somebody on the tile you are actually facing, first and always.
+      var faced = w.npcAt(fx, fy);
+      if (faced && talkTo(faced)) return;
+
+      // talk across counters: nurse/clerk stand one tile beyond the desk
+      var facedName = w.tileNameAt('deco', fx, fy) || w.tileNameAt('ground', fx, fy);
+      if (facedName === 'icounter') {
+        var over = w.npcAt(fx + d.dx, fy + d.dy);
+        if (over && talkTo(over)) return;
       }
 
       var item = w.itemAt(fx, fy);
@@ -1203,6 +1195,31 @@
       // boulder or a stretch of water is a locked door, and the key is an HM
       // plus the badge that licenses it.
       var fdef = w.tileDefAt(fx, fy);
+
+      // Talking is forgiving: if the tile you are facing holds nothing at all,
+      // anybody standing beside you will do, and you turn to them.
+      //
+      // This used to run BEFORE the item, sign and obstacle checks above, and
+      // that made it greedy rather than forgiving — in ROCK TUNNEL, with a
+      // beaten trainer to the north and an item ball to the west, facing the
+      // ball and pressing A turned you round and replayed the trainer's
+      // parting line. Every time. The ball could not be picked up at all.
+      //
+      // Nothing you are deliberately facing may lose to something you merely
+      // happen to be standing next to.
+      var facingSomething = (fdef && (fdef.story || fdef.cut || fdef.strength || fdef.water));
+      if (!facingSomething) {
+        var dirs = ['down', 'up', 'left', 'right'];
+        for (var di = 0; di < dirs.length; di++) {
+          var dd = G.DIRS[dirs[di]];
+          var cand = w.npcAt(p.x + dd.dx, p.y + dd.dy);
+          if (cand) {
+            p.dir = dirs[di];                  // turn toward them
+            if (talkTo(cand)) return;
+            break;
+          }
+        }
+      }
       // Some tiles ARE the interaction — BLAINE's quiz shutters answer to
       // being talked to, which is why walking up to one feels like being
       // asked a question rather than meeting a quizmaster.
