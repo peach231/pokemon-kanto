@@ -1457,8 +1457,14 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
 // like the ground beside it is not hard to find — it is invisible. You could
 // stand on the tile and see nothing.
 {
-  const PLAIN = new Set(['cavefloor', 'cavecalm', 'darkfloor', 'icefloor']);
-  const CAVE_BASE = new Set(['cavefloor', 'darkfloor', 'icefloor']);
+  // Not just caves. Every staircase in POKéMON TOWER, SILPH CO., the ROCKET
+  // HIDEOUT, the MANSION, the POWER PLANT and both UNDERGROUND PATHS was
+  // undrawn too — thirty-three more on top of the caves — because the first
+  // version of this only looked at maps floored in rock.
+  const PLAIN = new Set(['cavefloor', 'cavecalm', 'darkfloor', 'icefloor',
+                         'towerfloor', 'metalfloor', 'burntfloor']);
+  const CAVE_BASE = new Set(['cavefloor', 'darkfloor', 'icefloor',
+                             'towerfloor', 'metalfloor', 'burntfloor']);
   const blind = [];
   for (const id in G.MAPS) {
     const m = G.MAPS[id];
@@ -1474,7 +1480,7 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
   for (const b of blind.slice(0, 10)) errors.push('BLINDEXIT: ' + b);
   if (blind.length > 10) errors.push(`BLINDEXIT: …and ${blind.length - 10} more`);
-  if (!blind.length) console.log('  cave exits: every warp out of a cave is drawn as something you can see');
+  if (!blind.length) console.log('  dungeon exits: every warp out of a cave, tower, lab or hideout is drawn');
 }
 
 // --- and can you get BACK? ---

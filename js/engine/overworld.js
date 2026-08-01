@@ -127,28 +127,44 @@
     }
   }
 
-  // Every way out of a cave, made visible.
+  // Every way out of a dungeon, made visible.
   //
-  // Almost every cave warp in Kanto sat on plain floor: Rock Tunnel's exit to
-  // Route 10, Mt. Moon's to Route 3, Diglett's Cave at both ends, all eight
-  // warps in Victory Road, Cerulean Cave and Seafoam. Only Mt. Moon's own
-  // inter-floor stairs were ever drawn. So the way out looked exactly like the
-  // ground beside it, and in an unlit cave — where you can see two tiles —
-  // that is not a hard exit to find, it is an invisible one. You could stand
-  // on the tile and see nothing at all.
+  // Almost none of them were. Rock Tunnel's exit to Route 10, Mt. Moon's to
+  // Route 3, both ends of Diglett's Cave, all of Victory Road, Cerulean Cave
+  // and Seafoam — and then every staircase in POKéMON TOWER, SILPH CO., the
+  // ROCKET HIDEOUT, the MANSION, the POWER PLANT and both UNDERGROUND PATHS.
+  // Fifty-eight warps standing on plain floor, looking exactly like the ground
+  // beside them. In an unlit cave, where you can see two tiles, that is not a
+  // hard exit to find but an invisible one; in the Tower it is a staircase you
+  // can walk over without knowing it was there.
   //
-  // Done here rather than in twenty-odd grids so it holds for every cave that
-  // exists and every cave anybody adds later.
-  var PLAIN_CAVE = { cavefloor: 1, cavecalm: 1, darkfloor: 1, icefloor: 1 };
+  // Done here rather than in fifty-odd grids so it holds for every dungeon
+  // that exists and every one anybody adds later. A warp already drawn as
+  // something — a door, a ladder — is left alone.
+  var PLAIN_FLOOR = {
+    cavefloor: 1, cavecalm: 1, darkfloor: 1, icefloor: 1,   // caves
+    towerfloor: 1, metalfloor: 1, burntfloor: 1             // and the built ones
+  };
   function markCaveExits(map) {
     if (!map.deco || !map.legend) return;
     var stairChar = null;
     for (var c in map.legend) if (map.legend[c] === 'stairs') { stairChar = c; break; }
-    if (!stairChar) return;
+    // Some legends never needed a staircase glyph because nothing in the grid
+    // ever drew one — the POWER PLANT and both UNDERGROUND PATHS are wall and
+    // floor and nothing else. Give them one rather than let their exits stay
+    // invisible for want of a spare character.
+    if (!stairChar) {
+      var free = '>^&+=';
+      for (var fi = 0; fi < free.length; fi++) {
+        if (!map.legend[free[fi]]) { stairChar = free[fi]; break; }
+      }
+      if (!stairChar) return;
+      map.legend[stairChar] = 'stairs';
+    }
     for (var i = 0; i < (map.warps || []).length; i++) {
       var w = map.warps[i];
       var here = map.ground[w.y] && map.ground[w.y][w.x];
-      if (!PLAIN_CAVE[map.legend[here]]) continue;      // already drawn as something
+      if (!PLAIN_FLOOR[map.legend[here]]) continue;      // already drawn as something
       var row = map.deco[w.y];
       if (!row) continue;
       map.deco[w.y] = row.slice(0, w.x) + stairChar + row.slice(w.x + 1);
