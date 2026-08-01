@@ -1573,6 +1573,24 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
 }
 
+// --- every field move can explain why it will not work ---
+// G.fieldBlockedText builds its refusals as FLAVOUR[kind] + a reason. FLY had
+// no FLAVOUR line, because it is the one HM with no obstacle to walk into —
+// so nothing asked for one until the TOWN MAP started explaining its refusals,
+// and then every message opened with the word "undefined".
+{
+  const src = fs.readFileSync(path.join(ROOT, 'js/engine/field.js'), 'utf8');
+  const block = (src.match(/var FLAVOUR = \{([\s\S]*?)\};/) || [])[1] || '';
+  const have = new Set([...block.matchAll(/^\s*([a-z]+):/gm)].map(m => m[1]));
+  const missing = Object.keys(G.FIELD_MOVES || {}).filter(k => !have.has(k));
+  for (const k of missing) {
+    errors.push(`FIELDTEXT: '${k}' is a field move with no FLAVOUR line — every refusal for it reads "undefined ..."`);
+  }
+  if (!missing.length) {
+    console.log(`  field moves: all ${Object.keys(G.FIELD_MOVES || {}).length} can say why they are unavailable`);
+  }
+}
+
 // --- every item kind is actually handled by the bag ---
 // G.ITEM_KINDS already stopped an item from declaring a kind nobody had heard
 // of. It could not stop the reverse: a kind everybody had heard of that the

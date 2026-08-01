@@ -1182,9 +1182,21 @@
         if (G.input.justPressed('A')) {
           var node = NODES[this.sel];
           var pt = G.FLY_POINTS && G.FLY_POINTS[node.id];
-          if (!pt) { G.audio.sfx('cancel'); return; }
+          // Every refusal says why. Two of these used to be a cancel beep and
+          // nothing else, which leaves a player pressing Z at a map wondering
+          // whether the button works.
+          if (!pt) {
+            G.audio.sfx('cancel');
+            G.pushScene(G.Textbox('You can only FLY to a town or city — somewhere with room to land.'));
+            return;
+          }
           if (!isSeen(node.id)) { G.audio.sfx('cancel'); G.pushScene(G.Textbox('You have never been to ' + node.label + '.')); return; }
-          if (!G.canFly()) { G.audio.sfx('cancel'); return; }
+          var flyUse = G.fieldUser('fly');
+          if (flyUse.blocked) {
+            G.audio.sfx('cancel');
+            G.pushScene(G.Textbox(G.fieldBlockedText('fly', flyUse)));
+            return;
+          }
           if (G.world.map && G.world.map.indoors) { G.audio.sfx('cancel'); G.pushScene(G.Textbox('There is no room to FLY indoors.')); return; }
           G.ask('FLY to ' + node.label + '?', function () { G.flyTo(node.id); });
         }

@@ -52,17 +52,24 @@
     cut:      'A thin, spindly tree blocks the way. It looks like it could be CUT down.',
     surf:     'The water is deep and blue. Something could carry you across it.',
     strength: 'A boulder sits square in the path. It would take real STRENGTH to shift.',
-    flash:    'It is pitch black in here.'
+    flash:    'It is pitch black in here.',
+    // FLY is the only one of the five with no obstacle to walk into — it is
+    // used from the TOWN MAP — so it had no line here and nothing ever asked
+    // for one. The moment the map started explaining its refusals, every
+    // message began with the word "undefined".
+    fly:      'It is a long way, and the sky is open.'
   };
 
   G.fieldBlockedText = function (kind, use) {
     var f = use.f;
-    if (use.blocked === 'nohm') return FLAVOUR[kind] || 'Nothing happens.';
+    var lead = FLAVOUR[kind] || '';
+    var join = lead ? lead + ' ' : '';
+    if (use.blocked === 'nohm') return lead || 'Nothing happens.';
     if (use.blocked === 'nobadge') {
-      return FLAVOUR[kind] + ' You have the HM — but no trainer here will let you use it without the ' +
+      return join + 'You have the HM — but no trainer here will let you use it without the ' +
         f.badgeName + '.';
     }
-    return FLAVOUR[kind] + ' None of your POKéMON knows ' + G.MOVES[f.move].name.toUpperCase() + '.';
+    return join + 'None of your POKéMON knows ' + G.MOVES[f.move].name.toUpperCase() + '.';
   };
 
   // --------------------------------------------------------------- CUT ----
