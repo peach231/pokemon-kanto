@@ -95,6 +95,27 @@ const RENAME = { nidoran_f: 'nidoranf', nidoran_m: 'nidoranm', mr_mime: 'mrmime'
                  farfetch_d: 'farfetchd' };
 const gameKey = k => RENAME[k] || k;
 
+// ----------------------------------------------- FireRed's table as well --
+// Not the arbiter — Red/Blue is — but the licence for every entry this game
+// has that Red/Blue does not.
+const frlgAllows = {};
+const machineMove = {};
+{
+  const norm = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  for (const id in G.TM_MOVES) {
+    const mv = G.MOVES[G.TM_MOVES[id]];
+    if (mv) machineMove[id] = norm(mv.name);
+  }
+  let text = '';
+  try { text = read('pokefirered__tmhm_learnsets.h'); } catch (e) { /* optional */ }
+  for (const m of text.matchAll(/\[SPECIES_([A-Z0-9_]+)\]\s*=\s*TMHM_LEARNSET\(([\s\S]*?)\),\n/g)) {
+    const key = m[1].toLowerCase().replace(/_/g, '');
+    const set = new Set();
+    for (const t of m[2].matchAll(/TMHM\((?:TM|HM)\d+_([A-Z0-9_]+)\)/g)) set.add(norm(t[1]));
+    frlgAllows[key] = set;
+  }
+}
+
 // -------------------------------------------------------------- the diff --
 const problems = [];
 let checked = 0;
@@ -138,10 +159,18 @@ for (const k in src) {
   }
   const got = new Set(G.TM_COMPAT[gk] || []);
   const order = id => (id[0] === 'h' ? 100 : 0) + parseInt(id.slice(2), 10);
-  const extra = [...got].filter(x => !wantSet.has(x)).sort((a, b) => order(a) - order(b));
+  // Compatibility is Red/Blue's table WIDENED by FireRed's, because this game
+  // wears FireRed's clothes and a player will have FireRed's rules in mind —
+  // ODDISH learns FLASH there and not in Red/Blue. So the test is one-sided:
+  // nothing Red/Blue allowed may go missing, and every addition has to be
+  // something FireRed actually allows. See tools/merge_frlg_tmhm.js.
   const short = [...wantSet].filter(x => !got.has(x)).sort((a, b) => order(a) - order(b));
-  if (extra.length) problems.push(`${gk} machines: game allows ${extra.join(' ')} that pokered does not`);
   if (short.length) problems.push(`${gk} machines: pokered allows ${short.join(' ')} that the game does not`);
+  const extra = [...got].filter(x => !wantSet.has(x)).sort((a, b) => order(a) - order(b));
+  const unjustified = extra.filter(id => !(frlgAllows[gk] && frlgAllows[gk].has(machineMove[id])));
+  if (unjustified.length) {
+    problems.push(`${gk} machines: game allows ${unjustified.join(' ')}, which neither pokered nor FireRed does`);
+  }
 }
 
 // ------------------------------------------------- moves, from the source --

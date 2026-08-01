@@ -559,6 +559,21 @@ async function main() {
   const wild = await pokered.loadWild([...new Set(Object.values(WILD_MAPS))]);
   write('encounters.js', emitEncounters(wild));
 
+  // TM/HM compatibility is Red/Blue's, WIDENED by FireRed's — this game wears
+  // FireRed's clothes, so a player has FireRed's rules in mind. Run as a
+  // separate step against the file just written, so regenerating never
+  // silently narrows the tables back down to 1996.
+  {
+    const r = require('child_process').spawnSync(process.execPath,
+      [require('path').join(__dirname, 'merge_frlg_tmhm.js')], { encoding: 'utf8' });
+    if (r.status !== 0) {
+      console.error('\nWARNING: the FireRed compatibility merge failed — tms.js is Red/Blue only.');
+      console.error((r.stderr || '').trim());
+    } else {
+      console.log((r.stdout || '').trim());
+    }
+  }
+
   // ---- report ----
   const stoneEvos = d.dexOrder.filter(k => d.species[k].evos.some(e => e.how === 'item'));
   const tradeEvos = d.dexOrder.filter(k => d.species[k].evos.some(e => e.how === 'trade'));
