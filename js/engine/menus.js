@@ -15,6 +15,84 @@
     ctx.fillRect(x, y, fw, 3);
   }
 
+  // ------------------------------------------------------- save slot picker --
+  // Three files, and enough of each on screen to tell them apart without
+  // opening one: who you are, how far you got, how long it took, and what is
+  // walking in front. `mode` is 'load' (only filled slots pick) or 'save'
+  // (any slot picks, and an occupied one warns first).
+  //
+  // onPick(slot) when a file is chosen; onCancel() when backed out of.
+  G.SaveSlotScene = function (mode, onPick, onCancel) {
+    var sel = 0;
+    var confirming = false;
+    return {
+      opaque: true,
+      update: function () {
+        var n = G.SAVE_SLOTS;
+        if (confirming) {
+          if (G.input.justPressed('A')) { G.audio.sfx('confirm'); confirming = false; onPick(sel + 1); }
+          else if (G.input.justPressed('B')) { G.audio.sfx('cancel'); confirming = false; }
+          return;
+        }
+        if (G.input.repeat('up')) { sel = (sel + n - 1) % n; G.audio.sfx('menuMove'); }
+        if (G.input.repeat('down')) { sel = (sel + 1) % n; G.audio.sfx('menuMove'); }
+        if (G.input.justPressed('B')) { G.audio.sfx('cancel'); if (onCancel) onCancel(); return; }
+        if (G.input.justPressed('A')) {
+          var info = G.slotInfo(sel + 1);
+          if (mode === 'load' && !info) { G.audio.sfx('cancel'); return; }   // nothing to open
+          // Overwriting somebody's game is the one irreversible thing this
+          // screen can do, so it asks.
+          if (mode === 'save' && info) { confirming = true; G.audio.sfx('confirm'); return; }
+          G.audio.sfx('confirm');
+          onPick(sel + 1);
+        }
+      },
+      draw: function (ctx) {
+        ctx.fillStyle = '#1a1c2c'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#2a3050'; ctx.fillRect(0, 0, W, 18);
+        ctx.fillStyle = '#f8e878'; ctx.fillRect(0, 18, W, 1);
+        G.text(ctx, mode === 'save' ? 'SAVE TO WHICH FILE?' : 'WHICH FILE?', 8, 5, G.C.white, '#101018');
+
+        for (var i = 0; i < G.SAVE_SLOTS; i++) {
+          var y = 24 + i * 40, on = i === sel;
+          var info = G.slotInfo(i + 1);
+          panel(ctx, 6, y, W - 12, 38);
+          if (on) {
+            ctx.fillStyle = '#f8e878';
+            ctx.fillRect(6, y, 2, 38);
+          }
+          G.text(ctx, 'FILE ' + (i + 1), 14, y + 5, on ? '#c04a30' : G.UI.text, G.UI.textShadow);
+          if (!info) {
+            G.text(ctx, 'empty', 66, y + 5, G.C.lgry);
+            continue;
+          }
+          G.text(ctx, info.name, 66, y + 5, G.UI.text, G.UI.textShadow);
+          if (info.champion) G.text(ctx, 'CHAMPION', 130, y + 5, '#c8a020');
+          G.text(ctx, 'BADGES ' + info.badges + '/8', 14, y + 17, G.UI.text, G.UI.textShadow);
+          G.text(ctx, 'DEX ' + info.caught, 84, y + 17, G.UI.text, G.UI.textShadow);
+          G.text(ctx, 'TIME ' + G.playTimeText(info.playSeconds), 134, y + 17, G.UI.text, G.UI.textShadow);
+          var where = info.where || '';
+          G.text(ctx, where.length > 26 ? where.slice(0, 26) : where, 14, y + 26, G.C.lgry);
+          // the lead, so a file is recognisable at a glance
+          if (info.lead) {
+            var img = G.IMG['mon_' + info.lead.sp];
+            if (img) ctx.drawImage(img, W - 40, y + 2, 32, 32);
+          }
+        }
+
+        if (confirming) {
+          ctx.fillStyle = 'rgba(10,10,20,0.72)'; ctx.fillRect(0, 0, W, H);
+          panel(ctx, 20, 54, W - 40, 52);
+          G.text(ctx, 'FILE ' + (sel + 1) + ' already has a game in it.', 30, 64, G.UI.text, G.UI.textShadow);
+          G.text(ctx, 'Saving over it cannot be undone.', 30, 76, G.UI.text, G.UI.textShadow);
+          G.text(ctx, 'Z: save over it     X: back', 30, 92, '#f8e878');
+          return;
+        }
+        G.text(ctx, 'Z: choose    X: back', 8, H - 11, G.C.lgry);
+      }
+    };
+  };
+
   // ------------------------------------------------- starter preview screen --
   // Full preview before committing: sprite, types, stat bars, dex entry.
   // onChoice(true) = take it, onChoice(false) = put it back.
@@ -279,11 +357,31 @@
           if (pick === 'HELP') G.pushScene(G.TutorialScene());
           if (pick === 'OPTION') G.pushScene(G.OptionsScene());
           if (pick === 'SAVE') {
-            G.ask('Save your progress?', function () {
-              var ok = G.saveGame();
-              G.pushScene(G.Textbox(ok ? 'Progress saved!' : 'Save failed...'));
+            // Saving writes back to the file you are playing, without asking
+            // which — that is what a file IS. Choosing a different one is a
+            // deliberate act, so it lives behind "SAVE TO ANOTHER FILE".
+            var writeTo = function (slot) {
+              var ok = G.saveGame(slot);
+              G.pushScene(G.Textbox(ok ? ('Saved to FILE ' + G.currentSlot + '!') : 'Save failed...'));
               if (ok) G.audio.sfx('heal');
-            });
+            };
+            G.pushScene(G.Textbox('Save to FILE ' + G.currentSlot + '?', {
+              onDone: function () {
+                G.pushScene(G.Chooser({
+                  items: ['Save', 'Another file', 'Cancel'],
+                  cancelIndex: 2,
+                  onPick: function (i) {
+                    if (i === 0) writeTo(G.currentSlot);
+                    else if (i === 1) {
+                      G.pushScene(G.SaveSlotScene('save', function (slot) {
+                        G.popScene();
+                        writeTo(slot);
+                      }, function () { G.popScene(); }));
+                    }
+                  }
+                }));
+              }
+            }));
           }
         }
       },

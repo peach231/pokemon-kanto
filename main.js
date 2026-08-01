@@ -108,6 +108,25 @@
         ts.update();
         G.input.justPressed = realJP;
       }
+    } else if (hashIs('slots')) {
+      // #slots — the save-file picker, with two files invented so the layout
+      // can be looked at without playing to it.
+      G.world.loadMap('pallet', 5, 6, 'down');
+      G.pushScene(G.overworldScene);
+      var mk = function (n, nm, sp, lv, badges, secs, champ, where) {
+        G.newGame(nm);
+        G.player.party = [G.makeMon(sp, lv)];
+        for (var b = 0; b < badges; b++) G.player.badges[b] = true;
+        G.player.playSeconds = secs;
+        G.player.dexCaught = {}; for (var c = 0; c < badges * 9; c++) G.player.dexCaught['x' + c] = 1;
+        if (champ) G.flags.champion = 1;
+        G.world.loadMap(where, 5, 6, 'down');
+        G.saveGame(n);
+      };
+      mk(1, 'ERIC', 'charizard', 62, 8, 3 * 3600 + 42 * 60, true, 'pallet');
+      mk(2, 'SAM', 'squirtle', 7, 1, 25 * 60, false, 'viridian');
+      G.clearSave(3);
+      G.pushScene(G.SaveSlotScene('load', function () {}, function () {}));
     } else if (hashIs('preview')) {
       // #preview=hitmonlee — the take-it-or-leave-it screen, which the DOJO
       // prize now shares with the starters.
@@ -207,6 +226,12 @@
         }
         guard('update', G.updateScenes);
         G.frame++;
+        // Playtime. The save-file screen has always had a place to show it and
+        // nothing was ever counting: playSeconds was initialised to 0 by
+        // newGame and never touched again.
+        if (G.frame % 60 === 0 && G.player) {
+          G.player.playSeconds = (G.player.playSeconds || 0) + 1;
+        }
         acc -= STEP_MS;
       }
       // Re-blit animated battlers from their live <img> sources before drawing,

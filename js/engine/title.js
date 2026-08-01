@@ -220,12 +220,18 @@
           G.audio.sfx('confirm');
           var pick = items[sel];
           if (pick === 'CONTINUE') {
-            if (G.loadGame()) {
-              G.replaceScene(G.overworldScene);
-            } else {
-              G.pushScene(G.Textbox('The save data could not be read...'));
-            }
+            // Which file. The picker shows all three with enough of each to
+            // tell them apart, and refuses to open an empty one.
+            G.pushScene(G.SaveSlotScene('load', function (slot) {
+              G.popScene();
+              if (G.loadGame(slot)) G.replaceScene(G.overworldScene);
+              else G.pushScene(G.Textbox('That file could not be read...'));
+            }, function () { G.popScene(); }));
           } else if (pick === 'NEW GAME') {
+            // and which file it will live in. Asked BEFORE the intro rather
+            // than at the first save, so nothing is ever written on top of an
+            // existing game without being asked first.
+            var slotChosen = G.currentSlot;
             G.newGame();
             var enterWorld = function () {
               G.world.loadMap('playerhome', 4, 4, 'down');
@@ -251,7 +257,20 @@
             // line — then the trainer select, which asks your name itself
             // before handing back. Name LAST, because being asked it once you
             // can see who you are lands differently to an empty screen.
-            G.replaceScene(G.IntroCinematic(toChar));
+            var begin = function () {
+              G.currentSlot = slotChosen;
+              G.replaceScene(G.IntroCinematic(toChar));
+            };
+            // With nothing saved anywhere there is nothing to choose between,
+            // so the first game on a fresh browser never sees this screen.
+            if (G.anySave && G.anySave()) {
+              G.replaceScene(G.SaveSlotScene('save', function (slot) {
+                slotChosen = slot;
+                begin();
+              }, function () { G.replaceScene(G.TitleScene()); }));
+            } else {
+              begin();
+            }
           }
         }
       },
