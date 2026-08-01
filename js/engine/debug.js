@@ -274,6 +274,53 @@
       G.player = realPlayer;
     })();
 
+    // THE EXP SHARE. The whole point of it is that it pays the bench WITHOUT
+    // taxing the fighter — Gen 1's own EXP. ALL halved the fighter's share to
+    // fund the rest, which is exactly why nobody ever carried one. If that
+    // ever regresses, the item silently becomes a punishment for using it.
+    (function () {
+      var realPlayer = G.player;
+      function earned(withShare) {
+        G.player = {
+          party: ['pidgeot', 'rattata', 'pikachu'].map(function (s) { return G.makeMon(s, 20); }),
+          box: [], bag: withShare ? { expshare: 1 } : {},
+          dexSeen: {}, dexCaught: {}, money: 0, badges: []
+        };
+        var before = G.player.party.map(function (m) { return m.exp; });
+        var foe = G.makeMon('geodude', 15);
+        foe.curHp = 0;
+        var b = new G.Battle({ party: G.player.party, foes: [foe], wild: true });
+        var gen = b.awardExp(foe), s = gen.next();
+        while (!s.done) s = gen.next();
+        return G.player.party.map(function (m, i) { return m.exp - before[i]; });
+      }
+      var without = earned(false), with_ = earned(true);
+      assert(without[1] === 0 && without[2] === 0,
+        'the bench earned EXP with no EXP SHARE in the bag');
+      assert(with_[0] === without[0],
+        'the EXP SHARE cost the fighter ' + (without[0] - with_[0]) + ' EXP — it must cost it nothing');
+      assert(with_[1] > 0 && with_[1] === Math.floor(without[0] / 2),
+        'the EXP SHARE paid the bench ' + with_[1] + ', expected half of ' + without[0]);
+      G.player = realPlayer;
+    })();
+
+    // FRIENDSHIP and the career record, which are what make a POKéMON yours
+    // rather than merely the right level.
+    (function () {
+      if (!G.friendship) return;
+      var m = G.makeMon('pikachu', 10);
+      assert(G.friendship(m) === G.FRIEND_START, 'a new POKéMON did not start at the base friendship');
+      assert(m.met && m.met.level === 10, 'a new POKéMON recorded no meeting level');
+      G.addFriendship(m, 1000);
+      assert(G.friendship(m) === G.FRIEND_MAX, 'friendship went past its ceiling');
+      G.addFriendship(m, -1000);
+      assert(G.friendship(m) === 0, 'friendship went below zero');
+      var bands = {};
+      for (var f = 0; f <= G.FRIEND_MAX; f += 5) { m.friendship = f; bands[G.friendshipBand(m)[1]] = 1; }
+      assert(Object.keys(bands).length === G.FRIEND_BANDS.length,
+        'some friendship band can never be reached');
+    })();
+
     // BILL'S PC. G.PCScene was written in full — two columns, transfers both
     // ways, party floor of one and ceiling of six — and nothing in Kanto ever
     // opened it. Anything caught on a full party went into a box with no door.

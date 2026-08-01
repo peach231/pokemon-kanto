@@ -56,6 +56,10 @@
     this.aiSwitched = {};       // smart AI: one switch per mon
     this.participants = {};     // party indexes owed exp for current foe
     this.participants[this.activeP] = true;
+    // Everyone who was sent out at any point, for the career page. This one
+    // is never reset — participants is, once per fainted foe.
+    this.everOut = {};
+    this.everOut[this.activeP] = true;
     this.runAttempts = 0;
     this.over = false;
     this.result = null;
@@ -209,6 +213,12 @@
   // pAction: {type:'move', slot} | {type:'switch', index} | {type:'item', id, target}
   //        | {type:'ball', id} | {type:'run'}
   G.Battle.prototype.turn = function* (pAction) {
+    // What the active POKéMON had before this turn's blows landed. Friendship
+    // can let it hang on at 1 HP, and that should only ever rescue it from a
+    // real hit — not turn a mon that was already on 1 HP into an immortal one.
+    var _pa = this.active('p');
+    this._hpBefore = _pa ? _pa.curHp : 0;
+
     // A SAFARI turn has no opposing half. The creature never attacks; it only
     // decides whether to stay, and that decision is the entire fight.
     if (this.safari) {
@@ -347,6 +357,7 @@
       this.flinch.p = false;
       this.turnsOut.p = 0;
       this.participants[index] = true;
+      this.everOut[index] = true;
       var mon = this.party[index];
       yield { t: 'text', s: 'Go, ' + G.monName(mon) + '!' };
       yield { t: 'sendOut', side: 'p', mon: mon };
@@ -905,6 +916,24 @@
     var foe = this.active('f');
     var player = this.active('p');
 
+    // Hanging on. This is the whole visible point of friendship: a POKéMON
+    // that has been with you long enough will occasionally refuse to go down.
+    //
+    // Every damage source in this file funnels through here, so this is the
+    // one place it needs to exist. Once per battle per mon, so it is a moment
+    // rather than a strategy, and it cannot save you from a hit you took at
+    // 1 HP — it has to have been a real blow to be worth surviving.
+    if (player && player.curHp <= 0 && !player._heldOn &&
+        G.friendship && G.friendship(player) >= 180 && this._hpBefore > 1 &&
+        G.rand() < 0.25) {
+      player._heldOn = true;
+      player.curHp = 1;
+      yield { t: 'hp', side: 'p', from: 0, to: 1 };
+      yield { t: 'sfx', id: 'heal' };
+      yield { t: 'text', s: G.monName(player) + ' hung on with 1 HP — it would not let you down!' };
+      player = this.active('p');
+    }
+
     if (foe.curHp <= 0) {
       yield { t: 'anim', kind: 'faint', side: 'f' };
       yield { t: 'sfx', id: 'faint' };
@@ -937,6 +966,8 @@
     if (!this.over && player.curHp <= 0) {
       yield { t: 'anim', kind: 'faint', side: 'p' };
       yield { t: 'sfx', id: 'faint' };
+      // Losing one costs you more than the battle.
+      if (G.addFriendship) G.addFriendship(player, -5);
       yield { t: 'text', s: G.monName(player) + ' fainted!' };
       delete this.participants[this.activeP];
       if (!this.anyAlive('p')) {
@@ -953,6 +984,11 @@
   G.Battle.prototype.winBattle = function* () {
     this.over = true;
     this.result = 'win';
+    // A win goes on the record of everyone who was in it.
+    for (var wj in this.everOut) {
+      var wmon = this.party[wj];
+      if (wmon) wmon.wins = (wmon.wins || 0) + 1;
+    }
     if (this.trainer) {
       yield { t: 'text', s: 'You defeated ' + this.trainer.name + '!' };
       if (this.trainer.defeat) yield { t: 'text', s: this.trainer.name + ': ' + this.trainer.defeat };
@@ -964,6 +1000,34 @@
     yield { t: 'end', result: 'win' };
   };
 
+  // Everything a mon earns from one fainted foe, and everything that follows
+  // from it — levels, moves, an evolution queued for the end of the battle.
+  // Pulled out of awardExp so the bench can be paid through the same path the
+  // fighter is, rather than a second, quietly divergent copy of it.
+  G.Battle.prototype.applyExp = function* (mon, amount, showBar) {
+    if (showBar) yield { t: 'expbar', mon: mon, exp: mon.exp + amount };
+    var before = G.monStats(mon);          // snapshot to diff stat growth
+    var events = G.gainExp(mon, amount);
+    var learns = [], leveled = false;
+    for (var e = 0; e < events.length; e++) {
+      var ev = events[e];
+      if (ev.type === 'level') {
+        leveled = true;
+        if (G.addFriendship) G.addFriendship(mon, 2);   // growing up together
+        yield { t: 'sfx', id: 'levelUp' };
+        yield { t: 'text', s: G.monName(mon) + ' grew to level ' + ev.level + '!' };
+      } else if (ev.type === 'learn') {
+        learns.push(ev.moveId); // deferred so the stat panel shows first
+      }
+    }
+    if (leveled) yield { t: 'levelstats', mon: mon, before: before, after: G.monStats(mon) };
+    for (var li = 0; li < learns.length; li++) yield* this.learnMove(mon, learns[li]);
+    var evo = G.evolutionDue(mon);
+    if (evo && !this.pendingEvolutions.some(function (p) { return p.mon === mon; })) {
+      this.pendingEvolutions.push({ mon: mon, to: evo });
+    }
+  };
+
   G.Battle.prototype.awardExp = function* (faintedFoe) {
     var sp = G.SPECIES[faintedFoe.sp];
     var amount = Math.floor(sp.expYield * faintedFoe.level / 6);
@@ -972,28 +1036,33 @@
     for (var idx in this.participants) {
       var mon = this.party[idx];
       if (!mon || mon.curHp <= 0) continue;
+      mon.kos = (mon.kos || 0) + (Number(idx) === this.activeP ? 1 : 0);
       yield { t: 'text', s: G.monName(mon) + ' gained ' + amount + ' EXP!' };
-      if (Number(idx) === this.activeP) yield { t: 'expbar', mon: mon, exp: mon.exp + amount };
-      var before = G.monStats(mon);          // snapshot to diff stat growth
-      var events = G.gainExp(mon, amount);
-      var learns = [], leveled = false;
-      for (var e = 0; e < events.length; e++) {
-        var ev = events[e];
-        if (ev.type === 'level') {
-          leveled = true;
-          yield { t: 'sfx', id: 'levelUp' };
-          yield { t: 'text', s: G.monName(mon) + ' grew to level ' + ev.level + '!' };
-        } else if (ev.type === 'learn') {
-          learns.push(ev.moveId); // deferred so the stat panel shows first
-        }
+      yield* this.applyExp(mon, amount, Number(idx) === this.activeP);
+    }
+
+    // THE EXP SHARE. The bench is paid out of thin air rather than out of the
+    // fighter's share — Gen 1's own EXP. ALL halved what the fighter earned to
+    // fund it, which is exactly why nobody ever used the thing.
+    //
+    // One line for the whole bench rather than one per mon, because six "X
+    // gained 9 EXP!" messages after every RATTATA would be unbearable. Levels
+    // and evolutions still announce themselves.
+    if (G.player && G.player.bag && G.player.bag.expshare) {
+      var share = Math.max(1, Math.floor(amount / 2));
+      var bench = [];
+      for (var b = 0; b < this.party.length; b++) {
+        if (this.participants[b]) continue;
+        var bm = this.party[b];
+        if (!bm || bm.curHp <= 0 || bm.level >= 100) continue;
+        bench.push(bm);
       }
-      if (leveled) yield { t: 'levelstats', mon: mon, before: before, after: G.monStats(mon) };
-      for (var li = 0; li < learns.length; li++) yield* this.learnMove(mon, learns[li]);
-      var evo = G.evolutionDue(mon);
-      if (evo && !this.pendingEvolutions.some(function (p) { return p.mon === mon; })) {
-        this.pendingEvolutions.push({ mon: mon, to: evo });
+      if (bench.length) {
+        yield { t: 'text', s: 'The EXP SHARE passed ' + share + ' EXP to the rest of the team.' };
+        for (var bi = 0; bi < bench.length; bi++) yield* this.applyExp(bench[bi], share, false);
       }
     }
+
     // reset participation for the next foe
     this.participants = {};
     this.participants[this.activeP] = true;

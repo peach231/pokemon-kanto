@@ -1200,6 +1200,46 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
 }
 
+// --- the same thing registered twice ---
+// A duplicate G.* global froze the game on the name entry screen once, and
+// there is an audit above for that. The same mistake inside a data TABLE is
+// silent instead: STRUGGLE was declared twice in moves.js, four lines apart,
+// and the second quietly replaced the first. They disagreed about the recoil —
+// a quarter of the damage in one and a half in the other — so which was live
+// depended purely on line order.
+{
+  const dupes = [];
+  const TABLES = [
+    ['js/data/moves.js', /^\s*mv\('([a-z0-9_]+)'/gm, 'move'],
+    ['js/data/items.js', /^\s*item\('([a-z0-9_]+)'/gm, 'item'],
+    ['js/data/trainers.js', /^\s*tr\('([a-z0-9_]+)'/gm, 'trainer']
+  ];
+  for (const [file, re, what] of TABLES) {
+    let text;
+    try { text = fs.readFileSync(path.join(ROOT, file), 'utf8'); } catch (e) { continue; }
+    const count = {};
+    for (const m of text.matchAll(re)) count[m[1]] = (count[m[1]] || 0) + 1;
+    for (const k in count) {
+      if (count[k] > 1) dupes.push(`${what} '${k}' is declared ${count[k]} times in ${file} — only the last one is live`);
+    }
+  }
+  // and maps, which are assigned rather than registered through a helper
+  {
+    const count = {};
+    for (const f of SOURCES.filter(s => s.includes('maps_'))) {
+      const text = fs.readFileSync(path.join(ROOT, f), 'utf8');
+      for (const m of text.matchAll(/^\s*G\.MAPS\.([a-z0-9_]+)\s*=\s*\{/gm)) {
+        count[m[1]] = (count[m[1]] || 0) + 1;
+      }
+    }
+    for (const k in count) {
+      if (count[k] > 1) dupes.push(`map '${k}' is defined ${count[k]} times — only the last one is live`);
+    }
+  }
+  for (const d of dupes) errors.push('DUPLICATE: ' + d);
+  if (!dupes.length) console.log('  duplicates: no move, item, trainer or map is declared twice');
+}
+
 // --- written, but never wired to anything ---
 // The most expensive bugs in this project are not wrong code. They are correct
 // code nothing calls: G.stoneEvolution was written to make a THUNDERSTONE work
@@ -1765,6 +1805,24 @@ if (G.SPECIES && G.SPRITE_MANIFEST) {
   if (missing) warn.push(`SPRITES: ${missing}/${spCount} species have no confirmed sprite file yet (placeholder will render)`);
 }
 if (G.MOVES) for (const id in G.MOVES) mvCount++;
+
+// --- the data, against the ROM it came from ---
+// Runs in its own process because it parses the cached pokered .asm files with
+// its own reader rather than reusing gen_data.js. Asking the generator to
+// check its own output would only prove it is consistent with itself; this
+// re-derives types, base stats, the single Gen 1 special, catch rates, exp
+// yields, level-up learnsets and all 55 machines straight from the source and
+// disagrees out loud.
+{
+  const r = require('child_process').spawnSync(process.execPath,
+    [path.join(__dirname, 'verify_against_pokered.js')], { encoding: 'utf8' });
+  const out = (r.stdout || '').trim().split(String.fromCharCode(10));
+  if (r.status !== 0) {
+    for (const line of out) if (line.includes('MISMATCH')) errors.push('POKERED — ' + line.trim());
+  } else {
+    console.log('  pokered: ' + (out[out.length - 1] || '').trim());
+  }
+}
 
 // --- scene fuzz ---
 // Runs tools/fuzz_scenes.js in its own process: it replaces G.input, G.audio

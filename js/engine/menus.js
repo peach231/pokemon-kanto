@@ -372,13 +372,93 @@
   };
 
   // ----------------------------------------------------------- summary screen --
+  // Where a map id has to be said out loud. The maps know their own names, so
+  // this only exists for the handful that were never given one.
+  function placeName(id) {
+    if (!id) return 'somewhere you have forgotten';
+    var m = G.MAPS[id];
+    return (m && m.name) || id;
+  }
+
+  // THE CAREER PAGE. Levelling the bench gives you six usable POKéMON; it does
+  // nothing at all about swapping them for a better species two routes later.
+  // What stops that is investment you can SEE — so this is the page that
+  // remembers: where you met it, how far it has walked with you, what it has
+  // won, and how it feels about you now.
+  function drawCareer(ctx, mon) {
+    var sp = G.SPECIES[mon.sp];
+    ctx.fillStyle = '#2a3040';
+    ctx.fillRect(0, 0, W, H);
+
+    panel(ctx, 6, 6, 96, 104);
+    var img = G.IMG['mon_' + mon.sp];
+    if (img) ctx.drawImage(img, 54 - img.width / 2, 72 - img.height);
+    G.text(ctx, (mon.shiny ? '★' : '') + G.monName(mon), 14, 12, G.UI.text, G.UI.textShadow);
+    G.text(ctx, 'Lv' + mon.level, 74, 12, G.UI.text, G.UI.textShadow);
+
+    // the bond, as a word and a bar — the number itself is nobody's business
+    var band = G.friendshipBand ? G.friendshipBand(mon) : null;
+    if (band) {
+      G.text(ctx, band[1], 14, 78, band[2], G.UI.textShadow);
+      var f = G.friendship(mon) / G.FRIEND_MAX;
+      ctx.fillStyle = '#1a1c2c'; ctx.fillRect(14, 90, 80, 5);
+      ctx.fillStyle = band[2]; ctx.fillRect(14, 90, Math.round(80 * f), 5);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(14, 90, Math.round(80 * f), 1);
+    }
+
+    panel(ctx, 108, 6, 126, 130);
+    var met = mon.met || {};
+    var tms = 0;
+    if (G.TM_MOVES) {
+      for (var t in G.TM_MOVES) {
+        if (G.knowsMove(mon, G.TM_MOVES[t])) tms++;
+      }
+    }
+    var steps = mon.steps || 0;
+    var rows = [
+      ['Met at', placeName(met.map)],
+      ['Met at level', met.level == null ? '—' : 'Lv' + met.level],
+      ['Levels gained', String(Math.max(0, mon.level - (met.level || mon.level)))],
+      ['Battles won', String(mon.wins || 0)],
+      ['Foes it beat', String(mon.kos || 0)],
+      ['Walked with you', steps >= 1000 ? (steps / 1000).toFixed(1) + 'k steps' : steps + ' steps'],
+      ['Machines taught', String(tms)]
+    ];
+    // Label left, value hard against the right edge, both on one baseline.
+    // A place name can be longer than the space left over ("Viridian Forest"
+    // very nearly is), so anything that would collide drops to its own line
+    // underneath instead of overprinting the label.
+    var PANEL_L = 116, PANEL_R = 228;
+    var y = 14;
+    for (var i = 0; i < rows.length; i++) {
+      var label = rows[i][0], val = rows[i][1];
+      var lw = G.textWidth(label), vw = G.textWidth(val);
+      G.text(ctx, label, PANEL_L, y, G.C.lgry);
+      if (PANEL_L + lw + 6 + vw <= PANEL_R) {
+        G.text(ctx, val, PANEL_R - vw, y, G.UI.text, G.UI.textShadow);
+        y += 13;
+      } else {
+        G.text(ctx, val, PANEL_R - vw, y + 9, G.UI.text, G.UI.textShadow);
+        y += 21;
+      }
+    }
+
+    G.text(ctx, 'No.' + (sp.id < 10 ? '00' : sp.id < 100 ? '0' : '') + sp.id, 14, 100, G.C.lgry);
+    G.text(ctx, '< stats', 10, H - 12, G.C.lgry);
+    G.text(ctx, 'Z/X: back', W - 62, H - 12, G.C.lgry);
+  }
+
   G.SummaryScene = function (mon) {
     return {
       opaque: true,
+      page: 0,                 // 0 = stats and moves, 1 = career
       update: function () {
+        if (G.input.repeat('right') && this.page === 0) { this.page = 1; G.audio.sfx('menuMove'); return; }
+        if (G.input.repeat('left') && this.page === 1) { this.page = 0; G.audio.sfx('menuMove'); return; }
         if (G.input.justPressed('B') || G.input.justPressed('A')) { G.audio.sfx('cancel'); G.popScene(); }
       },
       draw: function (ctx) {
+        if (this.page === 1) { drawCareer(ctx, mon); return; }
         ctx.fillStyle = '#2a3040';
         ctx.fillRect(0, 0, W, H);
         var sp = G.SPECIES[mon.sp];
@@ -433,6 +513,7 @@
           G.text(ctx, lines[d], 10, 116 + d * 11, G.C.white, '#1a1c2c');
         }
         G.text(ctx, 'Z/X: back', 10, H - 12, G.C.lgry);
+        G.text(ctx, 'career >', W - 56, H - 12, '#f8e878');
       }
     };
   };

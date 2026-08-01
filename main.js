@@ -108,6 +108,17 @@
         ts.update();
         G.input.justPressed = realJP;
       }
+    } else if (hashIs('career')) {
+      // #career — the summary screen's second page, with a mon that has a
+      // history worth showing. Pure layout, so being able to look at it
+      // without playing to it is worth the few lines.
+      G.world.loadMap('viridianforest', 12, 20, 'up');
+      var cm = G.makeMon('pikachu', 34);
+      cm.met = { map: 'viridianforest', level: 5 };
+      cm.steps = 4820; cm.wins = 63; cm.kos = 91; cm.friendship = 214;
+      G.player.party = [cm];
+      G.pushScene(G.SummaryScene(cm));
+      G.topScene().page = 1;
     } else if (hashIs('shop')) {
       // #shop=saffronmart — stand at the counter with the list already open.
       // The shop list is the one menu whose size depends on data somebody

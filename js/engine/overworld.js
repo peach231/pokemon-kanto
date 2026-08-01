@@ -999,6 +999,16 @@
         }
       }
 
+      // Walking together. Every party member counts the step, and every so
+      // often the distance turns into a little more trust — which is also the
+      // number the career page reports as "walked with you".
+      for (var wi = 0; wi < G.player.party.length; wi++) {
+        var wm = G.player.party[wi];
+        if (!wm || wm.egg) continue;
+        wm.steps = (wm.steps || 0) + 1;
+        if (wm.steps % 256 === 0 && G.addFriendship) G.addFriendship(wm, 1);
+      }
+
       // repel ticks on every step, like the real thing
       if (G.player.repelSteps > 0) {
         G.player.repelSteps--;

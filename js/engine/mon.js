@@ -84,6 +84,14 @@
       sp: spKey,
       nick: null,
       level: level,
+      // The career record. Stamped at creation because that is the one moment
+      // every POKéMON passes through — caught, gifted, revived from a fossil
+      // or handed over by OAK. Wild and enemy mons get one too and nobody ever
+      // reads it, which is a much smaller price than threading a "you now own
+      // this" call through every gift event in the region.
+      met: { map: (G.world && G.world.mapId) || null, level: level },
+      friendship: G.FRIEND_START,
+      steps: 0, wins: 0, kos: 0,
       exp: G.expForLevel(level, (G.SPECIES[spKey] || {}).growth),
       dvs: opts.dvs ? G.makeDvs(opts.dvs) : rollDvs(),
       shiny: opts.shiny !== undefined ? opts.shiny : (G.rand() < 1 / 600),
@@ -164,6 +172,40 @@
       }
     }
     return events;
+  };
+
+  // ------------------------------------------------------------ friendship --
+  // Gen 1 has no friendship at all; this is a Gen 2 idea, borrowed because the
+  // thing Gen 1 does worst is give you any reason to keep a particular
+  // POKéMON rather than the next one you catch at the right level.
+  //
+  // It is deliberately slow to earn and quick to lose. 0-255, starting at 70,
+  // like Gen 2 — the numbers are not shown anywhere, only the word for them.
+  G.FRIEND_MAX = 255;
+  G.FRIEND_START = 70;
+
+  G.friendship = function (mon) {
+    return mon.friendship == null ? G.FRIEND_START : mon.friendship;
+  };
+  G.addFriendship = function (mon, n) {
+    if (!mon) return;
+    mon.friendship = Math.max(0, Math.min(G.FRIEND_MAX, G.friendship(mon) + n));
+  };
+  // The word, not the number. Five bands, because a bar of 255 tells a player
+  // nothing and "It would take a hit for you" tells them everything.
+  G.FRIEND_BANDS = [
+    [230, 'Inseparable', '#f06292'],
+    [180, 'Devoted', '#e8907c'],
+    [120, 'Warming to you', '#e8c038'],
+    [60, 'Getting used to you', '#9aa4c0'],
+    [0, 'Wary of you', '#6a7290']
+  ];
+  G.friendshipBand = function (mon) {
+    var f = G.friendship(mon);
+    for (var i = 0; i < G.FRIEND_BANDS.length; i++) {
+      if (f >= G.FRIEND_BANDS[i][0]) return G.FRIEND_BANDS[i];
+    }
+    return G.FRIEND_BANDS[G.FRIEND_BANDS.length - 1];
   };
 
   G.knowsMove = function (mon, moveId) {

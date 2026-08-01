@@ -184,8 +184,14 @@
   mv('superfang'     , 'Super Fang'    , 'normal'   ,   1,   90,  10, 0, { kind: 'fixed', mode: 'half' });
   mv('slash'         , 'Slash'         , 'normal'   ,  70,  100,  20, 0, { kind: 'highCrit' });
   mv('substitute'    , 'Substitute'    , 'normal'   ,   0,  100,  10, 0, { kind: 'substitute' });
-  mv('struggle'      , 'Struggle'      , 'normal'   ,  50,  100,  10, 0, { kind: 'recoil', frac: 0.25 });
-
-  // Struggle is not in the ROM move table but the engine needs it.
+  // STRUGGLE, once. It was written twice — the generated row from the ROM move
+  // table, and then a hand-written one directly underneath that silently
+  // replaced it. They disagreed about the only two things that matter: the
+  // recoil was 1/4 in the first and 1/2 in the second, and Gen 1 deals HALF
+  // the damage dealt back to you.
+  //
+  // The PP of 99 is deliberate and is not the ROM's 10: Struggle is what you
+  // are left with when everything else is empty, so it must never run out
+  // itself.
   mv('struggle', 'Struggle', 'normal', 50, 100, 99, 0, { kind: 'recoil', frac: 0.5 });
 })();

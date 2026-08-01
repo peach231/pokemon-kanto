@@ -88,6 +88,13 @@
   item('townmap',     'Town Map',     0, 'key', {}, 'A map of the whole KANTO region.');
   item('runningshoes','Running Shoes', 0, 'key', {}, 'Hold Shift to run. Mum will want them back eventually.');
   item('bicycle',     'Bicycle',      0, 'key', {}, 'A folding bicycle. Far faster than walking.');
+  // The EXP SHARE is bought rather than found, and it is the single biggest
+  // change you can make to how a team feels. Gen 1's own EXP. ALL halved the
+  // fighter's share to pay the bench, which is why nobody used it; this pays
+  // the bench out of thin air instead. The description says exactly what it
+  // does, because an item whose effect is invisible is an item nobody buys.
+  item('expshare',    'EXP Share',  3000, 'key', {},
+       'Carry it and your WHOLE PARTY earns EXP from every battle — half as much for the ones that never came out. No cost to the fighter.');
   item('bikevoucher', 'Bike Voucher', 0, 'key', {}, 'Redeemable for one BICYCLE at the CERULEAN shop.');
   item('ssticket',    'S.S. Ticket',  0, 'key', {}, 'A boarding pass for the S.S. ANNE.');
   item('oldrod',      'Old Rod',      0, 'key', {}, 'A cheap fishing rod. It only ever catches MAGIKARP.');

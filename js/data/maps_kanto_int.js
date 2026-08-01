@@ -468,9 +468,21 @@
   // misclick never costs you the whole run.
   function starterEvent(key, blurb) {
     return function* () {
-      if (G.flags.starter) {
+      // Before the League this is the first irreversible choice in the game
+      // and it stays that way. After it, OAK has no reason left to keep them
+      // on a shelf, and a player should not be barred for ever from the one
+      // they actually wanted.
+      if (G.flags.starter && !G.flags.champion) {
         yield { t: 'text', s: 'The other two balls have already gone back to the shelf.' };
         return;
+      }
+      if (G.flags.starter && G.player.dexCaught[key]) {
+        yield { t: 'text', s: 'That ball is empty. You already have one.' };
+        return;
+      }
+      if (G.flags.starter) {
+        yield { t: 'text', s: 'OAK: They have sat on that shelf since the day you left. Nobody else ever came for them.' };
+        yield { t: 'text', s: 'OAK: Go on. You have earned the right to a second opinion.' };
       }
       yield { t: 'text', s: blurb };
       var answer = { v: 1 };
@@ -491,8 +503,9 @@
         t: 'fn',
         fn: function () {
           var mon = G.makeMon(key, 5);
-          G.flags.starter = key;
-          G.player.party.push(mon);
+          if (!G.flags.starter) G.flags.starter = key;   // the FIRST one is the story's
+          if (G.player.party.length < 6) G.player.party.push(mon);
+          else G.player.box.push(mon);
           G.player.dexSeen[key] = 1;
           G.player.dexCaught[key] = 1;
         }
@@ -756,9 +769,17 @@
   // both fossils were on display in the Pewter museum so it is an informed one.
   function fossilEvent(item, other, blurb) {
     return function* () {
-      if (G.flags.fossil) {
+      if (G.flags.fossil && !G.flags.champion) {
         yield { t: 'text', s: 'The other fossil is gone. Someone took it while you were deciding.' };
         return;
+      }
+      if (G.flags.fossil && G.player.bag[item]) {
+        yield { t: 'text', s: 'You are already carrying it.' };
+        return;
+      }
+      if (G.flags.fossil) {
+        yield { t: 'text', s: 'The rock has been worked back open, and the second fossil is loose in it.' };
+        yield { t: 'text', s: 'Whoever was digging here gave up long ago. Nobody has been down since you.' };
       }
       yield { t: 'text', s: blurb };
       yield { t: 'text', s: 'There is only time to carry one out.' };
@@ -1723,6 +1744,22 @@
     return function* () {
       if (!G.flags.dojo_master) {
         yield { t: 'text', s: 'The two balls sit behind the master. He has not moved.' };
+        return;
+      }
+      // The MASTER keeps the other one — until you come back as CHAMPION,
+      // at which point he has rather run out of arguments.
+      if (G.flags.dojoPrize && G.flags.champion && !G.player.dexCaught[key]) {
+        yield { t: 'text', s: 'Master: You again. And a CHAMPION now, they tell me.' };
+        yield { t: 'text', s: 'Master: I said the other one stays with me. I have thought better of it.' };
+        yield { t: 'fn', fn: function () {
+          var mon = G.makeMon(key, 25);
+          if (G.player.party.length < 6) G.player.party.push(mon);
+          else G.player.box.push(mon);
+          G.player.dexSeen[key] = 1;
+          G.player.dexCaught[key] = 1;
+        } };
+        yield { t: 'sfx', id: 'catchClick' };
+        yield { t: 'text', s: 'You received ' + G.SPECIES[key].name + '!' };
         return;
       }
       if (G.flags.dojoPrize) {
@@ -3357,9 +3394,15 @@
   // EEVEE, in the block of flats behind the CELADON store. Three stones, three
   // futures, and the game never tells you that choosing is permanent.
   G.EVENTS.eeveeGift = function* () {
-    if (G.flags.got_eevee) {
+    // One EEVEE is three POKéMON you cannot all have. After the League the
+    // note is answered: whoever left it clearly kept breeding them.
+    if (G.flags.got_eevee && !G.flags.champion) {
       yield { t: 'text', s: 'The empty ball is still on the table. Nobody has moved it.' };
       return;
+    }
+    if (G.flags.got_eevee) {
+      yield { t: 'text', s: 'There is another ball on the table, and the same handwriting on the note.' };
+      yield { t: 'text', s: '"You again. Good. This one deserves somebody who can decide, too."' };
     }
     yield { t: 'text', s: 'There is a POKé BALL on the table and a note taped to it.' };
     yield { t: 'text', s: '"Whoever finds this: it is an EEVEE. I could not decide what to make it, and it deserves somebody who can."' };
@@ -3569,12 +3612,22 @@
   });
 
   storeFloor(2, 'Trainer Market',
-    ['greatball', 'superpotion', 'revive', 'superrepel', 'escaperope'], {
+    ['expshare', 'greatball', 'superpotion', 'revive', 'superrepel', 'escaperope'], {
     warps: [
       { x: 1, y: 1, to: 'celadonstore1', tx: 1, ty: 1, dir: 'down' },
       { x: 1, y: 2, to: 'celadonstore3', tx: 1, ty: 1, dir: 'up' }
     ],
-    signs: [{ x: 8, y: 3, text: '2F — TRAINER MARKET. Everything a challenger needs and nothing they want.' }]
+    signs: [{ x: 8, y: 3, text: '2F — TRAINER MARKET. Everything a challenger needs and nothing they want.' }],
+    // An item nobody understands is an item nobody buys, and this one changes
+    // how the whole game feels — so somebody stands next to it and says so in
+    // plain words before you have spent anything.
+    npcs: [
+      { x: 8, y: 5, sprite: 'gentleman', dir: 'left',
+        dialog: ['That EXP SHARE on the counter is the best money in this building.',
+                 'Carry one and your WHOLE TEAM earns from every battle — half shares for the ones that stayed in their balls.',
+                 'It costs the one doing the fighting nothing at all.',
+                 'Six POKéMON growing together, instead of one dragging five along behind it.'] }
+    ]
   });
 
   storeFloor(3, 'Household',
