@@ -88,13 +88,24 @@
   item('townmap',     'Town Map',     0, 'key', {}, 'A map of the whole KANTO region.');
   item('runningshoes','Running Shoes', 0, 'key', {}, 'Hold Shift to run. Mum will want them back eventually.');
   item('bicycle',     'Bicycle',      0, 'key', {}, 'A folding bicycle. Far faster than walking.');
-  // The EXP SHARE is bought rather than found, and it is the single biggest
-  // change you can make to how a team feels. Gen 1's own EXP. ALL halved the
-  // fighter's share to pay the bench, which is why nobody used it; this pays
-  // the bench out of thin air instead. The description says exactly what it
-  // does, because an item whose effect is invisible is an item nobody buys.
+  // Two ways to share, and neither is free.
+  //
+  // The first version of the EXP SHARE paid the bench out of thin air: the
+  // fighter kept its full share AND everybody else got half of one, so a
+  // battle was worth four times what it used to be. That levels a team, but it
+  // levels it past the game, and it makes the decision to carry one a
+  // no-brainer rather than a trade.
+  //
+  // Both of these divide a fixed amount instead, so the choice is about SHAPE
+  // — how evenly your six grow — and never about how fast the region does.
+  //
+  //   nothing     the fighter takes all of it              (Red/Blue)
+  //   EXP SHARE   fighter keeps half, the rest split the other half
+  //   EXP ALL     one equal share each, fighter included
   item('expshare',    'EXP Share',  3000, 'key', {},
-       'Carry it and your WHOLE PARTY earns EXP from every battle — half as much for the ones that never came out. No cost to the fighter.');
+       'The POKéMON that fought keeps HALF the EXP. The other half is split between everyone else in the party.');
+  item('expall',      'EXP All',    5000, 'key', {},
+       'One share each. The whole party splits the EXP evenly, the POKéMON that fought included.');
   item('bikevoucher', 'Bike Voucher', 0, 'key', {}, 'Redeemable for one BICYCLE at the CERULEAN shop.');
   item('ssticket',    'S.S. Ticket',  0, 'key', {}, 'A boarding pass for the S.S. ANNE.');
   item('oldrod',      'Old Rod',      0, 'key', {}, 'A cheap fishing rod. It only ever catches MAGIKARP.');

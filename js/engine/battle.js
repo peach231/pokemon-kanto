@@ -1033,34 +1033,52 @@
     var amount = Math.floor(sp.expYield * faintedFoe.level / 6);
     if (this.trainer) amount = Math.floor(amount * 1.5);
 
+    // How the pot gets divided. The pot itself never changes, so carrying one
+    // of these decides the SHAPE of a team's growth and never the speed of the
+    // game — which is the difference between a choice and a cheat code.
+    //
+    //   nothing     the fighter takes all of it              (Red/Blue)
+    //   EXP SHARE   fighter keeps half, the rest split the other half
+    //   EXP ALL     one equal share each, fighter included
+    //
+    // EXP ALL wins if somehow both are carried: it is the more thorough of the
+    // two, and picking the gentler one would be a surprise.
+    var bag = (G.player && G.player.bag) || {};
+    var mode = bag.expall ? 'all' : (bag.expshare ? 'share' : 'none');
+
+    var bench = [];
+    for (var b = 0; b < this.party.length; b++) {
+      if (this.participants[b]) continue;
+      var bm = this.party[b];
+      if (!bm || bm.curHp <= 0 || bm.level >= 100) continue;
+      bench.push(bm);
+    }
+
+    var fighterShare = amount, benchShare = 0;
+    if (mode === 'share' && bench.length) {
+      fighterShare = Math.max(1, Math.floor(amount / 2));
+      benchShare = Math.max(1, Math.floor((amount - fighterShare) / bench.length));
+    } else if (mode === 'all') {
+      var heads = bench.length + Math.max(1, Object.keys(this.participants).length);
+      fighterShare = Math.max(1, Math.floor(amount / heads));
+      benchShare = fighterShare;
+    }
+
     for (var idx in this.participants) {
       var mon = this.party[idx];
       if (!mon || mon.curHp <= 0) continue;
       mon.kos = (mon.kos || 0) + (Number(idx) === this.activeP ? 1 : 0);
-      yield { t: 'text', s: G.monName(mon) + ' gained ' + amount + ' EXP!' };
-      yield* this.applyExp(mon, amount, Number(idx) === this.activeP);
+      yield { t: 'text', s: G.monName(mon) + ' gained ' + fighterShare + ' EXP!' };
+      yield* this.applyExp(mon, fighterShare, Number(idx) === this.activeP);
     }
 
-    // THE EXP SHARE. The bench is paid out of thin air rather than out of the
-    // fighter's share — Gen 1's own EXP. ALL halved what the fighter earned to
-    // fund it, which is exactly why nobody ever used the thing.
-    //
     // One line for the whole bench rather than one per mon, because six "X
     // gained 9 EXP!" messages after every RATTATA would be unbearable. Levels
     // and evolutions still announce themselves.
-    if (G.player && G.player.bag && G.player.bag.expshare) {
-      var share = Math.max(1, Math.floor(amount / 2));
-      var bench = [];
-      for (var b = 0; b < this.party.length; b++) {
-        if (this.participants[b]) continue;
-        var bm = this.party[b];
-        if (!bm || bm.curHp <= 0 || bm.level >= 100) continue;
-        bench.push(bm);
-      }
-      if (bench.length) {
-        yield { t: 'text', s: 'The EXP SHARE passed ' + share + ' EXP to the rest of the team.' };
-        for (var bi = 0; bi < bench.length; bi++) yield* this.applyExp(bench[bi], share, false);
-      }
+    if (benchShare > 0 && bench.length) {
+      yield { t: 'text', s: (mode === 'all' ? 'The EXP ALL' : 'The EXP SHARE') +
+        ' passed ' + benchShare + ' EXP to each of the others.' };
+      for (var bi = 0; bi < bench.length; bi++) yield* this.applyExp(bench[bi], benchShare, false);
     }
 
     // reset participation for the next foe

@@ -335,10 +335,10 @@
     // ever regresses, the item silently becomes a punishment for using it.
     (function () {
       var realPlayer = G.player;
-      function earned(withShare) {
+      function earned(bag) {
         G.player = {
           party: ['pidgeot', 'rattata', 'pikachu'].map(function (s) { return G.makeMon(s, 20); }),
-          box: [], bag: withShare ? { expshare: 1 } : {},
+          box: [], bag: bag,
           dexSeen: {}, dexCaught: {}, money: 0, badges: []
         };
         var before = G.player.party.map(function (m) { return m.exp; });
@@ -349,13 +349,26 @@
         while (!s.done) s = gen.next();
         return G.player.party.map(function (m, i) { return m.exp - before[i]; });
       }
-      var without = earned(false), with_ = earned(true);
-      assert(without[1] === 0 && without[2] === 0,
-        'the bench earned EXP with no EXP SHARE in the bag');
-      assert(with_[0] === without[0],
-        'the EXP SHARE cost the fighter ' + (without[0] - with_[0]) + ' EXP — it must cost it nothing');
-      assert(with_[1] > 0 && with_[1] === Math.floor(without[0] / 2),
-        'the EXP SHARE paid the bench ' + with_[1] + ', expected half of ' + without[0]);
+      var plain = earned({}), share = earned({ expshare: 1 }), all = earned({ expall: 1 });
+      var sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
+
+      assert(plain[1] === 0 && plain[2] === 0, 'the bench earned EXP with no sharing item');
+
+      // EXP SHARE: the fighter keeps half and pays for the rest itself.
+      assert(share[0] === Math.floor(plain[0] / 2),
+        'EXP SHARE gave the fighter ' + share[0] + ', expected half of ' + plain[0]);
+      assert(share[1] > 0 && share[1] === share[2], 'EXP SHARE did not split evenly');
+
+      // EXP ALL: one equal share each, fighter included.
+      assert(all[0] === all[1] && all[1] === all[2], 'EXP ALL did not divide evenly');
+      assert(all[0] < share[0], 'EXP ALL should cost the fighter more than EXP SHARE');
+
+      // Neither may INVENT experience — that is the whole reason they were
+      // rebuilt. The first version paid the bench out of thin air and made a
+      // battle worth four times what it used to be.
+      assert(sum(share) <= sum(plain) && sum(all) <= sum(plain),
+        'a sharing item created EXP out of nothing: plain ' + sum(plain) +
+        ', share ' + sum(share) + ', all ' + sum(all));
       G.player = realPlayer;
     })();
 

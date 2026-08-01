@@ -86,11 +86,18 @@
         // that instead, because a shop list only ever shows you a name and a
         // price, and this is the one item on the shelf whose whole value is
         // in what it does rather than what it is.
+        // The rundown. Two items that do the same job to different degrees,
+        // and a shop list has room for a name and a price and nothing else —
+        // so somebody stands here and lays out all three options, including
+        // the one that costs nothing because it is what you already have.
         { x: 8, y: 4, sprite: 'youngster', dir: 'left',
           dialog: (inventory && inventory.indexOf('expshare') !== -1)
-            ? ['See that EXP SHARE? Carry one and your WHOLE TEAM levels up, not just whoever is out front.',
-               'Half shares for the ones still in their balls — and it takes nothing off the one doing the fighting.',
-               'Cheapest way there is to stop dragging five POKéMON around behind one.']
+            ? ['You want the EXP talk? Three ways to do it, and the EXP from a battle is the same however you split it.',
+               'CARRY NEITHER: whoever fought takes the lot. Fast for one POKéMON, slow for the other five.',
+               'EXP SHARE: the fighter keeps HALF, and the rest of your party splits the other half.',
+               'EXP ALL: one share each, evenly, the fighter included. Everybody moves together and nobody races ahead.',
+               'Neither one makes MORE experience. They just decide who it goes to.',
+               'Carrying both? Then it goes the EXP ALL way. No sense owning two.']
             : ['POTIONs are cheap and they save runs.', 'Buy more than you think you need. Trust me.'] }
       ]
     };
@@ -663,7 +670,7 @@
   // ========================================================== CERULEAN CITY =
   healCentre('ceruleancentre', 'CERULEAN', { map: 'cerulean', x: 20, y: 6 });
   pokeMart('ceruleanmart', 'CERULEAN', { map: 'cerulean', x: 20, y: 18 },
-    ['expshare', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+    ['expshare', 'expall', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
      'pokeball', 'greatball', 'repel', 'escaperope']);
 
   G.MAPS.ceruleanhouse = {
@@ -918,7 +925,7 @@
   // ========================================================= VERMILION CITY ==
   healCentre('vermilioncentre', 'VERMILION', { map: 'vermilion', x: 6, y: 6 });
   pokeMart('vermilionmart', 'VERMILION', { map: 'vermilion', x: 20, y: 6 },
-    ['expshare', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+    ['expshare', 'expall', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
      'iceheal', 'pokeball', 'greatball', 'repel', 'escaperope']);
 
   G.MAPS.vermilionhouse = {
@@ -1100,7 +1107,7 @@
   // ========================================================== LAVENDER TOWN =
   healCentre('lavendercentre', 'LAVENDER', { map: 'lavender', x: 6, y: 6 });
   pokeMart('lavendermart', 'LAVENDER', { map: 'lavender', x: 7, y: 18 },
-    ['expshare', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
+    ['expshare', 'expall', 'potion', 'superpotion', 'antidote', 'parlyzheal', 'awakening', 'burnheal',
      'iceheal', 'revive', 'pokeball', 'greatball', 'escaperope']);
 
   G.MAPS.lavenderhouse = {
@@ -1747,7 +1754,7 @@
   // ============================================================ SAFFRON CITY =
   healCentre('saffroncentre', 'SAFFRON', { map: 'saffron', x: 18, y: 6 });
   pokeMart('saffronmart', 'SAFFRON', { map: 'saffron', x: 18, y: 12 },
-    ['expshare', 'potion', 'superpotion', 'hyperpotion', 'maxpotion', 'fullrestore',
+    ['expshare', 'expall', 'potion', 'superpotion', 'hyperpotion', 'maxpotion', 'fullrestore',
      'antidote', 'parlyzheal', 'awakening', 'fullheal', 'revive',
      'pokeball', 'greatball', 'ultraball', 'repel', 'escaperope']);
 
@@ -2076,7 +2083,7 @@
   // ============================================================== FUCHSIA ===
   healCentre('fuchsiacentre', 'FUCHSIA', { map: 'fuchsia', x: 6, y: 9 });
   pokeMart('fuchsiamart', 'FUCHSIA', { map: 'fuchsia', x: 20, y: 9 },
-    ['expshare', 'ultraball', 'greatball', 'hyperpotion', 'superpotion', 'fullheal', 'revive', 'maxrepel']);
+    ['expshare', 'expall', 'ultraball', 'greatball', 'hyperpotion', 'superpotion', 'fullheal', 'revive', 'maxrepel']);
 
   // KOGA's gym. In Red/Blue this room is invisible walls — a puzzle built out
   // of bad information rather than out of geometry, and the only way through
@@ -2534,7 +2541,7 @@
   // ============================================================= CINNABAR ===
   healCentre('cinnabarcentre', 'CINNABAR', { map: 'cinnabar', x: 15, y: 6 });
   pokeMart('cinnabarmart', 'CINNABAR', { map: 'cinnabar', x: 16, y: 15 },
-    ['expshare', 'ultraball', 'greatball', 'maxpotion', 'hyperpotion', 'fullheal', 'revive', 'maxrepel', 'escaperope']);
+    ['expshare', 'expall', 'ultraball', 'greatball', 'maxpotion', 'hyperpotion', 'fullheal', 'revive', 'maxrepel', 'escaperope']);
 
   // The LAB. Two rooms in one: the fossil bench at the back, and the trade
   // desk at the front. The fossil you did NOT take in MT. MOON is gone
@@ -3688,7 +3695,7 @@
   });
 
   storeFloor(2, 'Trainer Market',
-    ['expshare', 'greatball', 'superpotion', 'revive', 'superrepel', 'escaperope'], {
+    ['expshare', 'expall', 'greatball', 'superpotion', 'revive', 'superrepel', 'escaperope'], {
     warps: [
       { x: 1, y: 1, to: 'celadonstore1', tx: 1, ty: 1, dir: 'down' },
       { x: 1, y: 2, to: 'celadonstore3', tx: 1, ty: 1, dir: 'up' }
@@ -3699,10 +3706,11 @@
     // plain words before you have spent anything.
     npcs: [
       { x: 8, y: 5, sprite: 'gentleman', dir: 'left',
-        dialog: ['That EXP SHARE on the counter is the best money in this building.',
-                 'Carry one and your WHOLE TEAM earns from every battle — half shares for the ones that stayed in their balls.',
-                 'It costs the one doing the fighting nothing at all.',
-                 'Six POKéMON growing together, instead of one dragging five along behind it.'] }
+        dialog: ['Both of those on the counter do the same job by different amounts.',
+                 'EXP SHARE: the POKéMON that fought keeps half, and your other five split what is left.',
+                 'EXP ALL: everybody takes an equal share, the fighter included.',
+                 'The EXP itself does not change. You are choosing who gets it, not how much there is.',
+                 'One evens a team out. The other evens it out faster, and costs your best POKéMON more to do it.'] }
     ]
   });
 
