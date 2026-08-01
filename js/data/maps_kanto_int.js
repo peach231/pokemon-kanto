@@ -1090,7 +1090,7 @@
     yield { t: 'text', s: 'Blue: I already found the captain. He is useless. Let us settle this instead.' };
     yield {
       t: 'custom',
-      run: function (resume) { G.startTrainerBattle('blue_ssanne', { onDone: resume }); }
+      run: function (resume) { G.startTrainerBattle('blue_ssanne', { onEnd: resume }); }
     };
     if (!G.flags.blue_ssanne) return;
     yield { t: 'text', s: 'Blue: Fine! Go and be nice to the sick man. See what it gets you.' };
@@ -1354,7 +1354,7 @@
       t: 'custom',
       run: function (resume) {
         G.startBattle({ party: G.player.party, foes: [G.makeMon('marowak', 30)], wild: true },
-          { bg: 'indoor', onDone: resume });
+          { bg: 'indoor', onEnd: resume });
       }
     };
     yield { t: 'fn', fn: function () { G.flags.marowakLaid = 1; } };
@@ -1367,7 +1367,7 @@
     yield { t: 'text', s: 'Blue: I came to see whether the ghost story was true. It is, by the way.' };
     yield {
       t: 'custom',
-      run: function (resume) { G.startTrainerBattle('blue_tower', { onDone: resume }); }
+      run: function (resume) { G.startTrainerBattle('blue_tower', { onEnd: resume }); }
     };
     if (!G.flags.blue_tower) return;
     yield { t: 'text', s: 'Blue: ...Fine. You are getting good at this.' };
@@ -1546,7 +1546,7 @@
     yield { t: 'text', s: 'Rocket: ...You saw nothing. Understand?' };
     yield {
       t: 'custom',
-      run: function (resume) { G.startTrainerBattle('gc_rocket', { onDone: resume }); }
+      run: function (resume) { G.startTrainerBattle('gc_rocket', { onEnd: resume }); }
     };
     if (!G.flags.gc_rocket) return;
     yield { t: 'fn', fn: function () { G.flags.hideoutOpen = 1; } };
@@ -1624,7 +1624,7 @@
     yield { t: 'text', s: 'Giovanni: A casino launders money. A tower supplies bone. It is all inventory.' };
     yield {
       t: 'custom',
-      run: function (resume) { G.startTrainerBattle('giovanni_hideout', { onDone: resume }); }
+      run: function (resume) { G.startTrainerBattle('giovanni_hideout', { onEnd: resume }); }
     };
     if (!G.flags.rh_giovanni) return;
     yield { t: 'text', s: 'Giovanni: ...Hm. You are better than the reports said.' };
@@ -1941,7 +1941,7 @@
     yield { t: 'text', s: 'Giovanni: Every trainer in the world, obsolete. And I would own the reason.' };
     yield {
       t: 'custom',
-      run: function (resume) { G.startTrainerBattle('giovanni_silph', { onDone: resume }); }
+      run: function (resume) { G.startTrainerBattle('giovanni_silph', { onEnd: resume }); }
     };
     if (!G.flags.silph_giovanni) return;
     yield { t: 'text', s: 'Giovanni: ...Enough. TEAM ROCKET withdraws. All of it. Everywhere.' };

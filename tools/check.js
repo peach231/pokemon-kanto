@@ -1380,6 +1380,47 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   if (!uniq.length) console.log('  crossing: from every entrance, every exit of that map can be reached');
 }
 
+// --- a battle inside an event must hand control back ---
+// An event that yields {t:'custom'} is suspended until its run() calls resume.
+// If a battle started inside one never calls back, the EventScene sits on the
+// stack for ever waiting: no movement, no menu, no input at all. A hard freeze
+// with nothing on screen to explain it.
+//
+// Six of them shipped that way, because G.startBattle and G.startTrainerBattle
+// read `onEnd` and every one of these passed `onDone` — the S.S. Anne and
+// Pokémon Tower rivals, the Game Corner Rocket, Giovanni at the Hideout and
+// again at Silph, and the Marowak ghost. Every major story battle in the game
+// except one, and the one that worked used the other spelling.
+//
+// The event dry-run above cannot see this and never will: it calls run() with
+// a no-op resume of its own, so the event always continues no matter what the
+// real run() does or fails to do. That is the right call for a dry run — it is
+// testing the event body, not the battle system — but it does mean the only
+// place this can be caught is in the SOURCE.
+//
+// So: the callback key handed to either function has to be one it reads.
+{
+  const src = SOURCES.map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
+  const battleSrc = fs.readFileSync(path.join(ROOT, 'js/engine/battle_ui.js'), 'utf8');
+  // what the two entry points actually look for
+  const READS = new Set();
+  for (const m of battleSrc.matchAll(/opts(?:Extra)?\.(on[A-Za-z]+)/g)) READS.add(m[1]);
+  const wrong = [];
+  for (const m of src.matchAll(/G\.start(?:Trainer)?Battle\s*\(([\s\S]{0,400}?)\)\s*;/g)) {
+    const call = m[1];
+    for (const k of call.matchAll(/\b(on[A-Za-z]+)\s*:/g)) {
+      if (!READS.has(k[1])) {
+        const who = (call.match(/'([a-z0-9_]+)'/) || [])[1] || 'a battle';
+        wrong.push(`${who} is started with '${k[1]}', which nothing reads — the event that started it never resumes and the game freezes`);
+      }
+    }
+  }
+  for (const w of [...new Set(wrong)]) errors.push('BATTLECB: ' + w);
+  if (!wrong.length) {
+    console.log(`  battle callbacks: every battle hands control back through ${[...READS].join('/')}`);
+  }
+}
+
 // --- every way out of a cave is DRAWN ---
 // Reachability audits ask whether a player COULD get to the exit. They cannot
 // ask whether the exit is visible, and almost every cave warp in Kanto was
