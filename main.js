@@ -108,6 +108,13 @@
         ts.update();
         G.input.justPressed = realJP;
       }
+    } else if (hashIs('dex')) {
+      // #dex=graveler — one POKeDEX entry, without playing to it.
+      var dk = (location.hash.match(/#dex=(\w+)/) || [])[1] || 'graveler';
+      G.player.dexSeen[dk] = 1; G.player.dexCaught[dk] = 1;
+      G.world.loadMap('pallet', 5, 6, 'down');
+      G.pushScene(G.overworldScene);
+      G.pushScene(G.DexEntryScene(dk));
     } else if (hashIs('career')) {
       // #career — the summary screen's second page, with a mon that has a
       // history worth showing. Pure layout, so being able to look at it

@@ -1362,12 +1362,58 @@
           ctx.fillRect(bx + 24, yy + 1, Math.round(60 * Math.min(1, v / 140)), 4);
         }
 
-        // the blurb
+        // WHAT IT BECOMES, and how.
+        //
+        // Four Gen 1 creatures only ever evolve by being traded — GRAVELER,
+        // MACHOKE, HAUNTER and KADABRA — and there is no cable in this game,
+        // so all four evolve by level here instead. That is no use to anybody
+        // who cannot see it: a player who knows Red/Blue will assume GOLEM is
+        // simply unobtainable and never train a GRAVELER past forty.
+        //
+        // So the Dex says it, and says which ones were a trade in 1996.
+        var evos = sp.evos || [];
+        var evoLine = '', tradeNote = '';
+        if (evos.length) {
+          var parts = [], compact = [], howAll = '', traded = false;
+          for (var e2 = 0; e2 < evos.length; e2++) {
+            var ev2 = evos[e2];
+            var into = ((G.SPECIES[ev2.into] || {}).name || ev2.into).toUpperCase();
+            var how = ev2.how === 'level' ? ('at Lv' + ev2.level)
+              : ev2.how === 'stone' ? ('with a ' + ((G.ITEMS[ev2.item] || {}).name || ev2.item))
+              : 'by trade';
+            if (ev2.wasTrade) traded = true;
+            parts.push(into + ' ' + how);
+            compact.push(into);
+            howAll = ev2.how === 'stone' ? 'by stone' : how;
+          }
+          // Measured in CHARACTERS, not by G.textWidth. Glyph widths are only
+          // known once the font has been decoded, which never happens under
+          // the headless test harness — so textWidth answers one thing here
+          // and another in the browser, and a layout that branches on it looks
+          // right in every test and wrong on screen. It did: this silently
+          // took the short branch and dropped the trade note for all four.
+          var full = 'Evolves into ' + parts.join(', ');
+          evoLine = full.length <= 44 ? full : (compact.join(' / ') + ' ' + howAll);
+          // Its own line, so it can never be what gets trimmed.
+          if (traded) tradeNote = 'In RED/BLUE that took a trade.';
+        }
+
+        // the blurb, with what it becomes on the first line
         ctx.fillStyle = '#f8f8f4'; ctx.fillRect(4, 106, W - 8, 40);
         ctx.fillStyle = '#b8b4a8'; ctx.fillRect(4, 106, W - 8, 1);
+        var ty2 = 111;
+        if (evoLine) {
+          G.text(ctx, evoLine, 10, ty2, '#7a4a2a');
+          ty2 += 11;
+        }
+        if (tradeNote) {
+          G.text(ctx, tradeNote, 10, ty2, '#7a4a2a');
+          ty2 += 11;
+        }
         var lines = G.textWrap(sp.dex || '', W - 20);
-        for (var l = 0; l < Math.min(3, lines.length); l++) {
-          G.text(ctx, lines[l], 10, 111 + l * 11, '#2a2a34');
+        var room = Math.floor((146 - ty2) / 11);
+        for (var l = 0; l < Math.min(room, lines.length); l++) {
+          G.text(ctx, lines[l], 10, ty2 + l * 11, '#2a2a34');
         }
         G.text(ctx, caught ? 'Z: cry   X: back' : 'Not yet caught.   X: back', 8, H - 10, '#5a5a68');
       }
