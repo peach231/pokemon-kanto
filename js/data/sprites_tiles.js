@@ -844,6 +844,20 @@
     fill('b'), fill('b'), fill('a'), fill('b'), fill('b'), fill('b'),
     fill('a'), fill('b'), fill('b'), fill('o')
   ]);
+  // The poster in the GAME CORNER, on the wall the grunt will not step away
+  // from. The whole "hidden staircase behind a poster" sequence was written
+  // and then hung on a bare patch of wall with nothing on it — the event told
+  // you there was a poster and there was no poster anywhere in the room.
+  //
+  // Same wall courses as t_iwall behind it, so it reads as something pinned up
+  // rather than a hole in the masonry.
+  T('t_iposter', { a: C.pls0, b: C.pls1, o: C.ink, p: C.pale, r: C.red2, y: C.yel1, k: C.blu3 }, [
+    fill('b'), 'bbbbbbbbbbbbbbbb', 'bboooooooooooobb',
+    'bbopppppppppppob', 'bbopprrrrrrppppb', 'bbopprppppppppob',
+    'bbopprpyyyyppppb', 'bbopprpykkyppppb', 'bbopprpykkyppppb',
+    'bbopprpyyyyppppb', 'bbopprppppppppob', 'bbopprrrrrrppppb',
+    'bbopppppppppppob', 'bboooooooooooobb', fill('b'), fill('o')
+  ]);
   T('t_imat', { a: C.red1, b: C.red2, c: C.red3, o: C.brn0 }, [
     fill('o'), 'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo',
     'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo', 'obbbbbbbbbbbbbbo',
@@ -1295,6 +1309,7 @@
     // ---- interiors ----
     ifloor:    { img: 't_ifloor' },
     iwall:     { img: 't_iwall', solid: true },
+    iposter:   { img: 't_iposter', solid: true },
     imat:      { img: 't_imat' },
     itable:    { img: 't_itable', solid: true },
     ibook:     { img: 't_ibook', solid: true },

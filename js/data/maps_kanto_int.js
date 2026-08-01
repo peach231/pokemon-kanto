@@ -1539,7 +1539,11 @@
       'I................I',
       'I.HHH.HHH.HHH....I',
       'I................I',
-      'I................I',
+      // The poster is ON THE WALL, and the grunt stands on the floor tile in
+      // front of it. It used to be nowhere: the event described a poster and a
+      // staircase behind it, and the warp sat on bare carpet two tiles from
+      // any wall with nothing drawn on it or near it.
+      'I................@',
       'I................I',
       'I................I',
       'IIIIIIII..IIIIIIII',
@@ -1552,14 +1556,16 @@
       // Behind the poster, and only once the poster has been pulled off the
       // wall. Ungated, this was a square of ordinary carpet that dropped you
       // into TEAM ROCKET's basement if you happened to tread on it.
-      { x: 15, y: 9, to: 'rockethideout1', tx: 2, ty: 1, dir: 'down',
+      { x: 16, y: 9, to: 'rockethideout1', tx: 2, ty: 1, dir: 'down',
         needFlag: 'hideoutOpen' }
     ],
     signs: [
       { x: 16, y: 2, text: 'PRIZE EXCHANGE — coins only. No refunds, no exceptions, no exchanges back to cash.' }
     ],
     npcs: [
-      { x: 14, y: 9, sprite: 'rocket', dir: 'left', event: 'gameCornerPoster' },
+      // He is standing on the trapdoor, which is why he will not move.
+      { x: 16, y: 9, sprite: 'rocket', dir: 'left', event: 'gameCornerPoster',
+        unlessFlag: 'hideoutOpen' },
       { x: 15, y: 2, sprite: 'clerk', dir: 'down', event: 'prizeCounter' },
       { x: 2, y: 2, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
       { x: 6, y: 2, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
@@ -1580,7 +1586,7 @@
   // a save that already opened the hideout gets its stairs back the next time
   // it loads the room, rather than being stuck with the invisible version.
   G.openHideoutStairs = function () {
-    if (G.setTileEdit) G.setTileEdit('gamecorner', 15, 9, 'stairs');
+    if (G.setTileEdit) G.setTileEdit('gamecorner', 16, 9, 'stairs');
   };
 
   G.EVENTS.gameCornerPoster = function* () {

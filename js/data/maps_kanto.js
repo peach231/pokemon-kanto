@@ -56,7 +56,7 @@
     '.': 'ifloor', 'I': 'iwall', 'm': 'imat', 'T': 'itable', 'B': 'ibook',
     'H': 'imach', '(': 'ibed_t', ')': 'ibed_b', 'P': 'iplant', 'o': 'istool',
     'C': 'icounter', 'E': 'ihealm', 'G': 'gfloor', 'R': 'redcarpet',
-    'U': 'statue', '>': 'stairs'
+    'U': 'statue', '>': 'stairs', '@': 'iposter'
   };
 
   // CAVE — Mt. Moon, Rock Tunnel, Victory Road, Cerulean Cave.
