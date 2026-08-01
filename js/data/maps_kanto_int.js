@@ -1851,6 +1851,25 @@
       }
       yield { t: 'text', s: blurb };
       yield { t: 'text', s: 'Master: One. Not both. Choose.' };
+      // Look before you commit. This said "choose" and then simply handed you
+      // whichever ball you happened to touch — an irreversible pick of one of
+      // two POKéMON, made by walking into it. The starters get a screen that
+      // shows you what is inside and lets you put it back down; this is the
+      // same shape of decision, so it gets the same screen.
+      var take = { v: false };
+      yield {
+        t: 'custom',
+        run: function (resume) {
+          G.pushScene(G.StarterPreviewScene(key, function (yes) {
+            take.v = yes;
+            resume();
+          }));
+        }
+      };
+      if (!take.v) {
+        yield { t: 'text', s: 'You set the ball back down. The master says nothing.' };
+        return;
+      }
       yield {
         t: 'fn',
         fn: function () {

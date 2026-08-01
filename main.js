@@ -108,6 +108,13 @@
         ts.update();
         G.input.justPressed = realJP;
       }
+    } else if (hashIs('preview')) {
+      // #preview=hitmonlee — the take-it-or-leave-it screen, which the DOJO
+      // prize now shares with the starters.
+      var pk = (location.hash.match(/#preview=(\w+)/) || [])[1] || 'hitmonlee';
+      G.world.loadMap('pallet', 5, 6, 'down');
+      G.pushScene(G.overworldScene);
+      G.pushScene(G.StarterPreviewScene(pk, function () {}));
     } else if (hashIs('dex')) {
       // #dex=graveler — one POKeDEX entry, without playing to it.
       var dk = (location.hash.match(/#dex=(\w+)/) || [])[1] || 'graveler';

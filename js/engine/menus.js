@@ -27,7 +27,8 @@
         var self = this;
         G.pushScene(G.Chooser({
           items: ['Take it!', 'Leave it'],
-          x: 150, y: 112,
+          // clear of the blurb underneath it
+          x: 150, y: 96,
           onPick: function (i) {
             G.popScene(); // pop the preview itself
             onChoice(i === 0);
@@ -47,10 +48,17 @@
         var img = G.IMG['mon_' + spKey];
         if (img) ctx.drawImage(img, 58 - img.width / 2, 98 - img.height);
         G.text(ctx, sp.name, 14, 12, G.UI.text, G.UI.textShadow);
+        // Chips sized to their word. A fixed 40px box fitted GRASS and WATER
+        // and cut FIGHTING to "FIGHTIN" — which nothing here had to render
+        // until the DOJO prize started using this screen.
+        var chipX = 14;
         for (var t = 0; t < sp.types.length; t++) {
+          var tname = sp.types[t].toUpperCase();
+          var cw = G.textWidth(tname) + 6;
           ctx.fillStyle = G.TYPE_COLORS[sp.types[t]];
-          ctx.fillRect(14 + t * 44, 24, 40, 11);
-          G.text(ctx, sp.types[t].toUpperCase().slice(0, 8), 17 + t * 44, 26, G.C.white);
+          ctx.fillRect(chipX, 24, cw, 11);
+          G.text(ctx, tname, chipX + 3, 26, G.C.white);
+          chipX += cw + 4;
         }
         // right: base stat bars
         panel(ctx, 116, 6, 120, 84);
@@ -65,10 +73,12 @@
           ctx.fillStyle = rows[i][1] >= 100 ? G.UI.hpGreen : rows[i][1] >= 60 ? G.UI.expBlue : G.UI.hpYellow;
           ctx.fillRect(173, y + 2, bw, 4);
         }
-        // dex flavor
+        // dex flavor, BELOW the take-it-or-leave-it box rather than behind it.
+        // The chooser sits bottom-right and this used to draw straight across
+        // it, so the last third of every blurb was hidden under the menu.
         var lines = G.textWrap(sp.dex, 222);
         for (var d = 0; d < Math.min(2, lines.length); d++) {
-          G.text(ctx, lines[d], 10, 128 + d * 11, G.C.white, '#1a1c2c');
+          G.text(ctx, lines[d], 10, 138 + d * 11, G.C.white, '#1a1c2c');
         }
       }
     };
