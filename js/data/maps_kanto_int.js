@@ -1549,7 +1549,11 @@
     warps: [
       { x: 8, y: 12, to: 'celadon', tx: 6, ty: 12, dir: 'down' },
       { x: 9, y: 12, to: 'celadon', tx: 7, ty: 12, dir: 'down' },
-      { x: 15, y: 9, to: 'rockethideout1', tx: 2, ty: 1, dir: 'down' }
+      // Behind the poster, and only once the poster has been pulled off the
+      // wall. Ungated, this was a square of ordinary carpet that dropped you
+      // into TEAM ROCKET's basement if you happened to tread on it.
+      { x: 15, y: 9, to: 'rockethideout1', tx: 2, ty: 1, dir: 'down',
+        needFlag: 'hideoutOpen' }
     ],
     signs: [
       { x: 16, y: 2, text: 'PRIZE EXCHANGE — coins only. No refunds, no exceptions, no exchanges back to cash.' }
@@ -1570,6 +1574,15 @@
     ]
   };
 
+  // Cutting the staircase into the floor behind the poster. Written as a tile
+  // EDIT rather than into the map, because the map is a module-level singleton
+  // shared by every save — see field.js — and because doing it this way means
+  // a save that already opened the hideout gets its stairs back the next time
+  // it loads the room, rather than being stuck with the invisible version.
+  G.openHideoutStairs = function () {
+    if (G.setTileEdit) G.setTileEdit('gamecorner', 15, 9, 'stairs');
+  };
+
   G.EVENTS.gameCornerPoster = function* () {
     if (G.flags.hideoutOpen) {
       yield { t: 'text', s: 'The poster hangs open on its hinge. Stairs lead down into the dark.' };
@@ -1584,7 +1597,14 @@
       run: function (resume) { G.startTrainerBattle('gc_rocket', { onEnd: resume }); }
     };
     if (!G.flags.gc_rocket) return;
-    yield { t: 'fn', fn: function () { G.flags.hideoutOpen = 1; } };
+    yield { t: 'fn', fn: function () {
+      G.flags.hideoutOpen = 1;
+      // and the staircase is now a thing you can see. The warp tile sat on
+      // bare arcade floor, so even once this event said "there is a staircase
+      // behind it" there was nothing whatever drawn there — you had to walk
+      // onto an unremarkable square of carpet and hope.
+      G.openHideoutStairs();
+    } };
     yield { t: 'sfx', id: 'doorOpen' };
     yield { t: 'text', s: 'The grunt bolts. The poster swings loose behind him.' };
     yield { t: 'text', s: 'There is a staircase behind it, going down.' };

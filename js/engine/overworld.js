@@ -777,6 +777,12 @@
         this.npcs.push(a);
       }
       if (map.music) G.audio.playMusic(map.music);
+      // A save that opened the GAME CORNER's hidden staircase before the tile
+      // for it existed would otherwise keep an invisible one for ever.
+      if (id === 'gamecorner' && G.flags.hideoutOpen && G.openHideoutStairs) {
+        G.openHideoutStairs();
+      }
+
       if (G.updateFollower) G.updateFollower();
       if (G.refreshFollower) G.refreshFollower();
       if (G.showTownCard) G.showTownCard(map);
