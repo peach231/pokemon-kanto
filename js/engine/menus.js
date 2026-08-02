@@ -1101,9 +1101,9 @@
       // --- the west ---
       { id: 'route7',         label: 'Route 7',          kind: 'route',  x: 100, y: 80 },
       { id: 'celadon',        label: 'Celadon City',     kind: 'gym', type: 'grass', x: 82, y: 80 },
-      { id: 'route16',        label: 'Route 16',         kind: 'route',  x: 82,  y: 96 },
-      { id: 'route17',        label: 'Cycling Road',     kind: 'route',  x: 82,  y: 116 },
-      { id: 'route18',        label: 'Route 18',         kind: 'route',  x: 100, y: 134 },
+      { id: 'route16',        label: 'Route 16',         kind: 'route',  x: 60,  y: 80 },
+      { id: 'route17',        label: 'Cycling Road',     kind: 'route',  x: 60,  y: 108 },
+      { id: 'route18',        label: 'Route 18',         kind: 'route',  x: 82,  y: 132 },
       // --- the south ---
       { id: 'route12',        label: 'Route 12',         kind: 'route',  x: 176, y: 96 },
       { id: 'route13',        label: 'Route 13',         kind: 'route',  x: 172, y: 116 },
@@ -1112,8 +1112,8 @@
       { id: 'fuchsia',        label: 'Fuchsia City',     kind: 'gym', type: 'poison', x: 120, y: 136 },
       { id: 'safarizonecenter', label: 'Safari Zone',    kind: 'forest', x: 120, y: 120 },
       // --- the sea and the island ---
-      { id: 'route19',        label: 'Route 19',         kind: 'route',  x: 104, y: 150 },
-      { id: 'route20',        label: 'Route 20',         kind: 'route',  x: 78,  y: 150 },
+      { id: 'route19',        label: 'Route 19',         kind: 'route',  x: 120, y: 152 },
+      { id: 'route20',        label: 'Route 20',         kind: 'route',  x: 96,  y: 152 },
       { id: 'seafoam1f',      label: 'Seafoam Islands',  kind: 'cave',   x: 62,  y: 150 },
       { id: 'cinnabar',       label: 'Cinnabar Island',  kind: 'gym', type: 'fire', x: 38, y: 148 },
       { id: 'route21',        label: 'Route 21',         kind: 'route',  x: 38,  y: 140 },
@@ -1175,8 +1175,33 @@
       sel: cur >= 0 ? cur : 0,
       update: function () {
         if (G.input.justPressed('B') || G.input.justPressed('start')) { G.audio.sfx('cancel'); G.popScene(); return; }
-        if (G.input.repeat('right') || G.input.repeat('down')) { this.sel = (this.sel + 1) % NODES.length; G.audio.sfx('menuMove'); }
-        if (G.input.repeat('left') || G.input.repeat('up')) { this.sel = (this.sel + NODES.length - 1) % NODES.length; G.audio.sfx('menuMove'); }
+        // The cursor moves in the direction you pressed. It used to step
+        // through the NODES array — right and down both meant "next in the
+        // list", left and up both meant "previous" — so on a map the cursor
+        // jumped wherever the array happened to go next, which on a MAP is
+        // indefensible.
+        //
+        // Nearest node within a 90-degree cone of the pressed direction, with
+        // sideways distance weighted heavily so it prefers something actually
+        // in that direction over something merely further along.
+        var step = function (self, dx, dy) {
+          var from = NODES[self.sel], best = -1, bestScore = Infinity;
+          for (var i = 0; i < NODES.length; i++) {
+            if (i === self.sel) continue;
+            var ax = NODES[i].x - from.x, ay = NODES[i].y - from.y;
+            var along = ax * dx + ay * dy;              // distance in the pressed direction
+            if (along <= 0) continue;                   // behind us
+            var side = Math.abs(ax * dy - ay * dx);     // how far off that line
+            if (side > along * 2) continue;             // outside the cone
+            var score = along + side * 2.5;
+            if (score < bestScore) { bestScore = score; best = i; }
+          }
+          if (best >= 0) { self.sel = best; G.audio.sfx('menuMove'); }
+        };
+        if (G.input.repeat('right')) step(this, 1, 0);
+        if (G.input.repeat('left')) step(this, -1, 0);
+        if (G.input.repeat('down')) step(this, 0, 1);
+        if (G.input.repeat('up')) step(this, 0, -1);
         // FLY. Only to towns you have actually stood in — flying somewhere you
         // have only read about on a map would hand you the geography.
         if (G.input.justPressed('A')) {
