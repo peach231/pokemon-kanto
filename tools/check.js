@@ -1573,6 +1573,43 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
 }
 
+// --- every event can be started by something ---
+// An event nobody hosts is content that does not exist. laprasGift was
+// written in full — it checked that Giovanni had been thrown out of Silph Co,
+// handed over a level 15 LAPRAS, and had a line for coming back afterwards —
+// and no NPC in Kanto ran it, so LAPRAS could not be obtained at all. mewTruck
+// was the same: the lorry it describes was never placed, so MEW was behind a
+// vehicle that did not exist.
+//
+// Both survived because the dex audit dry-runs every event in the table
+// whether or not the world can reach one, and therefore counted gifts nobody
+// could ever receive. It only runs reachable events now, and this makes the
+// unreachable ones loud in their own right.
+{
+  const hosted = new Set();
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    for (const o of (m.npcs || []).concat(m.trainers || [], m.signs || [],
+                                          m.scripts || [], m.items || [])) {
+      const ev = o.event || o.run;
+      if (ev) hosted.add(ev);
+    }
+  }
+  for (const t in (G.TILE_EVENTS || {})) hosted.add(G.TILE_EVENTS[t]);
+  for (const f of SOURCES) {
+    const text = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    for (const m of text.matchAll(/runEvent\(\s*'([A-Za-z0-9_]+)'/g)) hosted.add(m[1]);
+    for (const m of text.matchAll(/onTalkEvent\s*=\s*'([A-Za-z0-9_]+)'/g)) hosted.add(m[1]);
+  }
+  const stranded = Object.keys(G.EVENTS || {}).filter(e => !hosted.has(e));
+  for (const e of stranded) {
+    errors.push(`STRANDED: event '${e}' exists and nothing in the world can start it`);
+  }
+  if (!stranded.length) {
+    console.log(`  events: all ${Object.keys(G.EVENTS || {}).length} can be started by something in the world`);
+  }
+}
+
 // --- the town map knows where you are ---
 // "You are here" was a SUBSTRING test taking the first hit in array order.
 // That is fine for pewtercentre -> pewter and ruinous for anything numbered:
@@ -1783,7 +1820,28 @@ if (G.REGION_NODES && G.RegionMapScene) {
     // time, and the wallet is full.
     const seeds = [];
     for (let i = 0; i < G.DEX_ORDER.length; i += 6) seeds.push(G.DEX_ORDER.slice(i, i + 6));
+    // Only events the WORLD can actually start. Running every entry in the
+    // table counted a gift nobody could reach: laprasGift was complete, tested
+    // by this audit, and hosted by no NPC anywhere in Kanto — so LAPRAS was
+    // unobtainable while this said 151/151.
+    const reachableEvents = new Set();
+    for (const id in G.MAPS) {
+      const m = G.MAPS[id];
+      for (const o of (m.npcs || []).concat(m.trainers || [], m.signs || [],
+                                            m.scripts || [], m.items || [])) {
+        const ev = o.event || o.run;
+        if (ev) reachableEvents.add(ev);
+      }
+    }
+    for (const t in (G.TILE_EVENTS || {})) reachableEvents.add(G.TILE_EVENTS[t]);
+    // events started by other events, or by the engine, count too
+    for (const f of SOURCES) {
+      const text = fs.readFileSync(path.join(ROOT, f), 'utf8');
+      for (const m of text.matchAll(/runEvent\(\s*'([A-Za-z0-9_]+)'/g)) reachableEvents.add(m[1]);
+      for (const m of text.matchAll(/onTalkEvent\s*=\s*'([A-Za-z0-9_]+)'/g)) reachableEvents.add(m[1]);
+    }
     for (const eid in G.EVENTS) {
+      if (!reachableEvents.has(eid)) continue;
       for (const seed of seeds) {
        for (choice.i = 0; choice.i < 6; choice.i++) {
         G.newGame('DEX');

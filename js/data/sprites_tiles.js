@@ -858,6 +858,17 @@
     'bbopprpyyyyppppb', 'bbopprppppppppob', 'bbopprrrrrrppppb',
     'bbopppppppppppob', 'bboooooooooooobb', fill('b'), fill('o')
   ]);
+  // The lorry by the VERMILION dock. MEW is under it, and the event that says
+  // so was written and then never placed anywhere in the world — so MEW was
+  // unobtainable and the dex audit could not see it, because it dry-ran every
+  // event in the table whether or not the world could reach one.
+  T('t_truck', { o: C.ink, b: C.blu2, c: C.blu3, w: C.pale, g: C.stn2, y: C.yel1 }, [
+    fill('o'), 'oooooooooooooooo', 'obbbbbbbbbbwwwoo',
+    'obwwwwwwwwbwwwoo', 'obwwwwwwwwbwwwyo', 'obwwwwwwwwbcccoo',
+    'obwwwwwwwwbcccoo', 'obbbbbbbbbbcccoo', 'occcccccccccccoo',
+    'oogggoooooogggoo', 'oogggoooooogggoo', 'ooogooooooooogoo',
+    fill('o'), fill('o'), fill('o'), fill('o')
+  ]);
   T('t_imat', { a: C.red1, b: C.red2, c: C.red3, o: C.brn0 }, [
     fill('o'), 'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo',
     'obbbbbbbbbbbbbbo', 'obcbcbcbcbcbcbbo', 'obbbbbbbbbbbbbbo',
@@ -1310,6 +1321,7 @@
     ifloor:    { img: 't_ifloor' },
     iwall:     { img: 't_iwall', solid: true },
     iposter:   { img: 't_iposter', solid: true },
+    truck:     { img: 't_truck', solid: true },
     imat:      { img: 't_imat' },
     itable:    { img: 't_itable', solid: true },
     ibook:     { img: 't_ibook', solid: true },

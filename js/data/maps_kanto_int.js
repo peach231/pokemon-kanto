@@ -2019,7 +2019,14 @@
     ],
     npcs: [
       { x: 11, y: 1, sprite: 'giovanni', dir: 'down', unlessFlag: 'silph_giovanni', event: 'silphBoss' },
-      { x: 5, y: 16, sprite: 'gentleman', dir: 'up', event: 'silphPresident' }
+      { x: 5, y: 16, sprite: 'gentleman', dir: 'up', event: 'silphPresident' },
+      // The employee with the LAPRAS. This event was written in full — it
+      // checks that GIOVANNI has been thrown out of the building, it hands
+      // over a level 15 LAPRAS, it has a line for coming back afterwards —
+      // and NOBODY IN KANTO RAN IT. There was no way to obtain a LAPRAS at
+      // all, and the dex audit said 151/151 because it dry-runs every event in
+      // the table whether or not the world can reach one.
+      { x: 9, y: 16, sprite: 'scientist', dir: 'down', event: 'laprasGift' }
     ]
   });
 

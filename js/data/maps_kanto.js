@@ -29,7 +29,7 @@
     'X': 'cuttree', 'O': 'boulder', 'l': 'ledge', '*': 'rock', '#': 'cliff',
     'y': 'deco_flowerY', 'o': 'deco_pebble', 'Q': 'deco_bush',
     'V': 'deco_stump', 'J': 'deco_fern',
-    'F': 'fence', 'S': 'sign',
+    'F': 'fence', 'S': 'sign', 'Z': 'truck', 'K': 'truck',
     // house — terracotta roof
     '1': 'roof_tl', '2': 'roof_tm', '3': 'roof_tr',
     '4': 'roof_bl', '5': 'roof_bm', '6': 'roof_br', '0': 'roofx',
@@ -1005,7 +1005,7 @@
       '..abbc....pp....S.....',
       '..WYYW....pp..........',
       '..........pp..........',
-      '..........pp..........',
+      '..........pp..Z.......',   // 19 — and the lorry nobody has ever moved
       '%%%%%%%%%%pp%%%%%%%%%%',   // 20 the quay
       '^^^^^^^^^^pp^^^^^^^^^^',
       '~~~~~~~~~~pp~~~~~~~~~~',
@@ -1029,6 +1029,10 @@
       { x: 19, y: 11, to: 'vermilionfanclub', tx: 4, ty: 7, dir: 'up' }
     ],
     signs: [
+      // The lorry. Examining it is the whole easter egg — it needs
+      // STRENGTH, and MEW is underneath.
+      { x: 16, y: 19, event: 'mewTruck',
+        text: 'A lorry, parked by the dock. Nobody knows whose it is.' },
       { x: 18, y: 18, text: 'VERMILION CITY — The Port of Exquisite Sunsets.' },
       { x: 20, y: 16, text: 'A lorry, parked by the dock. No plates, no markings, and no record of it in the harbour office.' },
       { x: 5, y: 18, text: 'VERMILION CITY POKéMON GYM — LEADER: LT. SURGE. The Lightning American!' }
