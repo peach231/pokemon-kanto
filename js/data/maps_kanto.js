@@ -768,6 +768,11 @@
     ],
     signs: [
       { x: 4, y: 19, text: 'CERULEAN CITY — A Mysterious, Blue Aura Surrounds It.' },
+      // Outside the BIKE SHOP, because it is an ordinary house from the
+      // street and the only thing that ever mentions it is a man in
+      // VERMILION who says "the CERULEAN shop" — which everybody reads as
+      // the MART, two streets north.
+      { x: 17, y: 22, text: 'CERULEAN BIKE SHOP. Ask inside. (Cash buyers should sit down first.)' },
       { x: 5, y: 12, text: 'CERULEAN CITY POKéMON GYM — LEADER: MISTY. The Tomboyish Mermaid!' },
       { x: 3, y: 6, text: 'Across the water: UNKNOWN DUNGEON. Closed by order of the POKéMON LEAGUE.' }
     ],

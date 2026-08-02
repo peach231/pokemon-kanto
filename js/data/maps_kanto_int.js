@@ -1007,7 +1007,8 @@
     };
     yield { t: 'sfx', id: 'catchClick' };
     yield { t: 'text', s: 'You received a BIKE VOUCHER!' };
-    yield { t: 'text', s: 'Chairman: Redeem it at the CERULEAN shop. A bicycle is faster than walking, and you walk a great deal.' };
+    yield { t: 'text', s: 'Chairman: Take it to the BIKE SHOP in CERULEAN — not the MART, the shop with the bicycle on the sign, down in the south-east corner of the city.' };
+    yield { t: 'text', s: 'Chairman: They will not sell you one for money. Nobody has that much money.' };
   };
 
   // ----------------------------------------------------------- SURGE'S GYM --
