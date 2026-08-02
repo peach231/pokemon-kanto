@@ -344,6 +344,40 @@
     townCard = { t: 0, name: map.name, sub: G.SLOGANS[map.id] || '' };
   };
 
+  // Which floor you are standing on, held on screen the whole time you are on
+  // it rather than announced once when you arrive.
+  //
+  // The CELADON DEPARTMENT STORE is six identical rooms joined by one lift, and
+  // the only thing distinguishing them is a directory on the wall of the ground
+  // floor. Six floors of the POKeMON TOWER, three of SILPH CO. and two Rocket
+  // basements have the same problem. Every one of those maps already carries
+  // its floor in its NAME, so this is derived rather than declared and cannot
+  // be forgotten on a new room.
+  function floorTag(map) {
+    if (!map || !map.name) return null;
+    var m = map.name.match(/(?:^|[ .])(B?[0-9]+F)(?:$|[ ])/);
+    if (!m) return null;
+    var floor = m[1];
+    var rest = map.name.indexOf('—') !== -1
+      ? map.name.split('—')[1]                    // "3F - Household"
+      : map.name.slice(0, m.index);                     // "Pokemon Tower 3F"
+    return { floor: floor, label: (rest || '').trim() };
+  }
+
+  function drawFloorTag(ctx) {
+    var tag = floorTag(G.world && G.world.map);
+    if (!tag) return;
+    var lw = tag.label ? G.textWidth(tag.label) + 5 : 0;
+    var fw = G.textWidth(tag.floor) + 8;
+    var w = fw + lw + 3, h = 13;
+    ctx.fillStyle = 'rgba(20,24,42,0.72)';
+    ctx.fillRect(2, 2, w, h);
+    ctx.fillStyle = '#f8e878';
+    ctx.fillRect(2, 2, fw, h);
+    G.text(ctx, tag.floor, 6, 5, '#2a2a34');
+    if (tag.label) G.text(ctx, tag.label, fw + 5, 5, '#ffffff', '#101018');
+  }
+
   function drawTownCard(ctx) {
     if (!townCard) return;
     var IN = 16, HOLD = 96, OUT = 20;
@@ -1547,6 +1581,7 @@
       }
 
       drawTownCard(ctx);
+      drawFloorTag(ctx);
 
       // The control hints used to live here, pinned to the corner for the
       // whole playthrough. They are in the menu under HELP now, and the field

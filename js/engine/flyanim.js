@@ -54,6 +54,23 @@
     };
   }
 
+  // Fetch the rear-view walk sheet for something that can carry you.
+  //
+  // This used to be kicked off when the FLY scene was constructed, which is
+  // the moment the animation starts — the sheet is a network fetch and the
+  // whole flight lasts about a second and a half, so on any connection slower
+  // than a local disk it arrived after the landing and every flight fell back
+  // to the front battler. Which is the sprite standing still, which is the
+  // hovering.
+  //
+  // Called when the TOWN MAP opens instead, so it has however long the player
+  // spends choosing a destination. Safe to call repeatedly: it checks first.
+  G.preloadFlierArt = function (mon) {
+    if (!mon || !G.gfx || !G.gfx.loadFollowerSheet) return;
+    if (G.IMG['ch_mon_' + mon.sp + '_u0']) return;
+    G.gfx.loadFollowerSheet(mon.sp);
+  };
+
   // ---------------------------------------------------------------------------
   // onMid() runs at the top of the arc, hidden behind the sky — that is where
   // the map swap happens, so the world changes while nobody can see it.
@@ -103,9 +120,7 @@
     // The follower sheet is fetched on demand, so the first flight of a
     // playthrough may fall back to the rear battler and every one after it
     // will beat its wings.
-    if (mon && G.gfx && G.gfx.loadFollowerSheet && !G.IMG['ch_mon_' + mon.sp + '_u0']) {
-      G.gfx.loadFollowerSheet(mon.sp);
-    }
+    G.preloadFlierArt(mon);
     function flierArt() {
       if (!mon) return null;
       var u0 = G.IMG['ch_mon_' + mon.sp + '_u0'];
@@ -253,7 +268,13 @@
           if (!art.flap) { iw = 46; ih = 46; }
           // A few degrees of bank. A rear view needs far less of this than the
           // front one did — it is already going somewhere.
-          var tilt = (art.flap ? 0.05 : -0.10) * Math.sin(t / 11) * (0.3 + motion * 0.7);
+          // With the walk sheet this is a light roll on top of a real
+          // wingbeat. Without it, all the motion there is has to come from
+          // here, so a battler gets a hard forward lean and a deep rock —
+          // upright and still is exactly what reads as hovering.
+          var tilt = art.flap
+            ? 0.05 * Math.sin(t / 11) * (0.3 + motion * 0.7)
+            : -0.34 + 0.16 * Math.sin(t / 6) * (0.3 + motion * 0.7);
           ctx.save();
           ctx.translate(fx, fy);
           ctx.rotate(tilt);

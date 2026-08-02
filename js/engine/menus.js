@@ -1197,6 +1197,13 @@
       }
       return best;
     }
+    // Warm up the flier's rear-view sheet now, while the player is still
+    // deciding where to go. Fetching it when FLY starts left it arriving
+    // after the landing.
+    if (G.preloadFlierArt) {
+      var flyer = G.fieldUser && G.fieldUser('fly');
+      if (flyer && flyer.mon) G.preloadFlierArt(flyer.mon);
+    }
     var mid = (G.world && G.world.mapId) || '';
     var cur = nodeFor(mid);
     // Inside somewhere the map does not draw — OAK's lab, the GAME CORNER, a
