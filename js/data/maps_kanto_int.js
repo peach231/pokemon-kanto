@@ -2138,7 +2138,13 @@
       'I...I.....I.......I',
       'I.I.III.I.IIIII.I.I',
       'I.I.....I.....I.I.I',
-      'I.IIIIIIIIIII.III.I',
+      // (2,4) is an alcove cut off the entry corridor for the GYM GUIDE to
+      // stand in. It is a DEAD END — it adds no route, so the maze is still
+      // exactly one path — and the corridor past it is mandatory, so nobody
+      // walks by without meeting him. He used to stand at (1,15): the single
+      // tile between the door and the rest of the room, and the tile you land
+      // on. Step off it once and he sealed the only way out.
+      'I..IIIIIIIIII.III.I',
       'I.I.......I...I...I',
       'I.III.III.I.III.III',
       'I...I...I...I.....I',
@@ -2164,7 +2170,7 @@
       { x: 9, y: 13, sprite: 'blackbelt', dir: 'down', trainer: 'fg_rocky', sight: 0 }
     ],
     npcs: [
-      { x: 1, y: 15, sprite: 'gymguy', dir: 'right', event: 'fuchsiaGymGuide' }
+      { x: 2, y: 4, sprite: 'gymguy', dir: 'left', event: 'fuchsiaGymGuide' }
     ]
   };
 

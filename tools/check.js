@@ -1554,6 +1554,93 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   if (!uniq.length) console.log('  crossing: from every entrance, every exit of that map can be reached');
 }
 
+// --- and people are walls, so standing in the wrong place seals a room ---
+//
+// Everything above walks TILES. A person is just as solid as a wall, and the
+// FUCHSIA GYM guide stood on (1,15) — the one tile between the door and the
+// rest of the maze, which is also the tile you land on. Arriving put you on top
+// of him, so leaving again worked and the room looked fine; the moment you
+// stepped into the maze he sealed the only way out, and beating KOGA trapped
+// you in the building.
+//
+// Walking is symmetric: anywhere you can walk TO, you can walk back FROM. So a
+// person standing in a doorway cannot strand you — it just means you never got
+// past them. There is exactly one asymmetric move in the game, and that is a
+// WARP, which drops you on a tile without asking whether it is free. Landing on
+// top of somebody is therefore the whole bug class: it is a square you can be
+// on once and never reach again.
+{
+  const pass = (m, x, y) => {
+    if (x < 0 || y < 0 || x >= m.w || y >= m.h) return false;
+    const d = m.deco && m.deco[y] && m.deco[y][x];
+    const n = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[y][x]];
+    const t = n && G.TILES[n];
+    if (!t) return false;
+    if (t.water || t.cut || t.strength || t.story) return true;
+    return !t.solid;
+  };
+  const flood = (m, starts, blocked) => {
+    const seen = new Set(), q = [];
+    for (const s of starts) if (pass(m, s[0], s[1]) && !blocked.has(s.join(','))) { seen.add(s.join(',')); q.push(s); }
+    while (q.length) {
+      const [x, y] = q.shift();
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+        if (seen.has(k) || blocked.has(k) || !pass(m, nx, ny)) continue;
+        seen.add(k); q.push([nx, ny]);
+      }
+    }
+    return seen;
+  };
+  const arrivalsOf = {};
+  for (const id in G.MAPS) {
+    for (const w of (G.MAPS[id].warps || [])) {
+      if (G.MAPS[w.to]) (arrivalsOf[w.to] = arrivalsOf[w.to] || []).push({ x: w.tx, y: w.ty, from: id });
+    }
+  }
+  const trapped = [];
+  let landings = 0;
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    const doors = (m.warps || []).filter(w => G.MAPS[w.to]).map(w => [w.x, w.y]);
+    if (!doors.length) continue;
+    // An actor with `unlessFlag` is one the story removes — the ROCKET on a
+    // staircase who leaves once you beat him. Everyone else stands there for
+    // good, defeated or not, and is a wall.
+    const who = new Map();
+    for (const kind of ['npcs', 'trainers']) {
+      for (const o of (m[kind] || [])) {
+        if (Array.isArray(o.x) || o.x == null || o.unlessFlag) continue;
+        who.set(o.x + ',' + o.y, o.trainer || o.event || o.sprite || kind);
+      }
+    }
+    for (const a of (arrivalsOf[id] || [])) {
+      landings++;
+      const here = who.get(a.x + ',' + a.y);
+      if (!here) continue;
+      // You are standing inside them. That alone is wrong; whether it also
+      // locks the room depends on what is left once you step off.
+      // Step off in each direction separately. Flooding from all of them at
+      // once hides the trap, because one of the neighbours is usually the door
+      // itself — you can leave the instant you arrive, and only the OTHER
+      // direction, the one into the room, is the one with no way back.
+      const dead = [];
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const n = [a.x + dx, a.y + dy];
+        const after = flood(m, [n], new Set(who.keys()));
+        if (!after.size) continue;                       // a wall, not a way in
+        if (!doors.some(d => after.has(d.join(',')))) dead.push(`(${n[0]},${n[1]})`);
+      }
+      trapped.push(`${id}: arriving from ${a.from} lands you on top of '${here}' at (${a.x},${a.y})`
+        + (dead.length
+            ? ` — and stepping off to ${dead.join(' or ')} reaches NO door, so the room is a trap`
+            : ' — a tile you can never stand on again'));
+    }
+  }
+  for (const t of trapped) errors.push('SEALED: ' + t);
+  if (!trapped.length) console.log(`  sealed: none of the ${landings} places a warp drops you lands on top of somebody`);
+}
+
 // --- the browser must be able to tell that the code changed ---
 // There is no build step here, which is a feature, and it means every script
 // is cached by a filename that never changes. So a fix can be written, tested,
