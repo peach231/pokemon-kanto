@@ -80,7 +80,10 @@
   item('waterstone',   'Water Stone',  2100, 'stone', {}, 'A peculiar stone the colour of deep water.');
   item('thunderstone', 'Thunderstone', 2100, 'stone', {}, 'A peculiar stone with a thunderbolt pattern.');
   item('leafstone',    'Leaf Stone',   2100, 'stone', {}, 'A peculiar stone with a leaf pattern.');
-  item('moonstone',    'Moon Stone',   0,    'stone', {}, 'A stone found in MT. MOON. It glows faintly.');
+  // Priced above the other four, and it needs to BE priced: it was 0, which
+  // in a shop means free, and four species want one — NIDORINO, NIDORINA,
+  // CLEFAIRY and JIGGLYPUFF — against a single stone lying in Mt. Moon.
+  item('moonstone',    'Moon Stone',   3500, 'stone', {}, 'A stone that glows faintly. They are dug out of MT. MOON and there are not many.');
 
   // ------------------------------------------------------------ key items ---
   item('parcel',      "Oak's Parcel", 0, 'key', {}, 'A parcel from the VIRIDIAN MART, addressed to PROF. OAK.');

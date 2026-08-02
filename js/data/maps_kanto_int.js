@@ -3762,12 +3762,12 @@
   });
 
   storeFloor(4, 'Wiseman Gifts',
-    ['firestone', 'waterstone', 'thunderstone', 'leafstone'], {
+    ['firestone', 'waterstone', 'thunderstone', 'leafstone', 'moonstone'], {
     warps: [
       { x: 1, y: 1, to: 'celadonstore3', tx: 1, ty: 2, dir: 'down' },
       { x: 1, y: 2, to: 'celadonstore5', tx: 1, ty: 1, dir: 'up' }
     ],
-    signs: [{ x: 8, y: 3, text: '4F — EVOLUTION STONES. All sales final. All evolutions final.' }],
+    signs: [{ x: 8, y: 3, text: '4F — EVOLUTION STONES. MOON STONES held behind the counter. All sales final. All evolutions final.' }],
     npcs: [
       { x: 10, y: 7, sprite: 'oldwoman', dir: 'left',
         dialog: ['An EEVEE will become one of three things depending on which of these you hand it.',
