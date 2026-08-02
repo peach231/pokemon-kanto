@@ -1911,6 +1911,70 @@ if (G.REGION_NODES && G.RegionMapScene) {
   }
 }
 
+// --- ...and every field move actually WORKS when it is allowed to ---
+// The pass above only ever exercised the REFUSAL. Every success path in
+// field.js hands G.runEventGen a generator that has already been started —
+// `G.runEventGen((function* () { ... })())` — and runEventGen called it as a
+// function. So CUT, STRENGTH, SURF and FLASH each threw "genFn is not a
+// function" from inside the keypress handler, which goes to the console and
+// leaves the game running normally: you pressed A at the water and nothing
+// whatsoever happened. Four of the five HMs, the things the whole region is
+// gated on, and every audit here was green.
+//
+// So this grants the HM, the badge and a mon that knows the move, and calls
+// the real entry point.
+{
+  const snapshot = JSON.stringify({ p: G.player, f: G.flags });
+  const scenesWas = G.scenes.slice();
+  const broke = [];
+  const CASES = [
+    ['cut',      m => G.tryCut(m.x, m.y),      'cuttree'],
+    ['strength', m => G.tryStrength(m.x, m.y), 'boulder'],
+    ['surf',     m => G.trySurf(m.x, m.y),     'water'],
+    ['flash',    () => G.tryFlash(),           null]
+  ];
+  for (const [kind, call, tile] of CASES) {
+    const f = G.FIELD_MOVES[kind];
+    G.newGame('AUDIT');
+    G.player.party = [G.makeMon('lapras', 40)];
+    G.player.party[0].moves.push({ id: f.move, pp: 15, maxPp: 15 });
+    G.player.bag[f.hm] = 1;
+    G.flags[f.badge] = 1;
+    G.world.loadMap('pallet', 5, 6, 'down');
+    const use = G.fieldUser(kind);
+    if (use.blocked) { broke.push(`${kind}: set up with the HM, the badge and a user, and it still says '${use.blocked}'`); continue; }
+    // Somewhere the obstacle actually is, so the call is the real one.
+    let spot = { x: 5, y: 7 };
+    if (tile) {
+      outer:
+      for (const id in G.MAPS) {
+        const m = G.MAPS[id];
+        for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
+          const t = G.TILES[m.legend[m.ground[y][x]]];
+          if (t && (tile === 'water' ? t.water : tile === 'boulder' ? t.strength : t.cut)) {
+            G.world.loadMap(id, x, Math.max(0, y - 1), 'down'); spot = { x, y }; break outer;
+          }
+        }
+      }
+    }
+    G.scenes.length = 0;
+    try {
+      call(spot);
+      if (G.scenes.length === 0) broke.push(`${kind}: ran, but put nothing on screen — the player sees nothing happen`);
+    } catch (e) {
+      broke.push(`${kind}: threw ${e.constructor.name}: ${e.message} — pressing A does nothing at all`);
+    }
+  }
+  G.scenes.length = 0;
+  for (const s of scenesWas) G.scenes.push(s);
+  const back = JSON.parse(snapshot);
+  for (const k in back.p) G.player[k] = back.p[k];
+  for (const k in G.flags) delete G.flags[k];
+  for (const k in back.f) G.flags[k] = back.f[k];
+  for (const b of broke) errors.push('FIELDRUN: ' + b);
+  if (!broke.length) console.log('  field moves: all 4 obstacle HMs run to completion when you are allowed to use them');
+}
+
 // --- every item kind is actually handled by the bag ---
 // G.ITEM_KINDS already stopped an item from declaring a kind nobody had heard
 // of. It could not stop the reverse: a kind everybody had heard of that the

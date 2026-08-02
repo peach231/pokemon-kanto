@@ -1694,11 +1694,13 @@
 
       img = this._actorImage(a);
 
-      // SWIMMING: body submerged — only head shows, arms stroke, legs kick.
+      // SURFING. FireRed draws the rider AND the mount together in one 32px
+      // frame — art made to be sat on, and proportioned for it — so it is
+      // offset half a tile left and up to sit centred on the tile you occupy.
+      // Riding the actual species was tried and looks wrong: the follower
+      // sheets are creatures scaled to walk BESIDE you, so a LAPRAS is smaller
+      // than the trainer and you end up sitting on top of a pet.
       if (a === w.player && a.vehicle === 'swim') {
-        // FireRed's surf sheet draws the rider AND the mount together in a
-        // 32px frame, so it is offset half a tile left and up to sit centred
-        // on the tile the player occupies.
         if (G.IMG.ch_playersurf_d0 && img) {
           ctx.drawImage(img, sx - 8, sy - 8);
           return;
@@ -2046,8 +2048,16 @@
   G.runEvent = function (id, ctx) {
     G.runEventGen(G.EVENTS[id], ctx);
   };
+  // Takes EITHER a generator function to call, or a generator already started.
+  // It used to take only the first, and every field move in field.js hands it
+  // the second — `G.runEventGen((function* () { ... })())`. That threw
+  // "genFn is not a function" the instant you pressed A, from inside an input
+  // handler, so the exception went to the console and the game simply carried
+  // on: CUT, STRENGTH, SURF and FLASH all did visibly nothing. Both spellings
+  // are reasonable things to pass, so both are accepted.
   G.runEventGen = function (genFn, ctx) {
-    G.pushScene(G.EventScene(genFn(ctx)));
+    var gen = (genFn && typeof genFn.next === 'function') ? genFn : genFn(ctx);
+    G.pushScene(G.EventScene(gen));
   };
 
   G.EventScene = function (gen) {

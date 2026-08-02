@@ -71,6 +71,16 @@
       var chId = (location.hash.match(/char=(\w+)/) || [])[1];
       if (chId && G.applyCharacter) { G.player.charKey = chId; G.applyCharacter(chId); }
       G.world.loadMap(mapMatch[1], parseInt(mapMatch[2], 10), parseInt(mapMatch[3], 10), (location.hash.match(/dir=(\w+)/) || [])[1] || 'down');
+      // ,surf — start already out on the water, so the ride can be looked at
+      // without playing to the SOULBADGE first. ,surf=gyarados picks which of
+      // your POKéMON is carrying you, which only the text mentions.
+      if (/[#&,]surf/.test(location.hash)) {
+        var sm = (location.hash.match(/surf=(\w+)/) || [])[1] || 'lapras';
+        G.player.party = [G.makeMon(sm, 30)];
+        G.player.party[0].moves.push({ id: 'surf', pp: 15, maxPp: 15 });
+        G.player.bag.hm03 = 1; G.flags.badge5 = 1;
+        G.world.player.vehicle = 'swim';
+      }
       G.pushScene(G.overworldScene);
     } else if (hashIs('gallery') && G.debug && G.debug.GalleryScene) {
       G.pushScene(G.debug.GalleryScene());

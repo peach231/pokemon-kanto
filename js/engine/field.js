@@ -162,6 +162,9 @@
     var use = G.fieldUser('surf');
     if (use.blocked) { G.pushScene(G.Textbox(G.fieldBlockedText('surf', use))); return true; }
     var mon = use.mon;
+    // FireRed draws one 32px frame with the rider already seated on the mount,
+    // so the art is generic — the text is what tells you WHICH of yours is
+    // underneath you, and it is the one that used the move.
     G.runEventGen((function* () {
       yield { t: 'text', s: 'The water is calm here. Would you like to SURF?' };
       yield { t: 'text', s: G.monName(mon) + ' used SURF!' };
@@ -171,6 +174,7 @@
         p.fromX = p.x; p.fromY = p.y; p.x = fx; p.y = fy;
         p.moving = true; p.step = 0; p.stride = !p.stride;
       } };
+      yield { t: 'text', s: 'You climbed onto ' + G.monName(mon) + '.' };
     })());
     return true;
   };
