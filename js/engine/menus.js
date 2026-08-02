@@ -338,7 +338,7 @@
     // HELP is where the field's control hints went. They used to be welded
     // to the corner of the screen for the whole game; nobody reads them
     // after the first five minutes and they never go away.
-    var items = ['DEX', 'MAP', 'PARTY', 'BAG', 'HELP', 'OPTION', 'SAVE', 'EXIT'];
+    var items = ['DEX', 'MAP', 'PARTY', 'BAG', 'BADGES', 'HELP', 'OPTION', 'SAVE', 'EXIT'];
     return {
       opaque: false,
       sel: 0,
@@ -354,6 +354,7 @@
           if (pick === 'MAP') G.pushScene(G.RegionMapScene());
           if (pick === 'PARTY') G.pushScene(G.PartyScene());
           if (pick === 'BAG') G.pushScene(G.BagScene());
+          if (pick === 'BADGES') G.pushScene(G.BadgeCaseScene());
           if (pick === 'HELP') G.pushScene(G.TutorialScene());
           if (pick === 'OPTION') G.pushScene(G.OptionsScene());
           if (pick === 'SAVE') {
@@ -1604,6 +1605,99 @@
           G.text(ctx, lines[l], 10, ty2 + l * 11, '#2a2a34');
         }
         G.text(ctx, caught ? 'Z: cry   X: back' : 'Not yet caught.   X: back', 8, H - 10, '#5a5a68');
+      }
+    };
+  };
+
+  // ---------------------------------------------------------- badge case ----
+  // Eight slots, all eight always visible. A case that only showed what you had
+  // would answer "how many" and not "which ones", and "which ones" is the
+  // question — the badge you are missing tells you which city you have not
+  // finished with. So an unearned badge is drawn as its own silhouette: the
+  // real outline, in shadow, recognisably that shape and clearly not yours.
+  G.BadgeCaseScene = function () {
+    var COLS = 4, CELL_W = 56, CELL_H = 40, GRID_X = 6, GRID_Y = 20;
+
+    // The silhouette. Same sprite, every colour replaced by one dark tone, so
+    // the shape is exactly right and nothing about it reads as earned.
+    var shadows = {};
+    function silhouette(key) {
+      if (shadows[key]) return shadows[key];
+      var art = G.ART['badge_' + key];
+      if (!art) return null;
+      var pal = {};
+      for (var ch in art.pal) pal[ch] = (art.pal[ch] === '#000000') ? '#22242e' : '#454a5e';
+      var c = document.createElement('canvas');
+      c.width = 16; c.height = 16;
+      var cx = c.getContext('2d');
+      var id = cx.createImageData(16, 16);
+      for (var y = 0; y < 16; y++) {
+        for (var x = 0; x < 16; x++) {
+          var p = art.px[y][x];
+          if (p === '.' || !pal[p]) continue;
+          var rgb = pal[p], i = (y * 16 + x) * 4;
+          id.data[i] = parseInt(rgb.slice(1, 3), 16);
+          id.data[i + 1] = parseInt(rgb.slice(3, 5), 16);
+          id.data[i + 2] = parseInt(rgb.slice(5, 7), 16);
+          id.data[i + 3] = 255;
+        }
+      }
+      cx.putImageData(id, 0, 0);
+      shadows[key] = c;
+      return c;
+    }
+
+    return {
+      opaque: true,
+      sel: 0,
+      update: function () {
+        var n = G.BADGES.length;
+        if (G.input.repeat('left')) { this.sel = (this.sel + n - 1) % n; G.audio.sfx('menuMove'); }
+        if (G.input.repeat('right')) { this.sel = (this.sel + 1) % n; G.audio.sfx('menuMove'); }
+        if (G.input.repeat('up') && this.sel - COLS >= 0) { this.sel -= COLS; G.audio.sfx('menuMove'); }
+        if (G.input.repeat('down') && this.sel + COLS < n) { this.sel += COLS; G.audio.sfx('menuMove'); }
+        if (G.input.justPressed('B') || G.input.justPressed('A')) { G.audio.sfx('cancel'); G.popScene(); }
+      },
+      draw: function (ctx) {
+        ctx.fillStyle = '#2a2030';                       // the case lining
+        ctx.fillRect(0, 0, W, H);
+
+        var have = G.badgeCount();
+        G.text(ctx, 'BADGE CASE', 8, 6, G.C.white, '#1a1c2c');
+        var tally = have + '/8';
+        G.text(ctx, tally, W - 8 - G.textWidth(tally), 6, have === 8 ? '#f8e878' : G.C.white, '#1a1c2c');
+
+        for (var i = 0; i < G.BADGES.length; i++) {
+          var b = G.BADGES[i], got = G.hasBadge(i);
+          var cx2 = GRID_X + (i % COLS) * CELL_W;
+          var cy = GRID_Y + Math.floor(i / COLS) * CELL_H;
+          // Each badge sits in a recess, lit when earned.
+          ctx.fillStyle = got ? '#3d3350' : '#241d2a';
+          ctx.fillRect(cx2 + 8, cy, 38, 34);
+          ctx.strokeStyle = (i === this.sel) ? '#f8e878' : '#4a4058';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(cx2 + 8.5, cy + 0.5, 37, 33);
+
+          var img = got ? G.IMG['badge_' + b.key] : silhouette(b.key);
+          if (img) ctx.drawImage(img, cx2 + 19, cy + 3);
+          // The city under each one, because that is what you are looking for.
+          var city = b.city.replace(' CITY', '').replace(' ISLAND', '');
+          G.text(ctx, city, cx2 + 27 - G.textWidth(city) / 2, cy + 22,
+                 got ? G.C.white : '#6a6278', '#1a1c2c');
+        }
+
+        // The selected badge, in full.
+        var sel = G.BADGES[this.sel], mine = G.hasBadge(this.sel);
+        panel(ctx, 4, H - 48, W - 8, 44);
+        G.text(ctx, sel.name, 10, H - 41, G.UI.text, G.UI.textShadow);
+        var tname = sel.type.toUpperCase();
+        var cw = G.textWidth(tname) + 6;
+        ctx.fillStyle = G.TYPE_COLORS[sel.type];
+        ctx.fillRect(W - 12 - cw, H - 42, cw, 11);
+        G.text(ctx, tname, W - 9 - cw, H - 40, G.C.white);
+        G.text(ctx, sel.leader + ', ' + sel.city, 10, H - 28, G.UI.text, G.UI.textShadow);
+        G.text(ctx, mine ? sel.grants : 'Not earned yet.',
+               10, H - 15, mine ? G.UI.text : '#a05858', G.UI.textShadow);
       }
     };
   };

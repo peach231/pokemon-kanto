@@ -74,8 +74,17 @@ function read(file) {
   };
   const bgIndex = value(0, 0);
   const bgClear = ct === 3 && trns && bgIndex < trns.length && trns[bgIndex] < 8;
+  // The actual colour of a pixel, as #rrggbb, or null where it is background.
+  // `at` is for comparing pixels; this is for reproducing them.
+  const hex = (x, y) => {
+    const v = value(x, y);
+    if (v === -1 || v === bgIndex) return null;
+    const rgb = ct === 3 ? [pal[v * 3], pal[v * 3 + 1], pal[v * 3 + 2]]
+                         : [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+    return '#' + rgb.map(c => c.toString(16).padStart(2, '0')).join('');
+  };
   return {
-    w, h,
+    w, h, hex,
     at(x, y) {
       const v = value(x, y);
       if (v === -1) return -1;

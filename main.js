@@ -153,6 +153,18 @@
       G.world.loadMap('pallet', 5, 6, 'down');
       G.pushScene(G.overworldScene);
       G.pushScene(G.StarterPreviewScene(pk, function () {}));
+    } else if (hashIs('badges')) {
+      // #badges=5 — the case with five of eight earned, so the earned and the
+      // missing states can both be looked at without playing to them.
+      var bn = parseInt((location.hash.match(/badges=(\d+)/) || [])[1] || '5', 10);
+      G.player.party = [G.makeMon('charmander', 20)];
+      for (var bi = 0; bi < bn && bi < 8; bi++) {
+        G.player.badges[bi] = true;
+        G.flags['badge' + (bi + 1)] = 1;
+      }
+      G.world.loadMap('pallet', 5, 6, 'down');
+      G.pushScene(G.overworldScene);
+      G.pushScene(G.BadgeCaseScene());
     } else if (hashIs('dex')) {
       // #dex=graveler — one POKeDEX entry, without playing to it.
       var dk = (location.hash.match(/#dex=(\w+)/) || [])[1] || 'graveler';

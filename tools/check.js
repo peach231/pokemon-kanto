@@ -74,6 +74,11 @@ for (const name in G.ART) {
     }
   }
   for (const key in a.pal) {
+    // Art marked `imported` is a real sprite lifted from the source games and
+    // carries THEIR palette on purpose — the eight badges are FireRed's own,
+    // and repainting them into this game's colours would make them not the
+    // badges. Everything drawn for this game still has to stay on palette.
+    if (a.imported) continue;
     if (!masterColors.has(a.pal[key])) warn.push(`ART ${name}: color ${a.pal[key]} ('${key}') not in master palette`);
   }
 }
@@ -1909,6 +1914,53 @@ if (G.REGION_NODES && G.RegionMapScene) {
   if (!missing.length) {
     console.log(`  field moves: all ${Object.keys(G.FIELD_MOVES || {}).length} can say why they are unavailable`);
   }
+}
+
+// --- the badge case agrees with the gyms it describes ---
+// G.BADGES is a fourth copy of facts the game already held three times: the
+// leader's reward in trainers.js, the badge NAME in FIELD_MOVES, the city in
+// field.js's BADGE_FROM. A fourth copy is worth having — one screen wants all
+// of it at once — but only if it cannot quietly disagree with the other three.
+{
+  const wrong = [];
+  const leaderOf = {};
+  for (const id in G.TRAINERS) {
+    const r = G.TRAINERS[id].reward;
+    if (r && r.badge != null) leaderOf[r.badge] = { id, def: G.TRAINERS[id], flag: r.flag, text: r.text || '' };
+  }
+  (G.BADGES || []).forEach((b, i) => {
+    const L = leaderOf[i];
+    if (!L) { wrong.push(`${b.name}: no gym leader hands out badge ${i}`); return; }
+    if (L.flag !== b.flag) wrong.push(`${b.name}: case says flag '${b.flag}', ${L.id} sets '${L.flag}'`);
+    // The leader's own award line carries the badge's name, so they must match.
+    const said = (L.text.match(/[A-Z]{4,}BADGE/) || [])[0];
+    if (said && said !== b.name) wrong.push(`${b.name}: ${L.id} awards '${said}'`);
+    // The gym the case sends you to must be the map that leader stands on.
+    const room = G.MAPS[b.gym];
+    if (!room) wrong.push(`${b.name}: names gym '${b.gym}', which is not a map`);
+    else if (!(room.trainers || []).some(t => t.trainer === L.id)) {
+      wrong.push(`${b.name}: ${L.id} does not stand in ${b.gym}`);
+    }
+    // And the town it names has to be a real place on the map.
+    if (G.REGION_NODES && !Object.keys(G.REGION_NODES).some(k => {
+      const n = G.REGION_NODES[k];
+      return (n.label || '').toUpperCase() === b.city;
+    })) wrong.push(`${b.name}: city '${b.city}' is not a place on the town map`);
+    // Baked art, both states.
+    if (!G.ART['badge_' + b.key]) wrong.push(`${b.name}: no sprite baked as badge_${b.key}`);
+    if (!G.TYPE_COLORS[b.type]) wrong.push(`${b.name}: type '${b.type}' has no colour`);
+  });
+  // Every field move gated on a badge must name one this table knows.
+  for (const k in (G.FIELD_MOVES || {})) {
+    const f = G.FIELD_MOVES[k];
+    const b = (G.BADGES || []).find(x => x.flag === f.badge);
+    if (!b) wrong.push(`field move ${k} needs '${f.badge}', which is not a badge`);
+    else if (b.name.replace('BADGE', ' BADGE') !== f.badgeName && b.name !== f.badgeName.replace(' ', '')) {
+      wrong.push(`field move ${k} calls it '${f.badgeName}', the case calls it '${b.name}'`);
+    }
+  }
+  for (const w of wrong) errors.push('BADGE: ' + w);
+  if (!wrong.length) console.log(`  badges: all ${(G.BADGES || []).length} match the leader, gym, city and art they name`);
 }
 
 // --- a trainer who does not watch the room really does not watch it ---
