@@ -650,6 +650,24 @@
   // will cross the entire region to redeem one voucher. The inherited code
   // checked `bag.skates`, which is Hoenn's Mach Bike and which nothing in this
   // game ever grants, so the bicycle did nothing at all.
+  // Is this somewhere with a roof on it?
+  //
+  // `map.indoors` would be the obvious test and it is set on barely a third of
+  // the interiors — POKéMON CENTRES, gyms, OAK'S LAB and the GAME CORNER all
+  // lack it. So the floor decides instead, which cannot be forgotten when a
+  // new room is added: shop lino, gym boards, plating, tower stone, scorched
+  // board, marble and carpet are all inside. Grass, sand, sea and bare rock
+  // are not — Gen 1 lets you cycle through a cave and so does this.
+  var INDOOR_FLOORS = {
+    ifloor: 1, gfloor: 1, metalfloor: 1, towerfloor: 1,
+    burntfloor: 1, marble: 1, redcarpet: 1
+  };
+  G.isIndoors = function (map) {
+    if (!map) return false;
+    if (map.indoors) return true;
+    return !!INDOOR_FLOORS[map.base];
+  };
+
   G.moveSpeed = function () {
     if (!G.player) return 1;
     var bag = G.player.bag || {};
@@ -756,6 +774,15 @@
         if (!G.player.visited) G.player.visited = {};
         G.player.visited[id] = 1;
       }
+      // You cannot wheel a bicycle into a POKéMON CENTRE. Riding one indoors
+      // used to be possible and looked broken while it happened: the bike
+      // sheet is not drawn in here, so the bicycle vanished and left the
+      // player walking around a shop at cycling speed.
+      if (G.player && G.player.onBike && G.isIndoors(map)) {
+        G.player.onBike = false;
+        this._dismounted = true;
+      }
+
       // The last place you stood that the TOWN MAP can actually point at.
       // Tested against the map's own node list rather than the `indoors`
       // flag, which is set on barely a third of the interiors — so OAK'S LAB
@@ -959,6 +986,13 @@
 
     update: function () {
       var w = G.world, p = w.player;
+      // Said here rather than inside loadMap, so it lands after the doorway
+      // fade instead of underneath it.
+      if (w._dismounted) {
+        w._dismounted = false;
+        G.pushScene(G.Textbox('You cannot ride in here. You folded up the BICYCLE.'));
+        return;
+      }
       this._advanceFollower();
 
       if (p.hop > 0) {

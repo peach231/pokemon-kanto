@@ -665,7 +665,7 @@
       return 'COIN CASE: ' + (G.player.coins || 0) + ' coins.';
     }
     if (id === 'bicycle') {
-      if (G.world.map && G.world.map.indoors) return 'No cycling indoors.';
+      if (G.isIndoors && G.isIndoors(G.world.map)) return 'There is no room to ride in here.';
       G.player.onBike = !G.player.onBike;
       return G.player.onBike ? 'You got on the BICYCLE.' : 'You folded up the BICYCLE.';
     }

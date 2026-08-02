@@ -87,6 +87,40 @@
     var t = 0;
     var mid = false;
 
+    // Which picture of the creature to fly with, best first.
+    //
+    // The battle sprite is a FRONT view of something standing with its feet
+    // under it. Tilting it and adding a motion smear helped, but it still read
+    // as hovering, because the pose says "perched" no matter what you do to
+    // it. What reads as flight is seeing it from BEHIND, going away from you —
+    // and there are two rear views already in the game:
+    //
+    //   the follower sheet's up-facing pair, which is two frames and therefore
+    //   an actual wingbeat, and
+    //   the Gen-5 rear battler, which is one frame but is at least the right
+    //   way round.
+    //
+    // The follower sheet is fetched on demand, so the first flight of a
+    // playthrough may fall back to the rear battler and every one after it
+    // will beat its wings.
+    if (mon && G.gfx && G.gfx.loadFollowerSheet && !G.IMG['ch_mon_' + mon.sp + '_u0']) {
+      G.gfx.loadFollowerSheet(mon.sp);
+    }
+    function flierArt() {
+      if (!mon) return null;
+      var u0 = G.IMG['ch_mon_' + mon.sp + '_u0'];
+      if (u0) {
+        var u1 = G.IMG['ch_mon_' + mon.sp + '_u1'] || u0;
+        // a slow, deliberate beat rather than a flicker
+        // 32px art at 2.2 is about 70 across — big enough to read the wings,
+        // small enough that the sky it is crossing is still the picture.
+        return { img: ((t / 7) | 0) % 2 ? u1 : u0, scale: 2.2, flap: true };
+      }
+      var back = G.IMG['mon_' + mon.sp + '_back'];
+      if (back) return { img: back, scale: 1.0, flap: false };
+      return { img: G.IMG['mon_' + mon.sp], scale: 1.0, flap: false };
+    }
+
     return {
       opaque: true,
       update: function () {
@@ -206,33 +240,34 @@
         }
 
         // ---- the flier ----
-        var img = mon && G.IMG['mon_' + mon.sp];
-        var bob = Math.sin(t / 5) * 3 * (0.25 + motion * 0.75);
+        var art = flierArt();
+        // The wingbeat carries the bob when there is one, so the rise and fall
+        // of the body matches the stroke instead of drifting against it.
+        var beat = art && art.flap ? (((t / 7) | 0) % 2 ? 1 : -1) : Math.sin(t / 5);
+        var bob = beat * 2.5 * (0.25 + motion * 0.75);
         // rises up the screen while climbing, holds, then sinks away
         var fy = H * 0.62 - ease * (H * 0.22) + bob;
-        var fx = W / 2 - 24 + Math.sin(t / 17) * 5 * motion;
-        if (img) {
-          var s = 46;
-          // Tilted into the wind. These are battle sprites — every one of them
-          // is standing on the ground with its feet under it — so drawn square
-          // to the screen the flier looks like it is hovering upright rather
-          // than going anywhere. A few degrees of nose-down and a smear of
-          // motion behind it does the whole job.
-          var tilt = (-0.16 + Math.sin(t / 5) * 0.03) * (0.3 + motion * 0.7);
+        var fx = W / 2 + Math.sin(t / 17) * 5 * motion;
+        if (art && art.img) {
+          var iw = art.img.width * art.scale, ih = art.img.height * art.scale;
+          if (!art.flap) { iw = 46; ih = 46; }
+          // A few degrees of bank. A rear view needs far less of this than the
+          // front one did — it is already going somewhere.
+          var tilt = (art.flap ? 0.05 : -0.10) * Math.sin(t / 11) * (0.3 + motion * 0.7);
           ctx.save();
-          ctx.translate(fx + s / 2, fy);
+          ctx.translate(fx, fy);
           ctx.rotate(tilt);
           // The trail goes BEHIND. Everything else on screen drifts left, so
           // the flier is travelling right, and ghosts drawn ahead of it read
           // as a rendering fault rather than as speed.
           if (ease > 0.4) {
             ctx.globalAlpha = 0.13;
-            ctx.drawImage(img, -s / 2 - 6, -s / 2, s, s);
+            ctx.drawImage(art.img, -iw / 2 - 6, -ih / 2, iw, ih);
             ctx.globalAlpha = 0.07;
-            ctx.drawImage(img, -s / 2 - 12, -s / 2, s, s);
+            ctx.drawImage(art.img, -iw / 2 - 12, -ih / 2, iw, ih);
             ctx.globalAlpha = 1;
           }
-          ctx.drawImage(img, -s / 2, -s / 2, s, s);
+          ctx.drawImage(art.img, -iw / 2, -ih / 2, iw, ih);
           ctx.restore();
         }
 
