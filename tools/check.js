@@ -1911,6 +1911,43 @@ if (G.REGION_NODES && G.RegionMapScene) {
   }
 }
 
+// --- the surf sprite holds one pose per facing ---
+// The walking animation walks a sheet's frames 0,3,4 for south, 0/1/5/6 for
+// north and so on. That is right for a sheet laid out as a walk cycle, and the
+// SURF sheet is not one: its frames are three facings, then those same three
+// facings' second pose, then the float with nobody on it. FireRed's own frame
+// table says as much — all nine of its surf slots point at just three pictures.
+// So heading south played south, south', then NORTH', and heading west played
+// west and then an empty float: the rider spun on the spot while travelling in
+// a straight line.
+{
+  const KEYS = ['d0', 'd1', 'd2', 'u0', 'u1', 'u2', 's0', 's1', 's2'];
+  const saved = {};
+  for (const k of KEYS) {
+    for (const suffix of ['', '_flip']) {
+      const name = 'ch_playersurf_' + k + suffix;
+      saved[name] = G.IMG[name];
+      G.IMG[name] = { tag: k + suffix };     // each frame distinguishable
+    }
+  }
+  const p = G.world.player, was = { v: p.vehicle, d: p.dir, m: p.moving, s: p.stride, st: p.step };
+  p.vehicle = 'swim';
+  const spun = [];
+  for (const dir of ['down', 'up', 'left', 'right']) {
+    const seen = new Set();
+    for (const moving of [false, true]) for (const stride of [false, true]) for (const step of [0, 4, 8, 12]) {
+      p.dir = dir; p.moving = moving; p.stride = stride; p.step = step; p.hop = 0; p.hopTotal = 1;
+      const img = G.overworldScene._actorImage(p);
+      seen.add(img ? img.tag : 'nothing');
+    }
+    if (seen.size > 1) spun.push(`facing ${dir} cycles through ${[...seen].join(', ')} — the rider turns without turning`);
+  }
+  p.vehicle = was.v; p.dir = was.d; p.moving = was.m; p.stride = was.s; p.step = was.st;
+  for (const name in saved) { if (saved[name] === undefined) delete G.IMG[name]; else G.IMG[name] = saved[name]; }
+  for (const s of spun) errors.push('SURFPOSE: ' + s);
+  if (!spun.length) console.log('  surfing: one held pose per facing, so the rider never turns on the spot');
+}
+
 // --- ...and every field move actually WORKS when it is allowed to ---
 // The pass above only ever exercised the REFUSAL. Every success path in
 // field.js hands G.runEventGen a generator that has already been started —

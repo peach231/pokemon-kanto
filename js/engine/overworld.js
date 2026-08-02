@@ -1702,7 +1702,19 @@
       // than the trainer and you end up sitting on top of a pet.
       if (a === w.player && a.vehicle === 'swim') {
         if (G.IMG.ch_playersurf_d0 && img) {
-          ctx.drawImage(img, sx - 8, sy - 8);
+          // The pose is held rather than animated (see _actorImage), so the
+          // swell is what makes it look afloat: a slow one-pixel rise and fall,
+          // and a wake ring opening out behind while you are actually moving.
+          var sb = Math.round(Math.sin(G.frame * 0.09));
+          if (a.moving) {
+            var wt = (G.frame % 24) / 24;
+            ctx.strokeStyle = 'rgba(240,248,255,' + (0.35 * (1 - wt)).toFixed(2) + ')';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(sx + 8, sy + 14, 6 + wt * 7, 2 + wt * 2, 0, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.drawImage(img, sx - 8, sy - 8 + sb);
           return;
         }
         this._drawSwimmer(ctx, img, sx, sy);
@@ -1795,9 +1807,25 @@
       // sheet has not finished streaming, so a slow connection shows the
       // character walking on water rather than showing nothing at all.
       if (a === G.world.player) {
-        if (a.vehicle === 'swim' && G.IMG.ch_playersurf_d0) base = 'ch_playersurf_';
-        else if (G.player && G.player.onBike && G.player.bag && G.player.bag.bicycle
-                 && G.IMG.ch_playerbike_d0) base = 'ch_playerbike_';
+        if (a.vehicle === 'swim' && G.IMG.ch_playersurf_d0) {
+          // SURFING HAS NO WALK CYCLE. FireRed's own frame table proves it —
+          // all nine of its slots point at the same three pictures, one per
+          // facing — and this sheet is laid out to match: frames 0-2 are the
+          // three facings, 3-5 are their second poses in facing order, and 6-8
+          // are the float with nobody on it. Run the normal walking animation
+          // over that and heading SOUTH plays south, south', then NORTH', and
+          // heading WEST plays west and then an empty float. The rider spun on
+          // the spot and occasionally vanished, without ever turning.
+          //
+          // So: one pose per direction, held. The bob in the draw code is what
+          // keeps it alive.
+          return this._resolve('ch_playersurf_',
+            a.dir === 'right' ? 's0_flipped' :
+            a.dir === 'left'  ? 's0' :
+            a.dir === 'up'    ? 'u0' : 'd0');
+        }
+        if (G.player && G.player.onBike && G.player.bag && G.player.bag.bicycle
+            && G.IMG.ch_playerbike_d0) base = 'ch_playerbike_';
       }
       var striding = (a.moving && a.step < 8) || (a.hop > 0 && a.hop > a.hopTotal / 2);
       // Animation is LOCKED to the facing direction — front/back are never mirrored
