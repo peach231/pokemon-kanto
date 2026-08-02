@@ -756,6 +756,16 @@
         if (!G.player.visited) G.player.visited = {};
         G.player.visited[id] = 1;
       }
+      // The last place you stood that the TOWN MAP can actually point at.
+      // Tested against the map's own node list rather than the `indoors`
+      // flag, which is set on barely a third of the interiors — so OAK'S LAB
+      // and the GAME CORNER counted as open country and "You are here" gave
+      // up and pointed at PALLET TOWN.
+      if (G.REGION_NODES) {
+        for (var rn = 0; rn < G.REGION_NODES.length; rn++) {
+          if (G.REGION_NODES[rn].id === id) { this.lastOutdoorId = id; break; }
+        }
+      }
       this.player.x = x; this.player.y = y;
       this.player.dir = dir || this.player.dir;
       this.player.moving = false; this.player.step = 0; this.player.hop = 0;

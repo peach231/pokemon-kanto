@@ -1573,6 +1573,28 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
   }
 }
 
+// --- the town map knows where you are ---
+// "You are here" was a SUBSTRING test taking the first hit in array order.
+// That is fine for pewtercentre -> pewter and ruinous for anything numbered:
+// 'route1' is a substring of 'route11', so every route from 10 upward reported
+// itself as ROUTE 1 and 20 through 25 as ROUTE 2. Sixteen maps told you that
+// you were somewhere else entirely.
+if (G.REGION_NODES && G.RegionMapScene) {
+  const ids = G.REGION_NODES.map(n => n.id);
+  const lost = [];
+  for (const id of ids) {
+    if (!G.MAPS[id]) { lost.push(`${id} is on the town map but is not a map`); continue; }
+    G.world.loadMap(id, 1, 1, 'down');
+    const sc = G.RegionMapScene();
+    if (sc.sel !== ids.indexOf(id)) {
+      lost.push(`standing on ${id}, the map says '${G.REGION_NODES[sc.sel].label}'`);
+    }
+  }
+  for (const l of lost.slice(0, 10)) errors.push('YOUAREHERE: ' + l);
+  if (lost.length > 10) errors.push(`YOUAREHERE: …and ${lost.length - 10} more`);
+  if (!lost.length) console.log(`  town map: all ${ids.length} places report themselves correctly`);
+}
+
 // --- every field move can explain why it will not work ---
 // G.fieldBlockedText builds its refusals as FLAVOUR[kind] + a reason. FLY had
 // no FLAVOUR line, because it is the one HM with no obstacle to walk into —

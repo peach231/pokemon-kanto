@@ -1069,67 +1069,76 @@
   // Vermilion, east to Lavender, west to Celadon and Fuchsia, and out to
   // Cinnabar and the Plateau. Areas you have entered light up; the rest stay
   // dim. Node ids are the internal map ids, so visited[] lines up directly.
+  // The places the TOWN MAP draws, hoisted to module scope so the rest of
+  // the engine can ask whether somewhere is on it. loadMap uses that to
+  // remember the last place you stood that the map can actually point at,
+  // which is how "You are here" answers from inside a building.
+  //
+  // The vertical squash is applied ONCE, here, rather than every time the
+  // screen opens.
+  var NODES = [
+    // --- the south-western road ---
+    { id: 'pallet',         label: 'Pallet Town',      kind: 'town',   x: 38,  y: 132 },
+    { id: 'route1',         label: 'Route 1',          kind: 'route',  x: 38,  y: 116 },
+    { id: 'viridian',       label: 'Viridian City',    kind: 'gym', type: 'ground', x: 38, y: 100 },
+    { id: 'route22',        label: 'Route 22',         kind: 'route',  x: 18,  y: 100 },
+    { id: 'route2',         label: 'Route 2',          kind: 'route',  x: 38,  y: 84 },
+    { id: 'viridianforest', label: 'Viridian Forest',  kind: 'forest', x: 38,  y: 70 },
+    { id: 'pewter',         label: 'Pewter City',      kind: 'gym', type: 'rock', x: 38, y: 54 },
+    // --- east across the mountain ---
+    { id: 'route3',         label: 'Route 3',          kind: 'route',  x: 58,  y: 48 },
+    { id: 'mtmoon1f',       label: 'Mt. Moon',         kind: 'cave',   x: 78,  y: 46 },
+    { id: 'route4',         label: 'Route 4',          kind: 'route',  x: 98,  y: 48 },
+    { id: 'cerulean',       label: 'Cerulean City',    kind: 'gym', type: 'water', x: 118, y: 48 },
+    { id: 'route24',        label: 'Route 24',         kind: 'route',  x: 118, y: 32 },
+    { id: 'route25',        label: 'Route 25',         kind: 'route',  x: 138, y: 24 },
+    // --- the central spine ---
+    { id: 'route5',         label: 'Route 5',          kind: 'route',  x: 118, y: 64 },
+    { id: 'saffron',        label: 'Saffron City',     kind: 'gym', type: 'psychic', x: 118, y: 80 },
+    { id: 'route6',         label: 'Route 6',          kind: 'route',  x: 118, y: 96 },
+    { id: 'vermilion',      label: 'Vermilion City',   kind: 'gym', type: 'electric', x: 118, y: 112 },
+    // --- the eastern arm ---
+    { id: 'route9',         label: 'Route 9',          kind: 'route',  x: 142, y: 46 },
+    { id: 'rocktunnel1f',   label: 'Rock Tunnel',      kind: 'cave',   x: 164, y: 48 },
+    { id: 'route10',        label: 'Route 10',         kind: 'route',  x: 176, y: 60 },
+    { id: 'lavender',       label: 'Lavender Town',    kind: 'town',   x: 176, y: 78 },
+    { id: 'route8',         label: 'Route 8',          kind: 'route',  x: 148, y: 80 },
+    { id: 'route11',        label: 'Route 11',         kind: 'route',  x: 144, y: 112 },
+    // --- the west ---
+    { id: 'route7',         label: 'Route 7',          kind: 'route',  x: 100, y: 80 },
+    { id: 'celadon',        label: 'Celadon City',     kind: 'gym', type: 'grass', x: 82, y: 80 },
+    { id: 'route16',        label: 'Route 16',         kind: 'route',  x: 60,  y: 80 },
+    { id: 'route17',        label: 'Cycling Road',     kind: 'route',  x: 60,  y: 108 },
+    { id: 'route18',        label: 'Route 18',         kind: 'route',  x: 82,  y: 132 },
+    // --- the south ---
+    { id: 'route12',        label: 'Route 12',         kind: 'route',  x: 176, y: 96 },
+    { id: 'route13',        label: 'Route 13',         kind: 'route',  x: 172, y: 116 },
+    { id: 'route14',        label: 'Route 14',         kind: 'route',  x: 158, y: 128 },
+    { id: 'route15',        label: 'Route 15',         kind: 'route',  x: 140, y: 136 },
+    { id: 'fuchsia',        label: 'Fuchsia City',     kind: 'gym', type: 'poison', x: 120, y: 136 },
+    { id: 'safarizonecenter', label: 'Safari Zone',    kind: 'forest', x: 120, y: 120 },
+    // --- the sea and the island ---
+    { id: 'route19',        label: 'Route 19',         kind: 'route',  x: 120, y: 152 },
+    { id: 'route20',        label: 'Route 20',         kind: 'route',  x: 96,  y: 152 },
+    { id: 'seafoam1f',      label: 'Seafoam Islands',  kind: 'cave',   x: 62,  y: 150 },
+    { id: 'cinnabar',       label: 'Cinnabar Island',  kind: 'gym', type: 'fire', x: 38, y: 148 },
+    { id: 'route21',        label: 'Route 21',         kind: 'route',  x: 38,  y: 140 },
+    // --- the end of the road ---
+    { id: 'route23',        label: 'Route 23',         kind: 'route',  x: 18,  y: 80 },
+    { id: 'victoryroad1f',  label: 'Victory Road',     kind: 'cave',   x: 18,  y: 62 },
+    { id: 'indigo',         label: 'Indigo Plateau',   kind: 'league', x: 18,  y: 44 }
+  ];
+  // The footer panel owns the bottom 28 pixels, so the landmass has to live
+  // above it. These coordinates were laid out against a full-height screen
+  // and put CINNABAR and the SEAFOAM ISLANDS underneath the caption box —
+  // squeezing them here keeps the geography honest and the whole region
+  // visible at once.
+  for (var sq = 0; sq < NODES.length; sq++) {
+    NODES[sq].y = Math.round(NODES[sq].y * 0.74 + 12);
+  }
+  G.REGION_NODES = NODES;
+
   G.RegionMapScene = function () {
-    var NODES = [
-      // --- the south-western road ---
-      { id: 'pallet',         label: 'Pallet Town',      kind: 'town',   x: 38,  y: 132 },
-      { id: 'route1',         label: 'Route 1',          kind: 'route',  x: 38,  y: 116 },
-      { id: 'viridian',       label: 'Viridian City',    kind: 'gym', type: 'ground', x: 38, y: 100 },
-      { id: 'route22',        label: 'Route 22',         kind: 'route',  x: 18,  y: 100 },
-      { id: 'route2',         label: 'Route 2',          kind: 'route',  x: 38,  y: 84 },
-      { id: 'viridianforest', label: 'Viridian Forest',  kind: 'forest', x: 38,  y: 70 },
-      { id: 'pewter',         label: 'Pewter City',      kind: 'gym', type: 'rock', x: 38, y: 54 },
-      // --- east across the mountain ---
-      { id: 'route3',         label: 'Route 3',          kind: 'route',  x: 58,  y: 48 },
-      { id: 'mtmoon1f',       label: 'Mt. Moon',         kind: 'cave',   x: 78,  y: 46 },
-      { id: 'route4',         label: 'Route 4',          kind: 'route',  x: 98,  y: 48 },
-      { id: 'cerulean',       label: 'Cerulean City',    kind: 'gym', type: 'water', x: 118, y: 48 },
-      { id: 'route24',        label: 'Route 24',         kind: 'route',  x: 118, y: 32 },
-      { id: 'route25',        label: 'Route 25',         kind: 'route',  x: 138, y: 24 },
-      // --- the central spine ---
-      { id: 'route5',         label: 'Route 5',          kind: 'route',  x: 118, y: 64 },
-      { id: 'saffron',        label: 'Saffron City',     kind: 'gym', type: 'psychic', x: 118, y: 80 },
-      { id: 'route6',         label: 'Route 6',          kind: 'route',  x: 118, y: 96 },
-      { id: 'vermilion',      label: 'Vermilion City',   kind: 'gym', type: 'electric', x: 118, y: 112 },
-      // --- the eastern arm ---
-      { id: 'route9',         label: 'Route 9',          kind: 'route',  x: 142, y: 46 },
-      { id: 'rocktunnel1f',   label: 'Rock Tunnel',      kind: 'cave',   x: 164, y: 48 },
-      { id: 'route10',        label: 'Route 10',         kind: 'route',  x: 176, y: 60 },
-      { id: 'lavender',       label: 'Lavender Town',    kind: 'town',   x: 176, y: 78 },
-      { id: 'route8',         label: 'Route 8',          kind: 'route',  x: 148, y: 80 },
-      { id: 'route11',        label: 'Route 11',         kind: 'route',  x: 144, y: 112 },
-      // --- the west ---
-      { id: 'route7',         label: 'Route 7',          kind: 'route',  x: 100, y: 80 },
-      { id: 'celadon',        label: 'Celadon City',     kind: 'gym', type: 'grass', x: 82, y: 80 },
-      { id: 'route16',        label: 'Route 16',         kind: 'route',  x: 60,  y: 80 },
-      { id: 'route17',        label: 'Cycling Road',     kind: 'route',  x: 60,  y: 108 },
-      { id: 'route18',        label: 'Route 18',         kind: 'route',  x: 82,  y: 132 },
-      // --- the south ---
-      { id: 'route12',        label: 'Route 12',         kind: 'route',  x: 176, y: 96 },
-      { id: 'route13',        label: 'Route 13',         kind: 'route',  x: 172, y: 116 },
-      { id: 'route14',        label: 'Route 14',         kind: 'route',  x: 158, y: 128 },
-      { id: 'route15',        label: 'Route 15',         kind: 'route',  x: 140, y: 136 },
-      { id: 'fuchsia',        label: 'Fuchsia City',     kind: 'gym', type: 'poison', x: 120, y: 136 },
-      { id: 'safarizonecenter', label: 'Safari Zone',    kind: 'forest', x: 120, y: 120 },
-      // --- the sea and the island ---
-      { id: 'route19',        label: 'Route 19',         kind: 'route',  x: 120, y: 152 },
-      { id: 'route20',        label: 'Route 20',         kind: 'route',  x: 96,  y: 152 },
-      { id: 'seafoam1f',      label: 'Seafoam Islands',  kind: 'cave',   x: 62,  y: 150 },
-      { id: 'cinnabar',       label: 'Cinnabar Island',  kind: 'gym', type: 'fire', x: 38, y: 148 },
-      { id: 'route21',        label: 'Route 21',         kind: 'route',  x: 38,  y: 140 },
-      // --- the end of the road ---
-      { id: 'route23',        label: 'Route 23',         kind: 'route',  x: 18,  y: 80 },
-      { id: 'victoryroad1f',  label: 'Victory Road',     kind: 'cave',   x: 18,  y: 62 },
-      { id: 'indigo',         label: 'Indigo Plateau',   kind: 'league', x: 18,  y: 44 }
-    ];
-    // The footer panel owns the bottom 28 pixels, so the landmass has to live
-    // above it. These coordinates were laid out against a full-height screen
-    // and put CINNABAR and the SEAFOAM ISLANDS underneath the caption box —
-    // squeezing them here keeps the geography honest and the whole region
-    // visible at once.
-    for (var sq = 0; sq < NODES.length; sq++) {
-      NODES[sq].y = Math.round(NODES[sq].y * 0.74 + 12);
-    }
 
     // Which places actually connect to which. Kanto is a loop with two spurs
     // and an island chain, and the shape of that loop is the single most
@@ -1162,11 +1171,38 @@
 
     var visited = G.player.visited || {};
     function isSeen(id) { return !!visited[id]; }
-    var mid = (G.world && G.world.mapId) || '';
-    var cur = -1;
-    for (var i = 0; i < NODES.length; i++) {
-      if (NODES[i].id === mid || mid.indexOf(NODES[i].id) !== -1) { cur = i; break; }
+    // Where "You are here" goes.
+    //
+    // This used to be a SUBSTRING test taking the first hit in array order,
+    // which is fine for pewtercentre -> pewter and catastrophic for anything
+    // numbered: 'route1' is a substring of 'route11', so every route from 10
+    // upward reported itself as ROUTE 1, and 20 through 25 as ROUTE 2. Sixteen
+    // maps told you that you were somewhere else entirely.
+    //
+    // Exact match first. Then a prefix, but only where the next character is
+    // not a digit — so an interior still resolves to its town and ROUTE 11
+    // stops being ROUTE 1. Longest prefix wins, so a town whose name contains
+    // another cannot steal it.
+    function nodeFor(id) {
+      if (!id) return -1;
+      var i;
+      for (i = 0; i < NODES.length; i++) if (NODES[i].id === id) return i;
+      var best = -1, bestLen = 0;
+      for (i = 0; i < NODES.length; i++) {
+        var nid = NODES[i].id;
+        if (id.length <= nid.length || id.indexOf(nid) !== 0) continue;
+        var next = id.charAt(nid.length);
+        if (next >= '0' && next <= '9') continue;     // route11 is NOT route1
+        if (nid.length > bestLen) { best = i; bestLen = nid.length; }
+      }
+      return best;
     }
+    var mid = (G.world && G.world.mapId) || '';
+    var cur = nodeFor(mid);
+    // Inside somewhere the map does not draw — OAK's lab, the GAME CORNER, a
+    // Rocket basement — fall back to the last piece of open country you were
+    // standing in, which is the honest answer to "where am I".
+    if (cur < 0) cur = nodeFor(G.world && G.world.lastOutdoorId);
     var seenCount = 0;
     for (var v = 0; v < NODES.length; v++) if (isSeen(NODES[v].id)) seenCount++;
 
