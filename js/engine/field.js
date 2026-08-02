@@ -219,8 +219,20 @@
     if (use.blocked) return false;
     G.audio.sfx('confirm');
     G.popToOverworld();
-    G.world.loadMap(pt.map, pt.x, pt.y, 'down');
-    G.pushScene(G.Textbox(G.monName(use.mon) + ' flew you to ' + pt.label + '.'));
+    // The map swap happens at the top of the arc, behind the sky, so the world
+    // changes while there is nothing on screen but weather. Without the
+    // animation it is still just a load — the scene is the only thing that
+    // makes FLY feel like crossing a region rather than a menu action.
+    if (G.FlyScene) {
+      G.pushScene(G.FlyScene(use.mon, pt.label, function () {
+        G.world.loadMap(pt.map, pt.x, pt.y, 'down');
+      }, function () {
+        G.pushScene(G.Textbox(G.monName(use.mon) + ' flew you to ' + pt.label + '.'));
+      }));
+    } else {
+      G.world.loadMap(pt.map, pt.x, pt.y, 'down');
+      G.pushScene(G.Textbox(G.monName(use.mon) + ' flew you to ' + pt.label + '.'));
+    }
     return true;
   };
 

@@ -108,6 +108,15 @@
         ts.update();
         G.input.justPressed = realJP;
       }
+    } else if (hashIs('fly')) {
+      // #fly, or #fly&f=40 to hold a single frame — the sequence is pure
+      // drawing, so being able to stop it anywhere is how it gets tuned.
+      G.world.loadMap('pallet', 5, 6, 'down');
+      G.pushScene(G.overworldScene);
+      var flier = G.makeMon('pidgeot', 40);
+      G.pushScene(G.FlyScene(flier, 'CERULEAN CITY', function () {}, function () {}));
+      var hold = parseInt((location.hash.match(/f=(\d+)/) || [])[1] || '0', 10);
+      for (var fi = 0; fi < hold; fi++) G.topScene().update();
     } else if (hashIs('slots')) {
       // #slots — the save-file picker, with two files invented so the layout
       // can be looked at without playing to it.
