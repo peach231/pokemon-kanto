@@ -1,0 +1,626 @@
+{
+ "misc/birth_island_stone": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "misc/clipboard": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/cut_tree": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/fossil": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/gym_sign": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "misc/item_ball": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/lapras_doll": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "misc/old_amber": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/pokedex": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/rock_smash_rock": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/ruby": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/sapphire": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/seagallop": {
+  "frameW": 32,
+  "frameH": 128
+ },
+ "misc/sign": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/ss_anne": {
+  "frameW": 64,
+  "frameH": 128
+ },
+ "misc/strength_boulder": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "misc/surf_blob": {
+  "unused": true
+ },
+ "misc/town_map": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "misc/wooden_sign": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "people/agatha": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/balding_man": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/beauty": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/biker": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "people/bill": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/black_belt": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/blaine": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/blue": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/boy": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/brock": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/bruno": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/bug_catcher": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/cable_club_receptionist": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/cameraman": {
+  "unused": true
+ },
+ "people/camper": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/captain": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/celio": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/channeler": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/chef": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/clerk": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/cooltrainer_f": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/cooltrainer_m": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/crush_girl": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/daisy": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/erika": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/fat_man": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/fisher": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/gba_kid": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/gentleman": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/giovanni": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/green_bike": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "people/green_fish": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "people/green_item": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/green_normal": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/green_surf": {
+  "unused": true
+ },
+ "people/green_surf_run": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/green_vs_seeker_bike": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "people/gym_guy": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/hiker": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/koga": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/lance": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/lass": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/little_boy": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "people/little_girl": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "people/lorelei": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/lt_surge": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/man": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/mg_deliveryman": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/misty": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/mom": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/mr_fuji": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/nurse": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/old_man_1": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/old_man_2": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/old_man_lying_down": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "people/old_woman": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/picnicker": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/poke_maniac": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/policeman": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/prof_oak": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/red_bike": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "people/red_fish": {
+  "ambiguous": [
+   "16x32",
+   "32x32"
+  ]
+ },
+ "people/red_item": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/red_normal": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/red_surf": {
+  "unused": true
+ },
+ "people/red_surf_run": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/red_vs_seeker_bike": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "people/rich_boy": {
+  "unused": true
+ },
+ "people/rocker": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/rocket_f": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/rocket_m": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/rs_brendan": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/rs_may": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/sabrina": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/sailor": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/scientist": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/sitting_boy": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/swimmer_f_land": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/swimmer_f_water": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/swimmer_m_land": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/swimmer_m_water": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/teachy_tv_host": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/trainer_tower_dude": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/tuber_f": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "people/tuber_m_land": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "people/tuber_m_water": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "people/union_room_receptionist": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/unused_male_receptionist": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/unused_man": {
+  "unused": true
+ },
+ "people/unused_woman": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/woman_1": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/woman_2": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/woman_3": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/worker_f": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/worker_m": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "people/youngster": {
+  "frameW": 16,
+  "frameH": 32
+ },
+ "pokemon/articuno": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/celebi": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/chansey": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/clefairy": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/cubone": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/deoxys_a": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/deoxys_d": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/deoxys_n": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/doduo": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/entei": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/fearow": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/ho_oh": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/jigglypuff": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/kabuto": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/kangaskhan": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/lapras": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/lugia": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/machoke": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/machop": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/meowth": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/mew": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/mewtwo": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/moltres": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/nidoran_f": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/nidoran_m": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/nidorino": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/omanyte": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/pidgeot": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/pidgey": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/pikachu": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/poliwrath": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/psyduck": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/raikou": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/seel": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/slowbro": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/slowpoke": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/snorlax": {
+  "frameW": 32,
+  "frameH": 32
+ },
+ "pokemon/spearow": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/suicune": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/voltorb": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/wigglytuff": {
+  "frameW": 16,
+  "frameH": 16
+ },
+ "pokemon/zapdos": {
+  "frameW": 32,
+  "frameH": 32
+ }
+}

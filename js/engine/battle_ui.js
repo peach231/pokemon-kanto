@@ -1350,9 +1350,18 @@
             msg = 'Huh? ' + G.monName(mon) + ' stopped evolving!';
           } else {
             var oldName = G.monName(mon);
-            G.evolveMon(mon);
-            G.audio.sfx('levelUp');
-            msg = 'Congratulations! Your ' + oldName + ' evolved into ' + G.SPECIES[mon.sp].name + '!';
+            // Pass the TARGET the caller already worked out. Without it
+            // evolveMon fell back to the LEVEL-UP rule, which is null for every
+            // stone and every trade line — so a Moon Stone on NIDORINO played
+            // the whole animation, changed nothing, and announced that NIDORINO
+            // had evolved into NIDORINO.
+            if (!G.evolveMon(mon, cur().to)) {
+              cancelled = true;                     // draw the unchanged form
+              msg = 'Huh? ' + oldName + ' stopped evolving!';
+            } else {
+              G.audio.sfx('levelUp');
+              msg = 'Congratulations! Your ' + oldName + ' evolved into ' + G.SPECIES[mon.sp].name + '!';
+            }
           }
           G.pushScene(G.Textbox(msg, {
             onDone: function () {

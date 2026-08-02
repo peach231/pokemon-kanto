@@ -1151,6 +1151,106 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     if (!stuck.length) console.log('  placement: every drawn person stands on a tile a person could stand on');
   }
 
+  // Every evolution the data declares actually happens when it is triggered.
+  //
+  // G.evolveMon takes the target as an optional second argument and works out a
+  // LEVEL-UP evolution when it is left off. G.EvolutionScene left it off — so a
+  // MOON STONE on NIDORINO consumed the stone, played the full animation, and
+  // then asked evolveMon for the level-up evolution of a species that has none.
+  // It returned nothing, the mon was untouched, and the game announced that
+  // NIDORINO had evolved into NIDORINO. Every stone and every trade line in the
+  // game was dead the same way, and no test noticed because the mechanics
+  // underneath were fine — only the one call that used them was wrong.
+  {
+    const dud = [];
+    for (const sp in G.SPECIES) {
+      for (const e of (G.SPECIES[sp].evos || [])) {
+        const level = e.how === 'level' ? e.level : 20;
+        const mon = G.makeMon(sp, level);
+        const target = e.how === 'stone' ? G.stoneEvolution(mon, e.item)
+                     : e.how === 'level' ? G.evolutionDue(mon)
+                     : e.into;
+        if (target !== e.into) {
+          dud.push(`${sp} -> ${e.into} (${e.how}) is not what the lookup returns (${target})`);
+          continue;
+        }
+        if (!G.evolveMon(mon, target) || mon.sp !== e.into) {
+          dud.push(`${sp} -> ${e.into} (${e.how}) triggers but leaves the mon as ${mon.sp}`);
+        }
+      }
+    }
+    // ...and the scene that plays the animation passes that target along. This
+    // is the actual bug: the mechanics above all worked in isolation.
+    const scene = fs.readFileSync(path.join(ROOT, 'js', 'engine', 'battle_ui.js'), 'utf8');
+    if (!/G\.evolveMon\(\s*mon\s*,/.test(scene)) {
+      dud.push('EvolutionScene calls evolveMon without a target — stone and trade evolutions will play the animation and change nothing');
+    }
+    for (const d of dud) errors.push('EVOLVE: ' + d);
+    if (!dud.length) {
+      const n = Object.values(G.SPECIES).reduce((a, s) => a + (s.evos || []).length, 0);
+      console.log(`  evolution: all ${n} declared evolutions actually change the species when triggered`);
+    }
+  }
+
+  // Every sheet is sliced at the frame size FireRed actually drew it at.
+  //
+  // The loader took 16x32 for granted. Most object-event sheets are, so this
+  // held for four dozen classes and then quietly failed for the BIKER, whose
+  // frames are 32 wide because the rider comes with a motorcycle. Cutting that
+  // sheet on the 16px grid yields exactly the LEFT HALF of a person — and 320
+  // divides by 16 as cleanly as it divides by 32, so nothing anywhere could
+  // tell. Three trainer classes rode that sheet; all three were half a man.
+  //
+  // Ground truth is pokefirered's own frame tables, cached by
+  // tools/gen_ow_frames.js. This fails in BOTH directions: a sheet sliced at
+  // the wrong width, and a `wide` override that no longer matches the art.
+  {
+    const FRAMES = path.join(__dirname, 'frlg_overworld_frames.json');
+    if (!fs.existsSync(FRAMES)) {
+      errors.push('SHEETFRAME: tools/frlg_overworld_frames.json is missing — run `node tools/gen_ow_frames.js`');
+    } else {
+      const real = JSON.parse(fs.readFileSync(FRAMES, 'utf8'));
+      const cfg = G.OVERWORLD_CFG, wide = cfg.wide || {};
+      const bad = [];
+      const unverified = [];
+      const used = new Set(Object.values(cfg.sheets));
+      for (const name in cfg.sheets) {
+        const p = cfg.sheets[name];
+        const truth = real[p];
+        if (!truth) { bad.push(`'${name}' points at ${p}, which is not a pokefirered object-event pic at all`); continue; }
+        // FireRed ships a few pics no object event ever uses (RICH_BOY), so
+        // there is no frame table to check them against. Say so rather than
+        // inventing a size and calling it verified.
+        if (truth.unused) { unverified.push(name); continue; }
+        if (truth.ambiguous) {
+          bad.push(`'${name}' uses ${p}, which FireRed draws at ${truth.ambiguous.join(' AND ')} — it cannot be sliced one way`);
+          continue;
+        }
+        const cut = (wide[p] || cfg).frameW;
+        if (cut !== truth.frameW) {
+          bad.push(`'${name}' (${p}) is sliced at ${cut}px but the art is ${truth.frameW}x${truth.frameH}`
+                   + ` — every frame would be ${cut < truth.frameW ? 'part of' : 'more than'} one`);
+        }
+      }
+      for (const p in wide) {
+        if (!used.has(p)) bad.push(`OVERWORLD_CFG.wide declares ${p}, which no sprite uses`);
+        else if (wide[p].frameW === cfg.frameW) {
+          bad.push(`OVERWORLD_CFG.wide declares ${p} at the default ${cfg.frameW}px — the entry does nothing`);
+        }
+      }
+      for (const b of bad) errors.push('SHEETFRAME: ' + b);
+      if (!bad.length) {
+        const n = Object.keys(cfg.sheets).length - unverified.length;
+        const w = Object.keys(wide).length;
+        console.log(`  sheet frames: ${n} overworld sheets sliced at FireRed's own frame size, ${w} of them wider than 16px`
+          + (unverified.length
+              ? ` — ${unverified.join(', ')} draw${unverified.length === 1 ? 's' : ''} art FireRed itself never placed, so there is no table to check ${unverified.length === 1 ? 'it' : 'them'} against`
+              : ''));
+      }
+    }
+  }
+
+
   const dark = Object.keys(G.MAPS).filter(id => !seenMaps.has(id));
   if (dark.length) {
     errors.push(`PROGRESSION: ${dark.length} map(s) can never be reached on an honest playthrough — ${dark.slice(0, 10).join(', ')}${dark.length > 10 ? ' …' : ''}`);

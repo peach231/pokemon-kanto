@@ -29,7 +29,7 @@
     'X': 'cuttree', 'O': 'boulder', 'l': 'ledge', '*': 'rock', '#': 'cliff',
     'y': 'deco_flowerY', 'o': 'deco_pebble', 'Q': 'deco_bush',
     'V': 'deco_stump', 'J': 'deco_fern',
-    'F': 'fence', 'S': 'sign', 'Z': 'truck', 'K': 'truck',
+    'F': 'fence', 'S': 'sign', 'Z': 'truck',
     // house — terracotta roof
     '1': 'roof_tl', '2': 'roof_tm', '3': 'roof_tr',
     '4': 'roof_bl', '5': 'roof_bm', '6': 'roof_br', '0': 'roofx',
@@ -1661,7 +1661,7 @@
       'tu........pp.[~~~~tu',
       'vx........pp.[~~~~vx',
       'tu........pp.[~~~~tu',
-      'vx........OO.[~~~~vx',
+      'vx........pp.[~~~~vx',   // SNORLAX sleeps here; the actors are the wall
       'tu........pp.[~~~~tu',
       'vx........pp.[~~~~vx',
       'tu..ggggg.pp.[~~~~tu',
@@ -1698,8 +1698,10 @@
       { x: 6, y: 7, text: 'ROUTE 12 — SILENCE BRIDGE. Fishing from the rail is permitted.' }
     ],
     npcs: [
-      { x: 10, y: 11, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax12', event: 'snorlaxWake' },
-      { x: 11, y: 11, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax12', event: 'snorlaxWake' },
+      // One SNORLAX, two tiles: its frame is 32px, so the left actor draws the
+      // whole animal and the right one exists only to be talked to.
+      { x: 10, y: 11, sprite: 'snorlax', ox: 8, obj: true, dir: 'down', unlessFlag: 'snorlax12', event: 'snorlaxWake' },
+      { x: 11, y: 11, obj: true, dir: 'down', unlessFlag: 'snorlax12', event: 'snorlaxWake' },
       { x: 9, y: 10, sprite: 'oldman', dir: 'right', unlessFlag: 'snorlax12',
         dialog: ['That is a SNORLAX. It has been asleep across this road since before I was born.',
                  'Shouting does nothing. Shoving does nothing. It just breathes.',
@@ -2148,8 +2150,8 @@
       { x: 8, y: 8, text: 'CYCLING ROAD — through the gate. BICYCLES ONLY. No pedestrians.' }
     ],
     npcs: [
-      { x: 10, y: 6, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax16', event: 'snorlaxWake' },
-      { x: 11, y: 6, sprite: 'snorlax', obj: true, dir: 'down', unlessFlag: 'snorlax16', event: 'snorlaxWake' },
+      { x: 10, y: 6, sprite: 'snorlax', ox: 8, obj: true, dir: 'down', unlessFlag: 'snorlax16', event: 'snorlaxWake' },
+      { x: 11, y: 6, obj: true, dir: 'down', unlessFlag: 'snorlax16', event: 'snorlaxWake' },
       { x: 13, y: 7, sprite: 'oldwoman', dir: 'left', unlessFlag: 'snorlax16',
         dialog: ['Another one. There are two in KANTO and both of them chose a road.',
                  'The council voted to build around it. Twice.'] }

@@ -1633,8 +1633,13 @@
       var img;
       if (a.obj) {
         img = G.IMG[a.sprite];
-        if (img) ctx.drawImage(img, sx, sy);
-        return;
+        if (img) { ctx.drawImage(img, sx, sy); return; }
+        // No baked art under that name — fall through to the walk-sheet path
+        // below. ARTICUNO, ZAPDOS, MOLTRES and MEWTWO each had a real FireRed
+        // sheet configured, fetched and sliced this whole time, into
+        // ch_<name>_* keys that this branch never looked at. All four were an
+        // invisible tile you walked into and got a battle out of.
+        if (!G.IMG['ch_' + a.sprite + '_d0']) return;
       }
 
       // A creature follower has no walk sheet — it uses its battler art,
@@ -1706,11 +1711,20 @@
         return;
       }
 
-      var yoff = -8; // 8px head overhang
+      // The standard slot is 16x24: 8px of head overhang above the tile. A
+      // sheet with bigger frames — FireRed draws the BIKER 32px wide because
+      // of the motorcycle — keeps its feet on the same floor line and straddles
+      // the tile evenly instead of hanging off to the right.
+      var yoff = img ? 16 - img.height : -8;
+      var xoff = img ? Math.round((16 - img.width) / 2) : 0;
+      // An actor that occupies more than the tile it is pinned to nudges itself
+      // into place: SNORLAX sleeps across two tiles, so centring its 32px frame
+      // on the left one left the right-hand tile showing through.
+      if (a.def && a.def.ox) xoff += a.def.ox;
       if (a === w.player && a.vehicle === 'boat') {
         var bob = Math.round(Math.sin(G.frame * 0.22));
         if (G.IMG.fx_boat) ctx.drawImage(G.IMG.fx_boat, sx, sy + bob);
-        yoff = -8 + bob; // sit in the boat
+        yoff += bob; // sit in the boat
       }
       // water reflection: when water sits directly south, mirror the actor down
       // into it — vertically flipped with feet at the shoreline, translucent so
@@ -1722,11 +1736,11 @@
         ctx.globalAlpha = 0.4;
         ctx.translate(0, 2 * (sy + 16));
         ctx.scale(1, -1);
-        ctx.drawImage(img, sx + sway, sy + yoff);
+        ctx.drawImage(img, sx + xoff + sway, sy + yoff);
         ctx.restore();
       }
 
-      if (img) ctx.drawImage(img, sx, sy + yoff);
+      if (img) ctx.drawImage(img, sx + xoff, sy + yoff);
 
       // ledge-hop landing dust: a little tan puff kicked up at the touch-down
       // tile over the last few frames of the hop (the Emerald hop-land beat).

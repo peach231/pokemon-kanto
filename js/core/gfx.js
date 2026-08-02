@@ -445,7 +445,10 @@
       // three idle frames (48x32, not 144x32) because they never walk. Fill
       // their stride slots from the matching idle so they render completely
       // instead of falling back to unrelated baked art mid-animation.
-      var STAND_IN = { d1: 'd0', d2: 'd0', u1: 'u0', u2: 'u0', s1: 's0', s2: 's0' };
+      // u0/s0 come first: the single-frame sheets (a legendary that only ever
+      // faces you) have nothing but d0, and without a facing to fall back on
+      // they render as nothing at all the moment anything asks for 'up'.
+      var STAND_IN = { u0: 'd0', s0: 'd0', d1: 'd0', d2: 'd0', u1: 'u0', u2: 'u0', s1: 's0', s2: 's0' };
       Object.keys(STAND_IN).forEach(function (k) {
         if (!G.IMG[base + k] && G.IMG[base + STAND_IN[k]]) G.IMG[base + k] = G.IMG[base + STAND_IN[k]];
       });
@@ -472,7 +475,8 @@
       if (!cfg || !cfg.remoteBase || !cfg.sheets) return;
       var self = this;
       Object.keys(cfg.sheets).forEach(function (sprName) {
-        self.loadWalkSheet(cfg.sheets[sprName], sprName, null);
+        var path = cfg.sheets[sprName];
+        self.loadWalkSheet(path, sprName, null, null, cfg.wide && cfg.wide[path]);
       });
     },
 

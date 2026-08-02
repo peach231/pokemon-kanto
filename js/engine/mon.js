@@ -254,10 +254,12 @@
     return null;
   };
 
-  // `into` is optional — level evolutions can infer it.
+  // `into` is optional — level evolutions can infer it. Returns true only if
+  // the species actually changed, so a caller can tell a real evolution from a
+  // no-op instead of printing "X evolved into X!" over an unchanged party.
   G.evolveMon = function (mon, into) {
     var to = into || G.evolutionDue(mon);
-    if (!to || !G.SPECIES[to]) return;
+    if (!to || !G.SPECIES[to] || to === mon.sp) return false;
     var hpLost = G.monStats(mon).hp - mon.curHp;
     mon.sp = to;
     mon.curHp = Math.max(1, G.monStats(mon).hp - hpLost);
@@ -273,5 +275,6 @@
       G.player.dexSeen[to] = 1;
       G.player.dexCaught[to] = 1;
     }
+    return true;
   };
 })();

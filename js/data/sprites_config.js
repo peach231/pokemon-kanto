@@ -285,18 +285,42 @@
       // --- POKéMON that stand on the overworld ---
       // A legendary you can SEE from across the room, before it has a health
       // bar, is worth more than any amount of text telling you it is rare.
+      // These are addressed by name from maps as `sprite: 'articuno'`, and are
+      // the reason remoteBase points at pics/ rather than pics/people/.
+      //
+      // SNORLAX covers the two solid tiles it sleeps on in one 32px frame, so
+      // the second actor on each road carries no sprite — it is there to be
+      // talked to, not drawn twice.
       snorlax:    'pokemon/snorlax',
       articuno:   'pokemon/articuno',
       zapdos:     'pokemon/zapdos',
       moltres:    'pokemon/moltres',
-      mewtwo:     'pokemon/mewtwo',
-      mew:        'pokemon/mew',
-      voltorb:    'pokemon/voltorb',
-      kangaskhan: 'pokemon/kangaskhan',
-      seel:       'pokemon/seel'
+      mewtwo:     'pokemon/mewtwo'
     },
     frameW: 16, frameH: 32,       // source frame size on the sheet
     boxW: 16, boxH: 24,           // the engine's overworld slot
+
+    // ...except where it isn't. FireRed's own object_event_graphics_info.h
+    // gives the BIKER a .width of 32: the rider and the motorcycle are drawn
+    // wider than the tile they stand on. Slicing that sheet on the 16px grid
+    // hands back exactly the LEFT HALF of a person, which is what the Cycling
+    // Road and Rocket Hideout trainers had always been — three classes ride
+    // this one sheet (biker, cueball, burglar) and all three were half a man.
+    //
+    // Anything listed here must match the real PNG; the SHEETFRAME pass in
+    // tools/check.js reads the image headers and fails if a declaration and
+    // the artwork disagree in either direction.
+    wide: {
+      'people/biker':     { frameW: 32, boxW: 32, boxH: 32 },
+      // The three birds are drawn with their wings out, two tiles across, and
+      // SNORLAX is simply that big.
+      'pokemon/articuno': { frameW: 32, boxW: 32, boxH: 32 },
+      'pokemon/zapdos':   { frameW: 32, boxW: 32, boxH: 32 },
+      'pokemon/moltres':  { frameW: 32, boxW: 32, boxH: 32 },
+      'pokemon/snorlax':  { frameW: 32, boxW: 32, boxH: 32 }
+      // MEWTWO needs no entry: its sheet is a single 16x16 frame, which the
+      // default slice already reads correctly.
+    },
     crossOrigin: 'anonymous'
   };
 
