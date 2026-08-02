@@ -1,4 +1,13 @@
 {
+ "@surf": {
+  "d0": 0,
+  "d1": 1,
+  "u0": 2,
+  "u1": 3,
+  "s0": 4,
+  "s1": 5,
+  "note": "derived from the artwork, not from a frame table — see tools/gen_ow_frames.js"
+ },
  "misc/birth_island_stone": {
   "frameW": 32,
   "frameH": 32

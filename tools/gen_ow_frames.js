@@ -18,6 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const png = require('./png');
 
 const BASE = 'https://raw.githubusercontent.com/pret/pokefirered/master';
 const CACHE = path.join(__dirname, 'cache');
@@ -31,6 +32,66 @@ async function raw(rel) {
   fs.mkdirSync(CACHE, { recursive: true });
   fs.writeFileSync(file, text);
   return text;
+}
+
+async function rawBinary(rel) {
+  const file = path.join(CACHE, 'pokefirered__' + path.basename(rel));
+  if (fs.existsSync(file)) return file;
+  const res = await fetch(BASE + '/' + rel);
+  if (!res.ok) throw new Error(`fetch ${rel}: HTTP ${res.status}`);
+  fs.mkdirSync(CACHE, { recursive: true });
+  fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+  return file;
+}
+
+// Group a sheet's frames into facings from the pixels alone. Returns the engine
+// frame map, or { unreadable } with a reason rather than a guess.
+function surfLayout(file) {
+  const img = png.read(file);
+  const FW = 32;
+  const all = png.frames(img, FW);
+  // The rider frames are the big ones; the tail of the sheet is the float with
+  // nobody on it, which has far fewer pixels.
+  const busiest = Math.max(...all.map(f => f.count));
+  const rider = all.filter(f => f.count > busiest * 0.6);
+  if (rider.length < 6) return { unreadable: `only ${rider.length} frames carry a rider; expected 6` };
+
+  // Pair each frame with its closest match. Two poses of one facing look far
+  // more like each other than like any other facing.
+  const pairs = [];
+  const taken = new Set();
+  for (let a = 0; a < 6; a++) {
+    if (taken.has(a)) continue;
+    let best = -1, bestScore = -1;
+    for (let b = 0; b < 6; b++) {
+      if (b === a || taken.has(b)) continue;
+      const s = png.similarity(rider[a], rider[b], false);
+      if (s > bestScore) { bestScore = s; best = b; }
+    }
+    if (best < 0) return { unreadable: `frame ${a} has no partner` };
+    taken.add(a); taken.add(best);
+    pairs.push([a, best]);
+  }
+  if (pairs.length !== 3) return { unreadable: `frames grouped into ${pairs.length} facings, expected 3` };
+
+  // Front and back are near-mirror-symmetric; the side view is not. Exactly one
+  // pair must be the sideways one, and FireRed always orders south, north, west
+  // — so the symmetric pairs, in sheet order, are south then north.
+  const sideways = pairs.filter(([a]) => png.symmetry(rider[a]) < 0.6);
+  if (sideways.length !== 1) {
+    return { unreadable: `${sideways.length} of the three facings look sideways; expected exactly 1` };
+  }
+  const side = sideways[0];
+  const facing = pairs.filter(p => p !== side);
+  if (facing.length !== 2) return { unreadable: 'could not separate the two head-on facings' };
+
+  const [d, u] = facing;                                  // sheet order: south, north
+  return {
+    d0: d[0], d1: d[1],
+    u0: u[0], u1: u[1],
+    s0: side[0], s1: side[1],
+    note: 'derived from the artwork, not from a frame table — see tools/gen_ow_frames.js'
+  };
 }
 
 (async function main() {
@@ -77,6 +138,22 @@ async function raw(rel) {
     if (out[p]) continue;
     out[p] = { unused: true };
   }
+
+  // The SURF sheet's layout, read off the artwork.
+  //
+  // Every other sheet here is a walk cycle: three facings, then their strides.
+  // people/red_surf.png is not, and nothing in pokefirered says so, because
+  // nothing in pokefirered uses that file. Read it the ordinary way and 'north'
+  // lands on south's second pose while 'west' lands on north — which is exactly
+  // what shipped, and what it looked like: a rider facing north while sailing
+  // west.
+  //
+  // So it is derived instead of assumed. A front or back view is very nearly
+  // its own mirror image and a side view is not, which sorts the facings; each
+  // frame's closest match in the sheet is its own second pose, which pairs
+  // them; and FireRed orders facings south, north, west everywhere, which names
+  // them. If those three things ever stop agreeing, this refuses to guess.
+  out['@surf'] = surfLayout(await rawBinary('graphics/object_events/pics/people/red_surf.png'));
 
   const dest = path.join(__dirname, 'frlg_overworld_frames.json');
   const keys = Object.keys(out).sort();

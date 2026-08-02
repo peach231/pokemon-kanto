@@ -1921,31 +1921,74 @@ if (G.REGION_NODES && G.RegionMapScene) {
 // west and then an empty float: the rider spun on the spot while travelling in
 // a straight line.
 {
-  const KEYS = ['d0', 'd1', 'd2', 'u0', 'u1', 'u2', 's0', 's1', 's2'];
-  const saved = {};
-  for (const k of KEYS) {
-    for (const suffix of ['', '_flip']) {
+  const spun = [];
+  const declared = ((G.PLAYER_VEHICLE_CFG || {}).surf || {}).frames;
+  if (!declared) {
+    spun.push('the surf sheet declares no frame layout, so it is being read as an ordinary walk cycle');
+  } else {
+    // First and most important: does the declaration match the ARTWORK? Every
+    // other question here is about code, and code cannot tell you that frame 2
+    // is a picture of somebody facing north. tools/gen_ow_frames.js works that
+    // out from the pixels — symmetry sorts the side view from the head-on ones,
+    // similarity pairs each pose with its partner — and records it. Comparing
+    // the two is the only check that would have caught the sheet being read as
+    // an ordinary walk cycle, because a self-consistent wrong answer passes
+    // every test that only looks at the config.
+    const truthFile = path.join(__dirname, 'frlg_overworld_frames.json');
+    const truth = fs.existsSync(truthFile) ? (JSON.parse(fs.readFileSync(truthFile, 'utf8'))['@surf'] || null) : null;
+    if (!truth) spun.push('no derived surf layout to check against — run `node tools/gen_ow_frames.js`');
+    else if (truth.unreadable) spun.push(`the surf sheet could not be read from its pixels: ${truth.unreadable}`);
+    else {
+      for (const k of Object.keys(truth)) {
+        if (k === 'note') continue;
+        if (declared[k] !== truth[k]) {
+          spun.push(`'${k}' is declared as source frame ${declared[k]} but the artwork says ${truth[k]}`
+            + ' — that frame is a picture of a different facing');
+        }
+      }
+    }
+    // Which source frames belong to which facing, per the declaration.
+    const rowOf = k => k[0];                      // d / u / s
+    const allow = {};
+    for (const k in declared) (allow[rowOf(k)] = allow[rowOf(k)] || new Set()).add(declared[k]);
+    for (const row of ['d', 'u', 's']) {
+      if (!allow[row] || allow[row].size < 2) spun.push(`facing '${row}' has fewer than two poses declared — the bob will not play`);
+    }
+    const all = Object.values(declared);
+    if (new Set(all).size !== all.length) spun.push('two facings are declared to share a source frame');
+
+    // Substitute each engine frame with a marker carrying the SOURCE index it
+    // came from, filling the stand-ins exactly the way the slicer does, then
+    // ask the animation for every combination it can produce.
+    const STAND_IN = { d2: 'd0', u2: 'u0', s2: 's0' };
+    const src = Object.assign({}, declared);
+    for (const k in STAND_IN) if (src[k] === undefined && src[STAND_IN[k]] !== undefined) src[k] = src[STAND_IN[k]];
+    const saved = {};
+    for (const k in src) for (const suffix of ['', '_flip']) {
       const name = 'ch_playersurf_' + k + suffix;
       saved[name] = G.IMG[name];
-      G.IMG[name] = { tag: k + suffix };     // each frame distinguishable
+      G.IMG[name] = { src: src[k] };
     }
-  }
-  const p = G.world.player, was = { v: p.vehicle, d: p.dir, m: p.moving, s: p.stride, st: p.step };
-  p.vehicle = 'swim';
-  const spun = [];
-  for (const dir of ['down', 'up', 'left', 'right']) {
-    const seen = new Set();
-    for (const moving of [false, true]) for (const stride of [false, true]) for (const step of [0, 4, 8, 12]) {
-      p.dir = dir; p.moving = moving; p.stride = stride; p.step = step; p.hop = 0; p.hopTotal = 1;
-      const img = G.overworldScene._actorImage(p);
-      seen.add(img ? img.tag : 'nothing');
+    const p = G.world.player, was = { v: p.vehicle, d: p.dir, m: p.moving, s: p.stride, st: p.step };
+    p.vehicle = 'swim';
+    for (const [dir, row] of [['down', 'd'], ['up', 'u'], ['left', 's'], ['right', 's']]) {
+      const used = new Set();
+      for (const moving of [false, true]) for (const stride of [false, true]) for (const step of [0, 4, 8, 12]) {
+        p.dir = dir; p.moving = moving; p.stride = stride; p.step = step; p.hop = 0; p.hopTotal = 1;
+        const img = G.overworldScene._actorImage(p);
+        used.add(img ? img.src : 'nothing');
+      }
+      const stray = [...used].filter(i => !allow[row] || !allow[row].has(i));
+      if (stray.length) {
+        spun.push(`heading ${dir} draws source frame(s) ${stray.join(', ')}, which belong to another facing`
+          + ` — allowed here are ${[...allow[row]].join(', ')}`);
+      }
     }
-    if (seen.size > 1) spun.push(`facing ${dir} cycles through ${[...seen].join(', ')} — the rider turns without turning`);
+    p.vehicle = was.v; p.dir = was.d; p.moving = was.m; p.stride = was.s; p.step = was.st;
+    for (const name in saved) { if (saved[name] === undefined) delete G.IMG[name]; else G.IMG[name] = saved[name]; }
   }
-  p.vehicle = was.v; p.dir = was.d; p.moving = was.m; p.stride = was.s; p.step = was.st;
-  for (const name in saved) { if (saved[name] === undefined) delete G.IMG[name]; else G.IMG[name] = saved[name]; }
   for (const s of spun) errors.push('SURFPOSE: ' + s);
-  if (!spun.length) console.log('  surfing: one held pose per facing, so the rider never turns on the spot');
+  if (!spun.length) console.log('  surfing: every facing draws only its own frames, so the rider never turns on the spot');
 }
 
 // --- ...and every field move actually WORKS when it is allowed to ---

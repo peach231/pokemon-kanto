@@ -1807,24 +1807,12 @@
       // sheet has not finished streaming, so a slow connection shows the
       // character walking on water rather than showing nothing at all.
       if (a === G.world.player) {
-        if (a.vehicle === 'swim' && G.IMG.ch_playersurf_d0) {
-          // SURFING HAS NO WALK CYCLE. FireRed's own frame table proves it —
-          // all nine of its slots point at the same three pictures, one per
-          // facing — and this sheet is laid out to match: frames 0-2 are the
-          // three facings, 3-5 are their second poses in facing order, and 6-8
-          // are the float with nobody on it. Run the normal walking animation
-          // over that and heading SOUTH plays south, south', then NORTH', and
-          // heading WEST plays west and then an empty float. The rider spun on
-          // the spot and occasionally vanished, without ever turning.
-          //
-          // So: one pose per direction, held. The bob in the draw code is what
-          // keeps it alive.
-          return this._resolve('ch_playersurf_',
-            a.dir === 'right' ? 's0_flipped' :
-            a.dir === 'left'  ? 's0' :
-            a.dir === 'up'    ? 'u0' : 'd0');
-        }
-        if (G.player && G.player.onBike && G.player.bag && G.player.bag.bicycle
+        // The surf sheet pairs its poses by facing rather than laying out a
+        // walk cycle, which PLAYER_VEHICLE_CFG declares — so by the time the
+        // frames reach here, d0/d1 really are south and u0/u1 really are north,
+        // and the ordinary animation below is correct for them.
+        if (a.vehicle === 'swim' && G.IMG.ch_playersurf_d0) base = 'ch_playersurf_';
+        else if (G.player && G.player.onBike && G.player.bag && G.player.bag.bicycle
             && G.IMG.ch_playerbike_d0) base = 'ch_playerbike_';
       }
       var striding = (a.moving && a.step < 8) || (a.hop > 0 && a.hop > a.hopTotal / 2);

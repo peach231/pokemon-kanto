@@ -324,6 +324,33 @@
     crossOrigin: 'anonymous'
   };
 
+  // The player's two vehicle sheets. Both are 32px frames — the mount and the
+  // bicycle are drawn wider than the tile you stand on.
+  //
+  // The BIKE is an ordinary nine-frame walk sheet. The SURF sheet is NOT, and
+  // reading it as one is why the rider used to spin on the spot and then, once
+  // the animation was stopped, face north while travelling west. Its nine
+  // frames pair up BY FACING —
+  //
+  //     0 south   1 south'   2 north   3 north'   4 west   5 west'
+  //     6,7,8     the float with nobody on it
+  //
+  // — where the standard layout would be south, north, west and THEN the
+  // strides. Read the standard way, 'north' lands on south's second pose and
+  // 'west' lands on north.
+  //
+  // This is measured, not assumed: frames 4 and 5 are the only two that fail a
+  // horizontal-symmetry test, which is what a side view looks like and what a
+  // front or back view never does, and each frame's closest match in the sheet
+  // is its own pair. tools/check.js re-derives it from the pixels.
+  G.PLAYER_VEHICLE_CFG = {
+    surf: {
+      frameW: 32, boxW: 32, boxH: 32,
+      frames: { d0: 0, d1: 1, u0: 2, u1: 3, s0: 4, s1: 5 }
+    },
+    bike: { frameW: 32, boxW: 32, boxH: 32 }
+  };
+
   // The player's BATTLE back sprite. FireRed's back pics are 64x320 — five
   // 64x64 throw frames; we use frame 0.
   G.PLAYER_BACK_CFG = {
