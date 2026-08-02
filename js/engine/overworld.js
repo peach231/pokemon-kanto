@@ -1268,7 +1268,13 @@
         var n = w.npcs[i];
         var def = n.def;
         if (!def || !def.trainer || G.flags[def.trainer]) continue;
-        var sight = def.sight || 4;
+        // `sight: 0` means THIS ONE DOES NOT WATCH THE ROOM — a gym leader you
+        // walk up to, or one of BLAINE's quizmasters who only comes out if you
+        // got the question wrong. Written as `def.sight || 4` that read as "no
+        // preference" and handed all 28 of them a four-tile ambush, which in
+        // CINNABAR GYM meant every quizmaster fought you whatever you answered.
+        var sight = (def.sight == null) ? 4 : def.sight;
+        if (!sight) continue;
         var d = G.DIRS[n.dir];
         var dx = p.x - n.x, dy = p.y - n.y;
         if (d.dx !== 0) {

@@ -167,9 +167,18 @@ for (const k in src) {
   const short = [...wantSet].filter(x => !got.has(x)).sort((a, b) => order(a) - order(b));
   if (short.length) problems.push(`${gk} machines: pokered allows ${short.join(' ')} that the game does not`);
   const extra = [...got].filter(x => !wantSet.has(x)).sort((a, b) => order(a) - order(b));
-  const unjustified = extra.filter(id => !(frlgAllows[gk] && frlgAllows[gk].has(machineMove[id])));
+  // A third licence: a HOUSE RULE, declared in js/data/tms_house.js with a
+  // reason. Those are departures from both source games ON PURPOSE, and the
+  // only thing separating one from a mistake is that somebody wrote it down.
+  const house = (G.TM_HOUSE_RULES && G.TM_HOUSE_RULES[gk] && G.TM_HOUSE_RULES[gk].add) || [];
+  const unjustified = extra.filter(id =>
+    !(frlgAllows[gk] && frlgAllows[gk].has(machineMove[id])) && house.indexOf(id) === -1);
   if (unjustified.length) {
     problems.push(`${gk} machines: game allows ${unjustified.join(' ')}, which neither pokered nor FireRed does`);
+  }
+  for (const id of house) {
+    if (!G.TM_MOVES[id]) problems.push(`${gk}: house rule names ${id}, which is not a machine`);
+    else if (!got.has(id)) problems.push(`${gk}: house rule adds ${id} but the table does not have it — tms_house.js did not run`);
   }
 }
 

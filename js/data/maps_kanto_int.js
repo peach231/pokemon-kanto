@@ -2983,6 +2983,14 @@
       s: 'They are never identical. Every one is rolled differently the moment you meet it.' }
   ];
 
+  // Who is behind each shutter, in the same order as GYM_QUIZ — that is, the
+  // trainer standing in the corridor the shutter opens onto. The fifth is
+  // BLAINE, who is not a quizmaster and fights you regardless, so it is null.
+  // Exported so tools/check.js can confirm that every quizmaster standing in
+  // that room is actually reachable by getting a question wrong. One left out
+  // of this list is a trainer who can never fight you at all.
+  var QUIZ_TRAINER = G.QUIZ_TRAINER = ['bg_erik', 'bg_derek', 'bg_ramon', 'bg_avery', null];
+
   // Quiz shutters are a TILE with an event, not an NPC — the door itself is
   // the thing you talk to, which is why walking up to it feels like being
   // asked a question rather than meeting a quizmaster.
@@ -3029,6 +3037,26 @@
     yield { t: 'text', s: 'The shutter rolled up anyway — and somebody was standing behind it.' };
     yield { t: 'sfx', id: 'cancel' };
     yield { t: 'fn', fn: open };
+    // ...and then they actually come out, which is the other half of the deal
+    // and never happened. The quizmasters watched the corridor instead, so
+    // they fought you whatever you answered and a right answer bought nothing.
+    // The last shutter has BLAINE behind it rather than a quizmaster, so a
+    // wrong answer there simply opens it — he is the fight either way.
+    var behind = QUIZ_TRAINER[idx];
+    if (behind && !G.flags[behind]) {
+      var actor = null;
+      for (var i = 0; i < w.npcs.length; i++) {
+        if (w.npcs[i].def && w.npcs[i].def.trainer === behind) { actor = w.npcs[i]; break; }
+      }
+      if (actor) {
+        yield { t: 'balloon', npc: actor };
+        yield { t: 'text', s: G.TRAINERS[behind].name + ': ' + G.TRAINERS[behind].intro };
+        yield {
+          t: 'custom',
+          run: function (done) { G.startTrainerBattle(behind, { onEnd: function () { done(); } }); }
+        };
+      }
+    }
   };
 
   // ================================================== SEAFOAM ISLANDS =======

@@ -1911,6 +1911,70 @@ if (G.REGION_NODES && G.RegionMapScene) {
   }
 }
 
+// --- a trainer who does not watch the room really does not watch it ---
+// 28 trainers declare `sight: 0`, and it means something specific: a gym
+// leader you walk up to, one of BLAINE's quizmasters who only comes out if you
+// got the question wrong. The scan read it as `def.sight || 4` — zero is falsy
+// — so every one of them ambushed at four tiles, and CINNABAR GYM's whole quiz
+// was decoration: the quizmasters fought you whatever you answered.
+{
+  const ambush = [];
+  const p = G.world.player;
+  const before = G.world.mapId;
+  for (const id in G.MAPS) {
+    const quiet = (G.MAPS[id].trainers || []).filter(t => t.sight === 0 && !Array.isArray(t.x));
+    if (!quiet.length) continue;
+    G.world.loadMap(id, quiet[0].x, quiet[0].y, 'down');
+    for (const t of quiet) {
+      // _trainerScan answers "did ANYBODY engage", so everyone else in the room
+      // is marked defeated first. Without that, a normal trainer with a normal
+      // sight line standing nearby gets blamed on the quiet one.
+      const hushed = [];
+      for (const other of (G.MAPS[id].trainers || [])) {
+        if (other === t || !other.trainer || G.flags[other.trainer]) continue;
+        G.flags[other.trainer] = 1; hushed.push(other.trainer);
+      }
+      const wasDone = G.flags[t.trainer];
+      delete G.flags[t.trainer];
+      const d = G.DIRS[t.dir || 'down'];
+      for (let dist = 1; dist <= 4; dist++) {
+        p.x = t.x + d.dx * dist; p.y = t.y + d.dy * dist;
+        if (p.x < 0 || p.y < 0 || p.x >= G.MAPS[id].w || p.y >= G.MAPS[id].h) break;
+        if (G.overworldScene._trainerScan()) {
+          ambush.push(`${id} '${t.trainer}' says sight: 0 but challenges from ${dist} tile(s) away`);
+          G.scenes.length = 0; G.pushScene(G.overworldScene);
+          break;
+        }
+      }
+      for (const h of hushed) delete G.flags[h];
+      if (wasDone) G.flags[t.trainer] = wasDone;
+    }
+  }
+  if (before) G.world.loadMap(before, 1, 1, 'down');
+  G.scenes.length = 0; G.pushScene(G.overworldScene);
+  for (const a of ambush) errors.push('SIGHT: ' + a);
+  if (!ambush.length) console.log('  sight lines: every trainer who declares no line of sight keeps to it');
+}
+
+// --- and BLAINE's quizmasters can all still be fought ---
+// Getting a question wrong is the only thing that brings one out now, so a
+// quizmaster missing from that mapping is a trainer nobody can ever battle.
+{
+  const room = G.MAPS.cinnabargym;
+  const behind = new Set((G.QUIZ_TRAINER || []).filter(Boolean));
+  const orphan = (room.trainers || [])
+    .filter(t => !/^blaine/.test(t.trainer) && !behind.has(t.trainer))
+    .map(t => t.trainer);
+  for (const o of orphan) {
+    errors.push(`QUIZ: cinnabargym '${o}' stands behind no shutter, so no answer can ever bring them out`);
+  }
+  const ghosts = [...behind].filter(t => !(room.trainers || []).some(x => x.trainer === t));
+  for (const g of ghosts) errors.push(`QUIZ: a shutter names '${g}', who is not in the room`);
+  if (!orphan.length && !ghosts.length) {
+    console.log(`  quiz: all ${behind.size} of BLAINE's quizmasters answer to a wrong answer`);
+  }
+}
+
 // --- the surf sprite holds one pose per facing ---
 // The walking animation walks a sheet's frames 0,3,4 for south, 0/1/5/6 for
 // north and so on. That is right for a sheet laid out as a walk cycle, and the
