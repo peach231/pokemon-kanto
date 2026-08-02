@@ -1151,6 +1151,80 @@ for (const w of (G.MAP_WARN || [])) errors.push('MAP GRID: ' + w);
     if (!stuck.length) console.log('  placement: every drawn person stands on a tile a person could stand on');
   }
 
+  // Two things you can talk to never share a tile. _interact resolves a faced
+  // tile in a fixed order — person, then counter, then item, then sign — so the
+  // loser is simply unreadable, with nothing to show it is there. Adding the
+  // COIN COUNTER's sign put it straight onto a bystander and silenced it.
+  {
+    // Sharing a tile is fine when the two can never be present together — every
+    // gym leader stands on the same square as their post-CHAMPION rematch, one
+    // gated `unlessFlag: champion` and the other `ifFlag: champion`.
+    const exclusive = (a, b) =>
+      (!!a.ifFlag && a.ifFlag === b.unlessFlag) || (!!b.ifFlag && b.ifFlag === a.unlessFlag);
+    const buried = [];
+    for (const id in G.MAPS) {
+      const m = G.MAPS[id], at = new Map();
+      const put = (o, kind) => {
+        if (Array.isArray(o.x) || o.x == null) return;   // range triggers are not talked to
+        const k = o.x + ',' + o.y;
+        const here = at.get(k) || [];
+        for (const prev of here) {
+          if (exclusive(prev.o, o)) continue;
+          buried.push(`${id}: ${kind} at (${o.x},${o.y}) is under a ${prev.kind}, and can never be read`);
+        }
+        here.push({ o, kind });
+        at.set(k, here);
+      };
+      for (const o of (m.npcs || [])) put(o, 'person');
+      for (const o of (m.trainers || [])) put(o, 'trainer');
+      for (const o of (m.items || [])) put(o, 'item');
+      for (const o of (m.signs || [])) put(o, 'sign');
+    }
+    for (const b of buried) errors.push('BURIED: ' + b);
+    if (!buried.length) console.log('  interactables: nothing talkable is hidden underneath something else talkable');
+  }
+
+  // Anything the game asks you to SPEND has somewhere to get it.
+  //
+  // The GAME CORNER shipped with a prize counter, six prizes, a COIN CASE, a
+  // slot machine that costs three coins a spin — and no way to obtain a single
+  // coin. The building told you to "see the counter" and there was no counter.
+  // Every audit passed: the room was reachable, the events fired, the prizes
+  // existed. Nothing asked whether the currency they cost could be earned.
+  {
+    const src = Object.keys(G.EVENTS)
+      .map(k => String(G.EVENTS[k]))
+      .concat([fs.readFileSync(path.join(ROOT, 'js', 'engine', 'battle_ui.js'), 'utf8'),
+               fs.readFileSync(path.join(ROOT, 'js', 'engine', 'menus.js'), 'utf8')]);
+    const broke = [];
+    // A currency needs at least one place that ADDS to it, not just places
+    // that subtract. `coins -= cost` all day long is what a dead end looks like.
+    for (const [field, what] of [['coins', 'GAME CORNER coins'], ['money', 'money']]) {
+      const gain = new RegExp(`\\.${field}\\s*(\\+=|=\\s*\\(?[^;]*\\.${field}[^;]*\\+)`);
+      if (!src.some(s => gain.test(s))) {
+        broke.push(`nothing in the game ever increases ${what} — everything priced in it is unreachable`);
+      }
+    }
+    // PAY DAY banks into battle.payDay during the fight and is paid out when it
+    // ends. It banked for months with nothing on the other side of the ledger.
+    const payer = fs.readFileSync(path.join(ROOT, 'js', 'engine', 'battle_ui.js'), 'utf8');
+    const banks = /payDay\s*=\s*\(?this\.payDay/.test(fs.readFileSync(path.join(ROOT, 'js', 'engine', 'battle.js'), 'utf8'));
+    if (banks && !/\.money\s*\+=\s*[^;]*payDay/.test(payer)) {
+      broke.push('PAY DAY accumulates battle.payDay and nothing ever pays it out');
+    }
+    // And the slot machine has to be playable from a standing start: if a spin
+    // costs more than the smallest amount you can buy, the machines are props.
+    const slots = String(fs.readFileSync(path.join(ROOT, 'js', 'engine', 'menus.js'), 'utf8'));
+    const bet = +(slots.match(/var BET = (\d+)/) || [])[1];
+    const deals = [...String(G.EVENTS.coinCounter || '').matchAll(/coins:\s*(\d+)/g)].map(m => +m[1]);
+    if (!deals.length) broke.push('no coin counter sells coins, so the slots and the prize shelf cannot be started');
+    else if (bet && Math.min(...deals) < bet) {
+      broke.push(`the cheapest coin purchase is ${Math.min(...deals)} but a spin costs ${bet}`);
+    }
+    for (const b of broke) errors.push('CURRENCY: ' + b);
+    if (!broke.length) console.log('  currency: coins and money can both be earned, and the smallest coin purchase covers a spin');
+  }
+
   // Every evolution the data declares actually happens when it is triggered.
   //
   // G.evolveMon takes the target as an optional second argument and works out a

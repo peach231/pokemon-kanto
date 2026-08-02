@@ -1552,7 +1552,11 @@
       // staircase behind it, and the warp sat on bare carpet two tiles from
       // any wall with nothing drawn on it or near it.
       'I................@',
-      'I................I',
+      // The COIN COUNTER, immediately right of the door — the first thing you
+      // walk past on the way in, which is exactly where a casino puts it. The
+      // room had a prize counter and no way to get coins to spend at it, so
+      // the COIN CASE, the machines and the entire prize shelf were all dead.
+      'I...........CCCC.I',
       'I................I',
       'IIIIIIII..IIIIIIII',
       'IIIIIIIIIIIIIIIIII'
@@ -1568,13 +1572,16 @@
         needFlag: 'hideoutOpen' }
     ],
     signs: [
-      { x: 16, y: 2, text: 'PRIZE EXCHANGE — coins only. No refunds, no exceptions, no exchanges back to cash.' }
+      { x: 16, y: 2, text: 'PRIZE EXCHANGE — coins only. No refunds, no exceptions, no exchanges back to cash.' },
+      { x: 16, y: 10, text: 'COINS SOLD HERE — 50 for $1000, 500 for $10000. A COIN CASE is required to carry them.' }
     ],
     npcs: [
       // He is standing on the trapdoor, which is why he will not move.
       { x: 16, y: 9, sprite: 'rocket', dir: 'left', event: 'gameCornerPoster',
         unlessFlag: 'hideoutOpen' },
       { x: 15, y: 2, sprite: 'clerk', dir: 'down', event: 'prizeCounter' },
+      // Behind the coin counter, so you talk to her across the desk.
+      { x: 13, y: 9, sprite: 'woman', dir: 'down', event: 'coinCounter' },
       { x: 2, y: 2, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
       { x: 6, y: 2, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
       { x: 2, y: 6, sprite: 'gambler', obj: true, dir: 'down', event: 'playSlots' },
@@ -3596,6 +3603,52 @@
     yield { t: 'fn', fn: function () { G.player.bag.coincase = 1; G.player.coins = G.player.coins || 0; } };
     yield { t: 'text', s: 'You received the COIN CASE!' };
     yield { t: 'text', s: 'MAN: I worked out what the GAME CORNER is for about a year too late. It is not for winning.' };
+  };
+
+  // The coin counter. Coins had no source at all: PAY DAY tallied them and
+  // never handed them over, the machines want three to spin, and you start
+  // with none — so the COIN CASE, the slots and every prize behind them were
+  // unreachable, and the only thing the game told you was "see the counter".
+  // Gen 1's prices, unchanged: 50 for 1000, 500 for 10000.
+  G.EVENTS.coinCounter = function* () {
+    var DEALS = [
+      { coins: 50,  cost: 1000,  label: '50 coins — $1000' },
+      { coins: 500, cost: 10000, label: '500 coins — $10000' }
+    ];
+    if (!G.player.bag.coincase) {
+      yield { t: 'text', s: 'ATTENDANT: I can sell you coins, but you have nowhere to put them.' };
+      yield { t: 'text', s: 'ATTENDANT: They hand out COIN CASES somewhere in the flats round the corner.' };
+      return;
+    }
+    yield { t: 'text', s: 'ATTENDANT: Coins for cash. You have ' + (G.player.coins || 0)
+                          + ' coins and $' + G.player.money + '.' };
+    var pick = { v: -1 };
+    var items = DEALS.map(function (d) { return d.label; }).concat(['Nothing']);
+    yield {
+      t: 'custom',
+      run: function (done) {
+        G.pushScene(G.Chooser({
+          items: items, cols: 1, cancelIndex: items.length - 1,
+          onPick: function (i) { pick.v = i; done(); }
+        }));
+      }
+    };
+    if (pick.v < 0 || pick.v >= DEALS.length) { yield { t: 'text', s: 'ATTENDANT: Suit yourself.' }; return; }
+    var deal = DEALS[pick.v];
+    if (G.player.money < deal.cost) {
+      yield { t: 'text', s: 'ATTENDANT: That is $' + deal.cost + '. You do not have it.' };
+      return;
+    }
+    yield {
+      t: 'fn',
+      fn: function () {
+        G.player.money -= deal.cost;
+        G.player.coins = (G.player.coins || 0) + deal.coins;
+      }
+    };
+    yield { t: 'sfx', id: 'heal' };
+    yield { t: 'text', s: 'You bought ' + deal.coins + ' coins. You have ' + G.player.coins + ' now.' };
+    yield { t: 'text', s: 'ATTENDANT: The machines are straight ahead. Good luck. You will need it.' };
   };
 
   // The prize counter. Two POKéMON nobody can catch, and the TMs that make

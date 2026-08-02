@@ -1246,6 +1246,21 @@
   G.startBattle = function (battleOpts, optsExtra) {
     optsExtra = optsExtra || {};
     var battle = new G.Battle(battleOpts);
+    // PAY DAY scatters money during the fight and you pick it up on the way
+    // out. The move tallied it into battle.payDay and NOTHING ever read that
+    // field, so the only move in the game that makes you money made you none.
+    // Wrapped here rather than in the trainer path so wild PAY DAY pays out
+    // too. Not on a blackout: the loss already takes half your wallet, and
+    // handing you money a frame before halving it reads as a bug.
+    var caller = optsExtra.onEnd;
+    optsExtra.onEnd = function (result, b) {
+      if (b && b.payDay && result !== 'lose') {
+        G.player.money += b.payDay;
+        G.pushScene(G.Textbox('You picked up $' + b.payDay + ' scattered on the ground!'));
+        b.payDay = 0;
+      }
+      if (caller) caller(result, b);
+    };
     G.audio.playMusic(optsExtra.music || 'battle');
     // Grade the transition by the encounter. A LEGENDARY is identified by its
     // music rather than by a list, because the events that start those fights
