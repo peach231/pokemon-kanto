@@ -1916,6 +1916,80 @@ if (G.REGION_NODES && G.RegionMapScene) {
   }
 }
 
+// --- nobody stands on the only way through ---
+//
+// A person is a solid tile. The trainers on the quiet roads are placed by a
+// rule that says "only on a tile with three or more open neighbours — a
+// junction, never a corridor", and that rule is not enough: a T-junction can
+// still be the single link between two halves of a room. EDGAR had three open
+// neighbours and sealed the whole branch behind him on VICTORY ROAD 3F, and
+// ARTHUR sealed a cabin on the S.S. ANNE with TM08 still inside it.
+//
+// The real test is not how many neighbours a tile has. It is whether removing
+// the person changes what you can reach. Anyone who is genuinely meant to be a
+// wall says so with `blocks: <reason>`.
+{
+  const pass = (m, x, y) => {
+    if (x < 0 || y < 0 || x >= m.w || y >= m.h) return false;
+    const d = m.deco && m.deco[y] && m.deco[y][x];
+    const n = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[y][x]];
+    const t = n && G.TILES[n];
+    if (!t) return false;
+    if (t.water || t.cut || t.strength || t.story) return true;
+    return !t.solid;
+  };
+  const flood = (m, from, blocked) => {
+    const seen = new Set(), q = [];
+    if (!pass(m, from[0], from[1]) || blocked.has(from.join(','))) return seen;
+    seen.add(from.join(',')); q.push(from);
+    while (q.length) {
+      const [x, y] = q.shift();
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+        if (seen.has(k) || blocked.has(k) || !pass(m, nx, ny)) continue;
+        seen.add(k); q.push([nx, ny]);
+      }
+    }
+    return seen;
+  };
+  const walls = [];
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    // Somebody the story removes is not a wall — they are a gate that opens.
+    const actors = [];
+    for (const kind of ['npcs', 'trainers']) {
+      for (const o of (m[kind] || [])) {
+        if (Array.isArray(o.x) || o.x == null || o.unlessFlag) continue;
+        actors.push(o);
+      }
+    }
+    if (!actors.length) continue;
+    const doors = (m.warps || []).filter(w => G.MAPS[w.to]);
+    if (!doors.length) continue;
+    const everyone = new Set(actors.map(o => o.x + ',' + o.y));
+    const from = doors.map(w => [w.x, w.y]).find(d => pass(m, d[0], d[1]) && !everyone.has(d.join(',')));
+    if (!from) continue;
+    const asBuilt = flood(m, from, everyone);
+
+    for (const o of actors) {
+      const others = new Set(actors.filter(x => x !== o).map(x => x.x + ',' + x.y));
+      const freed = flood(m, from, others);
+      // Their own tile coming back does not count: standing in a dead end
+      // blocks nothing but the square you are standing on.
+      const opened = [...freed].filter(k => !asBuilt.has(k) && k !== (o.x + ',' + o.y));
+      if (!opened.length || o.blocks) continue;
+      const holds = [];
+      for (const it of (m.items || [])) if (opened.includes(it.x + ',' + it.y)) holds.push(`the ${it.item}`);
+      for (const w of doors) if (opened.includes(w.x + ',' + w.y)) holds.push(`the way to ${w.to}`);
+      walls.push(`${id} '${o.trainer || o.event || o.sprite}' at (${o.x},${o.y}) is the only way to `
+        + `${opened.length} tile(s)` + (holds.length ? `, including ${holds.join(' and ')}` : ' of the room')
+        + ' — standing there seals it');
+    }
+  }
+  for (const w of walls) errors.push('BRIDGE: ' + w);
+  if (!walls.length) console.log('  bridges: nobody is standing on the only way to anywhere');
+}
+
 // --- the badge case agrees with the gyms it describes ---
 // G.BADGES is a fourth copy of facts the game already held three times: the
 // leader's reward in trainers.js, the badge NAME in FIELD_MOVES, the city in

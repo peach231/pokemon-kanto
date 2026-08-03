@@ -2026,14 +2026,16 @@
     ],
     npcs: [
       { x: 11, y: 1, sprite: 'giovanni', dir: 'down', unlessFlag: 'silph_giovanni', event: 'silphBoss' },
-      { x: 5, y: 16, sprite: 'gentleman', dir: 'up', event: 'silphPresident' },
+      // Both stand on the staff side of the office. The floor behind them is
+      // theirs, not yours — `blocks` says so, and BRIDGE stops asking.
+      { x: 5, y: 16, sprite: 'gentleman', dir: 'up', event: 'silphPresident', blocks: 'the staff side of the office' },
       // The employee with the LAPRAS. This event was written in full — it
       // checks that GIOVANNI has been thrown out of the building, it hands
       // over a level 15 LAPRAS, it has a line for coming back afterwards —
       // and NOBODY IN KANTO RAN IT. There was no way to obtain a LAPRAS at
       // all, and the dex audit said 151/151 because it dry-runs every event in
       // the table whether or not the world can reach one.
-      { x: 9, y: 16, sprite: 'scientist', dir: 'down', event: 'laprasGift' }
+      { x: 9, y: 16, sprite: 'scientist', dir: 'down', event: 'laprasGift', blocks: 'the staff side of the office' }
     ]
   });
 
@@ -2954,7 +2956,7 @@
       { x: 9, y: 4, sprite: 'supernerd', dir: 'left', trainer: 'bg_avery', sight: 0 }
     ],
     npcs: [
-      { x: 2, y: 16, sprite: 'gymguy', dir: 'right', event: 'cinnabarGymGuide' }
+      { x: 2, y: 16, sprite: 'gymguy', dir: 'right', event: 'cinnabarGymGuide', blocks: 'the corner he stands in' }
     ]
   };
 
@@ -3994,8 +3996,11 @@
     ['route23', 6, 18, 'r23_mary', 'cooltrainerf'],
     ['route10', 8, 2, 'r10_nob', 'hiker'],
     ['route10', 13, 2, 'r10_dana', 'picnicker'],
-    ['victoryroad3f', 7, 15, 'vr_edgar', 'cooltrainerm'],
-    ['victoryroad3f', 3, 17, 'vr_tanya', 'cooltrainerf'],
+    // Both of these stood on the neck of the same branch and sealed it. A tile
+    // with three open neighbours is a JUNCTION but can still be the only way
+    // through — which is what the old rule missed, and what BRIDGE now checks.
+    ['victoryroad3f', 13, 17, 'vr_edgar', 'cooltrainerm'],
+    ['victoryroad3f', 11, 11, 'vr_tanya', 'cooltrainerf'],
     ['mansionb1f', 6, 17, 'mn_stella', 'scientist']
   ].forEach(function (e) {
     var m = G.MAPS[e[0]];
@@ -4056,7 +4061,11 @@
       // and the rematch, standing on the same tile once they have
       m.trainers.push({
         x: t.x, y: t.y, sprite: t.sprite, dir: t.dir,
-        trainer: e[1] + '_rematch', sight: 0, ifFlag: 'champion'
+        trainer: e[1] + '_rematch', sight: 0, ifFlag: 'champion',
+        // A leader stands where their room ends. KOGA's is the far corner of a
+        // maze, so the ground past him is a dead end with nothing in it, and
+        // his standing on it is the room working as designed.
+        blocks: 'the end of their own gym'
       });
       break;
     }

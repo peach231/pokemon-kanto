@@ -1191,7 +1191,9 @@
     ],
     trainers: [
       { x: 13, y: 11, sprite: 'sailor', dir: 'left', trainer: 'ss_dylan', sight: 3 },
-      { x: 20, y: 4, sprite: 'gentleman', dir: 'left', trainer: 'ss_arthur', sight: 3 }
+      // (20,4) is the mouth of this cabin — standing there sealed it, and TM08
+      // inside it, behind him for good. One tile in, nothing is walled off.
+      { x: 21, y: 4, sprite: 'gentleman', dir: 'left', trainer: 'ss_arthur', sight: 3 }
     ],
     items: [
       { x: 22, y: 11, item: 'maxpotion', once: 'ss_maxpotion' }
