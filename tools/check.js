@@ -1916,6 +1916,64 @@ if (G.REGION_NODES && G.RegionMapScene) {
   }
 }
 
+// --- a door opens, and a way out looks like one ---
+//
+// Two halves of the same complaint about the LEAGUE. warpTo plays the open
+// beat only for a tile that says `door: true`, and `leaguedoor` never did — so
+// all twelve doors of the ELITE FOUR cut straight to the fade with no door in
+// them. And the lobby's own way in was an unmarked floor tile up a side
+// gallery, while the red carpet the whole room is built around ran into a
+// blank wall.
+{
+  const shut = [];
+  for (const name in G.TILES) {
+    const t = G.TILES[name];
+    // A door you cannot stand on cannot animate — BLAINE's quiz shutters are
+    // solid on purpose, and are answered rather than walked through.
+    if (!/door$/.test(name) || t.solid) continue;
+    if (!t.door) shut.push(`tile '${name}' is a door you walk through, but does not say door: true, so it never opens`);
+  }
+  for (const s of shut) errors.push('DOORTILE: ' + s);
+  if (!shut.length) console.log('  doors: every walkable door tile plays its opening');
+}
+
+// A warp inside a building has to be visible. BLINDEXIT already asks this of
+// caves, towers, labs and hideouts, where a hole in the floor is the whole
+// problem; the LEAGUE is none of those, and its doors were invisible for the
+// same reason.
+//
+// Walking out through a gap in a room's bottom wall needs nothing drawn on it —
+// that is how every house in the game works, and the gap IS the door. What
+// cannot pass is a warp that faces a WALL: you step towards solid stone and
+// end up somewhere else. The old LEAGUE entrance was exactly that, an unmarked
+// tile in a side gallery with the chamber wall behind it.
+{
+  const WAY_OUT = new Set(['door', 'gdoor', 'gymdoor', 'leaguedoor', 'stairs', 'quizdoor', 'ladder', 'warptile']);
+  const blank = [];
+  for (const id in G.MAPS) {
+    const m = G.MAPS[id];
+    if (!m.indoors) continue;
+    for (const w of (m.warps || [])) {
+      if (!G.MAPS[w.to]) continue;
+      const d = m.deco && m.deco[w.y] && m.deco[w.y][w.x];
+      const name = (d && d !== '.' ? m.legend[d] : null) || m.legend[m.ground[w.y][w.x]];
+      if (WAY_OUT.has(name)) continue;
+      // Where does leaving take you, physically? Off the map is a doorway; a
+      // wall is a warp with nothing on it.
+      const step = G.DIRS[w.dir || 'down'];
+      const ox = w.x + step.dx, oy = w.y + step.dy;
+      if (ox < 0 || oy < 0 || ox >= m.w || oy >= m.h) continue;      // a gap in the wall
+      const beyond = m.legend[m.ground[oy][ox]];
+      const bt = beyond && G.TILES[beyond];
+      if (!bt || !bt.solid) continue;                                // opens into more room
+      blank.push(`${id} (${w.x},${w.y}) sends you to ${w.to}, but it is bare '${name}' `
+        + `with '${beyond}' in front of it — you walk into a wall and come out somewhere else`);
+    }
+  }
+  for (const b of blank) errors.push('BLANKDOOR: ' + b);
+  if (!blank.length) console.log('  indoor exits: no warp puts a wall where the door should be');
+}
+
 // --- nobody stands on the only way through ---
 //
 // A person is a solid tile. The trainers on the quiet roads are placed by a

@@ -1047,15 +1047,6 @@
   // only thing in KANTO that opens for an ANSWER.
   // The LEAGUE's chamber doors: dark bronze, banded, with a seam down the
   // middle that never quite lines up.
-  T('t_leaguedoor', { o: C.brk0, a: C.brk1, b: C.brk2, c: C.mtl3, w: C.pale }, [
-    'oooooooooooooooo', 'obbbbbbccbbbbbbo', 'obaaaaabbaaaaabo',
-    'obaoooabbaooo abo'.replace(' ', 'a'), 'obaoooabbaoooabo', 'obaaaaabbaaaaabo',
-    'obbbbbbccbbbbbbo', 'owwwwwwccwwwwwwo', 'obbbbbbccbbbbbbo',
-    'obaaaaabbaaaaabo', 'obaoooabbaoooabo', 'obaoooabbaoooabo',
-    'obaaaaabbaaaaabo', 'obbbbbbccbbbbbbo', 'oooooooooooooooo',
-    'oooooooooooooooo'
-  ]);
-
   // The LEAGUE's chamber doors: dark bronze, banded, with a seam down the
   // middle that never quite lines up.
   T('t_leaguedoor', { o: C.brk0, a: C.brk1, b: C.brk2, c: C.mtl3, w: C.pale }, [
@@ -1371,12 +1362,11 @@
     // your hand on it. It simply does not open, and the warp underneath it
     // tells you why. A wall would be a level-design decision; a door that
     // will not open is a statement about you.
-    leaguedoor: { img: 't_leaguedoor' },
-    // The LEAGUE's doors. Not solid — you can walk right up to one and put
-    // your hand on it. It simply does not open, and the warp underneath it
-    // tells you why. A wall would be a level-design decision; a door that
-    // will not open is a statement about you.
-    leaguedoor: { img: 't_leaguedoor' },
+    // ...and `door`, so it actually opens. warpTo plays the open beat only for
+    // a tile that says it IS a door, and this one never did — so every LEAGUE
+    // door in the game, the five chambers and the lobby, cut straight to the
+    // fade with no door in it.
+    leaguedoor: { img: 't_leaguedoor', door: true },
     burntfloor: { img: 't_burntfloor', wild: true },
     burntwall:  { img: 't_burntwall', solid: true },
     marble:     { img: 't_marble' },

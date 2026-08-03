@@ -2896,11 +2896,16 @@
     id: 'indigo', name: 'Indigo Plateau', w: 20, h: 20,
     music: 'gym', battleBg: 'indoor', base: 'marble', indoors: true,
     legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet',
-              'E': 'ihealm', 'C': 'icounter' },
+              'L': 'leaguedoor', 'E': 'ihealm', 'C': 'icounter' },
     ground: pad([
       '####################',
       '#..................#',
-      '#....##########....#',
+      // The whole room points at this door: the carpet runs the length of the
+      // hall and stops at it. It used to stop at a WALL — the top of the
+      // chamber was sealed and the only way to the ELITE FOUR was an unmarked
+      // floor tile up a side gallery, so walking the carpet led nowhere and
+      // the doors you did find were invisible.
+      '#....####LL####....#',
       '#....#........#....#',
       '#....#.RRRRRR.#....#',
       '#....#.RRRRRR.#....#',
@@ -2923,8 +2928,8 @@
     warps: [
       { x: 9, y: 19, to: 'victoryroad3f', tx: 9, ty: 17, dir: 'down' },
       { x: 10, y: 19, to: 'victoryroad3f', tx: 9, ty: 17, dir: 'down' },
-      { x: 9, y: 1, to: 'e4lorelei', tx: 9, ty: 11, dir: 'up' },
-      { x: 10, y: 1, to: 'e4lorelei', tx: 10, ty: 11, dir: 'up' }
+      { x: 9, y: 2, to: 'e4lorelei', tx: 9, ty: 11, dir: 'up' },
+      { x: 10, y: 2, to: 'e4lorelei', tx: 10, ty: 11, dir: 'up' }
     ],
     respawnPoint: { mapId: 'indigo', x: 9, y: 16 },
     signs: [
@@ -3106,7 +3111,8 @@
   G.MAPS.halloffame = {
     id: 'halloffame', name: 'Hall of Fame', w: 20, h: 14,
     music: 'gym', battleBg: 'indoor', base: 'marble', indoors: true,
-    legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet', 'U': 'statue' },
+    legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet', 'U': 'statue',
+              'L': 'leaguedoor' },
     ground: pad([
       '####################',
       '#..................#',
@@ -3148,7 +3154,8 @@
   G.MAPS.hallofchampions = {
     id: 'hallofchampions', name: 'Hall of Champions', w: 20, h: 20,
     music: 'gymleader', battleBg: 'indoor', base: 'marble', indoors: true,
-    legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet', 'U': 'statue' },
+    legend: { '#': 'marblewall', '.': 'marble', 'R': 'redcarpet', 'U': 'statue',
+              'L': 'leaguedoor' },
     ground: pad([
       '####################',
       '#..................#',
@@ -3168,11 +3175,12 @@
       '#........RR........#',
       '#........RR........#',
       '#........RR........#',
-      '#..................#',
+      '#........LL........#',
       '####################'
     ], 20, 20),
     deco: blank(20, 20),
     warps: [
+      // On the door, not on the bare floor in front of the wall it is set in.
       { x: 9, y: 18, to: 'indigo', tx: 9, ty: 4, dir: 'down' },
       { x: 10, y: 18, to: 'indigo', tx: 10, ty: 4, dir: 'down' }
     ],
